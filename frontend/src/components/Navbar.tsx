@@ -1,18 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, ChevronDown, Search, ShoppingCart, Bell, X, Store, Package } from "lucide-react";
+import { MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, UserCircle } from "lucide-react";
 import LoginModal from "./LoginModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const { user, isLoggedIn, logout } = useAuth();
   const cartCount = 3;
   const pathname = usePathname();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+    if (userMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [userMenuOpen]);
 
   const isEssentials = pathname === "/essentials";
   
@@ -166,16 +184,54 @@ export default function Navbar() {
             )}
           </button>
 
-          <button
-            id="login-signup-btn"
-            onClick={() => setIsLoginModalOpen(true)}
-            className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm text-white font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 ${primaryBg}`}
-          >
-            Login
-          </button>
+          {isLoggedIn ? (
+            <div className="relative ml-2 hidden md:block" ref={userMenuRef}>
+              <button
+                id="user-avatar-btn"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:border-orange-400 hover:bg-orange-50 transition-all duration-200"
+              >
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold ${primaryBg}`}>
+                  {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
+                </div>
+                <span className="hidden sm:block text-sm font-semibold text-gray-700">{user?.firstName || user?.email?.split('@')[0]}</span>
+                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+              </button>
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 w-52 py-2 z-50"
+                  >
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
+                      <p className="text-sm font-bold text-gray-800">{user?.firstName || "User"} {user?.lastName || ""}</p>
+                      <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => { logout(); setUserMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" /> Log Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <button
+              id="login-signup-btn"
+              onClick={() => setIsLoginModalOpen(true)}
+              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm text-white font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 ${primaryBg}`}
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
     </nav>
   );
 }

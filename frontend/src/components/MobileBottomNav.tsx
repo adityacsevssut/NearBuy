@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { Home, Search, ClipboardList, User, LogIn } from "lucide-react";
 import LoginModal from "./LoginModal";
+import { useAuth } from "../context/AuthContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -11,8 +12,7 @@ export default function MobileBottomNav() {
   const activeBg = isEssentials ? "bg-blue-100" : "bg-orange-100";
   const activeText = isEssentials ? "text-blue-600" : "text-orange-600";
 
-  // Mock authentication state
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isLoggedIn } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const tabs = [
@@ -21,9 +21,9 @@ export default function MobileBottomNav() {
     { id: "mobile-nav-orders", label: "Orders", icon: ClipboardList, href: "/orders" },
     { 
       id: "mobile-nav-auth", 
-      label: isLoggedIn ? "Profile" : "Login", 
+      label: isLoggedIn ? "Account" : "Login", 
       icon: isLoggedIn ? User : LogIn, 
-      href: isLoggedIn ? "/profile" : "#" 
+      href: isLoggedIn ? (isEssentials ? "/account?theme=blue" : "/account") : "#" 
     },
   ];
 
@@ -34,7 +34,7 @@ export default function MobileBottomNav() {
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden
           bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-safe"
       >
-        <div className="flex items-center justify-around px-2 py-2">
+        <div className="flex items-center justify-around px-2 py-2 relative">
           {tabs.map(({ id, label, icon: Icon, href }) => {
             const active = pathname === href && href !== "#";
             
@@ -77,7 +77,7 @@ export default function MobileBottomNav() {
         </div>
       </nav>
       
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
     </>
   );
 }
