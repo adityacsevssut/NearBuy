@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { MapPin, ChevronDown, Search, ShoppingCart, Bell, X, Store, Package } from "lucide-react";
+import LoginModal from "./LoginModal";
 
 export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const cartCount = 3;
   const pathname = usePathname();
 
@@ -165,15 +167,15 @@ export default function Navbar() {
           </button>
 
           <button
-            id="user-avatar-btn"
-            className="hidden sm:flex items-center ml-1 p-1 rounded-xl hover:bg-gray-100 transition-colors"
+            id="login-signup-btn"
+            onClick={() => setIsLoginModalOpen(true)}
+            className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm text-white font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 ${primaryBg}`}
           >
-            <div className={`w-8 h-8 rounded-xl ${btnClass} flex items-center justify-center`}>
-              <span className="text-white text-xs font-black">A</span>
-            </div>
+            Login
           </button>
         </div>
       </div>
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
     </nav>
   );
 }
