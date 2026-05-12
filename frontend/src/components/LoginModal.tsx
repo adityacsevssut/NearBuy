@@ -5,7 +5,7 @@ import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, Refres
 import { useAuth } from "@/context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
 
-const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "forgot-email" | "forgot-otp" | "forgot-reset" | "success";
 
