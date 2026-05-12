@@ -217,9 +217,10 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     </div>
   );
 
-  const BtnPrimary = ({ children, disabled, type = "submit" }: any) => (
+  const BtnPrimary = ({ children, disabled, type = "submit", onClick }: any) => (
     <button
       type={type}
+      onClick={onClick}
       disabled={disabled || loading}
       className={`w-full relative overflow-hidden py-3.5 rounded-xl bg-gradient-to-r ${t.btnGrad} text-white font-bold text-[15px] shadow-lg ${t.btnShadow} hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group`}
     >
@@ -229,14 +230,13 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   );
 
   const GoogleBtn = () => (
-    <div className="w-full mt-2 hover:scale-[1.01] active:scale-[0.99] transition-transform">
+    <div className="w-full mt-2 hover:scale-[1.01] active:scale-[0.99] transition-transform flex justify-center">
       <GoogleLogin
         onSuccess={handleGoogleSuccess}
         onError={() => setError("Google sign-in failed")}
-        width="100%"
+        width="360"
         text="continue_with"
-        shape="pill"
-        logo_alignment="left"
+        shape="rectangular"
       />
     </div>
   );
@@ -386,10 +386,8 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
               <>
                 <ModalHeader title="User Account" back="choose" />
                 <div className="p-6 sm:p-8 space-y-4 relative z-10 overflow-y-auto no-scrollbar">
-                  <BtnPrimary type="button" disabled={false}>
-                    <span onClick={() => reset("login")} className="w-full flex items-center justify-center gap-2">
-                      <Mail className="w-4 h-4" /> Log In with Email
-                    </span>
+                  <BtnPrimary type="button" disabled={false} onClick={() => reset("login")}>
+                    <Mail className="w-4 h-4" /> Log In with Email
                   </BtnPrimary>
                   <div className="pt-1">
                     <GoogleBtn />
@@ -414,7 +412,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                 <div className="p-6 sm:p-8 relative z-10 overflow-y-auto no-scrollbar">
                   <ErrorBanner />
                   <form onSubmit={handleLogin} className="space-y-4">
-                    <FloatingInput icon={Mail} type="email" id="login-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
+                    <FloatingInput icon={Mail} type="email" id="login-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required />
                     
                     <div className="space-y-1.5">
                       <FloatingInput 
@@ -461,7 +459,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                     </div>
                     
                     <FloatingInput icon={Phone} type="tel" id="su-mobile" label="Mobile (Optional)" value={mobile} onChange={(e:any) => setMobile(e.target.value)} pattern="[0-9]{10}" />
-                    <FloatingInput icon={Mail} type="email" id="su-email" label="Email address" value={signupEmail} onChange={(e:any) => setSignupEmail(e.target.value)} required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
+                    <FloatingInput icon={Mail} type="email" id="su-email" label="Email address" value={signupEmail} onChange={(e:any) => setSignupEmail(e.target.value)} required />
                     
                     <div className="space-y-2">
                       <FloatingInput 
@@ -547,7 +545,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </p>
                   <ErrorBanner />
                   <form onSubmit={handleForgotSendOtp} className="space-y-6">
-                    <FloatingInput icon={Mail} type="email" id="fg-email" label="Email address" value={forgotEmail} onChange={(e:any) => setForgotEmail(e.target.value)} required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" />
+                    <FloatingInput icon={Mail} type="email" id="fg-email" label="Email address" value={forgotEmail} onChange={(e:any) => setForgotEmail(e.target.value)} required />
                     <BtnPrimary>Send Reset Code</BtnPrimary>
                   </form>
                 </div>
