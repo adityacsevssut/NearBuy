@@ -230,11 +230,11 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   );
 
   const GoogleBtn = () => (
-    <div className="w-full mt-2 hover:scale-[1.01] active:scale-[0.99] transition-transform flex justify-center">
+    <div className="w-full mt-2 hover:scale-[1.01] active:scale-[0.99] transition-transform flex justify-center items-center max-w-full overflow-hidden px-2">
       <GoogleLogin
         onSuccess={handleGoogleSuccess}
         onError={() => setError("Google sign-in failed")}
-        width="360"
+        width="340"
         text="continue_with"
         shape="rectangular"
       />
