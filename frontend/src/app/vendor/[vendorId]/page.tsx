@@ -84,7 +84,8 @@ export default function VendorPage() {
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
   const [wishlist, setWishlist] = useState<number[]>([]);
-  const [cart, setCart] = useState<number[]>([]);
+  const [cart, setCart] = useState<Record<number, number>>({});
+  const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   // Generate mock dish data for this vendor
   const mockDishes = [
@@ -305,7 +306,7 @@ export default function VendorPage() {
                         </div>
 
                         {/* Image & Action Section */}
-                        <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-3">
+                        <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
                           <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 flex items-center justify-center text-6xl shadow-inner relative">
                             {dish.emoji}
                             <button
@@ -315,20 +316,43 @@ export default function VendorPage() {
                               <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                             </button>
 
-                            {/* Overlapping ADD button */}
-                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-28">
+                            {/* Quantity Selector and ADD Button */}
+                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center">
+                              <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
+                                <button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
+                                  }}
+                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                >
+                                  -
+                                </button>
+                                <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                                <button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                                  }}
+                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
                               <button 
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  setCart(c => c.includes(dish.id) ? c.filter(i => i !== dish.id) : [...c, dish.id]);
+                                  const q = quantities[dish.id] || 1;
+                                  setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
+                                  setQuantities(q => ({ ...q, [dish.id]: 1 }));
                                 }}
-                                className={`w-full py-1.5 border font-black text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                                  cart.includes(dish.id) 
-                                    ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700" 
+                                className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                                  cart[dish.id]
+                                    ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
                                     : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                                 }`}
                               >
-                                {cart.includes(dish.id) ? "ADDED ✓" : <>ADD <Plus className="w-3 h-3" /></>}
+                                {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
                               </button>
                             </div>
                           </div>
