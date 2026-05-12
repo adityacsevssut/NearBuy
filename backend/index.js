@@ -55,6 +55,11 @@ app.use((err, req, res, next) => {
 });
 
 // ── Start Server ──────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`✅ NearBuy backend running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`✅ NearBuy backend running on http://localhost:${PORT}`);
+  });
+}
+
+// Export the app for Vercel Serverless Functions
+module.exports = app;
