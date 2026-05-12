@@ -133,11 +133,11 @@ export default function DishPage() {
                 onClick={() => setFoodPref("veg")}
                 className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
                   foodPref === "veg"
-                    ? "bg-green-600 border-green-600 text-white"
+                    ? "bg-orange-600 border-orange-600 text-white"
                     : "bg-white border-gray-300 text-gray-600"
                 }`}
               >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`} />
+                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-orange-600"}`} />
                 Veg Only
               </button>
               <button
@@ -156,7 +156,7 @@ export default function DishPage() {
                 <select
                   value={sortOrder}
                   onChange={(e) => setSortOrder(e.target.value as any)}
-                  className="appearance-none flex items-center gap-1.5 pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border border-gray-300 bg-white text-gray-700 shadow-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 cursor-pointer"
+                  className="appearance-none flex items-center gap-1.5 pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border border-gray-300 bg-white text-gray-700 shadow-sm outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 cursor-pointer"
                 >
                   <option value="relevance">Filter: Relevance</option>
                   <option value="low-to-high">Price: Low to High</option>
@@ -178,18 +178,18 @@ export default function DishPage() {
               return (
                 <div
                   key={dish.id}
-                  className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex gap-4"
+                  className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-orange-300 hover:shadow-md transition-all duration-300 flex gap-4"
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       {/* Veg/Non-veg icon & Badge */}
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
+                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-orange-600" : "bg-red-600"}`} />
                         </span>
                         {dish.badge && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-emerald-700 bg-emerald-100 font-bold uppercase tracking-wider">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
                             {dish.badge}
                           </span>
                         )}
@@ -201,7 +201,7 @@ export default function DishPage() {
                       
                       {/* Vendor name with location pin styling */}
                       <p className="text-sm font-semibold text-gray-600 mb-2">
-                        by <span className="text-emerald-700">{dish.vendor}</span>
+                        by <span className="text-orange-700">{dish.vendor}</span>
                       </p>
 
                       <div className="flex items-center gap-1.5 mb-2">
@@ -244,8 +244,8 @@ export default function DishPage() {
                           }}
                           className={`w-full py-1.5 border font-black text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
                             cart.includes(dish.id) 
-                              ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700" 
-                              : "bg-white text-emerald-600 border-gray-200 hover:bg-emerald-50"
+                              ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700" 
+                              : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                           }`}
                         >
                           {cart.includes(dish.id) ? "ADDED ✓" : <>ADD <Plus className="w-3 h-3" /></>}

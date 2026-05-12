@@ -13,6 +13,13 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const isEssentials = pathname === "/essentials";
+  
+  const primaryText = isEssentials ? "text-blue-500" : "text-orange-500";
+  const primaryHoverText = isEssentials ? "group-hover:text-blue-400" : "group-hover:text-orange-400";
+  const primaryBorder = isEssentials ? "border-blue-400" : "border-orange-400";
+  const primaryBorderHover = isEssentials ? "hover:border-blue-400" : "hover:border-orange-400";
+  const primaryBg = isEssentials ? "bg-blue-500" : "bg-orange-500";
+  const btnClass = isEssentials ? "btn-blue" : "btn-orange";
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -28,7 +35,7 @@ export default function Navbar() {
         {/* ── Logo ── */}
         <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
           <div className="flex items-center -skew-x-6 pr-1">
-            <span className="text-emerald-500 font-black text-3xl tracking-tighter drop-shadow-sm group-hover:text-emerald-400 transition-colors">
+            <span className={`font-black text-3xl tracking-tighter drop-shadow-sm transition-colors ${primaryText} ${primaryHoverText}`}>
               N
             </span>
             <span className="text-gray-900 font-black text-3xl tracking-tighter -ml-1.5 drop-shadow-sm group-hover:text-gray-700 transition-colors">
@@ -36,7 +43,7 @@ export default function Navbar() {
             </span>
           </div>
           <span className="font-black text-xl tracking-tight hidden lg:block">
-            <span className="text-emerald-500">Near</span>
+            <span className={primaryText}>Near</span>
             <span className="text-gray-900">Buy</span>
           </span>
         </Link>
@@ -47,7 +54,7 @@ export default function Navbar() {
             href="/"
             className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
               !isEssentials
-                ? "bg-white text-emerald-600 shadow-sm border border-gray-200/50"
+                ? "bg-white text-orange-600 shadow-sm border border-gray-200/50"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
             }`}
           >
@@ -59,7 +66,7 @@ export default function Navbar() {
             href="/essentials"
             className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
               isEssentials
-                ? "bg-white text-emerald-600 shadow-sm border border-gray-200/50"
+                ? "bg-white text-blue-600 shadow-sm border border-gray-200/50"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
             }`}
           >
@@ -75,13 +82,13 @@ export default function Navbar() {
             className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border
               transition-all duration-300 bg-gray-50 ${
               searchFocused
-                ? "border-emerald-400 shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
+                ? `${primaryBorder} shadow-[0_0_0_3px_rgba(16,185,129,0.1)]`
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <Search
               className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                searchFocused ? "text-emerald-500" : "text-gray-400"
+                searchFocused ? primaryText : "text-gray-400"
               }`}
             />
             <input
@@ -133,15 +140,15 @@ export default function Navbar() {
         <div className="flex items-center gap-0.5 flex-shrink-0">
           <button
             id="location-picker"
-            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
-              border border-gray-200 hover:border-emerald-400 bg-gray-50
-              transition-all duration-200 group mr-2"
+            className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
+              border border-gray-200 ${primaryBorderHover} bg-gray-50
+              transition-all duration-200 group mr-2`}
           >
-            <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+            <MapPin className={`w-3.5 h-3.5 ${primaryText}`} />
             <span className="text-gray-800 font-semibold text-xs tracking-tight">
               Pulaha Hostel
             </span>
-            <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-emerald-500 transition-colors" />
+            <ChevronDown className={`w-3 h-3 text-gray-400 ${isEssentials ? 'group-hover:text-blue-500' : 'group-hover:text-orange-500'} transition-colors`} />
           </button>
 
           <button
@@ -150,8 +157,8 @@ export default function Navbar() {
           >
             <ShoppingCart className="w-5 h-5 text-gray-500 group-hover:text-gray-800 transition-colors" />
             {cartCount > 0 && (
-              <span className="absolute top-1 right-1 w-4 h-4 bg-emerald-500 rounded-full
-                text-white text-[10px] font-black flex items-center justify-center">
+              <span className={`absolute top-1 right-1 w-4 h-4 ${primaryBg} rounded-full
+                text-white text-[10px] font-black flex items-center justify-center`}>
                 {cartCount}
               </span>
             )}
@@ -161,7 +168,7 @@ export default function Navbar() {
             id="user-avatar-btn"
             className="hidden sm:flex items-center ml-1 p-1 rounded-xl hover:bg-gray-100 transition-colors"
           >
-            <div className="w-8 h-8 rounded-xl btn-emerald flex items-center justify-center">
+            <div className={`w-8 h-8 rounded-xl ${btnClass} flex items-center justify-center`}>
               <span className="text-white text-xs font-black">A</span>
             </div>
           </button>

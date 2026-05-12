@@ -39,7 +39,7 @@ const restaurants = [
     time: "10–14 min",
     emoji: "☕",
     badge: "Top Rated",
-    badgeColor: "bg-emerald-100 text-emerald-700",
+    badgeColor: "bg-orange-100 text-orange-700",
   },
   {
     id: "rest-4",
@@ -50,7 +50,7 @@ const restaurants = [
     time: "18–22 min",
     emoji: "🍕",
     badge: "New",
-    badgeColor: "bg-blue-100 text-blue-700",
+    badgeColor: "bg-orange-100 text-orange-700",
   },
   {
     id: "rest-5",
@@ -176,9 +176,9 @@ export default function VendorPage() {
 
       {/* Vendor Hero */}
       <div className="bg-white border-b border-gray-200 shadow-sm relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-emerald-100/50 opacity-50 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-orange-100/50 opacity-50 pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 hover:text-emerald-700 mb-4 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit">
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
 
@@ -225,11 +225,11 @@ export default function VendorPage() {
               onClick={() => setFoodPref("veg")}
               className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
                 foodPref === "veg"
-                  ? "bg-green-600 border-green-600 text-white"
+                  ? "bg-orange-600 border-orange-600 text-white"
                   : "bg-white/80 backdrop-blur-md border-gray-200 text-gray-700"
               }`}
             >
-              <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`} />
+              <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-orange-600"}`} />
               Veg Only
             </button>
             <button
@@ -248,7 +248,7 @@ export default function VendorPage() {
               <select
                 value={sortOrder}
                 onChange={(e) => setSortOrder(e.target.value as any)}
-                className="appearance-none flex items-center gap-1.5 pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border border-gray-200 bg-white/80 backdrop-blur-md text-gray-700 shadow-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 cursor-pointer"
+                className="appearance-none flex items-center gap-1.5 pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border border-gray-200 bg-white/80 backdrop-blur-md text-gray-700 shadow-sm outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 cursor-pointer"
               >
                 <option value="relevance">Filter: Relevance</option>
                 <option value="low-to-high">Price: Low to High</option>
@@ -273,18 +273,18 @@ export default function VendorPage() {
                     return (
                       <div
                         key={dish.id}
-                        className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex gap-4"
+                        className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-orange-300 hover:shadow-md transition-all duration-300 flex gap-4"
                       >
                         {/* Info Section */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div>
                             {/* Veg/Non-veg icon & Badge */}
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
+                              <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-orange-600" : "bg-red-600"}`} />
                               </span>
                               {dish.badge && (
-                                <span className="text-[10px] px-1.5 py-0.5 rounded text-emerald-700 bg-emerald-100 font-bold uppercase tracking-wider">
+                                <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
                                   {dish.badge}
                                 </span>
                               )}
@@ -324,8 +324,8 @@ export default function VendorPage() {
                                 }}
                                 className={`w-full py-1.5 border font-black text-sm rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
                                   cart.includes(dish.id) 
-                                    ? "bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700" 
-                                    : "bg-white text-emerald-600 border-gray-200 hover:bg-emerald-50"
+                                    ? "bg-orange-600 text-white border-orange-600 hover:bg-orange-700" 
+                                    : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                                 }`}
                               >
                                 {cart.includes(dish.id) ? "ADDED ✓" : <>ADD <Plus className="w-3 h-3" /></>}

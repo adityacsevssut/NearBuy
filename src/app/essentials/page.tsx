@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import {
   Search, Star, SlidersHorizontal, ChevronDown,
-  ShoppingCart, Heart, Zap, BadgePercent, Package,
+  ShoppingCart, Heart, Zap, BadgePercent, Package, X,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -93,7 +93,7 @@ export default function EssentialsPage() {
               />
               <div className="absolute inset-0 bg-gradient-to-l from-black/60 via-black/20 to-transparent pointer-events-none" />
               <div className="absolute inset-y-0 right-0 p-6 md:p-10 flex flex-col justify-center items-end text-right pointer-events-none">
-                <span className="inline-block px-3 py-1 bg-emerald-500 text-white text-xs font-bold rounded-full mb-3 shadow-md">
+                <span className="inline-block px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded-full mb-3 shadow-md">
                   STUDENT STORE
                 </span>
                 <h2 className="text-white text-2xl md:text-4xl font-black max-w-sm leading-tight tracking-tight drop-shadow-md">
@@ -131,13 +131,33 @@ export default function EssentialsPage() {
           </div>
 
           <div className="flex gap-6 pb-12">
-            {/* ── Sidebar filters (Desktop only or toggled) ── */}
+            {/* ── Sidebar filters ── */}
+            {/* Mobile Overlay */}
+            {showFilters && (
+              <div 
+                className="fixed inset-0 z-[60] bg-black/50 md:hidden backdrop-blur-sm"
+                onClick={() => setShowFilters(false)}
+              />
+            )}
             <aside
-              className={`flex-shrink-0 w-64 transition-all duration-300 ${showFilters ? "block" : "hidden md:block"}`}
+              className={`fixed inset-y-0 right-0 z-[70] w-72 bg-white shadow-2xl transform transition-transform duration-300 flex flex-col md:relative md:z-0 md:w-64 md:transform-none md:bg-transparent md:shadow-none md:flex-shrink-0 ${
+                showFilters ? "translate-x-0" : "translate-x-full md:translate-x-0"
+              }`}
             >
-              <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden sticky top-24 shadow-sm">
-                <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
-                  <Package className="w-5 h-5 text-emerald-600" />
+              {/* Mobile Header */}
+              <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100 bg-white flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Package className="w-5 h-5 text-blue-600" />
+                  <p className="font-black text-lg text-gray-900">Filters</p>
+                </div>
+                <button onClick={() => setShowFilters(false)} className="p-1.5 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200">
+                   <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-white md:rounded-2xl md:border md:border-gray-200 md:sticky md:top-24 md:shadow-sm pb-24 md:pb-0 scrollbar-hide">
+                <div className="hidden md:flex px-5 py-4 border-b border-gray-100 items-center gap-2">
+                  <Package className="w-5 h-5 text-blue-600" />
                   <p className="font-black text-base text-gray-900">Filters</p>
                 </div>
 
@@ -151,7 +171,7 @@ export default function EssentialsPage() {
                         onClick={() => setActiveCat(cat.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                           activeCat === cat.id
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm"
+                            ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm"
                             : "text-gray-600 hover:bg-gray-50 border border-transparent"
                         }`}
                       >
@@ -172,7 +192,7 @@ export default function EssentialsPage() {
                         onClick={() => setPriceRange(priceRange === r.label ? null : r.label)}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all ${
                           priceRange === r.label
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold shadow-sm"
+                            ? "bg-blue-50 text-blue-700 border border-blue-200 font-bold shadow-sm"
                             : "text-gray-600 hover:bg-gray-50 border border-transparent font-medium"
                         }`}
                       >
@@ -192,7 +212,7 @@ export default function EssentialsPage() {
                         onClick={() => setActiveSort(s)}
                         className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${
                           activeSort === s
-                            ? "text-emerald-700 font-bold bg-emerald-50/50"
+                            ? "text-blue-700 font-bold bg-blue-50/50"
                             : "text-gray-500 hover:text-gray-800 font-medium hover:bg-gray-50"
                         }`}
                       >
@@ -215,7 +235,7 @@ export default function EssentialsPage() {
                   {(activeCat !== "all" || priceRange) && (
                     <button
                       onClick={() => { setActiveCat("all"); setPriceRange(null); }}
-                      className="text-xs text-emerald-600 font-bold hover:underline px-3 py-1.5 bg-emerald-50 rounded-lg"
+                      className="text-xs text-blue-600 font-bold hover:underline px-3 py-1.5 bg-blue-50 rounded-lg"
                     >
                       Clear filters
                     </button>
@@ -233,7 +253,7 @@ export default function EssentialsPage() {
                     <div
                       key={p.id}
                       className="group bg-white rounded-2xl border border-gray-200 overflow-hidden
-                        shadow-sm hover:shadow-md hover:border-emerald-300 transition-all duration-300 flex flex-col relative"
+                        shadow-sm hover:shadow-md hover:border-blue-300 transition-all duration-300 flex flex-col relative"
                     >
                       {/* Image area */}
                       <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 flex items-center
@@ -255,7 +275,7 @@ export default function EssentialsPage() {
                         {/* Express badge */}
                         {p.express && (
                           <span className="absolute top-3 left-3 flex items-center gap-0.5 px-2 py-1
-                            bg-emerald-500 text-white rounded-md text-[10px] font-black shadow-sm z-10">
+                            bg-blue-500 text-white rounded-md text-[10px] font-black shadow-sm z-10">
                             <Zap className="w-3 h-3 fill-white" /> EXPRESS
                           </span>
                         )}
@@ -263,7 +283,7 @@ export default function EssentialsPage() {
 
                       <div className="p-4 flex flex-col flex-1 bg-white">
                         {p.badge && (
-                          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-100 px-2 py-1 rounded w-fit mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-1 rounded w-fit mb-2">
                             {p.badge}
                           </span>
                         )}
@@ -273,7 +293,7 @@ export default function EssentialsPage() {
                         </p>
 
                         <div className="flex items-center gap-1.5 mb-3">
-                          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white
+                          <span className="inline-flex items-center gap-0.5 bg-blue-600 text-white
                             text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
                             <Star className="w-3 h-3 fill-white" />
                             {p.rating}
@@ -284,7 +304,7 @@ export default function EssentialsPage() {
                         <div className="flex items-baseline gap-2 mb-4">
                           <span className="text-lg font-black text-gray-900">₹{p.price}</span>
                           <span className="text-xs text-gray-400 line-through font-medium">₹{p.mrp}</span>
-                          <span className="text-xs font-bold text-emerald-600 flex items-center gap-0.5 bg-emerald-50 px-1.5 py-0.5 rounded">
+                          <span className="text-xs font-bold text-blue-600 flex items-center gap-0.5 bg-blue-50 px-1.5 py-0.5 rounded">
                             <BadgePercent className="w-3 h-3" />{disc}% off
                           </span>
                         </div>
@@ -296,8 +316,8 @@ export default function EssentialsPage() {
                             !p.inStock
                               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                               : inCart
-                              ? "bg-emerald-600 text-white hover:bg-emerald-700 shadow-md"
-                              : "btn-emerald text-white hover:opacity-90 shadow-md"
+                              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md"
+                              : "btn-blue text-white hover:opacity-90 shadow-md"
                           }`}
                         >
                           <ShoppingCart className="w-4 h-4" />

@@ -1,4 +1,12 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 export default function Footer() {
+  const pathname = usePathname() || "";
+  const isEssentials = pathname.startsWith('/essentials');
+  const borderHover = isEssentials ? "hover:border-blue-500/40" : "hover:border-orange-500/40";
+  const btnClass = isEssentials ? "btn-blue" : "btn-orange";
   const links = {
     Product: ["How it Works", "Pricing", "Campus Coverage", "Track Order"],
     Company: ["About Us", "Blog", "Careers", "Press"],
@@ -13,7 +21,7 @@ export default function Footer() {
         {/* CTA Banner */}
         <div className="grid sm:grid-cols-2 gap-4 mb-16">
           {/* Runner CTA */}
-          <div className="p-6 rounded-2xl bg-gray-800 border border-gray-700 hover:border-emerald-500/40 transition-colors">
+          <div className={`p-6 rounded-2xl bg-gray-800 border border-gray-700 ${borderHover} transition-colors`}>
             <p className="text-lg font-black text-white mb-1 tracking-tight">
               Become a Student Runner 🏃
             </p>
@@ -21,8 +29,7 @@ export default function Footer() {
               Earn ₹200–₹500/day delivering on campus. Flexible hours, zero commitment.
             </p>
             <button
-              id="footer-runner-cta"
-              className="btn-emerald px-5 py-2.5 rounded-xl text-white font-bold text-sm"
+              className={`${btnClass} px-5 py-2.5 rounded-xl text-white font-bold text-sm`}
             >
               Apply Now →
             </button>

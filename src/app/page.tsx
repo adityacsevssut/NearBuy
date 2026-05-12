@@ -17,7 +17,7 @@ const banners = [
   {
     id: 1,
     image: "/banner.png",
-    bg: "bg-emerald-500",
+    bg: "bg-orange-500",
     tag: "NEW ON CAMPUS",
     title: "Everything you need, delivered in 15 mins.",
   },
@@ -80,7 +80,7 @@ const restaurants = [
     offer: "Free cookie on orders ₹150+",
     emoji: "☕",
     badge: "Top Rated",
-    badgeColor: "bg-emerald-100 text-emerald-700",
+    badgeColor: "bg-orange-100 text-orange-700",
     veg: true,
   },
   {
@@ -232,11 +232,11 @@ export default function HomePage() {
                 onClick={() => setFoodPref("veg")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
                   foodPref === "veg"
-                    ? "bg-green-600 border-green-600 text-white"
+                    ? "bg-orange-600 border-orange-600 text-white"
                     : "bg-white border-gray-300 text-gray-600"
                 }`}
               >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`} />
+                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-orange-600"}`} />
                 Veg Only
               </button>
               <button
@@ -274,7 +274,7 @@ export default function HomePage() {
                 key={b}
                 href={`/dish/${b.toLowerCase().replace(/\s+/g, '-')}`}
                 className="flex-shrink-0 px-4 py-2 rounded-xl bg-white border border-gray-200 shadow-sm
-                  hover:border-emerald-400 hover:text-emerald-700 text-sm font-semibold text-gray-700 transition-colors"
+                  hover:border-orange-400 hover:text-orange-700 text-sm font-semibold text-gray-700 transition-colors"
               >
                 {b}
               </Link>
@@ -294,7 +294,7 @@ export default function HomePage() {
                   href={`/vendor/${r.id}`}
                   key={r.id}
                   className="group flex flex-col bg-white rounded-2xl border border-gray-200
-                    hover:border-emerald-400 card-shadow text-left transition-all duration-300 overflow-hidden"
+                    hover:border-orange-400 card-shadow text-left transition-all duration-300 overflow-hidden"
                 >
                   <div className="relative w-full h-32 bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center text-6xl border-b border-gray-100">
                     {r.emoji}
@@ -302,8 +302,8 @@ export default function HomePage() {
                       {r.badge}
                     </span>
                     {r.veg && (
-                      <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-green-600 flex items-center justify-center bg-white shadow-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
+                      <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-orange-600 flex items-center justify-center bg-white shadow-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
                       </span>
                     )}
                   </div>
@@ -311,7 +311,7 @@ export default function HomePage() {
                   <div className="p-4 flex-1 w-full">
                     <div className="flex justify-between items-start mb-1">
                       <p className="font-black text-gray-900 text-lg tracking-tight truncate">{r.name}</p>
-                      <span className="flex items-center gap-1 text-xs font-bold text-white bg-green-600 px-1.5 py-0.5 rounded shadow-sm">
+                      <span className="flex items-center gap-1 text-xs font-bold text-white bg-orange-600 px-1.5 py-0.5 rounded shadow-sm">
                         <Star className="w-3 h-3 fill-white" />
                         {r.rating}
                       </span>
@@ -326,11 +326,11 @@ export default function HomePage() {
                     </div>
 
                     <div className="pt-3 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-xs text-emerald-700 font-bold">
-                        <span className="text-emerald-500 text-sm">🏷</span>
+                      <div className="flex items-center gap-1.5 text-xs text-orange-700 font-bold">
+                        <span className="text-orange-500 text-sm">🏷</span>
                         {r.offer}
                       </div>
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-emerald-500 transition-colors" />
+                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 transition-colors" />
                     </div>
                   </div>
                 </Link>

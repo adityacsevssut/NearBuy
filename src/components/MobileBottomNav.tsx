@@ -18,6 +18,9 @@ export default function MobileBottomNav() {
    * TODO: When routes are added, pathname-based active state will work automatically.
    */
   const pathname = usePathname();
+  const isEssentials = pathname.startsWith('/essentials');
+  const activeBg = isEssentials ? "bg-blue-100" : "bg-orange-100";
+  const activeText = isEssentials ? "text-blue-600" : "text-orange-600";
 
   return (
     <nav
@@ -37,18 +40,18 @@ export default function MobileBottomNav() {
             >
               <div
                 className={`p-1.5 rounded-xl transition-all duration-200 ${
-                  active ? "bg-emerald-100" : "group-hover:bg-gray-100"
+                  active ? activeBg : "group-hover:bg-gray-100"
                 }`}
               >
                 <Icon
                   className={`w-5 h-5 transition-colors duration-200 ${
-                    active ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-600"
+                    active ? activeText : "text-gray-400 group-hover:text-gray-600"
                   }`}
                 />
               </div>
               <span
                 className={`text-[10px] font-semibold transition-colors duration-200 ${
-                  active ? "text-emerald-600" : "text-gray-400 group-hover:text-gray-500"
+                  active ? activeText : "text-gray-400 group-hover:text-gray-500"
                 }`}
               >
                 {label}
