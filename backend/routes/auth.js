@@ -9,7 +9,7 @@ const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "1094969346401-k93gdrb25eeeakusutqthbfm6r4ov3gf.apps.googleusercontent.com";
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ── Helper: generate 6-digit OTP ──────────────────────────────────────────
@@ -243,6 +243,9 @@ router.post("/google", async (req, res) => {
     });
     const { sub: googleId, email, given_name, family_name, picture } = ticket.getPayload();
 
+    const firstName = given_name ? given_name.trim() : email.split("@")[0];
+    const lastName = family_name ? family_name.trim() : "";
+
     // Upsert user
     const { rows } = await pool.query(
       `INSERT INTO users (first_name, last_name, email, google_id, avatar_url, is_verified, password_hash)
@@ -253,7 +256,7 @@ router.post("/google", async (req, res) => {
          is_verified = TRUE,
          updated_at  = NOW()
        RETURNING *`,
-      [given_name, family_name || "", email, googleId, picture]
+      [firstName, lastName, email, googleId, picture || null]
     );
 
     const user = rows[0];
@@ -261,7 +264,7 @@ router.post("/google", async (req, res) => {
     return res.json({ user: safeUser(user), accessToken, refreshToken });
   } catch (err) {
     console.error("google auth error:", err);
-    return res.status(401).json({ error: "Google authentication failed." });
+    return res.status(401).json({ error: "Google auth failed: " + (err.message || err) });
   }
 });
 
