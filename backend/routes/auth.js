@@ -9,8 +9,13 @@ const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "1094969346401-k93gdrb25eeeakusutqthbfm6r4ov3gf.apps.googleusercontent.com";
-const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
+// Comma-separated list allowed (e.g. web + staging). Must include the same client id as NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend or verifyIdToken returns 401.
+const GOOGLE_CLIENT_IDS = (process.env.GOOGLE_CLIENT_ID || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+const googleClient =
+  GOOGLE_CLIENT_IDS.length > 0 ? new OAuth2Client(GOOGLE_CLIENT_IDS[0]) : null;
 
 // ── Helper: generate 6-digit OTP ──────────────────────────────────────────
 function generateOtp() {
@@ -235,11 +240,18 @@ router.post(
 router.post("/google", async (req, res) => {
   const { idToken } = req.body;
   if (!idToken) return res.status(400).json({ error: "Google ID token required." });
+  if (!googleClient || GOOGLE_CLIENT_IDS.length === 0) {
+    return res.status(503).json({
+      error: "Google sign-in is not configured. Set GOOGLE_CLIENT_ID on the server (same value as NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend).",
+    });
+  }
 
   try {
+    const audience =
+      GOOGLE_CLIENT_IDS.length === 1 ? GOOGLE_CLIENT_IDS[0] : GOOGLE_CLIENT_IDS;
     const ticket = await googleClient.verifyIdToken({
       idToken,
-      audience: GOOGLE_CLIENT_ID,
+      audience,
     });
     const { sub: googleId, email, given_name, family_name, picture } = ticket.getPayload();
 
@@ -264,7 +276,12 @@ router.post("/google", async (req, res) => {
     return res.json({ user: safeUser(user), accessToken, refreshToken });
   } catch (err) {
     console.error("google auth error:", err);
-    return res.status(401).json({ error: "Google auth failed: " + (err.message || err) });
+    const msg = err?.message || String(err);
+    const audienceHint =
+      /audience|Wrong number of segments|token signature|Token used too late/i.test(msg)
+        ? " Ensure Vercel backend GOOGLE_CLIENT_ID matches the frontend NEXT_PUBLIC_GOOGLE_CLIENT_ID (same OAuth Web client)."
+        : "";
+    return res.status(401).json({ error: "Google auth failed: " + msg + audienceHint });
   }
 });
 
