@@ -1,21 +1,8 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
-  // Google Sign-In uses window.postMessage between the popup / FedCM flow and the app.
-  // Without this, strict COOP (e.g. same-origin) can block sign-in in production.
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Cross-Origin-Opener-Policy",
-            value: "same-origin-allow-popups",
-          },
-        ],
-      },
-    ];
-  },
-};
+// Do NOT set Cross-Origin-Opener-Policy here. Even "same-origin-allow-popups" can block
+// Google's OAuth popup client from reading popup.closed(), which breaks sign-in.
+
+const nextConfig: NextConfig = {};
 
 export default nextConfig;

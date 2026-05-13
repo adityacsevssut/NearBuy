@@ -289,11 +289,21 @@ router.post("/google", async (req, res) => {
         console.error("google getTokenInfo:", e);
         return res.status(401).json({ error: "Invalid or expired Google access token." });
       }
-      const aud = info.audience || info.aud;
-      if (!aud || !GOOGLE_CLIENT_IDS.includes(aud)) {
+      // User access tokens: aud is often a Google APIs audience; OAuth Web client id is in azp.
+      const presenters = [
+        info.azp,
+        info.client_id,
+        info.aud,
+        info.audience,
+      ]
+        .filter(Boolean)
+        .map(String);
+      const okClient = presenters.some((p) => GOOGLE_CLIENT_IDS.includes(p));
+      if (!okClient) {
+        console.warn("google token client mismatch presenters=", presenters.slice(0, 4));
         return res.status(401).json({
           error:
-            "Google token audience does not match this app. Check GOOGLE_CLIENT_ID matches NEXT_PUBLIC_GOOGLE_CLIENT_ID.",
+            "Google token client does not match this app. Ensure Vercel GOOGLE_CLIENT_ID is the same Web OAuth client as NEXT_PUBLIC_GOOGLE_CLIENT_ID.",
         });
       }
       const ur = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
