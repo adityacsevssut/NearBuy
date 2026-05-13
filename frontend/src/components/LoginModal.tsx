@@ -11,6 +11,29 @@ type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "f
 
 interface Props { isOpen: boolean; onClose: () => void; isEssentials?: boolean; }
 
+const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, showEye, onEyeClick, isEyeOpen, ...props }: any) => (
+  <div className="relative group">
+    <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${theme.iconFocus} transition-colors z-10 pointer-events-none`} />
+    <input
+      type={type}
+      id={id}
+      value={value}
+      onChange={onChange}
+      className={`peer w-full bg-gray-50/80 border-2 border-gray-100 rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 outline-none ${theme.inputBorder} focus:bg-white focus:ring-4 ${theme.inputRing} transition-all placeholder-transparent`}
+      placeholder={label}
+      {...props}
+    />
+    <label htmlFor={id} className={`absolute left-[42px] top-2 text-[10px] uppercase font-bold tracking-wider text-gray-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-wider ${theme.labelFocus} transition-all pointer-events-none`}>
+      {label}
+    </label>
+    {showEye && (
+      <button type="button" onClick={onEyeClick} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 focus:outline-none p-1.5 rounded-lg hover:bg-gray-100 transition-colors z-10">
+        {isEyeOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+      </button>
+    )}
+  </div>
+);
+
 export default function LoginModal({ isOpen, onClose, isEssentials = false }: Props) {
   // Theme: orange for Food, blue for Essentials
   const t = isEssentials ? {
@@ -204,31 +227,6 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     },
     onError: () => setError("Google sign-in was cancelled or failed."),
   });
-
-  // --- UI Components ---
-
-  const FloatingInput = ({ icon: Icon, type, id, label, value, onChange, showEye, onEyeClick, isEyeOpen, ...props }: any) => (
-    <div className="relative group">
-      <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${t.iconFocus} transition-colors z-10 pointer-events-none`} />
-      <input
-        type={type}
-        id={id}
-        value={value}
-        onChange={onChange}
-        className={`peer w-full bg-gray-50/80 border-2 border-gray-100 rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 outline-none ${t.inputBorder} focus:bg-white focus:ring-4 ${t.inputRing} transition-all placeholder-transparent`}
-        placeholder={label}
-        {...props}
-      />
-      <label htmlFor={id} className={`absolute left-[42px] top-2 text-[10px] uppercase font-bold tracking-wider text-gray-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-placeholder-shown:tracking-normal peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase peer-focus:tracking-wider ${t.labelFocus} transition-all pointer-events-none`}>
-        {label}
-      </label>
-      {showEye && (
-        <button type="button" onClick={onEyeClick} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 focus:outline-none p-1.5 rounded-lg hover:bg-gray-100 transition-colors z-10">
-          {isEyeOpen ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-        </button>
-      )}
-    </div>
-  );
 
   const BtnPrimary = ({ children, disabled, type = "submit", onClick }: any) => (
     <button
@@ -432,10 +430,10 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                 <div className="p-6 sm:p-8 relative z-10 overflow-y-auto no-scrollbar">
                   <ErrorBanner />
                   <form onSubmit={handleLogin} className="space-y-4">
-                    <FloatingInput icon={Mail} type="email" id="login-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required />
+                    <FloatingInput theme={t} icon={Mail} type="email" id="login-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required />
                     
                     <div className="space-y-1.5">
-                      <FloatingInput 
+                      <FloatingInput theme={t}
                         icon={Lock} type={showPass ? "text" : "password"} id="login-pass" label="Password" 
                         value={loginPass} onChange={(e:any) => setLoginPass(e.target.value)} required minLength={8}
                         showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
@@ -474,18 +472,18 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   <ErrorBanner />
                   <form onSubmit={handleSignupSendOtp} className="space-y-4">
                     <div className="grid grid-cols-2 gap-3">
-                      <FloatingInput icon={User} type="text" id="su-first" label="First Name" value={firstName} onChange={(e:any) => setFirstName(e.target.value)} required />
+                      <FloatingInput theme={t} icon={User} type="text" id="su-first" label="First Name" value={firstName} onChange={(e:any) => setFirstName(e.target.value)} required />
                       <div className="relative group">
                         <input type="text" id="su-last" value={lastName} onChange={(e:any) => setLastName(e.target.value)} required className={`peer w-full bg-gray-50/80 border-2 border-gray-100 rounded-xl px-4 pt-5 pb-2 text-sm text-gray-800 outline-none ${t.inputBorder} focus:bg-white focus:ring-4 ${t.inputRing} transition-all placeholder-transparent`} placeholder="Last Name" />
                         <label htmlFor="su-last" className={`absolute left-4 top-2 text-[10px] uppercase font-bold tracking-wider text-gray-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase ${t.labelFocus} transition-all pointer-events-none`}>Last Name</label>
                       </div>
                     </div>
                     
-                    <FloatingInput icon={Phone} type="tel" id="su-mobile" label="Mobile (Optional)" value={mobile} onChange={(e:any) => setMobile(e.target.value)} pattern="[0-9]{10}" />
-                    <FloatingInput icon={Mail} type="email" id="su-email" label="Email address" value={signupEmail} onChange={(e:any) => setSignupEmail(e.target.value)} required />
+                    <FloatingInput theme={t} icon={Phone} type="tel" id="su-mobile" label="Mobile (Optional)" value={mobile} onChange={(e:any) => setMobile(e.target.value)} pattern="[0-9]{10}" />
+                    <FloatingInput theme={t} icon={Mail} type="email" id="su-email" label="Email address" value={signupEmail} onChange={(e:any) => setSignupEmail(e.target.value)} required />
                     
                     <div className="space-y-2">
-                      <FloatingInput 
+                      <FloatingInput theme={t}
                         icon={Lock} type={showPass ? "text" : "password"} id="su-pass" label="Password" 
                         value={signupPass} onChange={(e:any) => setSignupPass(e.target.value)} required minLength={8}
                         showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
@@ -505,7 +503,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                       <p className="text-[11px] text-gray-400 px-1 font-medium">Use at least 8 characters.</p>
                     </div>
 
-                    <FloatingInput 
+                    <FloatingInput theme={t}
                       icon={Lock} type={showConfirm ? "text" : "password"} id="su-conf" label="Confirm Password" 
                       value={confirmPass} onChange={(e:any) => setConfirmPass(e.target.value)} required minLength={8}
                       showEye onEyeClick={() => setShowConfirm(!showConfirm)} isEyeOpen={showConfirm} 
@@ -571,7 +569,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </p>
                   <ErrorBanner />
                   <form onSubmit={handleForgotSendOtp} className="space-y-6">
-                    <FloatingInput icon={Mail} type="email" id="fg-email" label="Email address" value={forgotEmail} onChange={(e:any) => setForgotEmail(e.target.value)} required />
+                    <FloatingInput theme={t} icon={Mail} type="email" id="fg-email" label="Email address" value={forgotEmail} onChange={(e:any) => setForgotEmail(e.target.value)} required />
                     <BtnPrimary>Send Reset Code</BtnPrimary>
                   </form>
                 </div>
