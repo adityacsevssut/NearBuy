@@ -248,8 +248,10 @@ router.post(
 // Google OAuth — login or auto-signup
 // ════════════════════════════════════════════════════════════════════════════
 router.post("/google", async (req, res) => {
-  const { idToken } = req.body;
-  if (!idToken) return res.status(400).json({ error: "Google ID token required." });
+  const { idToken, accessToken } = req.body;
+  if (!idToken && !accessToken) {
+    return res.status(400).json({ error: "Provide Google idToken or accessToken." });
+  }
   if (!googleClient || GOOGLE_CLIENT_IDS.length === 0) {
     return res.status(503).json({
       error: "Google sign-in is not configured. Set GOOGLE_CLIENT_ID on the server (same value as NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend).",
@@ -257,18 +259,64 @@ router.post("/google", async (req, res) => {
   }
 
   try {
-    const audience =
-      GOOGLE_CLIENT_IDS.length === 1 ? GOOGLE_CLIENT_IDS[0] : GOOGLE_CLIENT_IDS;
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience,
-    });
-    const { sub: googleId, email, given_name, family_name, picture } = ticket.getPayload();
+    let googleId;
+    let email;
+    let given_name;
+    let family_name;
+    let picture;
+
+    if (idToken) {
+      const audience =
+        GOOGLE_CLIENT_IDS.length === 1 ? GOOGLE_CLIENT_IDS[0] : GOOGLE_CLIENT_IDS;
+      const ticket = await googleClient.verifyIdToken({
+        idToken,
+        audience,
+      });
+      const payload = ticket.getPayload();
+      googleId = payload.sub;
+      email = payload.email;
+      given_name = payload.given_name;
+      family_name = payload.family_name;
+      picture = payload.picture;
+      if (!email) {
+        return res.status(400).json({ error: "Google token has no email." });
+      }
+    } else {
+      let info;
+      try {
+        info = await googleClient.getTokenInfo(accessToken);
+      } catch (e) {
+        console.error("google getTokenInfo:", e);
+        return res.status(401).json({ error: "Invalid or expired Google access token." });
+      }
+      const aud = info.audience || info.aud;
+      if (!aud || !GOOGLE_CLIENT_IDS.includes(aud)) {
+        return res.status(401).json({
+          error:
+            "Google token audience does not match this app. Check GOOGLE_CLIENT_ID matches NEXT_PUBLIC_GOOGLE_CLIENT_ID.",
+        });
+      }
+      const ur = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!ur.ok) {
+        console.error("google userinfo:", ur.status, await ur.text());
+        return res.status(401).json({ error: "Could not load Google profile." });
+      }
+      const profile = await ur.json();
+      googleId = profile.sub;
+      email = profile.email;
+      given_name = profile.given_name;
+      family_name = profile.family_name;
+      picture = profile.picture;
+      if (!email) {
+        return res.status(400).json({ error: "Google account has no email on file." });
+      }
+    }
 
     const firstName = given_name ? given_name.trim() : email.split("@")[0];
     const lastName = family_name ? family_name.trim() : "";
 
-    // Upsert user
     const { rows } = await pool.query(
       `INSERT INTO users (first_name, last_name, email, google_id, avatar_url, is_verified, password_hash)
        VALUES ($1, $2, $3, $4, $5, TRUE, NULL)
@@ -282,8 +330,8 @@ router.post("/google", async (req, res) => {
     );
 
     const user = rows[0];
-    const { accessToken, refreshToken } = await issueTokens(user);
-    return res.json({ user: safeUser(user), accessToken, refreshToken });
+    const tokens = await issueTokens(user);
+    return res.json({ user: safeUser(user), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
   } catch (err) {
     console.error("google auth error:", err);
     const msg = err?.message || String(err);
