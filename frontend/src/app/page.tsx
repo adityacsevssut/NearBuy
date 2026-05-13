@@ -130,7 +130,19 @@ const restaurants = [
   },
 ];
 
-const quickBites = ["Biryani", "Roll", "Dosa", "Chowmin", "Momo", "Pizza", "Burger", "Chicken Pokoda", "Vada", "Manchurrian", "Others"];
+const quickBites: { label: string; emoji: string }[] = [
+  { label: "Biryani", emoji: "🍛" },
+  { label: "Roll", emoji: "🌯" },
+  { label: "Dosa", emoji: "🫓" },
+  { label: "Chowmin", emoji: "🍜" },
+  { label: "Momo", emoji: "🥟" },
+  { label: "Pizza", emoji: "🍕" },
+  { label: "Burger", emoji: "🍔" },
+  { label: "Chicken Pokoda", emoji: "🍗" },
+  { label: "Vada", emoji: "🍘" },
+  { label: "Manchurrian", emoji: "🥘" },
+  { label: "Others", emoji: "🍽️" },
+];
 
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -269,14 +281,20 @@ export default function HomePage() {
           </div>
 
           <div className="flex gap-2 overflow-x-auto scrollbar-hide py-3">
-            {quickBites.map((b) => (
+            {quickBites.map(({ label, emoji }) => (
               <Link
-                key={b}
-                href={`/dish/${b.toLowerCase().replace(/\s+/g, '-')}`}
-                className="flex-shrink-0 px-4 py-2 rounded-xl bg-white border border-gray-200 shadow-sm
-                  hover:border-orange-400 hover:text-orange-700 text-sm font-semibold text-gray-700 transition-colors"
+                key={label}
+                href={`/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                className="flex-shrink-0 inline-flex items-center gap-2.5 rounded-xl bg-white border border-gray-200 shadow-sm px-3 py-2 pr-3.5
+                  hover:border-orange-400 hover:text-orange-900 text-sm font-semibold text-gray-800 transition-colors"
               >
-                {b}
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-orange-50 to-amber-100 text-lg shadow-inner ring-1 ring-orange-100/80 select-none"
+                  aria-hidden
+                >
+                  {emoji}
+                </span>
+                <span className="whitespace-nowrap leading-tight">{label}</span>
               </Link>
             ))}
           </div>
