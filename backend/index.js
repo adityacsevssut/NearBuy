@@ -13,9 +13,21 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 
 // ── CORS ──────────────────────────────────────────────────────────────────
-const allowedOrigins = (process.env.FRONTEND_URL || "http://localhost:3000")
-  .split(",")
-  .map((u) => u.trim());
+// FRONTEND_URL and CORS_ORIGINS are merged (comma, pipe, or newline separated).
+// Use CORS_ORIGINS as a backup on hosts where FRONTEND_URL is awkward to edit (e.g. Sensitive UI).
+function parseAllowedOrigins() {
+  const raw = [process.env.FRONTEND_URL, process.env.CORS_ORIGINS]
+    .filter(Boolean)
+    .join(",");
+  let list = raw
+    .split(/[,|\n\r]+/)
+    .map((u) => u.trim().replace(/\/+$/, ""))
+    .filter(Boolean);
+  if (list.length === 0) list = ["http://localhost:3000"];
+  return list;
+}
+
+const allowedOrigins = parseAllowedOrigins();
 
 app.use(
   cors({
