@@ -433,10 +433,13 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </form>
                   
                   <Divider />
-                  <GoogleBtn />
-                  
-                  <p className="text-center text-[13px] text-gray-500 font-medium mt-6">
-                    Don't have an account?{" "}
+                  <p className="text-center text-[13px] text-gray-500 font-medium">
+                    <button type="button" onClick={() => reset("pick-user")} className={`${t.linkText} font-bold hover:underline underline-offset-2`}>
+                      Sign in with Google
+                    </button>
+                  </p>
+                  <p className="text-center text-[13px] text-gray-500 font-medium mt-4">
+                    Don&apos;t have an account?{" "}
                     <button type="button" onClick={() => reset("signup-info")} className={`${t.linkText} font-bold hover:underline underline-offset-2`}>Sign Up</button>
                   </p>
                 </div>
@@ -494,9 +497,12 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </form>
                   
                   <Divider />
-                  <GoogleBtn />
-                  
-                  <p className="text-center text-[13px] text-gray-500 font-medium mt-6">
+                  <p className="text-center text-[13px] text-gray-500 font-medium">
+                    <button type="button" onClick={() => reset("pick-user")} className={`${t.linkText} font-bold hover:underline underline-offset-2`}>
+                      Sign in with Google
+                    </button>
+                  </p>
+                  <p className="text-center text-[13px] text-gray-500 font-medium mt-4">
                     Already have an account?{" "}
                     <button type="button" onClick={() => reset("login")} className={`${t.linkText} font-bold hover:underline underline-offset-2`}>Log In</button>
                   </p>

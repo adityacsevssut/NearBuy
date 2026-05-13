@@ -9,11 +9,21 @@ const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 
-// Comma-separated list allowed (e.g. web + staging). Must include the same client id as NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend or verifyIdToken returns 401.
-const GOOGLE_CLIENT_IDS = (process.env.GOOGLE_CLIENT_ID || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+// Comma-separated list allowed (e.g. web + staging). Must include the same client id as
+// NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend or verifyIdToken returns 401.
+// Strips wrapping quotes (common when pasting from Vercel / docs).
+function normalizeGoogleClientIds() {
+  return (process.env.GOOGLE_CLIENT_ID || "")
+    .split(",")
+    .map((s) =>
+      s
+        .trim()
+        .replace(/^["']+|["']+$/g, "")
+        .trim()
+    )
+    .filter(Boolean);
+}
+const GOOGLE_CLIENT_IDS = normalizeGoogleClientIds();
 const googleClient =
   GOOGLE_CLIENT_IDS.length > 0 ? new OAuth2Client(GOOGLE_CLIENT_IDS[0]) : null;
 
