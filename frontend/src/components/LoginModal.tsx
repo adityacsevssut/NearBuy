@@ -237,6 +237,9 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
         width="280"
         text="continue_with"
         shape="rectangular"
+        ux_mode="popup"
+        use_fedcm_for_button={false}
+        use_fedcm_for_prompt={false}
       />
     </div>
   );
