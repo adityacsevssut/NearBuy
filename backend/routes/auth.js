@@ -93,12 +93,12 @@ router.post(
         const otp = generateOtp();
         const otpHash = await hashValue(otp);
 
-        // Invalidate old OTPs for this mobile + purpose
-        await pool.query("UPDATE otps SET used=TRUE WHERE identifier=$1 AND purpose=$2 AND used=FALSE", [mobile, purpose]);
-        await pool.query("INSERT INTO otps (identifier, otp_hash, purpose) VALUES ($1, $2, $3)", [mobile, otpHash, purpose]);
+        // Invalidate old OTPs for this email + purpose
+        await pool.query("UPDATE otps SET used=TRUE WHERE identifier=$1 AND purpose=$2 AND used=FALSE", [email, purpose]);
+        await pool.query("INSERT INTO otps (identifier, otp_hash, purpose) VALUES ($1, $2, $3)", [email, otpHash, purpose]);
 
-        await sendOtpSms(mobile, otp);
-        return res.json({ message: "OTP sent to your mobile number." });
+        await sendOtpEmail(email, otp, "verify");
+        return res.json({ message: "OTP sent to your email." });
       }
 
       // ── RESET: OTP via email (unchanged) ───────────────────────────────
@@ -141,9 +141,8 @@ router.post(
 
     const { email, mobile, otp, purpose } = req.body;
 
-    // For signup: look up by mobile. For reset: look up by email.
-    const identifier = purpose === "signup" ? mobile : email;
-    if (!identifier) return res.status(400).json({ error: purpose === "signup" ? "Mobile number required." : "Email required." });
+    const identifier = email;
+    if (!identifier) return res.status(400).json({ error: "Email required." });
 
     try {
       const { rows } = await pool.query(

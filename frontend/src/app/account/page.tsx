@@ -72,15 +72,15 @@ function AccountContent() {
                 });
                 
                 if (res.ok) {
-                  toast.success("Account permanently deleted.", { id: toastId });
+                  toast.success("Account permanently deleted.", { id: toastId, duration: 3000 });
                   logout();
                   router.push("/");
                 } else {
                   const data = await res.json();
-                  toast.error(data.error || "Failed to delete account.", { id: toastId });
+                  toast.error(data.error || "Failed to delete account.", { id: toastId, duration: 3000 });
                 }
               } catch (err) {
-                toast.error("An error occurred. Please try again.", { id: toastId });
+                toast.error("An error occurred. Please try again.", { id: toastId, duration: 3000 });
               }
             }}
             className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"

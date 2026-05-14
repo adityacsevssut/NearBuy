@@ -5,8 +5,6 @@ import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, Refres
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
-import { auth } from "@/utils/firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -79,7 +77,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
-  const [confirmationResult, setConfirmationResult] = useState<any>(null);
+
 
   // Fields
   const [loginEmail, setLoginEmail] = useState("");
@@ -166,20 +164,8 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
 
     setLoading(true);
     try {
-      // Initialize reCAPTCHA if not already done
-      if (!(window as any).recaptchaVerifier) {
-        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-        });
-      }
-      
-      const appVerifier = (window as any).recaptchaVerifier;
-      const formattedMobile = "+91" + mobile;
-      
-      const confirmation = await signInWithPhoneNumber(auth, formattedMobile, appVerifier);
-      setConfirmationResult(confirmation);
-      
-      toast.success("OTP sent via Firebase to " + formattedMobile + " 📱", toastStyle);
+      await post("send-otp", { email: signupEmail, mobile, purpose: "signup" });
+      toast.success("OTP sent to your email 📧", toastStyle);
       reset("signup-otp");
     } catch (err: any) {
       console.error(err);
@@ -192,14 +178,10 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   async function handleSignupVerifyOtp(e: React.FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
     try {
-      if (!confirmationResult) throw new Error("Please request OTP first.");
+      const data = await post("verify-otp", { email: signupEmail, mobile, otp: otpValue, purpose: "signup" });
       
-      // Verify OTP with Firebase directly on frontend
-      await confirmationResult.confirm(otpValue);
-      
-      // If success, tell our backend to create the user
-      const result = await post("signup-firebase", {
-        firstName, lastName, mobile, email: signupEmail, password: signupPass,
+      const result = await post("signup", {
+        firstName, lastName, mobile, email: signupEmail, password: signupPass, verificationToken: data.verificationToken
       });
       
       login(result.user, result.accessToken, result.refreshToken);
@@ -554,8 +536,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                       showEye onEyeClick={() => setShowConfirm(!showConfirm)} isEyeOpen={showConfirm} 
                     />
                     
-                    {/* Firebase ReCaptcha Container (invisible) */}
-                    <div id="recaptcha-container"></div>
+
                     
                     <div className="pt-2">
                       <BtnPrimary>Send Verification OTP</BtnPrimary>
@@ -583,11 +564,11 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                 <div className="p-6 sm:p-8 overflow-y-auto no-scrollbar relative z-10">
                   <div className="text-center mb-6">
                     <div className={`w-16 h-16 ${t.panelIcon} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                      <Phone className="w-8 h-8" />
+                      <Mail className="w-8 h-8" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">Check your SMS</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Check your Email</h3>
                     <p className="text-[13px] text-gray-500 font-medium">We've sent a 6-digit code to</p>
-                    <p className="text-sm font-black text-gray-800">+91 {mobile}</p>
+                    <p className="text-sm font-black text-gray-800">{signupEmail}</p>
                   </div>
                   
                   <ErrorBanner />
@@ -598,8 +579,8 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </form>
                   
                   <div className="mt-6 text-center">
-                    <p className="text-[13px] text-gray-500 font-medium">Didn't receive the SMS?</p>
-                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("OTP resent to +91 " + mobile + " 📱", toastStyle); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
+                    <p className="text-[13px] text-gray-500 font-medium">Didn't receive the email?</p>
+                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("OTP resent to " + signupEmail + " 📧", toastStyle); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
                       Resend OTP
                     </button>
                   </div>
