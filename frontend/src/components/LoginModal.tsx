@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, RefreshCw, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
+import toast from "react-hot-toast";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -142,6 +143,18 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   const passLength = signupPass.length;
   const passStrength = passLength === 0 ? 0 : passLength < 6 ? 1 : passLength < 8 ? 2 : 3;
 
+  const toastStyle = {
+    style: {
+      border: `1px solid ${isEssentials ? '#3b82f6' : '#f97316'}`,
+      padding: '16px',
+      color: isEssentials ? '#3b82f6' : '#f97316',
+      fontWeight: 'bold',
+      borderRadius: '12px',
+      background: '#fff',
+    },
+    iconTheme: { primary: isEssentials ? '#3b82f6' : '#f97316', secondary: '#FFFAEE' },
+  };
+
   async function handleSignupSendOtp(e: React.FormEvent) {
     e.preventDefault(); setError(""); 
     if (signupPass !== confirmPass) return setError("Passwords do not match");
@@ -151,8 +164,12 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     setLoading(true);
     try {
       await post("send-otp", { email: signupEmail, purpose: "signup" });
+      toast.success("OTP sent! Check your inbox 📧", toastStyle);
       reset("signup-otp");
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send OTP. Try again.");
+      setError(err.message);
+    }
     setLoading(false);
   }
 
@@ -176,8 +193,12 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     e.preventDefault(); setError(""); setLoading(true);
     try {
       await post("send-otp", { email: forgotEmail, purpose: "reset" });
+      toast.success("Reset code sent! Check your inbox 📧", toastStyle);
       reset("forgot-otp");
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to send reset code. Try again.");
+      setError(err.message);
+    }
     setLoading(false);
   }
 
@@ -186,6 +207,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     try {
       const data = await post("verify-otp", { email: forgotEmail, otp: otpValue, purpose: "reset" });
       setVerificationToken(data.verificationToken);
+      toast.success("Code verified! Set your new password ✅", toastStyle);
       reset("forgot-reset");
     } catch (err: any) { setError(err.message); }
     setLoading(false);
@@ -199,6 +221,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     setLoading(true);
     try {
       await post("reset-password", { verificationToken, newPassword: newPass });
+      toast.success("Password reset successfully! 🎉", toastStyle);
       setSuccessMsg("Password reset! Please log in with your new password.");
       reset("success");
     } catch (err: any) { setError(err.message); }
@@ -551,7 +574,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   
                   <div className="mt-6 text-center">
                     <p className="text-[13px] text-gray-500 font-medium">Didn't receive the code?</p>
-                    <button type="button" onClick={() => { setOtp(["","","","","",""]); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
+                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("OTP resent! Check your inbox 📧", toastStyle); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
                       Resend OTP
                     </button>
                   </div>
@@ -591,7 +614,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                     <BtnPrimary disabled={otpValue.length < 6}>Verify Code</BtnPrimary>
                   </form>
                   <div className="mt-6 text-center">
-                    <button type="button" onClick={() => { setOtp(["","","","","",""]); handleForgotSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2`}>
+                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("Reset code resent! 📧", toastStyle); handleForgotSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2`}>
                       Resend Code
                     </button>
                   </div>

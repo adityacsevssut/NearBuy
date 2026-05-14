@@ -39,7 +39,7 @@ function AccountContent() {
   if (!isLoggedIn) return null;
 
   return (
-    <div className={`min-h-screen bg-[#F8F9FA] pb-24 md:hidden font-sans ${theme.selection}`}>
+    <div className={`min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8F9FA] pb-24 md:hidden font-sans ${theme.selection}`}>
       
       {/* Dynamic Brand Header */}
       <div className={`bg-gradient-to-br ${theme.gradient} pt-6 pb-20 px-4 rounded-b-[40px] relative shadow-lg`}>

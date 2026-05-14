@@ -74,6 +74,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("nb_user");
     localStorage.removeItem("nb_access");
     localStorage.removeItem("nb_refresh");
+    toast("Logged out. See you soon! 👋", {
+      icon: "👋",
+      style: {
+        border: "1px solid #e5e7eb",
+        padding: "16px",
+        color: "#374151",
+        fontWeight: "bold",
+        borderRadius: "12px",
+        background: "#fff",
+      },
+    });
   };
 
   return (
