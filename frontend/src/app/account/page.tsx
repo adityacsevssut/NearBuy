@@ -3,14 +3,17 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense } from "react";
+import Link from "next/link";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { 
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, 
   MapPin, Calendar, Clock, Mail, MessageCircle, 
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle
+  ChevronRight, AlertTriangle, Code2
 } from "lucide-react";
 import toast from "react-hot-toast";
+
+const DEV_EMAIL = "nahakaditya344@gmail.com";
 
 function AccountContent() {
   const { user, accessToken, logout, isLoggedIn } = useAuth();
@@ -182,6 +185,30 @@ function AccountContent() {
             <ModernRow icon={Globe} label="App Language" theme={theme} />
           </div>
         </div>
+
+        {/* Developer Section — only visible to dev */}
+        {user?.email === DEV_EMAIL && (
+          <div className="space-y-3">
+            <h3 className="text-xs font-black text-violet-400 uppercase tracking-widest px-2">⚡ Developer</h3>
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-violet-100 overflow-hidden py-1">
+              <Link
+                href="/dev"
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-violet-100/50 transition-colors group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+                    <Code2 className="w-4 h-4 text-violet-600" />
+                  </div>
+                  <div>
+                    <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Dev Dashboard</span>
+                    <p className="text-[11px] text-violet-400 font-medium">Manage managers & platform</p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-violet-300 group-hover:translate-x-0.5 transition-all" />
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Danger Zone */}
         <div className={`bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden mt-6`}>

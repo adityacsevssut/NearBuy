@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
   avatar_url    TEXT,
   is_verified   BOOLEAN NOT NULL DEFAULT FALSE,
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
-  role          TEXT NOT NULL DEFAULT 'user',  -- 'user' | 'vendor' | 'admin'
+  role          TEXT NOT NULL DEFAULT 'user',  -- 'user' | 'vendor' | 'manager' | 'admin'
+  manager_type  TEXT,                          -- 'food' | 'medicine' | 'store' (only for managers)
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

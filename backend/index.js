@@ -5,6 +5,7 @@ const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 
 const authRouter = require("./routes/auth");
+const managerRouter = require("./routes/manager");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -65,6 +66,7 @@ app.use("/api/auth", authLimiter);
 // ── Routes ────────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ status: "NearBuy API is running 🚀" }));
 app.use("/api/auth", authRouter);
+app.use("/api/managers", managerRouter);
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));

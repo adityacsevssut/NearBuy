@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
-type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "forgot-email" | "forgot-otp" | "forgot-reset" | "success";
+type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "forgot-email" | "forgot-otp" | "forgot-reset" | "success" | "vendor-login" | "manager-login";
 
 interface Props { isOpen: boolean; onClose: () => void; isEssentials?: boolean; }
 
@@ -82,6 +82,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   // Fields
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPass, setLoginPass] = useState("");
+  const [loginType, setLoginType] = useState<"food" | "medicine" | "store" | "">("");
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -137,6 +138,28 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
       const data = await post("login", { email: loginEmail, password: loginPass });
       login(data.user, data.accessToken, data.refreshToken);
       onClose();
+    } catch (err: any) { setError(err.message); }
+    setLoading(false);
+  }
+
+  async function handleVendorLogin(e: React.FormEvent) {
+    e.preventDefault(); setError(""); setLoading(true);
+    if (!loginType) { setError("Please select an Account Type."); setLoading(false); return; }
+    try {
+      const data = await post("vendor-login", { email: loginEmail, password: loginPass, type: loginType });
+      login(data.user, data.accessToken, data.refreshToken);
+      window.location.href = "/vendor";
+    } catch (err: any) { setError(err.message); }
+    setLoading(false);
+  }
+
+  async function handleManagerLogin(e: React.FormEvent) {
+    e.preventDefault(); setError(""); setLoading(true);
+    if (!loginType) { setError("Please select an Account Type."); setLoading(false); return; }
+    try {
+      const data = await post("manager-login", { email: loginEmail, password: loginPass, type: loginType });
+      login(data.user, data.accessToken, data.refreshToken);
+      window.location.href = "/manager";
     } catch (err: any) { setError(err.message); }
     setLoading(false);
   }
@@ -393,34 +416,34 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                     <ArrowLeft className="w-4 h-4 text-gray-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
                   </button>
 
-                  {/* Partner Login */}
+                  {/* Vendor Login */}
                   <button
-                    onClick={() => {}}
+                    onClick={() => reset("vendor-login")}
                     className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group text-left"
                   >
                     <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
                       <Phone className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-800 text-[15px]">Partner Login</p>
+                      <p className="font-bold text-gray-800 text-[15px]">Vendor Login</p>
                       <p className="text-xs text-gray-400 font-medium mt-0.5">Manage your store &amp; orders</p>
                     </div>
-                    <span className="ml-auto text-[10px] font-black text-emerald-500 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">Soon</span>
+                    <ArrowLeft className="w-4 h-4 text-emerald-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
                   </button>
 
-                  {/* Developer Login */}
+                  {/* Manager Login */}
                   <button
-                    onClick={() => {}}
+                    onClick={() => reset("manager-login")}
                     className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-violet-400 hover:bg-violet-50 transition-all duration-200 group text-left"
                   >
                     <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center shrink-0">
                       <Lock className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold text-gray-800 text-[15px]">Developer Login</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">API keys &amp; integrations</p>
+                      <p className="font-bold text-gray-800 text-[15px]">Manager Login</p>
+                      <p className="text-xs text-gray-400 font-medium mt-0.5">Admin panel access</p>
                     </div>
-                    <span className="ml-auto text-[10px] font-black text-violet-500 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full">Soon</span>
+                    <ArrowLeft className="w-4 h-4 text-violet-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </>
@@ -648,6 +671,96 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                     />
                     <div className="pt-2">
                       <BtnPrimary>Reset Password</BtnPrimary>
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+
+            {/* ── VENDOR LOGIN ── */}
+            {flow === "vendor-login" && (
+              <>
+                <ModalHeader title="Vendor Login" back="choose" />
+                <div className="p-6 sm:p-8 relative z-10 overflow-y-auto no-scrollbar">
+                  <ErrorBanner />
+                  <form onSubmit={handleVendorLogin} className="space-y-4">
+                    <FloatingInput theme={t} icon={Mail} type="email" id="vendor-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required />
+                    
+                    <div className="space-y-1.5">
+                      <FloatingInput theme={t}
+                        icon={Lock} type={showPass ? "text" : "password"} id="vendor-pass" label="Password" 
+                        value={loginPass} onChange={(e:any) => setLoginPass(e.target.value)} required minLength={8}
+                        showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-black text-gray-700 ml-1">Account Type</label>
+                      <div className="flex bg-gray-100/50 p-1 rounded-2xl border border-gray-200">
+                        {["food", "medicine", "store"].map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setLoginType(type as any)}
+                            className={`flex-1 py-2.5 text-[13px] font-bold rounded-xl capitalize transition-all ${
+                              loginType === type 
+                                ? "bg-white shadow-sm text-gray-900 border border-gray-200/50" 
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <BtnPrimary>Log In as Vendor</BtnPrimary>
+                    </div>
+                  </form>
+                </div>
+              </>
+            )}
+
+            {/* ── MANAGER LOGIN ── */}
+            {flow === "manager-login" && (
+              <>
+                <ModalHeader title="Manager Login" back="choose" />
+                <div className="p-6 sm:p-8 relative z-10 overflow-y-auto no-scrollbar">
+                  <ErrorBanner />
+                  <form onSubmit={handleManagerLogin} className="space-y-4">
+                    <FloatingInput theme={t} icon={Mail} type="email" id="manager-email" label="Email address" value={loginEmail} onChange={(e:any) => setLoginEmail(e.target.value)} required />
+                    
+                    <div className="space-y-1.5">
+                      <FloatingInput theme={t}
+                        icon={Lock} type={showPass ? "text" : "password"} id="manager-pass" label="Password" 
+                        value={loginPass} onChange={(e:any) => setLoginPass(e.target.value)} required minLength={8}
+                        showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[13px] font-black text-gray-700 ml-1">Account Type</label>
+                      <div className="flex bg-gray-100/50 p-1 rounded-2xl border border-gray-200">
+                        {["food", "medicine", "store"].map((type) => (
+                          <button
+                            key={type}
+                            type="button"
+                            onClick={() => setLoginType(type as any)}
+                            className={`flex-1 py-2.5 text-[13px] font-bold rounded-xl capitalize transition-all ${
+                              loginType === type 
+                                ? "bg-white shadow-sm text-gray-900 border border-gray-200/50" 
+                                : "text-gray-500 hover:text-gray-700"
+                            }`}
+                          >
+                            {type}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div className="pt-2">
+                      <BtnPrimary>Log In as Manager</BtnPrimary>
                     </div>
                   </form>
                 </div>

@@ -10,6 +10,7 @@ interface AuthUser {
   mobile?: string;
   avatar?: string;
   role: string;
+  manager_type?: string;
 }
 
 interface AuthContextType {

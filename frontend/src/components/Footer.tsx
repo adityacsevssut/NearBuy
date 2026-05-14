@@ -20,18 +20,18 @@ export default function Footer() {
 
         {/* CTA Banner */}
         <div className="grid sm:grid-cols-2 gap-4 mb-16">
-          {/* Runner CTA */}
+          {/* Runner CTA -> Student Business CTA */}
           <div className={`p-6 rounded-2xl bg-gray-800 border border-gray-700 ${borderHover} transition-colors`}>
             <p className="text-lg font-black text-white mb-1 tracking-tight">
-              Become a Student Runner 🏃
+              Start Your Business as a Student 🚀
             </p>
             <p className="text-sm text-gray-400 mb-4">
-              Earn ₹200–₹500/day delivering on campus. Flexible hours, zero commitment.
+              Turn your skills into income. Register as a student partner and start selling on campus.
             </p>
             <button
               className={`${btnClass} px-5 py-2.5 rounded-xl text-white font-bold text-sm`}
             >
-              Apply Now →
+              Register as Student →
             </button>
           </div>
 

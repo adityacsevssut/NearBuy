@@ -2,11 +2,17 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, UserCircle } from "lucide-react";
+import { 
+  MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, Code2,
+  CreditCard, Bell, Heart, ShoppingBag, Calendar, Clock, Mail, MessageCircle, 
+  QrCode, Globe, Percent, Star, Users, Trash2, Pencil, ChevronRight
+} from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
+
+const DEV_EMAIL = "nahakaditya344@gmail.com";
 
 export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
@@ -34,12 +40,23 @@ export default function Navbar() {
 
   const isEssentials = pathname === "/essentials";
   
-  const primaryText = isEssentials ? "text-blue-500" : "text-orange-500";
-  const primaryHoverText = isEssentials ? "group-hover:text-blue-400" : "group-hover:text-orange-400";
+  const theme = {
+    gradient: isEssentials ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
+    textPrimary: isEssentials ? "text-blue-500" : "text-orange-500",
+    avatarBg: isEssentials ? "from-blue-100 to-blue-50" : "from-orange-100 to-orange-50",
+    selection: isEssentials ? "selection:bg-blue-200" : "selection:bg-orange-200",
+    hoverBg: isEssentials ? "group-hover:bg-blue-50" : "group-hover:bg-orange-50",
+    hoverText: isEssentials ? "group-hover:text-blue-500" : "group-hover:text-orange-500",
+    dangerBorder: isEssentials ? "border-blue-50" : "border-red-50",
+    dangerText: isEssentials ? "text-blue-500" : "text-red-500",
+    dangerHoverBg: isEssentials ? "hover:bg-blue-50/50" : "hover:bg-red-50/50",
+  };
+
+  const primaryText = theme.textPrimary;
+  const primaryHoverText = theme.hoverText;
   const primaryBorder = isEssentials ? "border-blue-400" : "border-orange-400";
   const primaryBorderHover = isEssentials ? "hover:border-blue-400" : "hover:border-orange-400";
   const primaryBg = isEssentials ? "bg-blue-500" : "bg-orange-500";
-  const btnClass = isEssentials ? "btn-blue" : "btn-orange";
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -195,27 +212,121 @@ export default function Navbar() {
                   {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
                 </div>
                 <span className="hidden sm:block text-sm font-semibold text-gray-700">{user?.firstName || user?.email?.split('@')[0]}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
               </button>
+
               <AnimatePresence>
                 {userMenuOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: -6, scale: 0.97 }}
+                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -6, scale: 0.97 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 bg-white rounded-2xl shadow-xl border border-gray-100 w-52 py-2 z-50"
+                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute right-0 top-full mt-2 bg-[#F8F9FA] rounded-[32px] shadow-[0_16px_60px_rgba(0,0,0,0.1)] border border-gray-100 w-[340px] z-50 overflow-hidden max-h-[85vh] overflow-y-auto custom-scrollbar"
                   >
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50 rounded-t-2xl">
-                      <p className="text-sm font-bold text-gray-800">{user?.firstName || "User"} {user?.lastName || ""}</p>
-                      <p className="text-xs text-gray-400 truncate mt-0.5">{user?.email}</p>
+                    {/* Header bg matches mobile */}
+                    <div className={`bg-gradient-to-br ${theme.gradient} pt-5 pb-16 px-4 relative`}>
+                      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-40 h-40 rounded-full border-[20px] border-white/10"></div>
+                      <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-28 h-28 rounded-full border-[12px] border-white/10"></div>
                     </div>
-                    <button
-                      onClick={() => { logout(); setUserMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" /> Log Out
-                    </button>
+
+                    <div className="px-4 space-y-5 -mt-12 relative z-20 pb-5">
+                      {/* Floating Profile Card */}
+                      <div className="bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50/50">
+                        <div className="relative">
+                          <div className={`w-14 h-14 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white shadow-sm rotate-3`}>
+                            <span className={`text-xl font-black ${theme.textPrimary} -rotate-3`}>
+                              {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
+                            </span>
+                          </div>
+                          <button className="absolute -bottom-2 -right-2 bg-gray-800 p-1 rounded-full border-2 border-white text-white hover:bg-black transition-colors">
+                            <Pencil className="w-2.5 h-2.5" />
+                          </button>
+                        </div>
+                        
+                        <div className="ml-4 flex-1 min-w-0">
+                          <h2 className="text-[17px] font-black text-gray-800 tracking-tight leading-tight truncate">
+                            {user?.firstName || "NearBuy"} {user?.lastName || "User"}
+                          </h2>
+                          <p className="text-[12px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
+                        </div>
+                      </div>
+
+                      {/* Action Pills */}
+                      <div className="flex gap-2 justify-between">
+                        <ActionPill icon={CreditCard} label="Wallet" color="text-blue-500" bg="bg-blue-50" />
+                        <ActionPill icon={Bell} label="Alerts" color="text-purple-500" bg="bg-purple-50" />
+                        <ActionPill icon={Heart} label="Saved" color="text-rose-500" bg="bg-rose-50" />
+                      </div>
+
+                      {/* Section: Activity */}
+                      <div className="space-y-2">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">My Activity</h3>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+                          <ModernRow icon={ShoppingBag} label="Purchase History" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={MapPin} label="Saved Addresses" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Calendar} label="Active Subscriptions" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Clock} label="Buy Again" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                        </div>
+                      </div>
+
+                      {/* Section: Help Center */}
+                      <div className="space-y-2">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Help Center</h3>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+                          <ModernRow icon={Mail} label="Contact Support" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={MessageCircle} label="Chat on WhatsApp" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                        </div>
+                      </div>
+
+                      {/* Section: Settings */}
+                      <div className="space-y-2">
+                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Preferences & More</h3>
+                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+                          <ModernRow icon={QrCode} label="My QR Code" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Percent} label="Exclusive Offers" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Users} label="Invite Friends" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Star} label="Rate NearBuy" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                          <ModernRow icon={Globe} label="App Language" theme={theme} onClick={() => setUserMenuOpen(false)} />
+                        </div>
+                      </div>
+
+                      {/* Developer Section */}
+                      {user?.email === DEV_EMAIL && (
+                        <div className="space-y-2">
+                          <h3 className="text-[10px] font-black text-violet-400 uppercase tracking-widest px-2">⚡ Developer</h3>
+                          <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-violet-100 overflow-hidden py-1">
+                            <Link
+                              href="/dev"
+                              onClick={() => setUserMenuOpen(false)}
+                              className="w-full flex items-center justify-between px-4 py-3 hover:bg-violet-100/50 transition-colors group"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
+                                  <Code2 className="w-4 h-4 text-violet-600" />
+                                </div>
+                                <div>
+                                  <span className="text-[13.5px] font-bold text-gray-700 group-hover:text-gray-900 block leading-tight">Dev Dashboard</span>
+                                  <span className="text-[10px] text-violet-400 font-medium leading-tight">Manage managers & platform</span>
+                                </div>
+                              </div>
+                              <ChevronRight className="w-4 h-4 text-violet-300 group-hover:translate-x-0.5 transition-all" />
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Danger Zone */}
+                      <div className={`bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden`}>
+                        <button 
+                          onClick={() => { logout(); setUserMenuOpen(false); }}
+                          className={`w-full flex items-center justify-center gap-2 px-4 py-3 ${theme.dangerText} font-bold ${theme.dangerHoverBg} transition-colors`}
+                        >
+                          <LogOut className="w-4 h-4" /> Log Out
+                        </button>
+                      </div>
+
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -233,5 +344,31 @@ export default function Navbar() {
       </div>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
     </nav>
+  );
+}
+
+// Subcomponents matching the mobile Account Page style
+function ActionPill({ icon: Icon, label, color, bg }: { icon: any, label: string, color: string, bg: string }) {
+  return (
+    <button className="flex-1 bg-white py-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 transition-transform active:scale-95">
+      <div className={`p-2 rounded-xl ${bg}`}>
+        <Icon className={`w-4 h-4 ${color}`} />
+      </div>
+      <span className="text-[10px] font-bold text-gray-600">{label}</span>
+    </button>
+  );
+}
+
+function ModernRow({ icon: Icon, label, onClick, theme }: { icon: any, label: string, onClick?: () => void, theme: any }) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50/80 transition-colors group">
+      <div className="flex items-center gap-3">
+        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+          <Icon className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+        </div>
+        <span className="text-[13.5px] font-bold text-gray-700 group-hover:text-gray-900">{label}</span>
+      </div>
+      <ChevronRight className={`w-3.5 h-3.5 text-gray-300 ${theme.hoverText} group-hover:translate-x-0.5 transition-all`} />
+    </button>
   );
 }

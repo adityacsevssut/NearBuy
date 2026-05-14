@@ -315,6 +315,89 @@ router.post(
 );
 
 // ════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/vendor-login
+// Email + password login for Vendors
+// ════════════════════════════════════════════════════════════════════════════
+router.post(
+  "/vendor-login",
+  [body("email").isEmail().normalizeEmail(), body("password").notEmpty(), body("type").notEmpty()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { email, password, type } = req.body;
+    try {
+      const { rows } = await pool.query("SELECT * FROM users WHERE email=$1 AND is_active=TRUE", [email]);
+      if (!rows.length) return res.status(401).json({ error: "Invalid email or password." });
+
+      const user = rows[0];
+      if (user.role !== 'vendor') {
+        return res.status(403).json({ error: "Access denied. Not a vendor account." });
+      }
+
+      // Check type if it is set in DB (some vendors might not have manager_type set yet)
+      if (user.manager_type && user.manager_type.toLowerCase() !== type.toLowerCase()) {
+        return res.status(403).json({ error: `Access denied. Not a ${type} vendor.` });
+      }
+
+      if (!user.password_hash) {
+        return res.status(400).json({ error: "This account uses Google Sign-In. Please log in with Google." });
+      }
+
+      const valid = await bcrypt.compare(password, user.password_hash);
+      if (!valid) return res.status(401).json({ error: "Invalid email or password." });
+
+      const { accessToken, refreshToken } = await issueTokens(user);
+      return res.json({ user: safeUser(user), accessToken, refreshToken });
+    } catch (err) {
+      console.error("vendor login error:", err);
+      return res.status(500).json({ error: "Login failed. Please try again." });
+    }
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/manager-login
+// Email + password login for Managers
+// ════════════════════════════════════════════════════════════════════════════
+router.post(
+  "/manager-login",
+  [body("email").isEmail().normalizeEmail(), body("password").notEmpty(), body("type").notEmpty()],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { email, password, type } = req.body;
+    try {
+      const { rows } = await pool.query("SELECT * FROM users WHERE email=$1 AND is_active=TRUE", [email]);
+      if (!rows.length) return res.status(401).json({ error: "Invalid email or password." });
+
+      const user = rows[0];
+      if (user.role !== 'admin' && user.role !== 'manager') {
+        return res.status(403).json({ error: "Access denied. Not a manager account." });
+      }
+
+      if (user.manager_type && user.manager_type.toLowerCase() !== type.toLowerCase()) {
+        return res.status(403).json({ error: `Access denied. Account is not assigned to the ${type} division.` });
+      }
+
+      if (!user.password_hash) {
+        return res.status(400).json({ error: "This account uses Google Sign-In. Please log in with Google." });
+      }
+
+      const valid = await bcrypt.compare(password, user.password_hash);
+      if (!valid) return res.status(401).json({ error: "Invalid email or password." });
+
+      const { accessToken, refreshToken } = await issueTokens(user);
+      return res.json({ user: safeUser(user), accessToken, refreshToken });
+    } catch (err) {
+      console.error("manager login error:", err);
+      return res.status(500).json({ error: "Login failed. Please try again." });
+    }
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════════════
 // POST /api/auth/google
 // Google OAuth — login or auto-signup
 // ════════════════════════════════════════════════════════════════════════════
