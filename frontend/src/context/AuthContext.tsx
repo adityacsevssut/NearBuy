@@ -44,6 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("nb_access",  token);
     localStorage.setItem("nb_refresh", refresh);
     toast.success("Welcome to NearBuy!", {
+      duration: 3000,
       style: {
         border: '1px solid #f97316',
         padding: '16px',
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("nb_refresh");
     toast("Logged out. See you soon! 👋", {
       icon: "👋",
+      duration: 3000,
       style: {
         border: "1px solid #e5e7eb",
         padding: "16px",

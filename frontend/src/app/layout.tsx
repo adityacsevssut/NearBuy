@@ -32,7 +32,16 @@ export default function RootLayout({
       <body className="antialiased">
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
-            <Toaster position="top-center" reverseOrder={false} />
+            <Toaster 
+              position="top-center" 
+              reverseOrder={false} 
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  transition: 'all 0.3s ease-out'
+                }
+              }}
+            />
             {children}
           </AuthProvider>
         </GoogleOAuthProvider>
