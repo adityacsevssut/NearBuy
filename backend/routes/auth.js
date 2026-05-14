@@ -7,6 +7,7 @@ const { body, validationResult } = require("express-validator");
 
 const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
+const { sendOtpSms } = require("../config/sms");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 
 // Comma-separated list allowed (e.g. web + staging). Must include the same client id as
@@ -63,69 +64,91 @@ function safeUser(u) {
 
 // ════════════════════════════════════════════════════════════════════════════
 // POST /api/auth/send-otp
-// Sends OTP to email — used for both signup verification and password reset
+// signup → sends SMS OTP to mobile
+// reset  → sends email OTP to email (unchanged)
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/send-otp",
-  [
-    body("email").isEmail().normalizeEmail(),
-    body("purpose").isIn(["signup", "reset"]),
-  ],
+  [body("purpose").isIn(["signup", "reset"])],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-    const { email, purpose } = req.body;
+    const { email, mobile, purpose } = req.body;
+
     try {
-      // For reset OTP, user must exist
+      // ── SIGNUP: OTP via SMS to mobile ──────────────────────────────────
+      if (purpose === "signup") {
+        if (!email || !mobile) return res.status(400).json({ error: "Email and mobile number are required." });
+        if (!/^[0-9]{10}$/.test(mobile)) return res.status(400).json({ error: "Enter a valid 10-digit mobile number." });
+
+        // Email must not already exist
+        const emailCheck = await pool.query("SELECT id FROM users WHERE email=$1", [email]);
+        if (emailCheck.rows.length) return res.status(409).json({ error: "An account with this email already exists. Please log in." });
+
+        // Mobile must not already exist
+        const mobileCheck = await pool.query("SELECT id FROM users WHERE mobile=$1", [mobile]);
+        if (mobileCheck.rows.length) return res.status(409).json({ error: "An account with this mobile number already exists." });
+
+        const otp = generateOtp();
+        const otpHash = await hashValue(otp);
+
+        // Invalidate old OTPs for this mobile + purpose
+        await pool.query("UPDATE otps SET used=TRUE WHERE identifier=$1 AND purpose=$2 AND used=FALSE", [mobile, purpose]);
+        await pool.query("INSERT INTO otps (identifier, otp_hash, purpose) VALUES ($1, $2, $3)", [mobile, otpHash, purpose]);
+
+        await sendOtpSms(mobile, otp);
+        return res.json({ message: "OTP sent to your mobile number." });
+      }
+
+      // ── RESET: OTP via email (unchanged) ───────────────────────────────
       if (purpose === "reset") {
+        if (!email) return res.status(400).json({ error: "Email is required." });
+
         const { rows } = await pool.query("SELECT id FROM users WHERE email=$1 AND is_active=TRUE", [email]);
         if (!rows.length) return res.status(404).json({ error: "No account found with this email." });
+
+        const otp = generateOtp();
+        const otpHash = await hashValue(otp);
+
+        await pool.query("UPDATE otps SET used=TRUE WHERE identifier=$1 AND purpose=$2 AND used=FALSE", [email, purpose]);
+        await pool.query("INSERT INTO otps (identifier, otp_hash, purpose) VALUES ($1, $2, $3)", [email, otpHash, purpose]);
+
+        await sendOtpEmail(email, otp, "reset");
+        return res.json({ message: "OTP sent to your email." });
       }
-      // For signup OTP, email must NOT exist
-      if (purpose === "signup") {
-        const { rows } = await pool.query("SELECT id FROM users WHERE email=$1", [email]);
-        if (rows.length) return res.status(409).json({ error: "An account with this email already exists. Please log in." });
-      }
-
-      const otp = generateOtp();
-      const otpHash = await hashValue(otp);
-
-      // Invalidate old OTPs for this identifier + purpose
-      await pool.query("UPDATE otps SET used=TRUE WHERE identifier=$1 AND purpose=$2 AND used=FALSE", [email, purpose]);
-
-      // Insert new OTP
-      await pool.query(
-        "INSERT INTO otps (identifier, otp_hash, purpose) VALUES ($1, $2, $3)",
-        [email, otpHash, purpose]
-      );
-
-      await sendOtpEmail(email, otp, purpose === "reset" ? "reset" : "verify");
-
-      return res.json({ message: "OTP sent to your email." });
     } catch (err) {
       console.error("send-otp error:", err);
-      return res.status(500).json({ error: "Failed to send OTP. Try again." });
+      return res.status(500).json({ error: "Failed to send OTP. " + (err.message || "Try again.") });
     }
   }
 );
 
 // ════════════════════════════════════════════════════════════════════════════
 // POST /api/auth/verify-otp
-// Verifies OTP without consuming it — returns a short-lived verification token
+// signup → looks up OTP by mobile
+// reset  → looks up OTP by email
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/verify-otp",
-  [body("email").isEmail().normalizeEmail(), body("otp").isLength({ min: 6, max: 6 }), body("purpose").isIn(["signup", "reset"])],
+  [
+    body("otp").isLength({ min: 6, max: 6 }),
+    body("purpose").isIn(["signup", "reset"]),
+  ],
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-    const { email, otp, purpose } = req.body;
+    const { email, mobile, otp, purpose } = req.body;
+
+    // For signup: look up by mobile. For reset: look up by email.
+    const identifier = purpose === "signup" ? mobile : email;
+    if (!identifier) return res.status(400).json({ error: purpose === "signup" ? "Mobile number required." : "Email required." });
+
     try {
       const { rows } = await pool.query(
         "SELECT * FROM otps WHERE identifier=$1 AND purpose=$2 AND used=FALSE AND expires_at > NOW() ORDER BY created_at DESC LIMIT 1",
-        [email, purpose]
+        [identifier, purpose]
       );
       if (!rows.length) return res.status(400).json({ error: "OTP expired or invalid. Please request a new one." });
 
@@ -135,9 +158,12 @@ router.post(
       // Mark OTP as used
       await pool.query("UPDATE otps SET used=TRUE WHERE id=$1", [rows[0].id]);
 
-      // Issue a short-lived verification token so next step is secure
-      const verificationToken = signAccessToken({ email, purpose, verified: true });
+      // Token payload includes email (for account creation) and mobile (for verification)
+      const tokenPayload = purpose === "signup"
+        ? { email, mobile, purpose, verified: true }
+        : { email: identifier, purpose, verified: true };
 
+      const verificationToken = signAccessToken(tokenPayload);
       return res.json({ verified: true, verificationToken });
     } catch (err) {
       console.error("verify-otp error:", err);

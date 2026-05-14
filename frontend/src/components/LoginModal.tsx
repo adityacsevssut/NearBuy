@@ -159,12 +159,12 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     e.preventDefault(); setError(""); 
     if (signupPass !== confirmPass) return setError("Passwords do not match");
     if (signupPass.length < 8) return setError("Password must be at least 8 characters");
-    if (mobile && !/^[0-9]{10}$/.test(mobile)) return setError("Please enter a valid 10-digit mobile number");
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) return setError("Please enter a valid 10-digit mobile number");
 
     setLoading(true);
     try {
-      await post("send-otp", { email: signupEmail, purpose: "signup" });
-      toast.success("OTP sent! Check your inbox 📧", toastStyle);
+      await post("send-otp", { email: signupEmail, mobile, purpose: "signup" });
+      toast.success("OTP sent to +91 " + mobile + " 📱", toastStyle);
       reset("signup-otp");
     } catch (err: any) {
       toast.error(err.message || "Failed to send OTP. Try again.");
@@ -176,7 +176,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   async function handleSignupVerifyOtp(e: React.FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
     try {
-      const data = await post("verify-otp", { email: signupEmail, otp: otpValue, purpose: "signup" });
+      const data = await post("verify-otp", { email: signupEmail, mobile, otp: otpValue, purpose: "signup" });
       setVerificationToken(data.verificationToken);
       const result = await post("signup", {
         verificationToken: data.verificationToken,
@@ -502,7 +502,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                       </div>
                     </div>
                     
-                    <FloatingInput theme={t} icon={Phone} type="tel" id="su-mobile" label="Mobile (Optional)" value={mobile} onChange={(e:any) => setMobile(e.target.value)} pattern="[0-9]{10}" />
+                    <FloatingInput theme={t} icon={Phone} type="tel" id="su-mobile" label="Mobile Number" value={mobile} onChange={(e:any) => setMobile(e.target.value)} pattern="[0-9]{10}" required />
                     <FloatingInput theme={t} icon={Mail} type="email" id="su-email" label="Email address" value={signupEmail} onChange={(e:any) => setSignupEmail(e.target.value)} required />
                     
                     <div className="space-y-2">
@@ -558,11 +558,11 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                 <div className="p-6 sm:p-8 overflow-y-auto no-scrollbar relative z-10">
                   <div className="text-center mb-6">
                     <div className={`w-16 h-16 ${t.panelIcon} rounded-full flex items-center justify-center mx-auto mb-4`}>
-                      <Mail className="w-8 h-8" />
+                      <Phone className="w-8 h-8" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-1">Check your inbox</h3>
+                    <h3 className="text-lg font-bold text-gray-900 mb-1">Check your SMS</h3>
                     <p className="text-[13px] text-gray-500 font-medium">We've sent a 6-digit code to</p>
-                    <p className="text-sm font-black text-gray-800">{signupEmail}</p>
+                    <p className="text-sm font-black text-gray-800">+91 {mobile}</p>
                   </div>
                   
                   <ErrorBanner />
@@ -573,8 +573,8 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   </form>
                   
                   <div className="mt-6 text-center">
-                    <p className="text-[13px] text-gray-500 font-medium">Didn't receive the code?</p>
-                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("OTP resent! Check your inbox 📧", toastStyle); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
+                    <p className="text-[13px] text-gray-500 font-medium">Didn't receive the SMS?</p>
+                    <button type="button" onClick={() => { setOtp(["","","","","",""]); toast.success("OTP resent to +91 " + mobile + " 📱", toastStyle); handleSignupSendOtp({ preventDefault: () => {} } as any); }} className={`text-sm ${t.linkText} font-bold hover:underline underline-offset-2 mt-1`}>
                       Resend OTP
                     </button>
                   </div>
