@@ -15,8 +15,9 @@ async function sendOtpSms(mobile, otp) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      route: "otp",
-      variables_values: otp,
+      route: "q",
+      message: `Your NearBuy login OTP is ${otp}. Valid for 10 minutes.`,
+      language: "english",
       flash: 0,
       numbers: mobile,
     }),
