@@ -471,4 +471,33 @@ router.post("/logout", async (req, res) => {
   return res.json({ message: "Logged out." });
 });
 
+// ════════════════════════════════════════════════════════════════════════════
+// DELETE /api/auth/me
+// Delete current user account and all associated data
+// ════════════════════════════════════════════════════════════════════════════
+const { authenticate } = require("../middleware/auth");
+
+router.delete("/me", authenticate, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Because of ON DELETE CASCADE in the database schema, 
+    // deleting the user will automatically delete their refresh_tokens.
+    // Assuming other tables (orders, wishlists, etc.) are also set up with
+    // ON DELETE CASCADE referencing the users table, they will be deleted too.
+    
+    // Perform the deletion
+    const result = await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [userId]);
+    
+    if (result.rowCount === 0) {
+      return res.status(404).json({ error: "User not found or already deleted." });
+    }
+
+    return res.json({ message: "Account successfully deleted." });
+  } catch (err) {
+    console.error("Delete account error:", err);
+    return res.status(500).json({ error: "Failed to delete account. Please try again later." });
+  }
+});
+
 module.exports = router;

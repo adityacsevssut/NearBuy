@@ -8,11 +8,12 @@ import {
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, 
   MapPin, Calendar, Clock, Mail, MessageCircle, 
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight
+  ChevronRight, AlertTriangle
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function AccountContent() {
-  const { user, logout, isLoggedIn } = useAuth();
+  const { user, accessToken, logout, isLoggedIn } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isBlue = searchParams.get('theme') === 'blue';
@@ -35,6 +36,70 @@ function AccountContent() {
     }, 100);
     return () => clearTimeout(timer);
   }, [isLoggedIn, router]);
+
+  const handleDeleteAccount = () => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 rounded-full shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 text-[15px]">Delete Account?</h3>
+            <p className="text-sm text-gray-500 font-medium leading-tight mt-0.5">
+              This action is permanent. All your data, orders, and saved items will be deleted immediately.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              const toastId = toast.loading("Deleting account...");
+              try {
+                const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                const res = await fetch(`${apiBase}/api/auth/me`, {
+                  method: "DELETE",
+                  headers: {
+                    "Authorization": `Bearer ${accessToken}`
+                  }
+                });
+                
+                if (res.ok) {
+                  toast.success("Account permanently deleted.", { id: toastId });
+                  logout();
+                  router.push("/");
+                } else {
+                  const data = await res.json();
+                  toast.error(data.error || "Failed to delete account.", { id: toastId });
+                }
+              } catch (err) {
+                toast.error("An error occurred. Please try again.", { id: toastId });
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid #fee2e2",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "#fff",
+        maxWidth: "340px"
+      },
+    });
+  };
 
   if (!isLoggedIn) return null;
 
@@ -129,7 +194,11 @@ function AccountContent() {
         </div>
 
         <div className="flex justify-center pb-6">
-          <button className="text-xs font-bold text-gray-400 hover:text-red-400 transition-colors underline underline-offset-2">
+          <button 
+            onClick={handleDeleteAccount}
+            className="text-xs font-bold text-gray-400 hover:text-red-400 transition-colors underline underline-offset-2 flex items-center gap-1.5"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
             Delete My Account
           </button>
         </div>
