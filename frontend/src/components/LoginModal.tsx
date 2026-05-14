@@ -5,6 +5,8 @@ import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, Refres
 import { useAuth } from "@/context/AuthContext";
 import { useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
+import { auth } from "@/utils/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -77,6 +79,7 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [verificationToken, setVerificationToken] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
   // Fields
   const [loginEmail, setLoginEmail] = useState("");
@@ -163,10 +166,23 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
 
     setLoading(true);
     try {
-      await post("send-otp", { email: signupEmail, mobile, purpose: "signup" });
-      toast.success("OTP sent to +91 " + mobile + " 📱", toastStyle);
+      // Initialize reCAPTCHA if not already done
+      if (!(window as any).recaptchaVerifier) {
+        (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+        });
+      }
+      
+      const appVerifier = (window as any).recaptchaVerifier;
+      const formattedMobile = "+91" + mobile;
+      
+      const confirmation = await signInWithPhoneNumber(auth, formattedMobile, appVerifier);
+      setConfirmationResult(confirmation);
+      
+      toast.success("OTP sent via Firebase to " + formattedMobile + " 📱", toastStyle);
       reset("signup-otp");
     } catch (err: any) {
+      console.error(err);
       toast.error(err.message || "Failed to send OTP. Try again.");
       setError(err.message);
     }
@@ -176,16 +192,22 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
   async function handleSignupVerifyOtp(e: React.FormEvent) {
     e.preventDefault(); setError(""); setLoading(true);
     try {
-      const data = await post("verify-otp", { email: signupEmail, mobile, otp: otpValue, purpose: "signup" });
-      setVerificationToken(data.verificationToken);
-      const result = await post("signup", {
-        verificationToken: data.verificationToken,
-        firstName, lastName, mobile, password: signupPass,
+      if (!confirmationResult) throw new Error("Please request OTP first.");
+      
+      // Verify OTP with Firebase directly on frontend
+      await confirmationResult.confirm(otpValue);
+      
+      // If success, tell our backend to create the user
+      const result = await post("signup-firebase", {
+        firstName, lastName, mobile, email: signupEmail, password: signupPass,
       });
+      
       login(result.user, result.accessToken, result.refreshToken);
       setSuccessMsg(`Welcome to NearBuy, ${result.user.firstName}! 🎉`);
       reset("success");
-    } catch (err: any) { setError(err.message); }
+    } catch (err: any) { 
+      setError(err.message || "Invalid OTP code."); 
+    }
     setLoading(false);
   }
 
@@ -531,6 +553,9 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                       value={confirmPass} onChange={(e:any) => setConfirmPass(e.target.value)} required minLength={8}
                       showEye onEyeClick={() => setShowConfirm(!showConfirm)} isEyeOpen={showConfirm} 
                     />
+                    
+                    {/* Firebase ReCaptcha Container (invisible) */}
+                    <div id="recaptcha-container"></div>
                     
                     <div className="pt-2">
                       <BtnPrimary>Send Verification OTP</BtnPrimary>

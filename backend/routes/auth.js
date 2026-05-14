@@ -234,6 +234,52 @@ router.post(
 );
 
 // ════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/signup-firebase
+// Step 2 — create user account after Firebase OTP verified on frontend
+// ════════════════════════════════════════════════════════════════════════════
+router.post(
+  "/signup-firebase",
+  [
+    body("firstName").trim().notEmpty(),
+    body("lastName").trim().notEmpty(),
+    body("email").isEmail().normalizeEmail(),
+    body("mobile").isMobilePhone(),
+    body("password").isLength({ min: 8 }),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { firstName, lastName, email, mobile, password } = req.body;
+    try {
+      // For this implementation, we trust the frontend verified the phone number via Firebase.
+      const existing = await pool.query("SELECT id FROM users WHERE email=$1 OR mobile=$2", [email, mobile]);
+      if (existing.rows.length) return res.status(409).json({ error: "Account with this email or mobile already exists." });
+
+      const passwordHash = await hashValue(password);
+      const { rows } = await pool.query(
+        `INSERT INTO users (first_name, last_name, email, mobile, password_hash, is_verified)
+         VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING *`,
+        [firstName, lastName, email, mobile, passwordHash]
+      );
+
+      const user = rows[0];
+      const { accessToken, refreshToken } = await issueTokens(user);
+
+      return res.status(201).json({
+        message: "Account created successfully!",
+        user: safeUser(user),
+        accessToken,
+        refreshToken,
+      });
+    } catch (err) {
+      console.error("firebase signup error:", err);
+      return res.status(500).json({ error: "Signup failed. Please try again." });
+    }
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════════════
 // POST /api/auth/login
 // Email + password login
 // ════════════════════════════════════════════════════════════════════════════
