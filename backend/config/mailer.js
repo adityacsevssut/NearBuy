@@ -1,15 +1,15 @@
 const nodemailer = require("nodemailer");
 
+// Uses Brevo (formerly Sendinblue) SMTP relay — works on Vercel/cloud IPs.
+// Gmail blocks SMTP from datacenter IPs; Brevo does not.
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
   port: parseInt(process.env.SMTP_PORT || "587"),
   secure: false, // STARTTLS
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS, // Gmail App Password
+    user: process.env.SMTP_USER, // Your Brevo login email
+    pass: process.env.SMTP_PASS, // Brevo SMTP key (from Brevo dashboard)
   },
-  pool: true,
-  maxConnections: 5,
 });
 
 /**
