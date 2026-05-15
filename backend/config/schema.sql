@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS users (
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
   role          TEXT NOT NULL DEFAULT 'user',  -- 'user' | 'vendor' | 'manager' | 'admin'
   manager_type  TEXT,                          -- 'food' | 'medicine' | 'store' (only for managers)
+  request_type  TEXT,                          -- 'vendor' | 'student'
+  college_name  TEXT,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

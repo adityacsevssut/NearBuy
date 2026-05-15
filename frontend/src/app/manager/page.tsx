@@ -277,7 +277,14 @@ export default function PartnerDashboard() {
                       
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="font-bold text-gray-900">{req.owner_name}</h3>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-gray-900">{req.owner_name}</h3>
+                            {req.status === 'approved' && (
+                              <span className="flex items-center gap-1 text-[9px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">
+                                <ShieldCheck className="w-2.5 h-2.5" /> Verified
+                              </span>
+                            )}
+                          </div>
                           <p className="text-xs text-gray-500 mt-0.5 capitalize">{req.vendor_type} Partner</p>
                         </div>
                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
@@ -296,6 +303,11 @@ export default function PartnerDashboard() {
                         <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
                           <ShieldCheck className="w-4 h-4 text-gray-400" /> {req.owner_mobile}
                         </div>
+                        {req.status === 'approved' && req.password && (
+                          <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 border-dashed">
+                            <span className="text-[10px] text-blue-400 uppercase tracking-widest font-black">Credentials:</span> {req.password}
+                          </div>
+                        )}
                       </div>
 
                       {req.status === "pending" && (

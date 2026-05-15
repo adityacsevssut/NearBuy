@@ -26,14 +26,18 @@ router.post(
       if (existing.rows.length) {
         return res.status(409).json({ error: "A request with this email already exists." });
       }
-      
-      const passHash = await bcrypt.hash(password, 10);
 
+      // Check if user already exists in users
+      const userExists = await pool.query("SELECT id FROM users WHERE email=$1", [ownerEmail]);
+      if (userExists.rows.length) {
+        return res.status(409).json({ error: "An account with this email already exists. Please log in." });
+      }
+      
       const { rows } = await pool.query(
         `INSERT INTO vendor_requests (owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name)
          VALUES ($1, $2, $3, $4, $5, $6, $7)
          RETURNING id`,
-        [ownerName, ownerMobile, ownerEmail, passHash, vendorType, requestType || 'vendor', collegeName]
+        [ownerName, ownerMobile, ownerEmail, password, vendorType, requestType || 'vendor', collegeName]
       );
 
       return res.status(201).json({ message: "Vendor request submitted successfully.", requestId: rows[0].id });
@@ -52,7 +56,7 @@ router.get("/", authenticate, async (req, res) => {
        return res.status(403).json({ error: "Access denied." });
     }
     
-    let queryStr = `SELECT id, owner_name, owner_mobile, owner_email, vendor_type, request_type, college_name, status, created_at 
+    let queryStr = `SELECT id, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name, status, created_at 
                     FROM vendor_requests`;
     let queryParams = [];
 
@@ -100,12 +104,18 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     // Assuming we extract first/last name from owner_name roughly
     const parts = request.owner_name.split(' ');
     const firstName = parts[0];
-    const lastName = parts.slice(1).join(' ') || 'Vendor';
+    const lastName = parts.slice(1).join(' ') || (request.request_type === 'student' ? 'Student' : 'Vendor');
+
+    const passwordHash = await bcrypt.hash(request.password, 10);
 
     await pool.query(
-      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active)
-       VALUES ($1, $2, $3, $4, $5, 'vendor', TRUE, TRUE)`,
-      [firstName, lastName, request.owner_email, request.owner_mobile, request.password]
+      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8)`,
+      [
+        firstName, lastName, request.owner_email, request.owner_mobile, 
+        passwordHash, request.request_type || 'vendor', 
+        request.college_name, request.request_type
+      ]
     );
 
     // 4. Update request status
@@ -135,8 +145,8 @@ router.patch("/:id/reject", authenticate, async (req, res) => {
        return res.status(403).json({ error: "Cannot reject request for a different vendor type." });
     }
 
-    await pool.query("UPDATE vendor_requests SET status='rejected' WHERE id=$1", [id]);
-    return res.json({ message: "Vendor rejected." });
+    await pool.query("DELETE FROM vendor_requests WHERE id=$1", [id]);
+    return res.json({ message: "Vendor request deleted." });
   } catch (err) {
     console.error("reject vendor request error:", err);
     return res.status(500).json({ error: "Failed to reject request." });
