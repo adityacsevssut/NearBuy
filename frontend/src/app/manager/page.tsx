@@ -5,11 +5,53 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+
+const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
 export default function PartnerDashboard() {
-  const { user, logout, isLoggedIn } = useAuth();
+  const { user, logout, isLoggedIn, accessToken } = useAuth();
   const router = useRouter();
-  const [view, setView] = useState<"dashboard" | "vendors">("dashboard");
+  const [view, setView] = useState<"dashboard" | "vendors" | "requests">("dashboard");
+  const [requests, setRequests] = useState<any[]>([]);
+  const [loadingReqs, setLoadingReqs] = useState(false);
+
+  const fetchRequests = async () => {
+    setLoadingReqs(true);
+    try {
+      const res = await fetch(`${API}/api/vendor-requests`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      if (res.ok) setRequests(data.requests || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load requests");
+    }
+    setLoadingReqs(false);
+  };
+
+  const handleAction = async (id: string, action: "approve" | "reject") => {
+    try {
+      const res = await fetch(`${API}/api/vendor-requests/${id}/${action}`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Failed to ${action}`);
+      toast.success(data.message);
+      fetchRequests();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  useEffect(() => {
+    if (view === "requests" && accessToken) {
+      fetchRequests();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, accessToken]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -112,7 +154,7 @@ export default function PartnerDashboard() {
             <p className="text-sm text-gray-500 mt-1">Welcome back. Manage your division from here.</p>
           </div>
           
-          {view === "vendors" && (
+          {view !== "dashboard" && (
             <button 
               onClick={() => setView("dashboard")}
               className={`text-sm font-bold ${theme.btnText} ${theme.btnTextHover} px-4 py-2 rounded-xl ${theme.bg} ${theme.bgHover} transition-colors`}
@@ -144,7 +186,10 @@ export default function PartnerDashboard() {
               </button>
 
               {/* Button 2: Manage Vendor Requests */}
-              <button className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
+              <button 
+                onClick={() => setView("requests")}
+                className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
+              >
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
                   <ClipboardList className="w-24 h-24" />
                 </div>
@@ -174,7 +219,7 @@ export default function PartnerDashboard() {
                 </p>
               </button>
             </motion.div>
-          ) : (
+          ) : view === "vendors" ? (
             <motion.div 
               key="vendors"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
@@ -198,7 +243,77 @@ export default function PartnerDashboard() {
                 </div>
               </div>
             </motion.div>
-          )}
+          ) : view === "requests" ? (
+            <motion.div 
+              key="requests"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Vendor Requests</h2>
+                  <p className="text-xs text-gray-500 mt-1">Pending and processed partnership requests for {user?.manager_type} category</p>
+                </div>
+                <button onClick={fetchRequests} className={`px-4 py-2 text-sm font-bold bg-white border border-gray-200 rounded-xl hover:bg-gray-50 shadow-sm ${loadingReqs ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingReqs ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+
+              {requests.length === 0 && !loadingReqs ? (
+                <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
+                  <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 font-medium">No vendor requests found.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {requests.map(req => (
+                    <div key={req.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-300 transition-colors shadow-sm relative overflow-hidden">
+                      {/* Status indicator line */}
+                      <div className={`absolute top-0 left-0 w-full h-1 ${
+                        req.status === 'approved' ? 'bg-green-500' : 
+                        req.status === 'rejected' ? 'bg-red-500' : 
+                        'bg-orange-400'
+                      }`} />
+                      
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-gray-900">{req.owner_name}</h3>
+                          <p className="text-xs text-gray-500 mt-0.5 capitalize">{req.vendor_type} Partner</p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
+                          req.status === 'approved' ? 'bg-green-100 text-green-700' : 
+                          req.status === 'rejected' ? 'bg-red-100 text-red-700' : 
+                          'bg-orange-100 text-orange-700'
+                        }`}>
+                          {req.status}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-2 mb-5">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                          <UserCircle className="w-4 h-4 text-gray-400" /> {req.owner_email}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                          <ShieldCheck className="w-4 h-4 text-gray-400" /> {req.owner_mobile}
+                        </div>
+                      </div>
+
+                      {req.status === "pending" && (
+                        <div className="flex gap-2">
+                          <button onClick={() => handleAction(req.id, "approve")} className="flex-1 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-colors">
+                            Approve
+                          </button>
+                          <button onClick={() => handleAction(req.id, "reject")} className="flex-1 py-2 bg-white border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 text-sm font-bold rounded-xl transition-colors">
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          ) : null}
         </AnimatePresence>
 
       </main>

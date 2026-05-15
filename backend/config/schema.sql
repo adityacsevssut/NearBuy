@@ -69,3 +69,15 @@ ALTER TABLE refresh_tokens ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "service role bypass" ON users    FOR ALL USING (true);
 CREATE POLICY "service role bypass" ON otps     FOR ALL USING (true);
 CREATE POLICY "service role bypass" ON refresh_tokens FOR ALL USING (true);
+
+-- Vendor Requests Table
+CREATE TABLE IF NOT EXISTS vendor_requests (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_name    TEXT NOT NULL,
+  owner_mobile  TEXT NOT NULL,
+  owner_email   TEXT NOT NULL,
+  password      TEXT NOT NULL,
+  vendor_type   TEXT NOT NULL, -- 'food', 'medicine', 'store'
+  status        TEXT NOT NULL DEFAULT 'pending',
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

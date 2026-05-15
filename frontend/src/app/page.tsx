@@ -10,6 +10,7 @@ import {
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
+import BusinessRequestModal from "@/components/BusinessRequestModal";
 
 
 
@@ -147,6 +148,8 @@ const quickBites: { label: string; emoji: string }[] = [
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
+  const [reqModal, setReqModal] = useState(false);
+  const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
 
   const filtered = restaurants.filter((r) => {
     const matchVeg = foodPref === "all" || (foodPref === "veg" ? r.veg : !r.veg);
@@ -362,11 +365,39 @@ export default function HomePage() {
               </div>
             )}
           </div>
+
+          {/* ── Partner Section ── */}
+          <div className="py-12 border-t border-gray-200">
+            <div className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-8 md:p-12 text-center text-white shadow-xl relative overflow-hidden">
+              <div className="absolute inset-0 bg-white/10" />
+              <div className="relative z-10 max-w-2xl mx-auto">
+                <h2 className="text-3xl md:text-4xl font-black mb-4 tracking-tight drop-shadow-sm">Start Your Business on NearBuy</h2>
+                <p className="text-orange-50 font-medium mb-8 text-lg">
+                  Join our platform as a vendor or a student entrepreneur and reach thousands of daily customers on campus.
+                </p>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <button 
+                    onClick={() => { setReqType("student"); setReqModal(true); }}
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-white text-orange-600 font-black text-lg hover:bg-orange-50 shadow-lg hover:-translate-y-1 transition-all active:scale-95"
+                  >
+                    Start Business (Student)
+                  </button>
+                  <button 
+                    onClick={() => { setReqType("vendor"); setReqModal(true); }}
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-gray-900 text-white font-black text-lg hover:bg-gray-800 shadow-lg hover:-translate-y-1 transition-all active:scale-95 border border-gray-700"
+                  >
+                    Start Business (Vendor)
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
       <Footer />
       <MobileBottomNav />
+      <BusinessRequestModal isOpen={reqModal} onClose={() => setReqModal(false)} defaultType={reqType} />
     </div>
   );
 }

@@ -67,6 +67,7 @@ app.use("/api/auth", authLimiter);
 app.get("/", (req, res) => res.json({ status: "NearBuy API is running 🚀" }));
 app.use("/api/auth", authRouter);
 app.use("/api/managers", managerRouter);
+app.use("/api/vendor-requests", require("./routes/vendor-requests"));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
