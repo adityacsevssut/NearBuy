@@ -40,7 +40,7 @@ async function hashValue(value) {
 
 // ── Helper: issue tokens and store refresh token ──────────────────────────
 async function issueTokens(user, client) {
-  const payload = { id: user.id, email: user.email, role: user.role };
+  const payload = { id: user.id, email: user.email, role: user.role, manager_type: user.manager_type };
   const accessToken  = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
   const tokenHash    = crypto.createHash("sha256").update(refreshToken).digest("hex");
@@ -59,6 +59,7 @@ function safeUser(u) {
   return {
     id: u.id, firstName: u.first_name, lastName: u.last_name,
     email: u.email, mobile: u.mobile, avatar: u.avatar_url, role: u.role,
+    manager_type: u.manager_type
   };
 }
 
@@ -578,6 +579,7 @@ router.post("/refresh", async (req, res) => {
       id: user.rows[0].id,
       email: user.rows[0].email,
       role: user.rows[0].role,
+      manager_type: user.rows[0].manager_type,
     });
 
     return res.json({ accessToken: newAccessToken });

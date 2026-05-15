@@ -109,12 +109,12 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     const passwordHash = await bcrypt.hash(request.password, 10);
 
     await pool.query(
-      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type)
-       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8)`,
+      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type, manager_type)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9)`,
       [
         firstName, lastName, request.owner_email, request.owner_mobile, 
         passwordHash, request.request_type || 'vendor', 
-        request.college_name, request.request_type
+        request.college_name, request.request_type, request.vendor_type
       ]
     );
 
