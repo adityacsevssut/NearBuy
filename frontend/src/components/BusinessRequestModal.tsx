@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X, CheckCircle, RefreshCw,
   User, Mail, Phone, Lock,
-  Store, Pill, UtensilsCrossed,
+  Store, Pill, UtensilsCrossed, School,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -104,6 +104,7 @@ export default function BusinessRequestModal({
   const [ownerMobile, setOwnerMobile] = useState("");
   const [ownerEmail,  setOwnerEmail]  = useState("");
   const [password,    setPassword]    = useState("");
+  const [collegeName, setCollegeName] = useState("");
   const [vendorType,  setVendorType]  = useState<"food" | "medicine" | "store">("food");
 
   const theme = THEME[vendorType];
@@ -119,7 +120,10 @@ export default function BusinessRequestModal({
       const res = await fetch(`${API}/api/vendor-requests`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownerName, ownerMobile, ownerEmail, password, vendorType }),
+        body: JSON.stringify({ 
+          ownerName, ownerMobile, ownerEmail, password, vendorType, 
+          requestType: defaultType, collegeName 
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to submit request.");
@@ -136,7 +140,7 @@ export default function BusinessRequestModal({
     onClose();
     setTimeout(() => {
       setSuccess(false);
-      setOwnerName(""); setOwnerMobile(""); setOwnerEmail(""); setPassword("");
+      setOwnerName(""); setOwnerMobile(""); setOwnerEmail(""); setPassword(""); setCollegeName("");
     }, 500);
   };
 
@@ -147,9 +151,6 @@ export default function BusinessRequestModal({
   ] as const;
 
   const title = defaultType === "student" ? "Register as Student" : "Register as Vendor";
-  const subtitle = defaultType === "student"
-    ? "Join the NearBuy student partner program and start selling on campus."
-    : "List your campus stall, canteen, or shop and reach 3,000+ students.";
 
   return (
     <AnimatePresence>
@@ -197,8 +198,6 @@ export default function BusinessRequestModal({
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <p className="text-[13px] text-gray-500 text-center font-medium mb-6">{subtitle}</p>
-
                   {/* Business type selector (shown first so theme affects inputs) */}
                   <div className="pb-2">
                     <label className="text-[12px] uppercase font-bold text-gray-400 mb-2 block ml-1">
@@ -234,6 +233,16 @@ export default function BusinessRequestModal({
                     iconClass={theme.icon} focusBorderClass={theme.focus} labelFocusClass={theme.label}
                     required
                   />
+
+                  {defaultType === "student" && (
+                    <FormInput
+                      icon={School} id="br-college" label="College Name"
+                      type="text" value={collegeName} onChange={(e) => setCollegeName(e.target.value)}
+                      iconClass={theme.icon} focusBorderClass={theme.focus} labelFocusClass={theme.label}
+                      required
+                    />
+                  )}
+
                   <FormInput
                     icon={Phone} id="br-mobile" label="Owner Mobile"
                     type="tel"   value={ownerMobile} onChange={(e) => setOwnerMobile(e.target.value)}

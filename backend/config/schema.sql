@@ -78,6 +78,8 @@ CREATE TABLE IF NOT EXISTS vendor_requests (
   owner_email   TEXT NOT NULL,
   password      TEXT NOT NULL,
   vendor_type   TEXT NOT NULL, -- 'food', 'medicine', 'store'
+  request_type  TEXT NOT NULL DEFAULT 'vendor', -- 'vendor', 'student'
+  college_name  TEXT,
   status        TEXT NOT NULL DEFAULT 'pending',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
