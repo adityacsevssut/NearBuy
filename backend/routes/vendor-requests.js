@@ -61,9 +61,16 @@ router.get("/", authenticate, async (req, res) => {
     let queryParams = [];
 
     // Filter by manager_type if it is a manager (admin sees all)
-    if (req.user.role === "manager" && req.user.manager_type) {
-      queryStr += ` WHERE vendor_type = $1`;
-      queryParams.push(req.user.manager_type);
+    if (req.user.role === "manager") {
+      const mType = (req.user.manager_type || "").toLowerCase();
+      if (mType) {
+        queryStr += ` WHERE LOWER(vendor_type) = $1`;
+        queryParams.push(mType);
+      } else {
+        // If manager has no type assigned, they shouldn't see anything for safety
+        // unless you want them to see all (not recommended)
+        queryStr += ` WHERE 1=0`; 
+      }
     }
 
     queryStr += ` ORDER BY created_at DESC`;
@@ -90,8 +97,21 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     const request = reqQuery.rows[0];
 
     // Check manager type permission
-    if (req.user.role === "manager" && req.user.manager_type !== request.vendor_type) {
-       return res.status(403).json({ error: "Cannot approve request for a different vendor type." });
+    console.log("Approval check:", { 
+      userRole: req.user.role, 
+      userManagerType: req.user.manager_type, 
+      requestVendorType: request.vendor_type 
+    });
+
+    if (req.user.role === "manager") {
+      const userType = (req.user.manager_type || "").toLowerCase();
+      const targetType = (request.vendor_type || "").toLowerCase();
+      
+      if (userType !== targetType) {
+        return res.status(403).json({ 
+          error: `Cannot approve request for a different vendor type. Manager is '${userType}', Request is '${targetType}'.` 
+        });
+      }
     }
 
     // 2. Check if user already exists in `users`
@@ -141,8 +161,21 @@ router.patch("/:id/reject", authenticate, async (req, res) => {
     if (!reqQuery.rows.length) return res.status(404).json({ error: "Request not found" });
     const request = reqQuery.rows[0];
 
-    if (req.user.role === "manager" && req.user.manager_type !== request.vendor_type) {
-       return res.status(403).json({ error: "Cannot reject request for a different vendor type." });
+    console.log("Rejection check:", { 
+      userRole: req.user.role, 
+      userManagerType: req.user.manager_type, 
+      requestVendorType: request.vendor_type 
+    });
+
+    if (req.user.role === "manager") {
+      const userType = (req.user.manager_type || "").toLowerCase();
+      const targetType = (request.vendor_type || "").toLowerCase();
+      
+      if (userType !== targetType) {
+        return res.status(403).json({ 
+          error: `Cannot reject request for a different vendor type. Manager is '${userType}', Request is '${targetType}'.` 
+        });
+      }
     }
 
     await pool.query("DELETE FROM vendor_requests WHERE id=$1", [id]);
