@@ -404,46 +404,34 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
                   {/* User Login */}
                   <button
                     onClick={() => reset("pick-user")}
-                    className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 ${t.panelHover} transition-all duration-200 group text-left`}
+                    className={`w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 ${t.panelHover} transition-all duration-300 group shadow-sm hover:shadow-md bg-white`}
                   >
-                    <div className={`w-12 h-12 ${t.panelIcon} rounded-xl flex items-center justify-center shrink-0`}>
-                      <User className="w-6 h-6" />
+                    <div className={`w-10 h-10 ${t.panelIcon} rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                      <User className="w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-[15px]">User Login</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">Order food &amp; essentials</p>
-                    </div>
-                    <ArrowLeft className="w-4 h-4 text-gray-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
+                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-gray-900 transition-colors">User Login</span>
                   </button>
 
                   {/* Vendor Login */}
                   <button
                     onClick={() => reset("vendor-login")}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 group text-left"
+                    className="w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
                   >
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center shrink-0">
-                      <Phone className="w-6 h-6" />
+                    <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                      <Phone className="w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-[15px]">Vendor Login</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">Manage your store &amp; orders</p>
-                    </div>
-                    <ArrowLeft className="w-4 h-4 text-emerald-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
+                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-emerald-900 transition-colors">Vendor Login</span>
                   </button>
 
                   {/* Manager Login */}
                   <button
                     onClick={() => reset("manager-login")}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 hover:border-violet-400 hover:bg-violet-50 transition-all duration-200 group text-left"
+                    className="w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 hover:border-violet-400 hover:bg-violet-50 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
                   >
-                    <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center shrink-0">
-                      <Lock className="w-6 h-6" />
+                    <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                      <Lock className="w-5 h-5" />
                     </div>
-                    <div>
-                      <p className="font-bold text-gray-800 text-[15px]">Manager Login</p>
-                      <p className="text-xs text-gray-400 font-medium mt-0.5">Admin panel access</p>
-                    </div>
-                    <ArrowLeft className="w-4 h-4 text-violet-300 ml-auto rotate-180 group-hover:translate-x-1 transition-transform" />
+                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-violet-900 transition-colors">Manager Login</span>
                   </button>
                 </div>
               </>
