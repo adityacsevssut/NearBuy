@@ -83,6 +83,9 @@ export default function Navbar() {
             <span className={primaryText}>Near</span>
             <span className="text-gray-900">Buy</span>
           </span>
+          <span className={`lg:hidden font-black text-xl tracking-tight ${primaryText} -ml-1`}>
+            {isEssentials ? "Store" : "Food"}
+          </span>
         </Link>
 
         {/* ── App Mode Toggle (Food vs Essentials) ── */}
