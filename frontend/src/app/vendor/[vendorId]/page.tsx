@@ -307,7 +307,7 @@ export default function VendorPage() {
                         </div>
 
                         {/* Image & Action Section */}
-                        <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
+                        <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
                           <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" />
@@ -317,46 +317,46 @@ export default function VendorPage() {
                             >
                               <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                             </button>
+                          </div>
 
-                            {/* Quantity Selector and ADD Button */}
-                            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center">
-                              <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
-                                <button 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
-                                  }}
-                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                                >
-                                  -
-                                </button>
-                                <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
-                                <button 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
-                                  }}
-                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                                >
-                                  +
-                                </button>
-                              </div>
+                          {/* Quantity Selector and ADD Button */}
+                          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
+                            <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
                               <button 
                                 onClick={(e) => {
                                   e.preventDefault();
-                                  const q = quantities[dish.id] || 1;
-                                  setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
-                                  setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                                  setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
                                 }}
-                                className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                                  cart[dish.id]
-                                    ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                                    : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
-                                }`}
+                                className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
                               >
-                                {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                                -
+                              </button>
+                              <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                                }}
+                                className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                              >
+                                +
                               </button>
                             </div>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                const q = quantities[dish.id] || 1;
+                                setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
+                                setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                              }}
+                              className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                                cart[dish.id]
+                                  ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                                  : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                              }`}
+                            >
+                              {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                            </button>
                           </div>
                         </div>
                       </div>
