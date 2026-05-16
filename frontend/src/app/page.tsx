@@ -50,7 +50,7 @@ const restaurants = [
     time: "12–15 min",
     minOrder: "₹80",
     offer: "50% off up to ₹80",
-    emoji: "🍛",
+    image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=500&q=80",
     badge: "Bestseller",
     badgeColor: "bg-orange-100 text-orange-700",
     veg: false,
@@ -65,7 +65,7 @@ const restaurants = [
     time: "8–12 min",
     minOrder: "₹40",
     offer: "Buy 2 Get 1 Free",
-    emoji: "🍜",
+    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80",
     badge: "Late Night",
     badgeColor: "bg-indigo-100 text-indigo-700",
     veg: true,
@@ -80,7 +80,7 @@ const restaurants = [
     time: "10–14 min",
     minOrder: "₹60",
     offer: "Free cookie on orders ₹150+",
-    emoji: "☕",
+    image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80",
     badge: "Top Rated",
     badgeColor: "bg-orange-100 text-orange-700",
     veg: true,
@@ -95,7 +95,7 @@ const restaurants = [
     time: "18–22 min",
     minOrder: "₹120",
     offer: "₹30 off first order",
-    emoji: "🍕",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80",
     badge: "New",
     badgeColor: "bg-blue-100 text-blue-700",
     veg: false,
@@ -110,7 +110,7 @@ const restaurants = [
     time: "15–20 min",
     minOrder: "₹70",
     offer: "Budget friendly – daily specials",
-    emoji: "🍱",
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80",
     badge: "Budget Pick",
     badgeColor: "bg-purple-100 text-purple-700",
     veg: true,
@@ -125,7 +125,7 @@ const restaurants = [
     time: "10–15 min",
     minOrder: "₹60",
     offer: "Combo meals from ₹99",
-    emoji: "🌯",
+    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=500&q=80",
     badge: "Popular",
     badgeColor: "bg-amber-100 text-amber-700",
     veg: false,
@@ -336,10 +336,10 @@ export default function HomePage() {
                   className="group flex flex-col bg-white rounded-2xl border border-gray-200
                     hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 text-left transition-all duration-300 overflow-hidden"
                 >
-                  <div className="relative w-full h-44 md:h-48 bg-gradient-to-br from-orange-50 to-amber-50 flex items-center justify-center text-8xl md:text-9xl border-b border-gray-100 overflow-hidden">
-                    <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md">
-                      {r.emoji}
-                    </div>
+                  <div className="relative w-full h-44 md:h-48 bg-gray-100 flex items-center justify-center border-b border-gray-100 overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={r.image} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+
                     <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
                       {r.badge}
                     </span>

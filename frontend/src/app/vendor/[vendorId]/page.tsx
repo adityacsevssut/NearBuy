@@ -15,7 +15,7 @@ const restaurants = [
     rating: 4.7,
     reviews: 320,
     time: "12–15 min",
-    emoji: "🍛",
+    image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=500&q=80",
     badge: "Bestseller",
     badgeColor: "bg-orange-100 text-orange-700",
   },
@@ -26,7 +26,7 @@ const restaurants = [
     rating: 4.5,
     reviews: 210,
     time: "8–12 min",
-    emoji: "🍜",
+    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80",
     badge: "Late Night",
     badgeColor: "bg-indigo-100 text-indigo-700",
   },
@@ -37,7 +37,7 @@ const restaurants = [
     rating: 4.6,
     reviews: 180,
     time: "10–14 min",
-    emoji: "☕",
+    image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80",
     badge: "Top Rated",
     badgeColor: "bg-orange-100 text-orange-700",
   },
@@ -48,7 +48,7 @@ const restaurants = [
     rating: 4.3,
     reviews: 95,
     time: "18–22 min",
-    emoji: "🍕",
+    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80",
     badge: "New",
     badgeColor: "bg-orange-100 text-orange-700",
   },
@@ -59,7 +59,7 @@ const restaurants = [
     rating: 4.4,
     reviews: 140,
     time: "15–20 min",
-    emoji: "🍱",
+    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80",
     badge: "Budget Pick",
     badgeColor: "bg-purple-100 text-purple-700",
   },
@@ -70,7 +70,7 @@ const restaurants = [
     rating: 4.2,
     reviews: 88,
     time: "10–15 min",
-    emoji: "🌯",
+    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=500&q=80",
     badge: "Popular",
     badgeColor: "bg-amber-100 text-amber-700",
   },
@@ -97,7 +97,7 @@ export default function VendorPage() {
       rating: 4.5,
       reviews: 142,
       type: "non-veg",
-      emoji: "🍛",
+      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=300&q=80",
       badge: "Bestseller",
       desc: `Authentic and delicious dum biryani prepared with fresh ingredients and secret spices.`,
     },
@@ -109,7 +109,7 @@ export default function VendorPage() {
       rating: 4.2,
       reviews: 89,
       type: "non-veg",
-      emoji: "🌯",
+      image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=300&q=80",
       badge: "Spicy",
       desc: `For the spice lovers! Our signature roll with an extra kick of flavours.`,
     },
@@ -121,7 +121,7 @@ export default function VendorPage() {
       rating: 4.8,
       reviews: 210,
       type: "veg",
-      emoji: "🥘",
+      image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80",
       badge: "Must Try",
       desc: `A premium combo featuring our top-rated chole bhature along with onion rings.`,
     },
@@ -133,7 +133,7 @@ export default function VendorPage() {
       rating: 4.1,
       reviews: 305,
       type: "veg",
-      emoji: "🍲",
+      image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=300&q=80",
       badge: "Pocket Friendly",
       desc: `Rich and creamy paneer butter masala, perfect with naan or rice.`,
     },
@@ -145,7 +145,7 @@ export default function VendorPage() {
       rating: 4.6,
       reviews: 112,
       type: "veg",
-      emoji: "🍱",
+      image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=300&q=80",
       badge: "Serves 1",
       desc: `A complete meal with dal, sabzi, roti, rice, sweet, and papad.`,
     },
@@ -184,8 +184,9 @@ export default function VendorPage() {
           </Link>
 
           <div className="flex gap-4 items-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl border border-orange-100 flex items-center justify-center text-4xl shadow-sm flex-shrink-0">
-              {vendor.emoji}
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={vendor.image} alt={vendor.name} className="w-full h-full object-cover" />
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -307,8 +308,9 @@ export default function VendorPage() {
 
                         {/* Image & Action Section */}
                         <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
-                          <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 flex items-center justify-center text-6xl shadow-inner relative">
-                            {dish.emoji}
+                          <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" />
                             <button
                               onClick={() => setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id])}
                               className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"

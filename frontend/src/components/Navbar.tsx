@@ -66,36 +66,36 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-200/80 shadow-sm">
+    <nav className={`fixed top-0 left-0 right-0 z-50 shadow-sm transition-colors duration-300 ${isEssentials ? 'bg-blue-500' : 'bg-orange-500'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4">
 
         {/* ── Logo ── */}
         <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
           <div className="flex items-center -skew-x-6 pr-1">
-            <span className={`font-black text-3xl tracking-tighter drop-shadow-sm transition-colors ${primaryText} ${primaryHoverText}`}>
+            <span className={`font-black text-3xl tracking-tighter drop-shadow-sm transition-colors text-white`}>
               N
             </span>
-            <span className="text-gray-900 font-black text-3xl tracking-tighter -ml-1.5 drop-shadow-sm group-hover:text-gray-700 transition-colors">
+            <span className="text-black font-black text-3xl tracking-tighter drop-shadow-sm transition-colors">
               B
             </span>
           </div>
           <span className="font-black text-xl tracking-tight hidden lg:block">
-            <span className={primaryText}>Near</span>
-            <span className="text-gray-900">Buy</span>
+            <span className="text-white">Near</span>
+            <span className="text-black">Buy</span>
           </span>
-          <span className={`lg:hidden font-black text-xl tracking-tight ${primaryText} -ml-1`}>
+          <span className={`lg:hidden font-black text-xl tracking-tight text-white -ml-1`}>
             {isEssentials ? "Store" : "Food"}
           </span>
         </Link>
 
         {/* ── App Mode Toggle (Food vs Essentials) ── */}
-        <div className="flex bg-gray-100 p-1 rounded-xl shadow-inner border border-gray-200/50 flex-shrink-0">
+        <div className="flex bg-black/10 p-1 rounded-xl shadow-inner border border-white/10 flex-shrink-0 backdrop-blur-sm">
           <Link
             href="/"
             className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
               !isEssentials
-                ? "bg-white text-orange-600 shadow-sm border border-gray-200/50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                ? `bg-white text-orange-600 shadow-sm`
+                : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
             <Store className="w-4 h-4" />
@@ -106,8 +106,8 @@ export default function Navbar() {
             href="/essentials"
             className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
               isEssentials
-                ? "bg-white text-blue-600 shadow-sm border border-gray-200/50"
-                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200/50"
+                ? `bg-white text-blue-600 shadow-sm`
+                : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
             <Package className="w-4 h-4" />
@@ -120,15 +120,15 @@ export default function Navbar() {
         <div className="relative flex-1 hidden md:block max-w-md">
           <div
             className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border
-              transition-all duration-300 bg-gray-50 ${
+              transition-all duration-300 bg-white ${
               searchFocused
-                ? `${primaryBorder} shadow-[0_0_0_3px_rgba(16,185,129,0.1)]`
-                : "border-gray-200 hover:border-gray-300"
+                ? `border-white shadow-[0_0_0_3px_rgba(255,255,255,0.3)]`
+                : "border-transparent hover:border-white/50"
             }`}
           >
             <Search
               className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                searchFocused ? primaryText : "text-gray-400"
+                searchFocused ? (isEssentials ? 'text-blue-500' : 'text-orange-500') : "text-gray-400"
               }`}
             />
             <input
@@ -181,24 +181,24 @@ export default function Navbar() {
           <button
             id="location-picker"
             className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
-              border border-gray-200 ${primaryBorderHover} bg-gray-50
+              border border-white/30 hover:bg-white/10 bg-white/20 text-white
               transition-all duration-200 group mr-2`}
           >
-            <MapPin className={`w-3.5 h-3.5 ${primaryText}`} />
-            <span className="text-gray-800 font-semibold text-xs tracking-tight">
+            <MapPin className={`w-3.5 h-3.5 text-white`} />
+            <span className="font-semibold text-xs tracking-tight">
               Pulaha Hostel
             </span>
-            <ChevronDown className={`w-3 h-3 text-gray-400 ${isEssentials ? 'group-hover:text-blue-500' : 'group-hover:text-orange-500'} transition-colors`} />
+            <ChevronDown className={`w-3 h-3 text-white/70 group-hover:text-white transition-colors`} />
           </button>
 
           <button
             id="cart-btn"
-            className="relative p-2.5 rounded-xl hover:bg-gray-100 transition-colors group"
+            className="relative p-2.5 rounded-xl hover:bg-white/10 transition-colors group"
           >
-            <ShoppingCart className="w-5 h-5 text-gray-500 group-hover:text-gray-800 transition-colors" />
+            <ShoppingCart className="w-5 h-5 text-white group-hover:text-white transition-colors" />
             {cartCount > 0 && (
-              <span className={`absolute top-1 right-1 w-4 h-4 ${primaryBg} rounded-full
-                text-white text-[10px] font-black flex items-center justify-center`}>
+              <span className={`absolute top-1 right-1 w-4 h-4 bg-white rounded-full
+                ${isEssentials ? 'text-blue-600' : 'text-orange-600'} text-[10px] font-black flex items-center justify-center shadow-sm`}>
                 {cartCount}
               </span>
             )}
@@ -209,13 +209,13 @@ export default function Navbar() {
               <button
                 id="user-avatar-btn"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:border-orange-400 hover:bg-orange-50 transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-200"
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold ${primaryBg}`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-white ${isEssentials ? 'text-blue-600' : 'text-orange-600'} text-xs font-bold`}>
                   {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
                 </div>
-                <span className="hidden sm:block text-sm font-semibold text-gray-700">{user?.firstName || user?.email?.split('@')[0]}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
+                <span className="hidden sm:block text-sm font-semibold text-white">{user?.firstName || user?.email?.split('@')[0]}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
               </button>
 
               <AnimatePresence>
@@ -338,7 +338,7 @@ export default function Navbar() {
             <button
               id="login-signup-btn"
               onClick={() => setIsLoginModalOpen(true)}
-              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm text-white font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 ${primaryBg}`}
+              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 bg-white ${isEssentials ? 'text-blue-600' : 'text-orange-600'}`}
             >
               Login
             </button>
