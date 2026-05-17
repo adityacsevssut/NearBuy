@@ -36,6 +36,7 @@ export default function Footer() {
                 Turn your skills into income. Register as a student partner and start selling on campus.
               </p>
               <button
+                suppressHydrationWarning
                 className={`${btnClass} px-5 py-2.5 rounded-xl text-white font-bold text-sm`}
                 onClick={() => {
                   setModalType("student");
@@ -56,6 +57,7 @@ export default function Footer() {
               </p>
               <button
                 id="footer-business-cta"
+                suppressHydrationWarning
                 className="px-5 py-2.5 rounded-xl text-violet-300 font-bold text-sm
                   border border-violet-500/40 bg-violet-500/10 hover:bg-violet-500/20 transition-colors"
                 onClick={() => {

@@ -54,17 +54,17 @@ function RestaurantOrderCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100"
+      className="bg-white rounded-3xl overflow-hidden shadow-xl shadow-orange-500/5 border border-orange-100/50"
     >
       {/* ── Restaurant header ── */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+      <div className="flex items-center gap-4 px-5 py-4 border-b border-orange-100/50 bg-gradient-to-r from-orange-50/50 to-transparent">
         <div className="w-1 h-5 rounded-full bg-orange-500 shrink-0" />
         <div className="w-8 h-8 rounded-xl bg-orange-50 flex items-center justify-center shrink-0">
           <Utensils className="w-4 h-4 text-orange-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-gray-900 text-sm truncate">{restName}</p>
-          <p className="text-[11px] text-gray-400 font-medium">
+          <p className="font-black text-gray-900 text-xl tracking-tight truncate">{restName}</p>
+          <p className="text-[11px] text-gray-400 font-medium mt-0.5">
             {totalQty} {totalQty === 1 ? "item" : "items"} · Delivers independently
           </p>
         </div>
@@ -86,7 +86,7 @@ function RestaurantOrderCard({
               initial={{ opacity: 1 }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center gap-3 px-4 py-3"
+              className="flex items-center gap-4 px-5 py-4 hover:bg-orange-50/30 transition-colors"
             >
               {/* Thumbnail */}
               <div className="w-16 h-16 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden shrink-0 relative">
@@ -151,13 +151,13 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Subtotal row ── */}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-gray-50 border-t border-gray-100">
+      <div className="flex items-center justify-between px-5 py-3.5 bg-orange-50/30 border-t border-orange-100/50">
         <span className="text-sm text-gray-600 font-semibold">Items subtotal</span>
         <span className="text-sm font-black text-gray-900">₹{subtotal}</span>
       </div>
 
       {/* ── Coupon ── */}
-      <div className="px-4 py-3 border-t border-dashed border-gray-100">
+      <div className="px-5 py-4 border-t border-dashed border-orange-200">
         <div className="flex gap-2">
           <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2">
             <Tag className="w-3.5 h-3.5 text-orange-400 shrink-0" />
@@ -192,10 +192,10 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Bill breakdown (collapsible) ── */}
-      <div className="border-t border-gray-100">
+      <div className="border-t border-orange-100/50">
         <button
           onClick={() => setShowBill(!showBill)}
-          className="w-full flex items-center justify-between px-4 py-3 text-sm font-black text-gray-900 hover:bg-gray-50 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 text-sm font-black text-gray-900 hover:bg-orange-50/30 transition-colors"
         >
           <span className="flex items-center gap-2">
             Bill Details
@@ -249,8 +249,9 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Place Order button for THIS restaurant ── */}
-      <div className="px-4 pb-4 pt-2 border-t border-gray-100 bg-gray-50">
-        <button className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl text-sm shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+      <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30">
+        <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-2xl text-[15px] shadow-xl shadow-orange-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group relative overflow-hidden">
+          <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
           <CreditCard className="w-4 h-4" />
           Place Order · ₹{grandTotal}
         </button>

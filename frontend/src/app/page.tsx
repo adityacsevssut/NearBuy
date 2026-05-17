@@ -4,8 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Search, Star, Clock, ChevronRight, ChevronLeft,
-  Filter, Flame, Leaf, Zap, Coffee, Pizza, UtensilsCrossed,
+  Search, Star, Clock, ChevronRight,
   MapPin, ChevronDown
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -16,29 +15,6 @@ import { useLocationContext } from "@/context/LocationContext";
 
 
 
-const banners = [
-  {
-    id: 1,
-    image: "/banner.png",
-    bg: "bg-orange-500",
-    tag: "NEW ON CAMPUS",
-    title: "Everything you need, delivered in 15 mins.",
-  },
-  {
-    id: 2,
-    image: null,
-    bg: "bg-gradient-to-r from-orange-500 to-red-500",
-    tag: "MIDNIGHT CRAVINGS",
-    title: "50% OFF on all late night orders.",
-  },
-  {
-    id: 3,
-    image: null,
-    bg: "bg-gradient-to-r from-blue-600 to-indigo-600",
-    tag: "WELCOME OFFER",
-    title: "Free delivery on your first 3 orders!",
-  }
-];
 
 const restaurants = [
   {
@@ -165,14 +141,6 @@ export default function HomePage() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const { scrollLeft, clientWidth } = scrollRef.current;
-      const scrollTo = direction === "left" ? scrollLeft - clientWidth : scrollLeft + clientWidth;
-      scrollRef.current.scrollTo({ left: scrollTo, behavior: "smooth" });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-orange-50/40 flex flex-col pt-16">
       <Navbar />
@@ -182,6 +150,7 @@ export default function HomePage() {
           {/* ── Mobile Top Bar (Location) ── */}
           <div className="md:hidden pt-4 pb-2 px-1">
             <button
+              suppressHydrationWarning
               onClick={() => setIsLocationModalOpen(true)}
               className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm active:bg-orange-50 transition-colors"
             >
@@ -201,53 +170,17 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* ── Banner Section (Slider) ── */}
-          <div className="py-4 md:py-6 w-full relative group">
-            <button
-              onClick={() => scroll("left")}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-700 hover:bg-white hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hidden md:block"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={() => scroll("right")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md text-gray-700 hover:bg-white hover:scale-110 transition-all opacity-0 group-hover:opacity-100 hidden md:block"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
-
-            <div
-              ref={scrollRef}
-              className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide gap-4 w-full rounded-3xl"
-            >
-              {banners.map((banner) => (
-                <div
-                  key={banner.id}
-                  className={`relative w-full flex-shrink-0 h-40 md:h-64 rounded-3xl overflow-hidden shadow-lg border border-gray-200 snap-center ${banner.image ? "" : banner.bg
-                    }`}
-                >
-                  {banner.image && (
-                    <>
-                      <Image
-                        src={banner.image}
-                        alt="NearBuy Promo Banner"
-                        fill
-                        className="object-cover"
-                        priority={banner.id === 1}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent pointer-events-none" />
-                    </>
-                  )}
-                  <div className="absolute inset-y-0 left-0 p-6 md:p-10 flex flex-col justify-center pointer-events-none">
-                    <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md text-white text-xs font-bold rounded-full w-fit mb-3 shadow-sm border border-white/30">
-                      {banner.tag}
-                    </span>
-                    <h2 className="text-white text-2xl md:text-4xl font-black max-w-sm leading-tight tracking-tight drop-shadow-md">
-                      {banner.title}
-                    </h2>
-                  </div>
-                </div>
-              ))}
+          {/* ── Fixed Hero Banner ── */}
+          <div className="py-4 md:py-6 w-full">
+            <div className="relative w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1] rounded-3xl overflow-hidden shadow-xl border border-orange-100">
+              <Image
+                src="/food_hero_v2.png"
+                alt="NearBuy Food Banner"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
+                className="object-cover object-center"
+                priority
+              />
             </div>
           </div>
 
@@ -257,6 +190,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2">
               <button
                 id="all-toggle"
+                suppressHydrationWarning
                 onClick={() => setFoodPref("all")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "all"
                   ? "bg-gradient-to-r from-orange-500 to-orange-400 border-orange-500 text-white shadow-orange-500/30"
@@ -267,6 +201,7 @@ export default function HomePage() {
               </button>
               <button
                 id="veg-toggle"
+                suppressHydrationWarning
                 onClick={() => setFoodPref("veg")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "veg"
                   ? "bg-orange-600 border-orange-600 text-white"
@@ -278,6 +213,7 @@ export default function HomePage() {
               </button>
               <button
                 id="nonveg-toggle"
+                suppressHydrationWarning
                 onClick={() => setFoodPref("non-veg")}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "non-veg"
                   ? "bg-red-600 border-red-600 text-white"
@@ -297,6 +233,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100/50 transition-all mx-1">
               <Search className="w-4 h-4 text-orange-400 flex-shrink-0" />
               <input
+                suppressHydrationWarning
                 type="text"
                 placeholder="Search restaurants..."
                 className="flex-1 bg-transparent text-sm text-gray-800 outline-none"
