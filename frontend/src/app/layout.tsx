@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
+import { LocationProvider } from "@/context/LocationContext";
+import { CartProvider } from "@/context/CartContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const inter = Inter({
@@ -29,20 +31,24 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="antialiased">
+      <body className="antialiased" suppressHydrationWarning>
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
-            <Toaster 
-              position="top-center" 
-              reverseOrder={false} 
-              toastOptions={{
-                duration: 3000,
-                style: {
-                  transition: 'all 0.3s ease-out'
-                }
-              }}
-            />
-            {children}
+            <CartProvider>
+              <LocationProvider>
+                <Toaster 
+                  position="top-center" 
+                  reverseOrder={false} 
+                  toastOptions={{
+                    duration: 3000,
+                    style: {
+                      transition: 'all 0.3s ease-out'
+                    }
+                  }}
+                />
+                {children}
+              </LocationProvider>
+            </CartProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
       </body>

@@ -18,6 +18,10 @@ CREATE TABLE IF NOT EXISTS users (
   manager_type  TEXT,                          -- 'food' | 'medicine' | 'store' (only for managers)
   request_type  TEXT,                          -- 'vendor' | 'student'
   college_name  TEXT,
+  location_name TEXT,
+  pincode       TEXT,
+  latitude      DECIMAL(10, 7),
+  longitude     DECIMAL(10, 7),
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

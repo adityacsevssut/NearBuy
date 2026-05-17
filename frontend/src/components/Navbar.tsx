@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
+import { useCart } from "@/context/CartContext";
+import LocationModal from "./LocationModal";
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
 
@@ -21,7 +24,8 @@ export default function Navbar() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const { user, isLoggedIn, logout } = useAuth();
-  const cartCount = 3;
+  const { locationName, setIsLocationModalOpen } = useLocationContext();
+  const { restaurantCount: cartCount } = useCart();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -180,18 +184,20 @@ export default function Navbar() {
         <div className="flex items-center gap-0.5 flex-shrink-0">
           <button
             id="location-picker"
+            onClick={() => setIsLocationModalOpen(true)}
             className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
               border border-white/30 hover:bg-white/10 bg-white/20 text-white
-              transition-all duration-200 group mr-2`}
+              transition-all duration-200 group mr-2 max-w-[200px]`}
           >
-            <MapPin className={`w-3.5 h-3.5 text-white`} />
-            <span className="font-semibold text-xs tracking-tight">
-              Pulaha Hostel
+            <MapPin className={`w-3.5 h-3.5 text-white shrink-0`} />
+            <span className="font-semibold text-xs tracking-tight truncate">
+              {locationName}
             </span>
-            <ChevronDown className={`w-3 h-3 text-white/70 group-hover:text-white transition-colors`} />
+            <ChevronDown className={`w-3 h-3 text-white/70 group-hover:text-white transition-colors shrink-0`} />
           </button>
 
-          <button
+          <Link
+            href="/cart"
             id="cart-btn"
             className="relative p-2.5 rounded-xl hover:bg-white/10 transition-colors group"
           >
@@ -202,7 +208,7 @@ export default function Navbar() {
                 {cartCount}
               </span>
             )}
-          </button>
+          </Link>
 
           {isLoggedIn ? (
             <div className="relative ml-2 hidden md:block" ref={userMenuRef}>
@@ -346,6 +352,7 @@ export default function Navbar() {
         </div>
       </div>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
+      <LocationModal />
     </nav>
   );
 }

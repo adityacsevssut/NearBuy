@@ -9,6 +9,7 @@ import {
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
+import { useLocationContext } from "@/context/LocationContext";
 
 const categories = [
   { id: "all", label: "All", emoji: "🛒" },
@@ -50,6 +51,7 @@ export default function EssentialsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
+  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
 
   const filtered = products
     .filter((p) => {
@@ -83,21 +85,24 @@ export default function EssentialsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           {/* ── Mobile Top Bar (Location) ── */}
           <div className="md:hidden pt-4 pb-2 px-1">
-            <div className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm">
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm active:bg-blue-50 transition-colors"
+            >
                <div className="flex items-center gap-2.5 overflow-hidden">
                  <MapPin className="w-6 h-6 text-blue-600 shrink-0" />
-                 <div className="flex flex-col overflow-hidden">
-                   <div className="flex items-center gap-1 cursor-pointer">
-                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Home</span>
+                 <div className="flex flex-col overflow-hidden text-left">
+                   <div className="flex items-center gap-1">
+                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
                      <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
                    </div>
-                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">Pulaha Hostel, Burla, Odisha...</span>
+                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
                  </div>
                </div>
-               <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center shadow-sm border border-blue-200 shrink-0 ml-2">
-                  <span className="text-sm font-black text-blue-600">N</span>
+               <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shrink-0 ml-2">
+                  <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
                </div>
-            </div>
+            </button>
           </div>
 
           {/* ── Banner Section ── */}

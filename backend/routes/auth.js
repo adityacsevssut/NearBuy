@@ -630,4 +630,45 @@ router.delete("/me", authenticate, async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════════════
+// PUT /api/auth/me/location
+// Update user location
+// ════════════════════════════════════════════════════════════════════════════
+router.put(
+  "/me/location",
+  authenticate,
+  [
+    body("locationName").notEmpty().withMessage("Location name is required"),
+    body("pincode").optional(),
+    body("latitude").optional().isFloat(),
+    body("longitude").optional().isFloat(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { locationName, pincode, latitude, longitude } = req.body;
+    try {
+      const { rows } = await pool.query(
+        `UPDATE users SET 
+           location_name = $1, 
+           pincode = $2, 
+           latitude = $3, 
+           longitude = $4,
+           updated_at = NOW()
+         WHERE id = $5 AND is_active = TRUE 
+         RETURNING *`,
+        [locationName, pincode || null, latitude || null, longitude || null, req.user.id]
+      );
+
+      if (!rows.length) return res.status(404).json({ error: "User not found." });
+
+      return res.json({ message: "Location updated successfully.", user: safeUser(rows[0]) });
+    } catch (err) {
+      console.error("update location error:", err);
+      return res.status(500).json({ error: "Failed to update location." });
+    }
+  }
+);
+
 module.exports = router;

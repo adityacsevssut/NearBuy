@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { useCart } from "@/context/CartContext";
 
 const restaurants = [
   {
@@ -84,8 +85,8 @@ export default function VendorPage() {
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
   const [wishlist, setWishlist] = useState<number[]>([]);
-  const [cart, setCart] = useState<Record<number, number>>({});
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const { addItem, itemQty } = useCart();
 
   // Generate mock dish data for this vendor
   const mockDishes = [
@@ -346,16 +347,25 @@ export default function VendorPage() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 const q = quantities[dish.id] || 1;
-                                setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
+                                addItem({
+                                  id: dish.id,
+                                  name: dish.name,
+                                  price: dish.price,
+                                  image: dish.image,
+                                  type: dish.type as "veg" | "non-veg",
+                                  restaurantId: vendor.id,
+                                  restaurantName: vendor.name,
+                                  section: "food",
+                                }, q);
                                 setQuantities(q => ({ ...q, [dish.id]: 1 }));
                               }}
                               className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                                cart[dish.id]
+                                itemQty(dish.id, vendor.id) > 0
                                   ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
                                   : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                               }`}
                             >
-                              {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                              {itemQty(dish.id, vendor.id) > 0 ? `ADDED (${itemQty(dish.id, vendor.id)})` : "ADD"}
                             </button>
                           </div>
                         </div>

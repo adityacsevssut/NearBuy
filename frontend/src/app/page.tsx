@@ -12,6 +12,7 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
+import { useLocationContext } from "@/context/LocationContext";
 
 
 
@@ -151,6 +152,7 @@ export default function HomePage() {
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
+  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
 
   const filtered = restaurants.filter((r) => {
     const matchVeg = foodPref === "all" || (foodPref === "veg" ? r.veg : !r.veg);
@@ -179,21 +181,24 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           {/* ── Mobile Top Bar (Location) ── */}
           <div className="md:hidden pt-4 pb-2 px-1">
-            <div className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm">
+            <button
+              onClick={() => setIsLocationModalOpen(true)}
+              className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm active:bg-orange-50 transition-colors"
+            >
                <div className="flex items-center gap-2.5 overflow-hidden">
                  <MapPin className="w-6 h-6 text-orange-500 shrink-0" />
-                 <div className="flex flex-col overflow-hidden">
-                   <div className="flex items-center gap-1 cursor-pointer">
-                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Home</span>
+                 <div className="flex flex-col overflow-hidden text-left">
+                   <div className="flex items-center gap-1">
+                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
                      <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
                    </div>
-                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">Pulaha Hostel, Burla, Odisha...</span>
+                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
                  </div>
                </div>
-               <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center shadow-sm border border-orange-200 shrink-0 ml-2">
-                  <span className="text-sm font-black text-orange-600">N</span>
+               <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center shadow-sm shrink-0 ml-2">
+                  <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
                </div>
-            </div>
+            </button>
           </div>
 
           {/* ── Banner Section (Slider) ── */}
