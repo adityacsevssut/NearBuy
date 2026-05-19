@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Search, Star, Clock, ChevronRight,
-  MapPin, ChevronDown
+  MapPin, ChevronDown, SlidersHorizontal, X, Utensils
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -126,6 +126,7 @@ const quickBites: { label: string; image: string; emoji: string }[] = [
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
+  const [showFilters, setShowFilters] = useState(false);
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
   const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
@@ -185,51 +186,89 @@ export default function HomePage() {
           </div>
 
           {/* ── Sub-header (Filter / Veg Toggle) ── */}
-          <div className="flex items-center justify-between py-4 border-b border-orange-100">
-            <h1 className="font-black text-2xl text-orange-500 tracking-tight">Food Items</h1>
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between py-4 border-b border-orange-100 mb-4">
+            <h1 className="font-black text-lg md:text-xl text-orange-500 tracking-tight leading-tight mr-2">
+              NearBuy<br />Food
+            </h1>
+            <div className="flex items-center gap-3">
+              {/* Veg Toggle (Zomato Style) */}
+              <label className="flex items-center gap-1.5 cursor-pointer bg-white border border-gray-200 px-2.5 py-1.5 rounded-xl shadow-sm hover:border-green-300 transition-all select-none">
+                <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center transition-colors ${foodPref === "veg" ? "border-green-600 bg-white" : "border-gray-400 bg-gray-50"}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full transition-colors ${foodPref === "veg" ? "bg-green-600" : "bg-transparent"}`} />
+                </span>
+                <span className={`text-[11px] font-bold transition-colors ${foodPref === "veg" ? "text-green-700" : "text-gray-600"}`}>Veg Mode</span>
+                <div className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${foodPref === "veg" ? "bg-green-500" : "bg-gray-300"}`}>
+                  <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-sm ${foodPref === "veg" ? "translate-x-3.5" : "translate-x-0.5"}`} />
+                </div>
+                <input 
+                  type="checkbox" 
+                  className="hidden" 
+                  checked={foodPref === "veg"} 
+                  onChange={(e) => setFoodPref(e.target.checked ? "veg" : "all")} 
+                />
+              </label>
+
+              {/* Filter Button */}
               <button
-                id="all-toggle"
-                suppressHydrationWarning
-                onClick={() => setFoodPref("all")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "all"
-                  ? "bg-gradient-to-r from-orange-500 to-orange-400 border-orange-500 text-white shadow-orange-500/30"
-                  : "bg-white border-orange-200 text-gray-600 hover:border-orange-400 hover:text-orange-600"
-                  }`}
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${showFilters ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/30 shadow-sm" : "bg-white border-orange-200 text-gray-700 hover:border-orange-400"}`}
               >
-                View All
-              </button>
-              <button
-                id="veg-toggle"
-                suppressHydrationWarning
-                onClick={() => setFoodPref("veg")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "veg"
-                  ? "bg-orange-600 border-orange-600 text-white"
-                  : "bg-white border-gray-300 text-gray-600"
-                  }`}
-              >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-orange-600"}`} />
-                Veg Only
-              </button>
-              <button
-                id="nonveg-toggle"
-                suppressHydrationWarning
-                onClick={() => setFoodPref("non-veg")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref === "non-veg"
-                  ? "bg-red-600 border-red-600 text-white"
-                  : "bg-white border-gray-300 text-gray-600"
-                  }`}
-              >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`} />
-                Non-veg
+                <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
               </button>
             </div>
           </div>
 
 
 
-          {/* Mobile Search Replacement */}
-          <div className="md:hidden py-3">
+          <div className="flex gap-6 pb-12">
+            {/* ── Sidebar filters ── */}
+            {/* Mobile Overlay */}
+            {showFilters && (
+              <div
+                className="fixed inset-0 z-[60] bg-black/50 md:hidden backdrop-blur-sm"
+                onClick={() => setShowFilters(false)}
+              />
+            )}
+            <aside
+              className={`fixed inset-y-0 right-0 z-[70] w-72 bg-white shadow-2xl transform transition-transform duration-300 flex flex-col md:relative md:z-0 md:w-64 md:transform-none md:bg-transparent md:shadow-none md:flex-shrink-0 ${showFilters ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
+            >
+              {/* Mobile Header */}
+              <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100 bg-white flex-shrink-0">
+                <div className="flex items-center gap-2">
+                  <Utensils className="w-5 h-5 text-orange-600" />
+                  <p className="font-black text-lg text-gray-900">Filters</p>
+                </div>
+                <button onClick={() => setShowFilters(false)} className="p-1.5 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-white md:rounded-2xl md:border md:border-gray-200 md:sticky md:top-24 md:shadow-sm pb-24 md:pb-0 scrollbar-hide">
+                <div className="hidden md:flex px-5 py-4 border-b border-gray-100 items-center gap-2">
+                  <Utensils className="w-5 h-5 text-orange-600" />
+                  <p className="font-black text-base text-gray-900">Filters</p>
+                </div>
+
+                {/* Dietary Preference */}
+                <div className="px-5 py-5 border-b border-gray-100">
+                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Dietary Preference</p>
+                  <div className="space-y-1">
+                    <button onClick={() => setFoodPref("all")} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "all" ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md shadow-orange-500/20" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 border border-transparent"}`}>View All</button>
+                    <button onClick={() => setFoodPref("veg")} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "veg" ? "bg-gradient-to-r from-green-600 to-green-500 text-white shadow-md shadow-green-500/20" : "text-gray-600 hover:bg-green-50 hover:text-green-600 border border-transparent"}`}>
+                      <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "veg" ? "bg-green-600" : "bg-transparent"}`} /></span>Pure Veg
+                    </button>
+                    <button onClick={() => setFoodPref("non-veg")} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "non-veg" ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md shadow-red-500/20" : "text-gray-600 hover:bg-red-50 hover:text-red-600 border border-transparent"}`}>
+                      <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "non-veg" ? "bg-red-600" : "bg-transparent"}`} /></span>Non-Veg Only
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* ── Main Content Area ── */}
+            <div className="flex-1 min-w-0 pt-2">
+              {/* Mobile Search Replacement */}
+              <div className="md:hidden py-3 mb-2">
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100/50 transition-all mx-1">
               <Search className="w-4 h-4 text-orange-400 flex-shrink-0" />
               <input
@@ -322,14 +361,16 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
-            {filtered.length === 0 && (
-              <div className="flex flex-col items-center py-20 text-gray-400">
-                <span className="text-5xl mb-4">🍽️</span>
-                <p className="font-bold text-gray-600 text-lg">No restaurants found</p>
-                <p className="text-sm mt-1">Try changing your filters or search</p>
-              </div>
-            )}
+              {filtered.length === 0 && (
+                <div className="col-span-full flex flex-col items-center py-20 text-gray-400 bg-white rounded-3xl border border-gray-200">
+                  <span className="text-5xl mb-4">🍽️</span>
+                  <p className="font-bold text-gray-600 text-lg">No restaurants found</p>
+                  <p className="text-sm mt-1">Try changing your filters or search</p>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
 
         </div>
       </main>

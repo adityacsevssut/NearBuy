@@ -10,7 +10,7 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace
 
 type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "forgot-email" | "forgot-otp" | "forgot-reset" | "success" | "vendor-login" | "manager-login";
 
-interface Props { isOpen: boolean; onClose: () => void; isEssentials?: boolean; }
+interface Props { isOpen: boolean; onClose: () => void; isEssentials?: boolean; isMedico?: boolean; }
 
 const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, showEye, onEyeClick, isEyeOpen, ...props }: any) => (
   <div className="relative group">
@@ -35,8 +35,8 @@ const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, sh
   </div>
 );
 
-export default function LoginModal({ isOpen, onClose, isEssentials = false }: Props) {
-  // Theme: orange for Food, blue for Essentials
+export default function LoginModal({ isOpen, onClose, isEssentials = false, isMedico = false }: Props) {
+  // Theme: orange for Food, blue for Essentials, emerald for Medico
   const t = isEssentials ? {
     logoText: "text-blue-500",
     inputBorder: "focus:border-blue-500",
@@ -52,6 +52,21 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
     panelHover: "hover:border-blue-500 hover:bg-blue-50",
     panelIcon: "bg-blue-100 text-blue-600",
     forgotText: "text-blue-600 hover:text-blue-700",
+  } : isMedico ? {
+    logoText: "text-emerald-500",
+    inputBorder: "focus:border-emerald-500",
+    inputRing: "focus:ring-emerald-500/10",
+    iconFocus: "group-focus-within:text-emerald-500",
+    labelFocus: "peer-focus:text-emerald-500",
+    btnGrad: "from-emerald-500 to-emerald-600",
+    btnShadow: "shadow-emerald-500/30 hover:shadow-emerald-500/40",
+    otpFocus: "focus:border-emerald-500 focus:ring-emerald-500/10",
+    headerGlow: "from-emerald-50/50",
+    linkText: "text-emerald-600 hover:text-emerald-700",
+    cardBorder: "border-emerald-100",
+    panelHover: "hover:border-emerald-500 hover:bg-emerald-50",
+    panelIcon: "bg-emerald-100 text-emerald-600",
+    forgotText: "text-emerald-600 hover:text-emerald-700",
   } : {
     logoText: "text-orange-500",
     inputBorder: "focus:border-orange-500",
@@ -169,14 +184,14 @@ export default function LoginModal({ isOpen, onClose, isEssentials = false }: Pr
 
   const toastStyle = {
     style: {
-      border: `1px solid ${isEssentials ? '#3b82f6' : '#f97316'}`,
+      border: `1px solid ${isEssentials ? '#3b82f6' : isMedico ? '#10b981' : '#f97316'}`,
       padding: '16px',
-      color: isEssentials ? '#3b82f6' : '#f97316',
+      color: isEssentials ? '#3b82f6' : isMedico ? '#10b981' : '#f97316',
       fontWeight: 'bold',
       borderRadius: '12px',
       background: '#fff',
     },
-    iconTheme: { primary: isEssentials ? '#3b82f6' : '#f97316', secondary: '#FFFAEE' },
+    iconTheme: { primary: isEssentials ? '#3b82f6' : isMedico ? '#10b981' : '#f97316', secondary: '#FFFAEE' },
   };
 
   async function handleSignupSendOtp(e: React.FormEvent) {

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft, MapPin, ChevronRight, Plus, Minus, Trash2,
+  MapPin, ChevronRight, Plus, Minus, Trash2,
   Tag, CheckCircle, Bike, ShoppingBag, Utensils, Store,
   CreditCard, Smartphone, Wallet, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -282,7 +282,6 @@ export default function CartPage() {
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Back button */}
           <Link href="/" className="flex items-center gap-1.5 p-2 -ml-2 rounded-lg hover:bg-gray-100 text-gray-700 font-bold text-sm transition-colors">
-            <ArrowLeft className="w-4 h-4" />
             Back to Home
           </Link>
 

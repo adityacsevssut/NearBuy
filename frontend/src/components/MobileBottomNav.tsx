@@ -9,8 +9,9 @@ import { useAuth } from "../context/AuthContext";
 export default function MobileBottomNav() {
   const pathname = usePathname();
   const isEssentials = pathname.startsWith('/essentials');
-  const activeBg = isEssentials ? "bg-blue-100" : "bg-orange-100";
-  const activeText = isEssentials ? "text-blue-600" : "text-orange-600";
+  const isMedico = pathname.startsWith('/medico');
+  const activeBg = isEssentials ? "bg-blue-100" : isMedico ? "bg-emerald-100" : "bg-orange-100";
+  const activeText = isEssentials ? "text-blue-600" : isMedico ? "text-emerald-600" : "text-orange-600";
 
   const { isLoggedIn } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -23,61 +24,65 @@ export default function MobileBottomNav() {
       id: "mobile-nav-auth", 
       label: isLoggedIn ? "Account" : "Login", 
       icon: isLoggedIn ? User : LogIn, 
-      href: isLoggedIn ? (isEssentials ? "/account?theme=blue" : "/account") : "#" 
+      href: isLoggedIn ? (isEssentials ? "/account?theme=blue" : isMedico ? "/account?theme=emerald" : "/account") : "#" 
     },
   ];
 
   return (
     <>
-      <nav
-        id="mobile-bottom-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden
-          bg-white/90 backdrop-blur-xl border-t border-gray-200 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] pb-safe"
-      >
-        <div className="flex items-center justify-around px-2 py-2 relative">
-          {tabs.map(({ id, label, icon: Icon, href }) => {
-            const active = pathname === href && href !== "#";
-            
-            const handleClick = (e: React.MouseEvent) => {
-              if (id === "mobile-nav-auth" && !isLoggedIn) {
-                e.preventDefault();
-                setIsLoginModalOpen(true);
-              }
-            };
+      <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden flex justify-center pointer-events-none pb-safe">
+        <nav
+          id="mobile-bottom-nav"
+          className="pointer-events-auto bg-white/85 backdrop-blur-2xl border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.12)] rounded-3xl w-full max-w-[380px] px-2 py-1.5"
+        >
+          <div className="flex items-center justify-around relative">
+            {tabs.map(({ id, label, icon: Icon, href }) => {
+              const active = pathname === href && href !== "#";
+              
+              const handleClick = (e: React.MouseEvent) => {
+                if (id === "mobile-nav-auth" && !isLoggedIn) {
+                  e.preventDefault();
+                  setIsLoginModalOpen(true);
+                }
+              };
 
-            return (
-              <a
-                key={id}
-                id={id}
-                href={href}
-                onClick={handleClick}
-                className="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all duration-200 group cursor-pointer"
-              >
-                <div
-                  className={`p-1.5 rounded-xl transition-all duration-200 ${
-                    active ? activeBg : "group-hover:bg-gray-100"
-                  }`}
+              return (
+                <a
+                  key={id}
+                  id={id}
+                  href={href}
+                  onClick={handleClick}
+                  className="flex flex-col items-center gap-1 w-16 py-1 rounded-2xl transition-all duration-300 group cursor-pointer relative"
                 >
-                  <Icon
-                    className={`w-5 h-5 transition-colors duration-200 ${
-                      active ? activeText : "text-gray-400 group-hover:text-gray-600"
+                  {active && (
+                    <div className={`absolute inset-0 ${activeBg} rounded-2xl opacity-50 -z-10`} />
+                  )}
+                  <div
+                    className={`p-1.5 rounded-xl transition-all duration-300 ${
+                      active ? "-translate-y-1" : "group-hover:-translate-y-0.5"
                     }`}
-                  />
-                </div>
-                <span
-                  className={`text-[10px] font-semibold transition-colors duration-200 ${
-                    active ? activeText : "text-gray-400 group-hover:text-gray-500"
-                  }`}
-                >
-                  {label}
-                </span>
-              </a>
-            );
-          })}
-        </div>
-      </nav>
+                  >
+                    <Icon
+                      className={`w-[22px] h-[22px] transition-colors duration-300 ${
+                        active ? activeText : "text-gray-400 group-hover:text-gray-600"
+                      }`}
+                    />
+                  </div>
+                  <span
+                    className={`text-[9px] font-bold transition-all duration-300 ${
+                      active ? activeText : "text-gray-400 group-hover:text-gray-500"
+                    }`}
+                  >
+                    {label}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        </nav>
+      </div>
       
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} isMedico={isMedico} />
     </>
   );
 }

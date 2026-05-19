@@ -43,7 +43,7 @@ export default function Footer() {
                   setIsModalOpen(true);
                 }}
               >
-                Register as Student →
+                Register as Student
               </button>
             </div>
 
@@ -65,7 +65,7 @@ export default function Footer() {
                   setIsModalOpen(true);
                 }}
               >
-                Register as Vendor →
+                Register as Vendor
               </button>
             </div>
           </div>

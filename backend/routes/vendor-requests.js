@@ -186,4 +186,61 @@ router.patch("/:id/reject", authenticate, async (req, res) => {
   }
 });
 
+// DELETE /api/vendor-requests/:id — hard-delete a vendor request
+router.delete("/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const check = await pool.query("SELECT vendor_type FROM vendor_requests WHERE id=$1", [id]);
+    if (!check.rows.length) return res.status(404).json({ error: "Request not found." });
+
+    if (req.user.role === "manager") {
+      const userType = (req.user.manager_type || "").toLowerCase();
+      const targetType = (check.rows[0].vendor_type || "").toLowerCase();
+      if (userType !== targetType) {
+        return res.status(403).json({ error: "Cannot delete request for a different vendor type." });
+      }
+    }
+
+    await pool.query("DELETE FROM vendor_requests WHERE id=$1", [id]);
+    return res.json({ message: "Vendor request deleted successfully." });
+  } catch (err) {
+    console.error("delete vendor request error:", err);
+    return res.status(500).json({ error: "Failed to delete request." });
+  }
+});
+
+// PUT /api/vendor-requests/:id — edit vendor details (name, email, mobile)
+router.put("/:id", authenticate, async (req, res) => {
+  const { id } = req.params;
+  const { owner_name, owner_email, owner_mobile } = req.body;
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const check = await pool.query("SELECT vendor_type FROM vendor_requests WHERE id=$1", [id]);
+    if (!check.rows.length) return res.status(404).json({ error: "Request not found." });
+
+    if (req.user.role === "manager") {
+      const userType = (req.user.manager_type || "").toLowerCase();
+      const targetType = (check.rows[0].vendor_type || "").toLowerCase();
+      if (userType !== targetType) {
+        return res.status(403).json({ error: "Cannot edit request for a different vendor type." });
+      }
+    }
+
+    await pool.query(
+      `UPDATE vendor_requests SET owner_name=$1, owner_email=$2, owner_mobile=$3 WHERE id=$4`,
+      [owner_name, owner_email, owner_mobile, id]
+    );
+    return res.json({ message: "Vendor updated successfully." });
+  } catch (err) {
+    console.error("edit vendor request error:", err);
+    return res.status(500).json({ error: "Failed to update request." });
+  }
+});
+
 module.exports = router;
+

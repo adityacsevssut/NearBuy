@@ -43,24 +43,25 @@ export default function Navbar() {
   }, [userMenuOpen]);
 
   const isEssentials = pathname === "/essentials";
+  const isMedico = pathname === "/medico";
   
   const theme = {
-    gradient: isEssentials ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
-    textPrimary: isEssentials ? "text-blue-500" : "text-orange-500",
-    avatarBg: isEssentials ? "from-blue-100 to-blue-50" : "from-orange-100 to-orange-50",
-    selection: isEssentials ? "selection:bg-blue-200" : "selection:bg-orange-200",
-    hoverBg: isEssentials ? "group-hover:bg-blue-50" : "group-hover:bg-orange-50",
-    hoverText: isEssentials ? "group-hover:text-blue-500" : "group-hover:text-orange-500",
-    dangerBorder: isEssentials ? "border-blue-50" : "border-red-50",
-    dangerText: isEssentials ? "text-blue-500" : "text-red-500",
-    dangerHoverBg: isEssentials ? "hover:bg-blue-50/50" : "hover:bg-red-50/50",
+    gradient: isEssentials ? "from-blue-500 to-blue-400" : isMedico ? "from-emerald-500 to-emerald-400" : "from-orange-500 to-orange-400",
+    textPrimary: isEssentials ? "text-blue-500" : isMedico ? "text-emerald-500" : "text-orange-500",
+    avatarBg: isEssentials ? "from-blue-100 to-blue-50" : isMedico ? "from-emerald-100 to-emerald-50" : "from-orange-100 to-orange-50",
+    selection: isEssentials ? "selection:bg-blue-200" : isMedico ? "selection:bg-emerald-200" : "selection:bg-orange-200",
+    hoverBg: isEssentials ? "group-hover:bg-blue-50" : isMedico ? "group-hover:bg-emerald-50" : "group-hover:bg-orange-50",
+    hoverText: isEssentials ? "group-hover:text-blue-500" : isMedico ? "group-hover:text-emerald-500" : "group-hover:text-orange-500",
+    dangerBorder: isEssentials ? "border-blue-50" : isMedico ? "border-emerald-50" : "border-red-50",
+    dangerText: isEssentials ? "text-blue-500" : isMedico ? "text-emerald-500" : "text-red-500",
+    dangerHoverBg: isEssentials ? "hover:bg-blue-50/50" : isMedico ? "hover:bg-emerald-50/50" : "hover:bg-red-50/50",
   };
 
   const primaryText = theme.textPrimary;
   const primaryHoverText = theme.hoverText;
-  const primaryBorder = isEssentials ? "border-blue-400" : "border-orange-400";
-  const primaryBorderHover = isEssentials ? "hover:border-blue-400" : "hover:border-orange-400";
-  const primaryBg = isEssentials ? "bg-blue-500" : "bg-orange-500";
+  const primaryBorder = isEssentials ? "border-blue-400" : isMedico ? "border-emerald-400" : "border-orange-400";
+  const primaryBorderHover = isEssentials ? "hover:border-blue-400" : isMedico ? "hover:border-emerald-400" : "hover:border-orange-400";
+  const primaryBg = isEssentials ? "bg-blue-500" : isMedico ? "bg-emerald-500" : "bg-orange-500";
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -70,16 +71,15 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 shadow-sm transition-colors duration-300 ${isEssentials ? 'bg-blue-500' : 'bg-orange-500'}`}>
+    <nav className={`fixed top-0 left-0 right-0 z-50 shadow-sm transition-colors duration-300 ${isEssentials ? 'bg-blue-500' : isMedico ? 'bg-emerald-500' : 'bg-orange-500'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4">
 
-        {/* ── Logo ── */}
-        <Link href="/" className="flex-shrink-0 flex items-center gap-2 group">
+        <Link href="/" className="flex-shrink-0 flex items-center gap-1.5 md:gap-2 group">
           <div className="flex items-center -skew-x-6 pr-1">
-            <span className={`font-black text-3xl tracking-tighter drop-shadow-sm transition-colors text-white`}>
+            <span className={`font-black text-2xl md:text-3xl tracking-tighter drop-shadow-sm transition-colors text-white`}>
               N
             </span>
-            <span className="text-black font-black text-3xl tracking-tighter drop-shadow-sm transition-colors">
+            <span className="text-black font-black text-2xl md:text-3xl tracking-tighter drop-shadow-sm transition-colors">
               B
             </span>
           </div>
@@ -87,36 +87,45 @@ export default function Navbar() {
             <span className="text-white">Near</span>
             <span className="text-black">Buy</span>
           </span>
-          <span className={`lg:hidden font-black text-xl tracking-tight text-white -ml-1`}>
-            {isEssentials ? "Store" : "Food"}
-          </span>
         </Link>
 
-        {/* ── App Mode Toggle (Food vs Essentials) ── */}
+        {/* ── App Mode Toggle (Food vs Essentials vs Medico) ── */}
         <div className="flex bg-black/10 p-1 rounded-xl shadow-inner border border-white/10 flex-shrink-0 backdrop-blur-sm">
           <Link
             href="/"
-            className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
-              !isEssentials
+            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
+              !isEssentials && !isMedico
                 ? `bg-white text-orange-600 shadow-sm`
                 : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
-            <Store className="w-4 h-4" />
+            <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span className="hidden sm:block">Food Delivery</span>
             <span className="sm:hidden">Food</span>
           </Link>
           <Link
             href="/essentials"
-            className={`flex items-center gap-1.5 px-3 md:px-4 py-1.5 rounded-lg text-xs md:text-sm font-bold transition-all duration-300 ${
+            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
               isEssentials
                 ? `bg-white text-blue-600 shadow-sm`
                 : "text-white/80 hover:text-white hover:bg-white/10"
             }`}
           >
-            <Package className="w-4 h-4" />
+            <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
             <span className="hidden sm:block">Essentials</span>
             <span className="sm:hidden">Store</span>
+          </Link>
+          <Link
+            href="/medico"
+            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
+              isMedico
+                ? `bg-white text-emerald-600 shadow-sm`
+                : "text-white/80 hover:text-white hover:bg-white/10"
+            }`}
+          >
+            <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:block">Medico</span>
+            <span className="sm:hidden">Medico</span>
           </Link>
         </div>
 
@@ -132,14 +141,14 @@ export default function Navbar() {
           >
             <Search
               className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                searchFocused ? (isEssentials ? 'text-blue-500' : 'text-orange-500') : "text-gray-400"
+                searchFocused ? (isEssentials ? 'text-blue-500' : isMedico ? 'text-emerald-500' : 'text-orange-500') : "text-gray-400"
               }`}
             />
             <input
               id="search-bar"
               suppressHydrationWarning
               type="text"
-              placeholder={isEssentials ? "Search for notebooks, chargers..." : "Search for Biryani, Pizza..."}
+              placeholder={isEssentials ? "Search for notebooks, chargers..." : isMedico ? "Search for medicines..." : "Search for Biryani, Pizza..."}
               className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none h-6"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -204,7 +213,7 @@ export default function Navbar() {
             <ShoppingCart className="w-5 h-5 text-white group-hover:text-white transition-colors" />
             {cartCount > 0 && (
               <span className={`absolute top-1 right-1 w-4 h-4 bg-white rounded-full
-                ${isEssentials ? 'text-blue-600' : 'text-orange-600'} text-[10px] font-black flex items-center justify-center shadow-sm`}>
+                ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'} text-[10px] font-black flex items-center justify-center shadow-sm`}>
                 {cartCount}
               </span>
             )}
@@ -217,7 +226,7 @@ export default function Navbar() {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-200"
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-white ${isEssentials ? 'text-blue-600' : 'text-orange-600'} text-xs font-bold`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-white ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'} text-xs font-bold`}>
                   {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
                 </div>
                 <span className="hidden sm:block text-sm font-semibold text-white">{user?.firstName || user?.email?.split('@')[0]}</span>
@@ -344,14 +353,14 @@ export default function Navbar() {
             <button
               id="login-signup-btn"
               onClick={() => setIsLoginModalOpen(true)}
-              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 bg-white ${isEssentials ? 'text-blue-600' : 'text-orange-600'}`}
+              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 bg-white ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'}`}
             >
               Login
             </button>
           )}
         </div>
       </div>
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} />
+      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} isMedico={isMedico} />
       <LocationModal />
     </nav>
   );
