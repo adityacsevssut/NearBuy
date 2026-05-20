@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -16,98 +16,7 @@ import { useLocationContext } from "@/context/LocationContext";
 
 
 
-const restaurants = [
-  {
-    id: "rest-1",
-    name: "Sharma Dhaba",
-    tags: ["trending", "fast"],
-    cuisine: "North Indian · Biryani · Thali",
-    rating: 4.7,
-    reviews: 320,
-    time: "12–15 min",
-    minOrder: "₹80",
-    offer: "50% off up to ₹80",
-    image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=500&q=80",
-    badge: "Bestseller",
-    badgeColor: "bg-orange-100 text-orange-700",
-    veg: false,
-  },
-  {
-    id: "rest-2",
-    name: "Maggi Corner",
-    tags: ["trending", "fast", "veg"],
-    cuisine: "Fast Food · Noodles · Snacks",
-    rating: 4.5,
-    reviews: 210,
-    time: "8–12 min",
-    minOrder: "₹40",
-    offer: "Buy 2 Get 1 Free",
-    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80",
-    badge: "Late Night",
-    badgeColor: "bg-indigo-100 text-indigo-700",
-    veg: true,
-  },
-  {
-    id: "rest-3",
-    name: "Campus Café",
-    tags: ["cafe", "veg"],
-    cuisine: "Beverages · Sandwiches · Pastries",
-    rating: 4.6,
-    reviews: 180,
-    time: "10–14 min",
-    minOrder: "₹60",
-    offer: "Free cookie on orders ₹150+",
-    image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80",
-    badge: "Top Rated",
-    badgeColor: "bg-orange-100 text-orange-700",
-    veg: true,
-  },
-  {
-    id: "rest-4",
-    name: "Pizza Bhai",
-    tags: ["pizza", "fast"],
-    cuisine: "Pizza · Pasta · Garlic Bread",
-    rating: 4.3,
-    reviews: 95,
-    time: "18–22 min",
-    minOrder: "₹120",
-    offer: "₹30 off first order",
-    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80",
-    badge: "New",
-    badgeColor: "bg-blue-100 text-blue-700",
-    veg: false,
-  },
-  {
-    id: "rest-5",
-    name: "Hostel Meals",
-    tags: ["veg", "trending"],
-    cuisine: "Home Style · Thali · Dal Rice",
-    rating: 4.4,
-    reviews: 140,
-    time: "15–20 min",
-    minOrder: "₹70",
-    offer: "Budget friendly – daily specials",
-    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80",
-    badge: "Budget Pick",
-    badgeColor: "bg-purple-100 text-purple-700",
-    veg: true,
-  },
-  {
-    id: "rest-6",
-    name: "Rolls & Wraps",
-    tags: ["fast", "trending"],
-    cuisine: "Rolls · Wraps · Kathi",
-    rating: 4.2,
-    reviews: 88,
-    time: "10–15 min",
-    minOrder: "₹60",
-    offer: "Combo meals from ₹99",
-    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=500&q=80",
-    badge: "Popular",
-    badgeColor: "bg-amber-100 text-amber-700",
-    veg: false,
-  },
-];
+// Removed hardcoded restaurants array
 
 const quickBites: { label: string; image: string; emoji: string }[] = [
   { label: "Biryani", image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=200&h=200", emoji: "🍛" },
@@ -123,13 +32,69 @@ const quickBites: { label: string; image: string; emoji: string }[] = [
   { label: "Others", image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=200&h=200", emoji: "🍽️" },
 ];
 
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
+}
+
+function getDistance(lat1: number | null, lon1: number | null, lat2: number | null, lon2: number | null) {
+  if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return null;
+  const R = 6371; // Radius of the earth in km
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const d = R * c; // Distance in km
+  return d;
+}
+
+function formatDistance(userLat: number | null, userLon: number | null, userPin: string, vendor: any) {
+  const distance = getDistance(
+    userLat,
+    userLon,
+    vendor.latitude ? parseFloat(vendor.latitude) : null,
+    vendor.longitude ? parseFloat(vendor.longitude) : null
+  );
+  if (distance !== null) {
+    if (distance < 1) {
+      return `${Math.round(distance * 1000)} m`;
+    }
+    return `${distance.toFixed(1)} km`;
+  }
+  return null;
+}
+
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [showFilters, setShowFilters] = useState(false);
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
-  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, pincode, latitude, longitude, setIsLocationModalOpen, activeCenter } = useLocationContext();
+
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    fetchRestaurants();
+  }, []);
+
+  const fetchRestaurants = async () => {
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/public/vendors`);
+      if (res.ok) {
+        const data = await res.json();
+        setRestaurants(data);
+      }
+    } catch (err) {
+      console.error("Failed to load restaurants", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filtered = restaurants.filter((r) => {
     const matchVeg = foodPref === "all" || (foodPref === "veg" ? r.veg : !r.veg);
@@ -137,7 +102,24 @@ export default function HomePage() {
       !searchQuery ||
       r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchVeg && matchSearch;
+
+    // Main Service Center Radius constraint:
+    let matchCenter = true;
+    if (activeCenter) {
+      const vendorLat = r.latitude ? parseFloat(r.latitude) : null;
+      const vendorLon = r.longitude ? parseFloat(r.longitude) : null;
+      const centerLat = activeCenter.latitude ? parseFloat(activeCenter.latitude) : null;
+      const centerLon = activeCenter.longitude ? parseFloat(activeCenter.longitude) : null;
+      
+      if (vendorLat !== null && vendorLon !== null && centerLat !== null && centerLon !== null) {
+        const distToCenter = getDistance(centerLat, centerLon, vendorLat, vendorLon);
+        if (distToCenter !== null) {
+          matchCenter = distToCenter <= parseFloat(activeCenter.radius_km);
+        }
+      }
+    }
+
+    return matchVeg && matchSearch && matchCenter;
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -208,65 +190,82 @@ export default function HomePage() {
                 />
               </label>
 
-              {/* Filter Button */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${showFilters ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/30 shadow-sm" : "bg-white border-orange-200 text-gray-700 hover:border-orange-400"}`}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
-              </button>
+              {/* Filter Button — desktop: dropdown popover, mobile: slide-in */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${showFilters ? "bg-orange-600 text-white border-orange-600 shadow-orange-500/30 shadow-sm" : "bg-white border-orange-200 text-gray-700 hover:border-orange-400"}`}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
+                  {foodPref !== "all" && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-white ml-0.5 opacity-80" />
+                  )}
+                </button>
+
+                {/* Desktop dropdown popover */}
+                {showFilters && (
+                  <div className="hidden md:block absolute right-0 top-full mt-2 z-[80] w-52 bg-white border border-gray-200 rounded-2xl shadow-xl overflow-hidden">
+                    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100">
+                      <Utensils className="w-4 h-4 text-orange-500" />
+                      <p className="font-black text-sm text-gray-900">Dietary Preference</p>
+                    </div>
+                    <div className="p-2 space-y-1">
+                      <button onClick={() => { setFoodPref("all"); setShowFilters(false); }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "all" ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-sm" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"}`}>View All</button>
+                      <button onClick={() => { setFoodPref("veg"); setShowFilters(false); }} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "veg" ? "bg-gradient-to-r from-green-600 to-green-500 text-white shadow-sm" : "text-gray-600 hover:bg-green-50 hover:text-green-600"}`}>
+                        <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center shrink-0 ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "veg" ? "bg-green-600" : "bg-transparent"}`} /></span>Pure Veg
+                      </button>
+                      <button onClick={() => { setFoodPref("non-veg"); setShowFilters(false); }} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "non-veg" ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-sm" : "text-gray-600 hover:bg-red-50 hover:text-red-600"}`}>
+                        <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center shrink-0 ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "non-veg" ? "bg-red-600" : "bg-transparent"}`} /></span>Non-Veg Only
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
 
 
-          <div className="flex gap-6 pb-12">
-            {/* ── Sidebar filters ── */}
-            {/* Mobile Overlay */}
-            {showFilters && (
-              <div
-                className="fixed inset-0 z-[60] bg-black/50 md:hidden backdrop-blur-sm"
-                onClick={() => setShowFilters(false)}
-              />
-            )}
-            <aside
-              className={`fixed inset-y-0 right-0 z-[70] w-72 bg-white shadow-2xl transform transition-transform duration-300 flex flex-col md:relative md:z-0 md:w-64 md:transform-none md:bg-transparent md:shadow-none md:flex-shrink-0 ${showFilters ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}
-            >
-              {/* Mobile Header */}
-              <div className="md:hidden flex items-center justify-between p-4 border-b border-gray-100 bg-white flex-shrink-0">
-                <div className="flex items-center gap-2">
-                  <Utensils className="w-5 h-5 text-orange-600" />
-                  <p className="font-black text-lg text-gray-900">Filters</p>
-                </div>
-                <button onClick={() => setShowFilters(false)} className="p-1.5 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200">
-                  <X className="w-4 h-4" />
-                </button>
+          {/* ── Filter Popover (mobile: slide-in panel, desktop: dropdown) ── */}
+          {showFilters && (
+            <div
+              className="fixed inset-0 z-[60] backdrop-blur-sm bg-black/40 md:bg-transparent md:backdrop-blur-none"
+              onClick={() => setShowFilters(false)}
+            />
+          )}
+
+          {/* Mobile slide-in panel */}
+          <div
+            className={`fixed inset-y-0 right-0 z-[70] w-72 bg-white shadow-2xl transform transition-transform duration-300 flex flex-col md:hidden ${showFilters ? "translate-x-0" : "translate-x-full"}`}
+          >
+            <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <Utensils className="w-5 h-5 text-orange-600" />
+                <p className="font-black text-lg text-gray-900">Filters</p>
               </div>
-
-              <div className="flex-1 overflow-y-auto bg-white md:rounded-2xl md:border md:border-gray-200 md:sticky md:top-24 md:shadow-sm pb-24 md:pb-0 scrollbar-hide">
-                <div className="hidden md:flex px-5 py-4 border-b border-gray-100 items-center gap-2">
-                  <Utensils className="w-5 h-5 text-orange-600" />
-                  <p className="font-black text-base text-gray-900">Filters</p>
-                </div>
-
-                {/* Dietary Preference */}
-                <div className="px-5 py-5 border-b border-gray-100">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Dietary Preference</p>
-                  <div className="space-y-1">
-                    <button onClick={() => setFoodPref("all")} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "all" ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md shadow-orange-500/20" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600 border border-transparent"}`}>View All</button>
-                    <button onClick={() => setFoodPref("veg")} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "veg" ? "bg-gradient-to-r from-green-600 to-green-500 text-white shadow-md shadow-green-500/20" : "text-gray-600 hover:bg-green-50 hover:text-green-600 border border-transparent"}`}>
-                      <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "veg" ? "bg-green-600" : "bg-transparent"}`} /></span>Pure Veg
-                    </button>
-                    <button onClick={() => setFoodPref("non-veg")} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "non-veg" ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md shadow-red-500/20" : "text-gray-600 hover:bg-red-50 hover:text-red-600 border border-transparent"}`}>
-                      <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "non-veg" ? "bg-red-600" : "bg-transparent"}`} /></span>Non-Veg Only
-                    </button>
-                  </div>
+              <button onClick={() => setShowFilters(false)} className="p-1.5 bg-gray-100 rounded-full text-gray-600 hover:bg-gray-200">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto pb-24 scrollbar-hide">
+              <div className="px-5 py-5">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Dietary Preference</p>
+                <div className="space-y-1">
+                  <button onClick={() => { setFoodPref("all"); setShowFilters(false); }} className={`w-full text-left px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "all" ? "bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-md shadow-orange-500/20" : "text-gray-600 hover:bg-orange-50 hover:text-orange-600"}`}>View All</button>
+                  <button onClick={() => { setFoodPref("veg"); setShowFilters(false); }} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "veg" ? "bg-gradient-to-r from-green-600 to-green-500 text-white shadow-md shadow-green-500/20" : "text-gray-600 hover:bg-green-50 hover:text-green-600"}`}>
+                    <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "veg" ? "border-white bg-white" : "border-green-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "veg" ? "bg-green-600" : "bg-transparent"}`} /></span>Pure Veg
+                  </button>
+                  <button onClick={() => { setFoodPref("non-veg"); setShowFilters(false); }} className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${foodPref === "non-veg" ? "bg-gradient-to-r from-red-600 to-red-500 text-white shadow-md shadow-red-500/20" : "text-gray-600 hover:bg-red-50 hover:text-red-600"}`}>
+                    <span className={`w-3.5 h-3.5 rounded-sm border-2 flex items-center justify-center ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`}><span className={`w-1.5 h-1.5 rounded-full ${foodPref === "non-veg" ? "bg-red-600" : "bg-transparent"}`} /></span>Non-Veg Only
+                  </button>
                 </div>
               </div>
-            </aside>
+            </div>
+          </div>
 
+          <div className="pb-12">
             {/* ── Main Content Area ── */}
-            <div className="flex-1 min-w-0 pt-2">
+            <div className="w-full min-w-0 pt-2 relative">
               {/* Mobile Search Replacement */}
               <div className="md:hidden py-3 mb-2">
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100/50 transition-all mx-1">
@@ -310,56 +309,107 @@ export default function HomePage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-              {filtered.map((r) => (
-                <Link
-                  href={`/vendor/${r.id}`}
-                  key={r.id}
-                  className="group flex flex-col bg-white rounded-2xl border border-gray-200
-                    hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 text-left transition-all duration-300 overflow-hidden"
-                >
-                  <div className="relative w-full h-44 md:h-48 bg-gray-100 flex items-center justify-center border-b border-gray-100 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={r.image} alt={r.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              {isLoading ? (
+                <div className="col-span-full py-12 flex justify-center text-orange-500">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                </div>
+              ) : (
+                filtered.map((r) => {
+                  const rawDistance = getDistance(
+                    latitude,
+                    longitude,
+                    r.latitude ? parseFloat(r.latitude) : null,
+                    r.longitude ? parseFloat(r.longitude) : null
+                  );
+                  const maxRange = r.deliveryRange ? parseFloat(r.deliveryRange) : 5.0;
+                  const isOutOfRange = rawDistance !== null && rawDistance > maxRange;
+                  const isClosed = r.isOpen === false;
 
-                    <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
-                      {r.badge}
-                    </span>
-                    {r.veg && (
-                      <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-orange-600 flex items-center justify-center bg-white shadow-sm z-10">
-                        <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
-                      </span>
-                    )}
-                  </div>
+                  return (
+                    <Link
+                      href={`/vendor/${r.id}`}
+                      key={r.id}
+                      className={`group flex flex-col bg-white rounded-2xl border border-gray-200
+                        hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 text-left transition-all duration-300 overflow-hidden ${
+                          (isClosed || isOutOfRange) ? "opacity-75" : ""
+                        }`}
+                    >
+                      <div className="relative w-full h-44 md:h-48 bg-gray-100 flex items-center justify-center border-b border-gray-100 overflow-hidden">
+                        {r.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={r.image} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`} />
+                        ) : (
+                          <div className={`w-full h-full bg-orange-50 flex items-center justify-center ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`}>
+                             <Utensils className="w-12 h-12 text-orange-200" />
+                          </div>
+                        )}
 
-                  <div className="p-3.5 flex flex-col justify-between flex-1 w-full bg-white">
-                    <div>
-                      <div className="flex justify-between items-start mb-0.5">
-                        <p className="font-black text-gray-900 text-[17px] tracking-tight truncate">{r.name}</p>
-                        <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-orange-600 px-1.5 py-0.5 rounded shadow-sm">
-                          <Star className="w-3 h-3 fill-white" />
-                          {r.rating}
-                        </span>
+                        {r.badge && (
+                          <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
+                            {r.badge}
+                          </span>
+                        )}
+                        {r.veg && (
+                          <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-orange-600 flex items-center justify-center bg-white shadow-sm z-10">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+                          </span>
+                        )}
+
+                        {(isClosed || isOutOfRange) && (
+                          <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-20 pointer-events-none">
+                            <span className="text-red-600 font-black text-sm uppercase tracking-widest px-3 py-1 bg-white/80 rounded-md shadow-sm">
+                              {isClosed ? "Closed Now" : "Out of Range"}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <p className="text-[13px] text-gray-500 mb-2 truncate">{r.cuisine}</p>
 
-                      <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500 mb-3">
-                        <span className="flex items-center gap-1 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">
-                          <Clock className="w-3 h-3 text-orange-400" /> {r.time}
-                        </span>
-                        <span className="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">Min {r.minOrder}</span>
+                      <div className="p-3.5 flex flex-col justify-between flex-1 w-full bg-white">
+                        <div>
+                          <div className="flex justify-between items-start mb-0.5">
+                            <p className="font-black text-gray-900 text-[17px] tracking-tight truncate">{r.name}</p>
+                            <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-orange-600 px-1.5 py-0.5 rounded shadow-sm">
+                              <Star className="w-3 h-3 fill-white" />
+                              {r.rating}
+                            </span>
+                          </div>
+                          <p className="text-[13px] text-gray-500 mb-2 truncate">{r.cuisine}</p>
+
+                          <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500 mb-3">
+                            <span className="flex items-center gap-1 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">
+                              <Clock className="w-3 h-3 text-orange-400" /> {r.time || "30 min"}
+                            </span>
+                            <span className="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">Min ₹{r.minOrder || 0}</span>
+                            {(() => {
+                              const dist = formatDistance(latitude, longitude, pincode, r);
+                              if (dist) {
+                                return (
+                                  <span className="bg-orange-50 border border-orange-100 px-2 py-1 rounded-md shadow-sm text-orange-600 font-bold flex items-center gap-0.5">
+                                    📍 {dist}
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
+                          </div>
+                        </div>
+
+                      <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between">
+                        {r.offer ? (
+                          <div className="flex items-center gap-1.5 text-[11px] text-orange-700 font-bold">
+                            <span className="text-orange-500 text-sm">🏷</span>
+                            {r.offer}
+                          </div>
+                        ) : (
+                          <div className="text-[11px] text-gray-400 font-medium">Explore menu</div>
+                        )}
+                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
                       </div>
                     </div>
-
-                    <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-[11px] text-orange-700 font-bold">
-                        <span className="text-orange-500 text-sm">🏷</span>
-                        {r.offer}
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
-                    </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                  );
+                })
+              )}
             </div>
               {filtered.length === 0 && (
                 <div className="col-span-full flex flex-col items-center py-20 text-gray-400 bg-white rounded-3xl border border-gray-200">
@@ -371,8 +421,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-
-        </div>
+      </div>
       </main>
 
       <Footer />

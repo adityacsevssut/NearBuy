@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
+import ServiceGuard from "@/components/ServiceGuard";
 import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
@@ -46,7 +47,9 @@ export default function RootLayout({
                     }
                   }}
                 />
-                {children}
+                <ServiceGuard>
+                  {children}
+                </ServiceGuard>
               </LocationProvider>
             </CartProvider>
           </AuthProvider>

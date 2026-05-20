@@ -180,18 +180,31 @@ export default function BusinessRequestModal({
 
             <div className="p-6 overflow-y-auto no-scrollbar">
               {success ? (
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                   <motion.div
                     initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5"
                   >
                     <CheckCircle className="w-10 h-10 text-green-500" />
                   </motion.div>
                   <h3 className="text-2xl font-black text-gray-900 mb-2">Request Sent!</h3>
-                  <p className="text-gray-500 font-medium">Our manager will review your details and contact you soon.</p>
+                  
+                  {/* Routing confirmation */}
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-4 ${theme.border} ${theme.bg}`}>
+                    {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text}`} />}
+                    {vendorType === "medicine" && <Pill className={`w-4 h-4 ${theme.text}`} />}
+                    {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text}`} />}
+                    <span className={`text-sm font-black ${theme.text} capitalize`}>
+                      Sent to {vendorType} Manager
+                    </span>
+                  </div>
+
+                  <p className="text-gray-500 font-medium text-sm leading-relaxed max-w-xs mx-auto">
+                    Your request has been routed to the <span className={`font-black ${theme.text} capitalize`}>{vendorType} Division Manager</span>. They will review your details and contact you soon.
+                  </p>
                   <button
                     onClick={handleClose}
-                    className="mt-8 w-full py-3.5 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors"
+                    className="mt-7 w-full py-3.5 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors"
                   >
                     Close
                   </button>
@@ -262,9 +275,21 @@ export default function BusinessRequestModal({
                     required minLength={6}
                   />
 
+                  {/* Routing info — shown before submit */}
+                  <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border ${theme.border} ${theme.bg}`}>
+                    {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text} shrink-0`} />}
+                    {vendorType === "medicine" && <Pill className={`w-4 h-4 ${theme.text} shrink-0`} />}
+                    {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text} shrink-0`} />}
+                    <p className="text-xs text-gray-600">
+                      This request will be sent to the{" "}
+                      <span className={`font-black ${theme.text} capitalize`}>{vendorType} Manager</span>{" "}
+                      for review and approval.
+                    </p>
+                  </div>
+
                   <button
                     type="submit" disabled={loading}
-                    className={`w-full mt-6 relative py-4 rounded-xl bg-gradient-to-r ${theme.submit} text-white font-bold shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-70 flex items-center justify-center`}
+                    className={`w-full relative py-4 rounded-xl bg-gradient-to-r ${theme.submit} text-white font-bold shadow-lg hover:-translate-y-0.5 active:scale-[0.98] transition-all disabled:opacity-70 flex items-center justify-center`}
                   >
                     {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Submit Request"}
                   </button>

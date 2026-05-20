@@ -13,6 +13,10 @@ interface AuthUser {
   avatar?: string;
   role: string;
   manager_type?: string;
+  locationName?: string;
+  pincode?: string;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 interface AuthContextType {

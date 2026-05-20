@@ -59,7 +59,11 @@ function safeUser(u) {
   return {
     id: u.id, firstName: u.first_name, lastName: u.last_name,
     email: u.email, mobile: u.mobile, avatar: u.avatar_url, role: u.role,
-    manager_type: u.manager_type
+    manager_type: u.manager_type,
+    locationName: u.location_name,
+    pincode: u.pincode,
+    latitude: u.latitude ? parseFloat(u.latitude) : null,
+    longitude: u.longitude ? parseFloat(u.longitude) : null
   };
 }
 

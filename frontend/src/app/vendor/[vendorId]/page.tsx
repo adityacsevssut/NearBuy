@@ -1,86 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
-
-const restaurants = [
-  {
-    id: "rest-1",
-    name: "Sharma Dhaba",
-    cuisine: "North Indian · Biryani · Thali",
-    rating: 4.7,
-    reviews: 320,
-    time: "12–15 min",
-    image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=500&q=80",
-    badge: "Bestseller",
-    badgeColor: "bg-orange-100 text-orange-700",
-  },
-  {
-    id: "rest-2",
-    name: "Maggi Corner",
-    cuisine: "Fast Food · Noodles · Snacks",
-    rating: 4.5,
-    reviews: 210,
-    time: "8–12 min",
-    image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=500&q=80",
-    badge: "Late Night",
-    badgeColor: "bg-indigo-100 text-indigo-700",
-  },
-  {
-    id: "rest-3",
-    name: "Campus Café",
-    cuisine: "Beverages · Sandwiches · Pastries",
-    rating: 4.6,
-    reviews: 180,
-    time: "10–14 min",
-    image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=500&q=80",
-    badge: "Top Rated",
-    badgeColor: "bg-orange-100 text-orange-700",
-  },
-  {
-    id: "rest-4",
-    name: "Pizza Bhai",
-    cuisine: "Pizza · Pasta · Garlic Bread",
-    rating: 4.3,
-    reviews: 95,
-    time: "18–22 min",
-    image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=500&q=80",
-    badge: "New",
-    badgeColor: "bg-orange-100 text-orange-700",
-  },
-  {
-    id: "rest-5",
-    name: "Hostel Meals",
-    cuisine: "Home Style · Thali · Dal Rice",
-    rating: 4.4,
-    reviews: 140,
-    time: "15–20 min",
-    image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=500&q=80",
-    badge: "Budget Pick",
-    badgeColor: "bg-purple-100 text-purple-700",
-  },
-  {
-    id: "rest-6",
-    name: "Rolls & Wraps",
-    cuisine: "Rolls · Wraps · Kathi",
-    rating: 4.2,
-    reviews: 88,
-    time: "10–15 min",
-    image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=500&q=80",
-    badge: "Popular",
-    badgeColor: "bg-amber-100 text-amber-700",
-  },
-];
+import { useLocationContext } from "@/context/LocationContext";
 
 export default function VendorPage() {
   const params = useParams();
   const vendorId = params.vendorId as string;
-  const vendor = restaurants.find(r => r.id === vendorId) || restaurants[0];
+  const [vendor, setVendor] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { latitude, longitude } = useLocationContext();
+
+  const getDistance = (lat1: number | null, lon1: number | null, lat2: number | null, lon2: number | null) => {
+    if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return null;
+    const R = 6371; // km
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const rawDistance = vendor ? getDistance(
+    latitude,
+    longitude,
+    vendor.latitude ? parseFloat(vendor.latitude) : null,
+    vendor.longitude ? parseFloat(vendor.longitude) : null
+  ) : null;
+
+  const maxRange = vendor && vendor.deliveryRange ? parseFloat(vendor.deliveryRange) : 5.0;
+  const isOutOfRange = rawDistance !== null && rawDistance > maxRange;
+  const isClosed = vendor && vendor.isOpen === false;
+
+  useEffect(() => {
+    const fetchVendor = async () => {
+      try {
+        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${API}/api/public/vendors/${vendorId}`);
+        if (res.ok) {
+          const data = await res.json();
+          setVendor(data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchVendor();
+  }, [vendorId]);
 
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
@@ -89,82 +65,22 @@ export default function VendorPage() {
   const { addItem, itemQty } = useCart();
 
   // Generate mock dish data for this vendor
-  const mockDishes = [
-    {
-      id: 1,
-      name: `Chicken Dum Biryani`,
-      category: "Biryani",
-      price: 180,
-      rating: 4.5,
-      reviews: 142,
-      type: "non-veg",
-      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=300&q=80",
-      badge: "Bestseller",
-      desc: `Authentic and delicious dum biryani prepared with fresh ingredients and secret spices.`,
-    },
-    {
-      id: 2,
-      name: `Egg Chicken Roll`,
-      category: "Roll",
-      price: 90,
-      rating: 4.2,
-      reviews: 89,
-      type: "non-veg",
-      image: "https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=300&q=80",
-      badge: "Spicy",
-      desc: `For the spice lovers! Our signature roll with an extra kick of flavours.`,
-    },
-    {
-      id: 3,
-      name: `Chole Bhature`,
-      category: "Others",
-      price: 120,
-      rating: 4.8,
-      reviews: 210,
-      type: "veg",
-      image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80",
-      badge: "Must Try",
-      desc: `A premium combo featuring our top-rated chole bhature along with onion rings.`,
-    },
-    {
-      id: 4,
-      name: `Paneer Butter Masala`,
-      category: "Others",
-      price: 180,
-      rating: 4.1,
-      reviews: 305,
-      type: "veg",
-      image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=300&q=80",
-      badge: "Pocket Friendly",
-      desc: `Rich and creamy paneer butter masala, perfect with naan or rice.`,
-    },
-    {
-      id: 5,
-      name: `Special Veg Thali`,
-      category: "Others",
-      price: 150,
-      rating: 4.6,
-      reviews: 112,
-      type: "veg",
-      image: "https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=300&q=80",
-      badge: "Serves 1",
-      desc: `A complete meal with dal, sabzi, roti, rice, sweet, and papad.`,
-    },
-  ];
+  // Currently empty since we are going to design the manage foods page next
+  const mockDishes: any[] = [];
 
   const filteredDishes = mockDishes
-    .filter((dish) => foodPref === "all" || dish.type === foodPref)
-    .sort((a, b) => {
+    .filter((dish: any) => foodPref === "all" || dish.type === foodPref)
+    .sort((a: any, b: any) => {
       if (sortOrder === "low-to-high") return a.price - b.price;
       if (sortOrder === "high-to-low") return b.price - a.price;
       return 0;
     });
 
-  const groupedDishes = filteredDishes.reduce((acc, dish) => {
+  const groupedDishes = filteredDishes.reduce((acc: any, dish: any) => {
     if (!acc[dish.category]) acc[dish.category] = [];
     acc[dish.category].push(dish);
     return acc;
-  }, {} as Record<string, typeof mockDishes>);
+  }, {} as Record<string, any[]>);
 
   const categoryNames = Object.keys(groupedDishes).sort((a, b) => {
     if (a === "Others") return 1;
@@ -176,8 +92,27 @@ export default function VendorPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col pt-16">
       <Navbar />
 
-      {/* Vendor Hero */}
-      <div className="bg-white border-b border-gray-200 shadow-sm relative overflow-hidden">
+      {/* Warning Banner */}
+      {!isLoading && vendor && (isClosed || isOutOfRange) && (
+        <div className="bg-red-50 border-b border-red-100 px-4 py-3 flex items-center justify-center text-center">
+          <p className="text-xs sm:text-sm font-black text-red-600 uppercase tracking-wider">
+            ⚠️ {isClosed ? "This restaurant is temporarily closed and not accepting orders" : "This restaurant does not deliver to your location"}
+          </p>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+        </div>
+      ) : !vendor ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-gray-500 font-bold">Restaurant not found.</p>
+        </div>
+      ) : (
+        <>
+          {/* Vendor Hero */}
+          <div className="bg-white border-b border-gray-200 shadow-sm relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-orange-100/50 opacity-50 pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative">
           <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit">
@@ -185,9 +120,13 @@ export default function VendorPage() {
           </Link>
 
           <div className="flex gap-4 items-center mb-6">
-            <div className="w-20 h-20 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={vendor.image} alt={vendor.name} className="w-full h-full object-cover" />
+            <div className="w-20 h-20 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 flex items-center justify-center">
+              {vendor.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={vendor.image} alt={vendor.name} className="w-full h-full object-cover" />
+              ) : (
+                <Store className="w-8 h-8 text-gray-400" />
+              )}
             </div>
             <div>
               <div className="flex items-center gap-2 mb-1">
@@ -198,7 +137,12 @@ export default function VendorPage() {
                   {vendor.badge}
                 </span>
               </div>
-              <p className="text-sm font-medium text-gray-500 mb-2">{vendor.cuisine}</p>
+              <p className="text-sm font-medium text-gray-500 mb-2.5">{vendor.cuisine}</p>
+              {(vendor.manualAddress || vendor.gpsAddress) && (
+                <p className="text-xs font-semibold text-gray-400 mb-3 flex items-center gap-1">
+                  <span className="text-sm shrink-0">📍</span> {vendor.manualAddress || vendor.gpsAddress}
+                </p>
+              )}
               
               <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
                 <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">
@@ -271,7 +215,7 @@ export default function VendorPage() {
               <div key={category} className="space-y-4">
                 <h2 className="font-black text-2xl text-gray-900 tracking-tight">{category}</h2>
                 <div className="space-y-4">
-                  {groupedDishes[category].map((dish) => {
+                  {groupedDishes[category].map((dish: any) => {
                     const wished = wishlist.includes(dish.id);
                     return (
                       <div
@@ -322,28 +266,31 @@ export default function VendorPage() {
 
                           {/* Quantity Selector and ADD Button */}
                           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                            <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
-                              <button 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
-                                }}
-                                className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                              >
-                                -
-                              </button>
-                              <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
-                              <button 
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
-                                }}
-                                className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                              >
-                                +
-                              </button>
-                            </div>
+                            {!(isClosed || isOutOfRange) && (
+                              <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
+                                <button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
+                                  }}
+                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                >
+                                  -
+                                </button>
+                                <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                                <button 
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                                  }}
+                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                >
+                                  +
+                                </button>
+                              </div>
+                            )}
                             <button 
+                              disabled={isClosed || isOutOfRange}
                               onClick={(e) => {
                                 e.preventDefault();
                                 const q = quantities[dish.id] || 1;
@@ -360,12 +307,18 @@ export default function VendorPage() {
                                 setQuantities(q => ({ ...q, [dish.id]: 1 }));
                               }}
                               className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                                itemQty(dish.id, vendor.id) > 0
+                                isClosed || isOutOfRange
+                                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                  : itemQty(dish.id, vendor.id) > 0
                                   ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
                                   : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                               }`}
                             >
-                              {itemQty(dish.id, vendor.id) > 0 ? `ADDED (${itemQty(dish.id, vendor.id)})` : "ADD"}
+                              {isClosed || isOutOfRange 
+                                ? "UNAVAILABLE" 
+                                : itemQty(dish.id, vendor.id) > 0 
+                                ? `ADDED (${itemQty(dish.id, vendor.id)})` 
+                                : "ADD"}
                             </button>
                           </div>
                         </div>
@@ -379,13 +332,15 @@ export default function VendorPage() {
             {filteredDishes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
                 <span className="text-6xl mb-4">🍽️</span>
-                <p className="font-black text-gray-700 text-xl">No items found</p>
-                <p className="text-sm mt-2 font-medium">Try disabling the Veg/Non-veg filter.</p>
+                <p className="font-black text-gray-700 text-xl">No food available</p>
+                <p className="text-sm mt-2 font-medium">It will be available soon.</p>
               </div>
             )}
           </div>
         </div>
       </main>
+      </>
+      )}
 
       <MobileBottomNav />
     </div>

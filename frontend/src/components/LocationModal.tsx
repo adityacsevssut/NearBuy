@@ -153,21 +153,52 @@ export default function LocationModal() {
     setIsSubmittingPincode(true);
     const toastId = toast.loading("Looking up pincode…");
     try {
-      const res = await fetch(
-        `https://api.postalpincode.in/pincode/${manualPincode}`
+      // 1. Fetch Post Office name from Postal API
+      let locationName = `Pincode ${manualPincode}`;
+      try {
+        const postalRes = await fetch(
+          `https://api.postalpincode.in/pincode/${manualPincode}`
+        );
+        const postalData = await postalRes.json();
+        if (postalData?.[0]?.Status === "Success" && postalData[0].PostOffice?.length > 0) {
+          const po = postalData[0].PostOffice[0];
+          locationName = `${po.Name}, ${po.District}`;
+        }
+      } catch (err) {
+        console.warn("Postal API lookup failed, falling back to nominatim only.", err);
+      }
+
+      // 2. Fetch coordinates for this pincode in India
+      const geoRes = await fetch(
+        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json`
       );
-      const data = await res.json();
-      if (data?.[0]?.Status === "Success" && data[0].PostOffice?.length > 0) {
-        const po = data[0].PostOffice[0];
-        setLocation(`${po.Name}, ${po.District}`, manualPincode);
-        toast.success(`📍 Location set to ${po.Name}`, { id: toastId });
+      const geoData = await geoRes.json();
+      
+      if (geoData && geoData.length > 0) {
+        const lat = parseFloat(geoData[0].lat);
+        const lon = parseFloat(geoData[0].lon);
+        setLocation(locationName, manualPincode, lat, lon);
+        toast.success(`📍 Location set to ${locationName}`, { id: toastId });
       } else {
-        setLocation(`Pincode ${manualPincode}`, manualPincode);
-        toast.success(`📍 Location set to ${manualPincode}`, { id: toastId });
+        // Fallback: search by query
+        const queryRes = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${manualPincode}+India&format=json`
+        );
+        const queryData = await queryRes.json();
+        if (queryData && queryData.length > 0) {
+          const lat = parseFloat(queryData[0].lat);
+          const lon = parseFloat(queryData[0].lon);
+          setLocation(locationName, manualPincode, lat, lon);
+          toast.success(`📍 Location set to ${locationName}`, { id: toastId });
+        } else {
+          // If all geocoding fails, fallback without coordinates
+          setLocation(locationName, manualPincode);
+          toast.error(`Could not resolve coordinates for ${manualPincode}. Range check might be restricted.`, { id: toastId });
+        }
       }
     } catch {
       setLocation(`Pincode ${manualPincode}`, manualPincode);
-      toast.success(`📍 Location set to ${manualPincode}`, { id: toastId });
+      toast.error(`Lookup failed.`, { id: toastId });
     } finally {
       setIsSubmittingPincode(false);
     }

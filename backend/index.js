@@ -68,6 +68,9 @@ app.get("/", (req, res) => res.json({ status: "NearBuy API is running 🚀" }));
 app.use("/api/auth", authRouter);
 app.use("/api/managers", managerRouter);
 app.use("/api/vendor-requests", require("./routes/vendor-requests"));
+app.use("/api/vendor-profile", require("./routes/vendor-profile"));
+app.use("/api/public", require("./routes/public"));
+app.use("/api/service-centers", require("./routes/service_centers"));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
@@ -80,10 +83,18 @@ app.use((err, req, res, next) => {
 
 // ── Start Server ──────────────────────────────────────────────────────────
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  app.listen(PORT, () => {
+  const server = app.listen(PORT, () => {
     console.log(`✅ NearBuy backend running on http://localhost:${PORT}`);
   });
 }
+
+// Keep-alive to prevent clean exit if event loop gets empty
+setInterval(() => {}, 1000 * 60 * 60);
+
+process.on('exit', (code) => {
+  console.log('Node process exiting with code:', code);
+  console.trace('Trace of exit');
+});
 
 // Export the app for Vercel Serverless Functions
 module.exports = app;

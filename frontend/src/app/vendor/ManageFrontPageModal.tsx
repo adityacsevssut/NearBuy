@@ -1,0 +1,453 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag } from "lucide-react";
+import toast from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
+
+interface ManageFrontPageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  vendorType: string;
+}
+
+export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: ManageFrontPageModalProps) {
+  const { accessToken } = useAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isGpsLoading, setIsGpsLoading] = useState(false);
+  const [hasProfile, setHasProfile] = useState(false);
+
+  const [formData, setFormData] = useState({
+    restaurant_name: "",
+    cuisine: "",
+    delivery_time: "30-45 min",
+    min_order: "80",
+    offer: "50% off up to ₹80",
+    badge: "Bestseller",
+    gps_address: "",
+    manual_address: "",
+    latitude: "",
+    longitude: "",
+    pincode: "",
+    rating: "4.5",
+  });
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  // Theme accents
+  const tColor = vendorType === "store" ? "blue" : vendorType === "medicine" ? "emerald" : "orange";
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchProfile();
+    }
+  }, [isOpen]);
+
+  const fetchProfile = async () => {
+    try {
+      setIsLoading(true);
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/vendor-profile`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const data = await res.json();
+      if (data.profile) {
+        setFormData({
+          restaurant_name: data.profile.restaurant_name || "",
+          cuisine: data.profile.cuisine || "",
+          delivery_time: data.profile.delivery_time || "",
+          min_order: data.profile.min_order?.toString() || "",
+          offer: data.profile.offer || "",
+          badge: data.profile.badge || "",
+          gps_address: data.profile.gps_address || "",
+          manual_address: data.profile.manual_address || "",
+          latitude: data.profile.latitude?.toString() || "",
+          longitude: data.profile.longitude?.toString() || "",
+          pincode: data.profile.pincode || "",
+          rating: data.profile.rating?.toString() || "0.0",
+        });
+        if (data.profile.image_url) {
+          setImagePreview(data.profile.image_url);
+        }
+      }
+    } catch (err) {
+      toast.error("Failed to load profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // We removed handleDelete, hasProfile, isDeleting state parameters, so we can clean it up.
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onload = () => setImagePreview(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const fetchGpsLocation = async () => {
+    setIsGpsLoading(true);
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported by browser");
+      setIsGpsLoading(false);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const data = await res.json();
+          const address = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          const pincode = data.address?.postcode || "";
+
+          setFormData((prev) => ({
+            ...prev,
+            latitude: latitude.toString(),
+            longitude: longitude.toString(),
+            gps_address: address,
+            pincode: pincode,
+          }));
+          toast.success("GPS location auto-filled");
+        } catch (err) {
+          toast.error("Could not resolve address");
+        } finally {
+          setIsGpsLoading(false);
+        }
+      },
+      () => {
+        toast.error("Location permission denied");
+        setIsGpsLoading(false);
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.restaurant_name) {
+      toast.error("Shop/Restaurant name is required");
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const form = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        form.append(key, value);
+      });
+      if (imageFile) {
+        form.append("image", imageFile);
+      } else if (imagePreview && imagePreview.startsWith("data:")) {
+        // Fallback for existing image (handled by backend if no file)
+        form.append("existing_image_url", imagePreview);
+      } else if (imagePreview) {
+        form.append("existing_image_url", imagePreview);
+      }
+
+      const res = await fetch(`${API}/api/vendor-profile`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: form,
+      });
+
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("Front page created successfully!");
+      onClose();
+    } catch (err) {
+      toast.error("Failed to save changes");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90dvh] flex flex-col overflow-hidden"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
+            <div>
+              <h2 className="text-xl font-black text-gray-900">Manage Front Page</h2>
+              <p className="text-sm text-gray-500 font-medium mt-0.5">Customise how your shop appears to customers</p>
+            </div>
+            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Form Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {isLoading ? (
+              <div className="h-40 flex items-center justify-center">
+                <Loader2 className={`w-8 h-8 animate-spin text-${tColor}-500`} />
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {/* ════════ Live Preview Card ════════ */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-3">Live Customer Preview</label>
+                  <div className="max-w-[340px] mx-auto sm:mx-0 bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden relative">
+                    {/* Image Banner */}
+                    <div className="relative w-full h-40 bg-gray-100">
+                      {imagePreview ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <ImageIcon className="w-8 h-8 opacity-50" />
+                        </div>
+                      )}
+                      {formData.badge && (
+                        <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-white text-orange-600 text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm">
+                          {formData.badge}
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Card Content */}
+                    <div className="p-4">
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <h3 className="font-black text-gray-900 text-lg leading-tight truncate">
+                          {formData.restaurant_name || "Your Shop Name"}
+                        </h3>
+                        <div className="flex items-center gap-1 bg-orange-500 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span className="text-xs font-bold">{formData.rating || "0.0"}</span>
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-gray-500 font-medium truncate mb-3">
+                        {formData.cuisine || "Category · Tags"}
+                      </p>
+                      
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-100 rounded-lg">
+                          <Clock className="w-3.5 h-3.5 text-orange-500" />
+                          <span className="text-xs font-semibold text-gray-600">{formData.delivery_time || "Time"}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-100 rounded-lg">
+                          <span className="text-xs font-semibold text-gray-600">Min ₹{formData.min_order || "0"}</span>
+                        </div>
+                      </div>
+                      
+                      {formData.offer && (
+                        <div className="pt-3 border-t border-gray-100 border-dashed flex items-center gap-2 text-orange-600">
+                          <Tag className="w-4 h-4 shrink-0" />
+                          <span className="text-xs font-bold truncate">{formData.offer}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="h-px bg-gray-200/60 w-full" />
+
+                {/* ════════ Form ════════ */}
+                <form id="frontPageForm" onSubmit={handleSubmit} className="space-y-6">
+                
+                {/* Image Upload Banner */}
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Display Banner Image</label>
+                  <div className="relative w-full h-48 sm:h-56 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:bg-gray-100 transition-colors group">
+                    {imagePreview ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2">
+                        <ImageIcon className="w-10 h-10" />
+                        <span className="text-sm font-medium">Click to upload image</span>
+                      </div>
+                    )}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    />
+                    {imagePreview && (
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
+                        <span className="text-white font-bold bg-black/50 px-4 py-2 rounded-full">Change Image</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {/* Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Shop Name</label>
+                    <input 
+                      value={formData.restaurant_name}
+                      onChange={e => setFormData({...formData, restaurant_name: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. Sharma Dhaba"
+                    />
+                  </div>
+
+                  {/* Cuisine */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tags / Categories</label>
+                    <input 
+                      value={formData.cuisine}
+                      onChange={e => setFormData({...formData, cuisine: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. North Indian, Biryani"
+                    />
+                  </div>
+
+                  {/* Delivery Time */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Avg. Delivery Time</label>
+                    <input 
+                      value={formData.delivery_time}
+                      onChange={e => setFormData({...formData, delivery_time: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. 30-45 min"
+                    />
+                  </div>
+
+                  {/* Min Order */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Min Order (₹)</label>
+                    <input 
+                      type="number"
+                      value={formData.min_order}
+                      onChange={e => setFormData({...formData, min_order: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. 80"
+                    />
+                  </div>
+
+                  {/* Offer */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Active Offer</label>
+                    <input 
+                      value={formData.offer}
+                      onChange={e => setFormData({...formData, offer: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-orange-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. 50% off up to ₹80"
+                    />
+                  </div>
+
+                  {/* Badge */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Highlight Badge</label>
+                    <input 
+                      value={formData.badge}
+                      onChange={e => setFormData({...formData, badge: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. Bestseller"
+                    />
+                  </div>
+
+                  {/* Rating */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Rating (0.0 - 5.0)</label>
+                    <input 
+                      type="number"
+                      step="0.1"
+                      min="0"
+                      max="5"
+                      value={formData.rating}
+                      onChange={e => setFormData({...formData, rating: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. 4.5"
+                    />
+                  </div>
+                </div>
+
+                {/* Location Section */}
+                <div className="mt-8 pt-6 border-t border-gray-100 space-y-5">
+                  <div>
+                    <h3 className="text-lg font-black text-gray-900">Shop Location</h3>
+                    <p className="text-xs text-gray-500">Auto-fetch your GPS coords and provide manual details</p>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">GPS Auto-Fetch Address</label>
+                    <div className="flex gap-2">
+                      <input 
+                        readOnly
+                        value={formData.gps_address}
+                        className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 outline-none"
+                        placeholder="Click button to auto-fetch GPS..."
+                      />
+                      <button 
+                        type="button"
+                        onClick={fetchGpsLocation}
+                        disabled={isGpsLoading}
+                        className={`px-4 py-3 bg-${tColor}-500 hover:bg-${tColor}-600 text-white rounded-xl font-bold shadow-md transition-all disabled:opacity-50 flex items-center gap-2`}
+                      >
+                        {isGpsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                        <span className="hidden sm:inline">Fetch GPS</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Manual Address Detail</label>
+                    <textarea 
+                      value={formData.manual_address}
+                      onChange={e => setFormData({...formData, manual_address: e.target.value})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none resize-none h-24"
+                      placeholder="e.g. Shop No 4, Kirba Chowk, Near Main Gate, Burla"
+                    />
+                  </div>
+                </div>
+              </form>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-end gap-3 bg-gray-50">
+            <button 
+              type="button" 
+              onClick={onClose}
+              className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit" 
+              form="frontPageForm"
+              disabled={isSaving || isLoading}
+              className={`px-6 py-2.5 bg-${tColor}-500 hover:bg-${tColor}-600 text-white rounded-xl font-black shadow-lg shadow-${tColor}-500/20 transition-all disabled:opacity-50 flex items-center gap-2 active:scale-95`}
+            >
+              {isSaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
+              Save Front Page
+            </button>
+          </div>
+
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
