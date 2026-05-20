@@ -118,13 +118,37 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
   if (loading || status === "checking") {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 relative">
-          <div className="absolute inset-0 rounded-full border-4 border-orange-100"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-          <MapPin className="absolute inset-0 m-auto w-6 h-6 text-orange-500" />
+      <div className="min-h-screen bg-orange-50/20 flex flex-col items-center justify-center p-4 select-none">
+        {/* Simple card container */}
+        <div className="max-w-md w-full bg-white rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 flex flex-col items-center">
+          {/* Logo */}
+          <div className="flex items-center -skew-x-6 pr-1 mb-6">
+            <span className="font-black text-4xl tracking-tighter drop-shadow-sm text-orange-500">
+              N
+            </span>
+            <span className="text-black font-black text-4xl tracking-tighter drop-shadow-sm">
+              B
+            </span>
+            <span className="font-black text-2xl tracking-tight text-gray-800 ml-1.5 skew-x-6">
+              Near<span className="text-orange-500">Buy</span>
+            </span>
+          </div>
+
+          {/* Texts */}
+          <h2 className="text-2xl font-black text-gray-900 mb-1 tracking-tight leading-tight">
+            Welcome to <span className="text-orange-500">NearBuy</span>
+          </h2>
+          <p className="text-gray-500 font-bold text-sm tracking-tight mb-8">
+            Explore Your Nearest Market
+          </p>
+
+          {/* Simple classic spinning loader with MapPin */}
+          <div className="w-16 h-16 relative">
+            <div className="absolute inset-0 rounded-full border-4 border-orange-100"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
+            <MapPin className="absolute inset-0 m-auto w-6 h-6 text-orange-500" />
+          </div>
         </div>
-        <p className="mt-6 text-gray-500 font-bold text-sm tracking-widest uppercase">Checking Service Area...</p>
       </div>
     );
   }
