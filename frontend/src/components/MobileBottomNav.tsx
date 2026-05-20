@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { Home, Search, ClipboardList, User, LogIn } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "../context/AuthContext";
@@ -52,7 +53,7 @@ export default function MobileBottomNav() {
             };
 
             return (
-              <a
+              <Link
                 key={id}
                 id={id}
                 href={href}
@@ -77,7 +78,7 @@ export default function MobileBottomNav() {
                 >
                   {label}
                 </span>
-              </a>
+              </Link>
             );
           })}
         </div>

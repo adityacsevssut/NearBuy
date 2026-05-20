@@ -31,6 +31,16 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<"checking" | "allowed" | "denied" | "no-location">("checking");
   const [permissionPrompted, setPermissionPrompted] = useState(false);
+  const [isWelcomed, setIsWelcomed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const welcomed = sessionStorage.getItem("nearbuy_welcomed") === "true";
+        setIsWelcomed(welcomed);
+      } catch (e) {}
+    }
+  }, []);
 
   // Bypass the guard for these paths
   const bypassedPaths = ["/dev", "/manager", "/vendor"];
@@ -114,9 +124,23 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     }
   }, [latitude, longitude, centers, loading, isBypassed, permissionPrompted, setLocation, setIsLocationModalOpen]);
 
+  useEffect(() => {
+    if (status !== "checking") {
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem("nearbuy_welcomed", "true");
+          setIsWelcomed(true);
+        } catch (e) {}
+      }
+    }
+  }, [status]);
+
   if (isBypassed) return <>{children}</>;
 
   if (loading || status === "checking") {
+    if (isWelcomed) {
+      return <>{children}</>;
+    }
     return (
       <div className="min-h-screen bg-orange-50/20 flex flex-col items-center justify-center p-4 select-none">
         {/* Simple card container */}
@@ -130,13 +154,13 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               B
             </span>
             <span className="font-black text-2xl tracking-tight text-gray-800 ml-1.5 skew-x-6">
-              Near<span className="text-orange-500">Buy</span>
+              <span className="text-orange-500">Near</span>Buy
             </span>
           </div>
 
           {/* Texts */}
           <h2 className="text-2xl font-black text-gray-900 mb-1 tracking-tight leading-tight">
-            Welcome to <span className="text-orange-500">NearBuy</span>
+            Welcome to <span className="text-orange-500">Near</span>Buy
           </h2>
           <p className="text-gray-500 font-bold text-sm tracking-tight mb-8">
             Explore Your Nearest Market
