@@ -196,13 +196,23 @@ export default function DevDashboard() {
     try {
       // 1. Get fallback Map Coordinates for this PIN code from Nominatim
       let fLat = "20.5937", fLon = "78.9629";
+      let fName = `PIN: ${centerPincode}`;
+      let fDistrict = "Unknown";
+      let fState = "Unknown";
+      
       try {
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${centerPincode}&countrycodes=IN&format=json&accept-language=en`);
+        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${centerPincode}&countrycodes=IN&format=json&addressdetails=1&accept-language=en`);
         const nomData = await nomRes.json();
         if (nomData && nomData.length > 0) {
           fLat = nomData[0].lat;
           fLon = nomData[0].lon;
-          setFallbackMapCenter({ lat: parseFloat(fLat), lon: parseFloat(fLon), name: `PIN: ${centerPincode}` });
+          const addr = nomData[0].address || {};
+          
+          fDistrict = addr.state_district || addr.county || addr.region || addr.city || "Unknown Location";
+          fState = addr.state || "India";
+          fName = nomData[0].name || addr.suburb || addr.town || addr.village || addr.city || `PIN: ${centerPincode}`;
+
+          setFallbackMapCenter({ lat: parseFloat(fLat), lon: parseFloat(fLon), name: fName });
         }
       } catch (err) {
         console.warn("Nominatim fallback failed");
@@ -235,14 +245,14 @@ export default function DevDashboard() {
         setSearchResults(formatted);
       } else if (fLat !== "20.5937") {
         setSearchResults([{
-          name: `PIN: ${centerPincode}`,
-          district: "Unknown",
-          state: "Unknown",
+          name: fName,
+          district: fDistrict,
+          state: fState,
           pincode: centerPincode,
           lat: fLat,
           lon: fLon,
           isExact: false,
-          fullName: `PIN: ${centerPincode}`
+          fullName: `${fName}, ${fDistrict}, ${fState}`
         }]);
       } else {
         toast.error("No specific localities found for this PIN code.");

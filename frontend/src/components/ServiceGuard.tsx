@@ -136,6 +136,46 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     }
   }, [status]);
 
+  const [isDetecting, setIsDetecting] = useState(false);
+
+  const handleAutoDetectLocation = () => {
+    setIsDetecting(true);
+    if (!navigator.geolocation) {
+      toast.error("Geolocation not supported by your browser");
+      setIsDetecting(false);
+      return;
+    }
+    
+    const toastId = toast.loading("Detecting location...");
+    
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
+          const data = await res.json();
+          const pin = data.address?.postcode || "";
+          const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
+          setLocation(name, pin, lat, lon);
+          toast.success("Location detected!", { id: toastId });
+        } catch {
+          setLocation("Current Location", "", lat, lon);
+          toast.success("Location detected!", { id: toastId });
+        } finally {
+          setIsDetecting(false);
+        }
+      },
+      (err) => {
+        console.warn("Geolocation error or denied:", err);
+        toast.error("Location permission denied. Please select manually.", { id: toastId });
+        setIsDetecting(false);
+        setIsLocationModalOpen(true);
+      },
+      { enableHighAccuracy: true, timeout: 15000 }
+    );
+  };
+
   if (isBypassed) return <>{children}</>;
 
   if (loading || status === "checking") {
@@ -191,12 +231,22 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
             <p className="text-gray-500 mb-8 leading-relaxed font-medium text-[15px]">
               Please allow location access or select your location manually to see if we deliver to your area.
             </p>
-            <button 
-              onClick={() => setIsLocationModalOpen(true)}
-              className="w-full flex items-center justify-center gap-2 py-4 bg-gray-900 hover:bg-black rounded-xl text-white font-bold transition-colors shadow-lg"
-            >
-              <Map className="w-5 h-5" /> Select Location Manually
-            </button>
+            <div className="space-y-3">
+              <button 
+                onClick={handleAutoDetectLocation}
+                disabled={isDetecting}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-bold transition-colors shadow-lg disabled:opacity-70"
+              >
+                <Navigation className={`w-5 h-5 ${isDetecting ? 'animate-pulse' : ''}`} /> 
+                {isDetecting ? "Detecting..." : "Auto Detect Location"}
+              </button>
+              <button 
+                onClick={() => setIsLocationModalOpen(true)}
+                className="w-full flex items-center justify-center gap-2 py-4 bg-gray-900 hover:bg-black rounded-xl text-white font-bold transition-colors shadow-lg"
+              >
+                <Map className="w-5 h-5" /> Select Location Manually
+              </button>
+            </div>
           </div>
         </main>
         <Footer />
