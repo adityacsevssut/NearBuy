@@ -36,7 +36,7 @@ export default function WishlistPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="font-black text-2xl md:text-3xl text-gray-900 tracking-tight">
-            NearBuy Food <span className="text-rose-500">Wishlist</span>
+            <span className="text-orange-500">Near</span>Buy Food <span className="text-rose-500">Wishlist</span>
           </h1>
         </div>
 

@@ -218,10 +218,10 @@ export default function DevDashboard() {
         console.warn("Nominatim fallback failed");
       }
 
-      // 2. Fetch all exact localities/Post Offices for this PIN code from Indian Post API
+      // 2. Fetch all exact localities/Post Offices for this PIN code from Indian Post API via Proxy
       let formatted: any[] = [];
       try {
-        const res = await fetch(`https://api.postalpincode.in/pincode/${centerPincode}`);
+        const res = await fetch(`/api/pincode?pin=${centerPincode}`);
         const data = await res.json();
         
         if (data && data[0] && data[0].Status === "Success") {
@@ -268,8 +268,9 @@ export default function DevDashboard() {
     setSelectedCenter(loc);
     toast.loading("Finding exact location on map...", { id: "geo" });
     try {
-      // Fetch exact lat/lon for the specific locality chosen
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.name + ", " + loc.district)}&countrycodes=IN&format=json&accept-language=en`);
+      // Fetch exact lat/lon for the specific locality chosen using Nominatim
+      // We refine the query to be as exact as possible.
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.name + ", " + loc.district + ", India")}&format=json&accept-language=en`);
       const data = await res.json();
       if (data && data.length > 0) {
         const exactLat = parseFloat(data[0].lat);
@@ -284,8 +285,19 @@ export default function DevDashboard() {
         setFallbackMapCenter({ lat: exactLat, lon: exactLon, name: loc.name });
         toast.success("Location pinpointed accurately!", { id: "geo" });
       } else {
-        toast.error("Exact coordinates not found, using generic PIN center.", { id: "geo" });
-        setFallbackMapCenter({ lat: parseFloat(loc.lat), lon: parseFloat(loc.lon), name: loc.name });
+        // Fallback to district level if exact locality fails
+        const distRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.district + ", India")}&format=json&accept-language=en`);
+        const distData = await distRes.json();
+        if (distData && distData.length > 0) {
+           const dLat = parseFloat(distData[0].lat);
+           const dLon = parseFloat(distData[0].lon);
+           setSelectedCenter({ ...loc, lat: dLat, lon: dLon, isExact: true });
+           setFallbackMapCenter({ lat: dLat, lon: dLon, name: loc.name });
+           toast.success("Used district center for location.", { id: "geo" });
+        } else {
+           toast.error("Exact coordinates not found, using generic PIN center.", { id: "geo" });
+           setFallbackMapCenter({ lat: parseFloat(loc.lat), lon: parseFloat(loc.lon), name: loc.name });
+        }
       }
     } catch {
       toast.dismiss("geo");

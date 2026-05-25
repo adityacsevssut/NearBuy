@@ -157,7 +157,7 @@ export default function LocationModal() {
       let locationName = `Pincode ${manualPincode}`;
       try {
         const postalRes = await fetch(
-          `https://api.postalpincode.in/pincode/${manualPincode}`
+          `/api/pincode?pin=${manualPincode}`
         );
         const postalData = await postalRes.json();
         if (postalData?.[0]?.Status === "Success" && postalData[0].PostOffice?.length > 0) {
@@ -165,7 +165,7 @@ export default function LocationModal() {
           locationName = `${po.Name}, ${po.District}`;
         }
       } catch (err) {
-        console.warn("Postal API lookup failed, falling back to nominatim only.", err);
+        console.warn("Postal API proxy lookup failed, falling back to nominatim only.", err);
       }
 
       // 2. Fetch coordinates for this pincode in India
