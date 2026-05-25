@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function VendorPage() {
   const params = useParams();
@@ -60,15 +61,29 @@ export default function VendorPage() {
 
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
-  const [wishlist, setWishlist] = useState<number[]>([]);
+  const { isFoodWished, toggleFood } = useWishlist();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { addItem, itemQty } = useCart();
+  const [menuItems, setMenuItems] = useState<any[]>([]);
 
-  // Generate mock dish data for this vendor
-  // Currently empty since we are going to design the manage foods page next
-  const mockDishes: any[] = [];
+  useEffect(() => {
+    if (!vendorId) return;
+    const fetchMenu = async () => {
+      try {
+        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${API}/api/public/vendors/${vendorId}/menu`);
+        if (res.ok) {
+          const data = await res.json();
+          setMenuItems(data.items || []);
+        }
+      } catch (err) {
+        console.error("Failed to load menu:", err);
+      }
+    };
+    fetchMenu();
+  }, [vendorId]);
 
-  const filteredDishes = mockDishes
+  const filteredDishes = menuItems
     .filter((dish: any) => foodPref === "all" || dish.type === foodPref)
     .sort((a: any, b: any) => {
       if (sortOrder === "low-to-high") return a.price - b.price;
@@ -216,19 +231,19 @@ export default function VendorPage() {
                 <h2 className="font-black text-2xl text-gray-900 tracking-tight">{category}</h2>
                 <div className="space-y-4">
                   {groupedDishes[category].map((dish: any) => {
-                    const wished = wishlist.includes(dish.id);
+                    const wished = isFoodWished(dish.id);
                     return (
                       <div
                         key={dish.id}
-                        className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-orange-300 hover:shadow-md transition-all duration-300 flex gap-4"
+                        className={`bg-white p-4 rounded-2xl border border-gray-200 shadow-sm transition-all duration-300 flex gap-4 ${dish.is_available === false ? "opacity-75 grayscale-[0.2]" : "hover:border-orange-300 hover:shadow-md"}`}
                       >
                         {/* Info Section */}
                         <div className="flex-1 min-w-0 flex flex-col justify-between">
                           <div>
                             {/* Veg/Non-veg icon & Badge */}
                             <div className="flex items-center gap-2 mb-1.5">
-                              <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-orange-600" : "bg-red-600"}`} />
+                              <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
                               </span>
                               {dish.badge && (
                                 <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
@@ -245,19 +260,48 @@ export default function VendorPage() {
                               <span className="text-base font-black text-gray-900">₹{dish.price}</span>
                             </div>
 
+                            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mb-2">
+                              {dish.rating && parseFloat(dish.rating) > 0 && (
+                                <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                                  {dish.rating}
+                                  {dish.reviews && parseInt(dish.reviews) > 0 && (
+                                    <span className="text-gray-400 font-medium ml-0.5">({dish.reviews})</span>
+                                  )}
+                                </span>
+                              )}
+                              {dish.prep_time && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="w-3 h-3 text-gray-400" />
+                                  {dish.prep_time}
+                                </span>
+                              )}
+                            </div>
+
                             <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed max-w-md mt-2">
-                              {dish.desc}
+                              {dish.description}
                             </p>
                           </div>
                         </div>
 
                         {/* Image & Action Section */}
                         <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
-                          <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={dish.image} alt={dish.name} className="w-full h-full object-cover" />
+                          <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative flex items-center justify-center">
+                            {dish.image_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <Utensils className="w-8 h-8 text-gray-300" />
+                            )}
+                            
+                            {dish.is_available === false && (
+                              <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br/>Stock</span>
+                              </div>
+                            )}
+
                             <button
-                              onClick={() => setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id])}
+                              onClick={() => toggleFood({...dish, restaurantId: vendor.id, restaurantName: vendor.name})}
                               className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
                             >
                               <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
@@ -266,60 +310,68 @@ export default function VendorPage() {
 
                           {/* Quantity Selector and ADD Button */}
                           <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                            {!(isClosed || isOutOfRange) && (
-                              <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
-                                <button 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
-                                  }}
-                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                                >
-                                  -
-                                </button>
-                                <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
-                                <button 
-                                  onClick={(e) => {
-                                    e.preventDefault();
-                                    setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
-                                  }}
-                                  className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                                >
-                                  +
-                                </button>
+                            {dish.is_available === false ? (
+                              <div className="w-full py-1.5 border border-red-200 font-black text-[10px] rounded-lg shadow-sm bg-red-50 text-red-600 text-center uppercase tracking-wider">
+                                Out of Stock
                               </div>
+                            ) : (
+                              <>
+                                {!(isClosed || isOutOfRange) && (
+                                  <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
+                                    <button 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
+                                      }}
+                                      className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                    >
+                                      -
+                                    </button>
+                                    <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                                    <button 
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                                      }}
+                                      className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                )}
+                                <button 
+                                  disabled={isClosed || isOutOfRange}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    const q = quantities[dish.id] || 1;
+                                    addItem({
+                                      id: dish.id,
+                                      name: dish.name,
+                                      price: dish.price,
+                                      image: dish.image_url,
+                                      type: dish.type as "veg" | "non-veg",
+                                      restaurantId: vendor.id,
+                                      restaurantName: vendor.name,
+                                      section: "food",
+                                    }, q);
+                                    setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                                  }}
+                                  className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                                    isClosed || isOutOfRange
+                                      ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                      : itemQty(dish.id, vendor.id) > 0
+                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                                      : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                                  }`}
+                                >
+                                  {isClosed || isOutOfRange 
+                                    ? "UNAVAILABLE" 
+                                    : itemQty(dish.id, vendor.id) > 0 
+                                    ? `ADDED (${itemQty(dish.id, vendor.id)})` 
+                                    : "ADD"}
+                                </button>
+                              </>
                             )}
-                            <button 
-                              disabled={isClosed || isOutOfRange}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                const q = quantities[dish.id] || 1;
-                                addItem({
-                                  id: dish.id,
-                                  name: dish.name,
-                                  price: dish.price,
-                                  image: dish.image,
-                                  type: dish.type as "veg" | "non-veg",
-                                  restaurantId: vendor.id,
-                                  restaurantName: vendor.name,
-                                  section: "food",
-                                }, q);
-                                setQuantities(q => ({ ...q, [dish.id]: 1 }));
-                              }}
-                              className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                                isClosed || isOutOfRange
-                                  ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                                  : itemQty(dish.id, vendor.id) > 0
-                                  ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                                  : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
-                              }`}
-                            >
-                              {isClosed || isOutOfRange 
-                                ? "UNAVAILABLE" 
-                                : itemQty(dish.id, vendor.id) > 0 
-                                ? `ADDED (${itemQty(dish.id, vendor.id)})` 
-                                : "ADD"}
-                            </button>
                           </div>
                         </div>
                       </div>

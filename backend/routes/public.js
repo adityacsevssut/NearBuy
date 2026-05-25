@@ -88,6 +88,24 @@ router.get("/vendors/:id", async (req, res) => {
   }
 });
 
+// GET /api/public/vendors/:id/menu  →  public menu items for a vendor
+router.get("/vendors/:id/menu", async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, category, name, description, price, type, badge, image_url, is_available, sort_order, rating, prep_time, reviews
+       FROM vendor_menu_items
+       WHERE vendor_id = $1
+       ORDER BY category, sort_order, created_at`,
+      [req.params.id]
+    );
+    return res.json({ items: rows });
+  } catch (err) {
+    console.error("GET /api/public/vendors/:id/menu error:", err);
+    return res.status(500).json({ error: "Failed to load menu" });
+  }
+});
+
+
 // GET /api/public/service-centers
 router.get("/service-centers", async (req, res) => {
   try {

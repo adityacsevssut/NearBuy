@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { useLocationContext } from "@/context/LocationContext";
 import ManageFrontPageModal from "./ManageFrontPageModal";
 import ManageLocationRangeModal from "./ManageLocationRangeModal";
+import ManageFoodsModal from "./ManageFoodsModal";
 import LocationModal from "@/components/LocationModal";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -91,6 +92,7 @@ export default function VendorDashboard() {
   const [mounted, setMounted] = useState(false);
   const [isFrontPageOpen, setIsFrontPageOpen] = useState(false);
   const [isRangeModalOpen, setIsRangeModalOpen] = useState(false);
+  const [isFoodsOpen, setIsFoodsOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [isOpenToggle, setIsOpenToggle] = useState(true);
 
@@ -406,6 +408,8 @@ export default function VendorDashboard() {
                     setIsFrontPageOpen(true);
                   } else if (card.id === "range-payment") {
                     setIsRangeModalOpen(true);
+                  } else if (card.id === "foods") {
+                    setIsFoodsOpen(true);
                   }
                 }}
                 className={`group text-left flex flex-col p-6 bg-white rounded-3xl border ${t.cardBorder} hover:shadow-xl ${t.cardShadow} transition-all duration-300 relative overflow-hidden cursor-pointer`}
@@ -484,6 +488,12 @@ export default function VendorDashboard() {
               fetchProfile();
             }}
             profile={profile}
+          />
+          <ManageFoodsModal
+            isOpen={isFoodsOpen}
+            onClose={() => setIsFoodsOpen(false)}
+            vendorType={vType}
+            onOpenFrontPage={() => setIsFrontPageOpen(true)}
           />
           <LocationModal />
         </>

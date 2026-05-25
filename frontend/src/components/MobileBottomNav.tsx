@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Search, ClipboardList, User, LogIn } from "lucide-react";
+import { Home, Search, ClipboardList, User, LogIn, Heart } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "../context/AuthContext";
 
@@ -22,7 +22,7 @@ export default function MobileBottomNav() {
 
   const tabs = [
     { id: "mobile-nav-home", label: "Home", icon: Home, href: homeHref },
-    { id: "mobile-nav-search", label: "Search", icon: Search, href: "/search" },
+    { id: "mobile-nav-wishlist", label: "Wishlist", icon: Heart, href: "/wishlist" },
     { id: "mobile-nav-orders", label: "Orders", icon: ClipboardList, href: "/orders" },
     { 
       id: "mobile-nav-auth", 

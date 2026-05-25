@@ -23,73 +23,7 @@ export default function DishPage() {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
 
   // Generate mock dish data for the searched item
-  const mockDishes = [
-    {
-      id: 1,
-      name: `Classic ${itemName}`,
-      vendor: "Sharma Dhaba",
-      price: 120,
-      rating: 4.5,
-      reviews: 142,
-      time: "15 min",
-      type: "veg",
-      emoji: "🍛",
-      badge: "Bestseller",
-      desc: `Authentic and delicious ${itemName.toLowerCase()} prepared with fresh ingredients and secret spices.`,
-    },
-    {
-      id: 2,
-      name: `Spicy Special ${itemName}`,
-      vendor: "Hostel Meals",
-      price: 140,
-      rating: 4.2,
-      reviews: 89,
-      time: "20 min",
-      type: "nonveg",
-      emoji: "🌶️",
-      badge: "Spicy",
-      desc: `For the spice lovers! Our signature ${itemName.toLowerCase()} with an extra kick of flavours.`,
-    },
-    {
-      id: 3,
-      name: `Premium ${itemName} Combo`,
-      vendor: "Campus Café",
-      price: 180,
-      rating: 4.8,
-      reviews: 210,
-      time: "25 min",
-      type: "veg",
-      emoji: "✨",
-      badge: "Must Try",
-      desc: `A premium combo featuring our top-rated ${itemName.toLowerCase()} along with a complimentary beverage.`,
-    },
-    {
-      id: 4,
-      name: `Budget ${itemName}`,
-      vendor: "Maggi Corner",
-      price: 80,
-      rating: 4.1,
-      reviews: 305,
-      time: "10 min",
-      type: "veg",
-      emoji: "🔥",
-      badge: "Pocket Friendly",
-      desc: `Quick, affordable, and tasty. The perfect ${itemName.toLowerCase()} for your late-night cravings.`,
-    },
-    {
-      id: 5,
-      name: `Jumbo ${itemName} Family Pack`,
-      vendor: "Rolls & Wraps",
-      price: 250,
-      rating: 4.6,
-      reviews: 112,
-      time: "18 min",
-      type: "nonveg",
-      emoji: "🥘",
-      badge: "Serves 2-3",
-      desc: `Extra large portion of ${itemName.toLowerCase()}, perfect for sharing with your hostel mates.`,
-    },
-  ];
+  const mockDishes: any[] = [];
 
   const filteredDishes = mockDishes
     .filter((dish) => foodPref === "all" || dish.type === foodPref)

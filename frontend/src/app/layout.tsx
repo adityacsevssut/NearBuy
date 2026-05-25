@@ -24,6 +24,7 @@ export const metadata: Metadata = {
   },
 };
 
+import { WishlistProvider } from "@/context/WishlistContext";
 import ServiceGuard from "@/components/ServiceGuard";
 import { Toaster } from 'react-hot-toast';
 
@@ -36,21 +37,23 @@ export default function RootLayout({
         <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
             <CartProvider>
-              <LocationProvider>
-                <Toaster 
-                  position="top-center" 
-                  reverseOrder={false} 
-                  toastOptions={{
-                    duration: 3000,
-                    style: {
-                      transition: 'all 0.3s ease-out'
-                    }
-                  }}
-                />
-                <ServiceGuard>
-                  {children}
-                </ServiceGuard>
-              </LocationProvider>
+              <WishlistProvider>
+                <LocationProvider>
+                  <Toaster 
+                    position="top-center" 
+                    reverseOrder={false} 
+                    toastOptions={{
+                      duration: 3000,
+                      style: {
+                        transition: 'all 0.3s ease-out'
+                      }
+                    }}
+                  />
+                  <ServiceGuard>
+                    {children}
+                  </ServiceGuard>
+                </LocationProvider>
+              </WishlistProvider>
             </CartProvider>
           </AuthProvider>
         </GoogleOAuthProvider>

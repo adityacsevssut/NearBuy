@@ -5,13 +5,14 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Search, Star, Clock, ChevronRight,
-  MapPin, ChevronDown, SlidersHorizontal, X, Utensils
+  MapPin, ChevronDown, SlidersHorizontal, X, Utensils, Heart
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 
 
@@ -73,6 +74,7 @@ export default function HomePage() {
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
   const { locationName, pincode, latitude, longitude, setIsLocationModalOpen, activeCenter } = useLocationContext();
+  const { restaurantWishlist, toggleRestaurant } = useWishlist();
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -342,6 +344,25 @@ export default function HomePage() {
                                 <Utensils className="w-12 h-12 text-orange-200" />
                               </div>
                             )}
+
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleRestaurant({
+                                  id: r.id,
+                                  name: r.name,
+                                  type: r.cuisine,
+                                  image_url: r.image,
+                                  rating: r.rating,
+                                  distance: formatDistance(latitude, longitude, pincode, r) || "0 km",
+                                  isClosed: isClosed || isOutOfRange
+                                });
+                              }}
+                              className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform z-30"
+                            >
+                              <Heart className={`w-4 h-4 ${restaurantWishlist.some(w => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
+                            </button>
 
                             {r.badge && (
                               <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
