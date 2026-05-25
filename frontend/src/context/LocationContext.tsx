@@ -84,28 +84,33 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isLoggedIn, user]);
 
-  // Fetch active centers and resolve the active center based on user coordinates
+  // Fetch active centers and resolve the active center based on user coordinates or pincode
   useEffect(() => {
-    if (latitude === null || longitude === null) {
+    if ((latitude === null || longitude === null) && !pincode) {
       setActiveCenter(null);
       return;
     }
 
     const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-    fetch(`${apiBase}/api/public/service-centers`)
+    fetch(`${apiBase}/api/public/service-centers`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => {
         const centers = data.centers || [];
-        const matchingCenter = centers.find((c: any) => {
-          const dist = getDistance(latitude, longitude, parseFloat(c.latitude), parseFloat(c.longitude));
-          return dist <= parseFloat(c.radius_km);
-        });
+        let matchingCenter = null;
+        if (latitude !== null && longitude !== null) {
+          matchingCenter = centers.find((c: any) => {
+            const dist = getDistance(latitude, longitude, parseFloat(c.latitude), parseFloat(c.longitude));
+            return dist <= parseFloat(c.radius_km);
+          });
+        } else if (pincode) {
+          matchingCenter = centers.find((c: any) => c.pincode === pincode);
+        }
         setActiveCenter(matchingCenter || null);
       })
       .catch(err => {
         console.error("Failed to fetch service centers for context", err);
       });
-  }, [latitude, longitude]);
+  }, [latitude, longitude, pincode]);
 
   const syncLocationToBackend = async (
     name: string,

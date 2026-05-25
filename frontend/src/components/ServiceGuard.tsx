@@ -54,7 +54,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
   async function fetchCenters() {
     try {
-      const res = await fetch(`${API}/api/public/service-centers`);
+      const res = await fetch(`${API}/api/public/service-centers`, { cache: 'no-store' });
       const data = await res.json();
       if (res.ok) {
         setCenters(data.centers || []);
@@ -71,6 +71,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
     if (latitude === null || longitude === null) {
       // If user typed/selected a location but coordinates are unresolved, they are out of range.
+      // Fallback: Check if the exact pincode matches any active center
+      if (pincode && centers.some(c => c.pincode === pincode)) {
+        setStatus("allowed");
+        return;
+      }
+      
       if (pincode || (locationName && locationName !== "Select Location")) {
         setStatus("denied");
         return;
