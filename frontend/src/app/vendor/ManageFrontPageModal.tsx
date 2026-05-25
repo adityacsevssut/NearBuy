@@ -412,6 +412,18 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                   </div>
 
                   <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode</label>
+                    <input 
+                      type="text"
+                      maxLength={6}
+                      value={formData.pincode}
+                      onChange={e => setFormData({...formData, pincode: e.target.value.replace(/\D/g, "")})}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      placeholder="e.g. 768018"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
                     <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Manual Address Detail</label>
                     <textarea 
                       value={formData.manual_address}

@@ -429,10 +429,19 @@ export default function LocationModal() {
                           <p className="font-black text-gray-900 text-[16px] leading-tight">
                             {resolvedAddress.name}
                           </p>
-                          {resolvedAddress.pincode && (
-                            <p className="text-xs text-orange-600 font-bold mt-0.5">
-                              Pincode: {resolvedAddress.pincode}
-                            </p>
+                          {resolvedAddress.pincode !== undefined && (
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-xs text-orange-600 font-bold">Pincode:</span>
+                              <input
+                                type="text"
+                                maxLength={6}
+                                value={resolvedAddress.pincode}
+                                onChange={(e) => setResolvedAddress({...resolvedAddress, pincode: e.target.value.replace(/\D/g, "")})}
+                                className="px-2 py-0.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors"
+                                placeholder="Edit Pincode"
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            </div>
                           )}
                           <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">
                             {resolvedAddress.fullAddress}

@@ -209,22 +209,41 @@ export default function DevDashboard() {
       }
 
       // 2. Fetch all exact localities/Post Offices for this PIN code from Indian Post API
-      const res = await fetch(`https://api.postalpincode.in/pincode/${centerPincode}`);
-      const data = await res.json();
-      
-      if (data && data[0] && data[0].Status === "Success") {
-        const offices = data[0].PostOffice;
-        const formatted = offices.map((o: any) => ({
-          name: o.Name,
-          district: o.District,
-          state: o.State,
-          pincode: o.Pincode,
+      let formatted: any[] = [];
+      try {
+        const res = await fetch(`https://api.postalpincode.in/pincode/${centerPincode}`);
+        const data = await res.json();
+        
+        if (data && data[0] && data[0].Status === "Success") {
+          const offices = data[0].PostOffice;
+          formatted = offices.map((o: any) => ({
+            name: o.Name,
+            district: o.District,
+            state: o.State,
+            pincode: o.Pincode,
+            lat: fLat,
+            lon: fLon,
+            isExact: false,
+            fullName: `${o.Name}, ${o.District}, ${o.State}`
+          }));
+        }
+      } catch (err) {
+        console.warn("Postal API failed", err);
+      }
+
+      if (formatted.length > 0) {
+        setSearchResults(formatted);
+      } else if (fLat !== "20.5937") {
+        setSearchResults([{
+          name: `PIN: ${centerPincode}`,
+          district: "Unknown",
+          state: "Unknown",
+          pincode: centerPincode,
           lat: fLat,
           lon: fLon,
           isExact: false,
-          fullName: `${o.Name}, ${o.District}, ${o.State}`
-        }));
-        setSearchResults(formatted);
+          fullName: `PIN: ${centerPincode}`
+        }]);
       } else {
         toast.error("No specific localities found for this PIN code.");
         setSearchResults([]);

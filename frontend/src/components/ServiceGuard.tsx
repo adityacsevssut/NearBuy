@@ -7,6 +7,7 @@ import { MapPin, Navigation, Map, ShieldAlert, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -199,6 +200,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           </div>
         </main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
@@ -241,6 +243,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           </div>
         </main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
