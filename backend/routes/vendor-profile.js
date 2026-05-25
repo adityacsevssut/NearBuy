@@ -68,24 +68,33 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
     const final_restaurant_name = restaurant_name !== undefined ? restaurant_name : (existing.restaurant_name || "");
     const final_cuisine = cuisine !== undefined ? cuisine : (existing.cuisine || "");
     const final_delivery_time = delivery_time !== undefined ? delivery_time : (existing.delivery_time || "30-45 min");
-    const final_min_order = min_order !== undefined ? parseInt(min_order) : (existing.min_order || 0);
+    const parsedMinOrder = parseInt(min_order);
+    const final_min_order = !isNaN(parsedMinOrder) ? parsedMinOrder : (existing.min_order || 0);
     const final_offer = offer !== undefined ? offer : (existing.offer || "");
     const final_badge = badge !== undefined ? badge : (existing.badge || "");
     
     const final_gps_address = gps_address !== undefined ? gps_address : (existing.gps_address || "");
     const final_manual_address = manual_address !== undefined ? manual_address : (existing.manual_address || "");
-    const final_latitude = latitude !== undefined && latitude !== "" ? parseFloat(latitude) : (existing.latitude !== null && existing.latitude !== undefined ? parseFloat(existing.latitude) : null);
-    const final_longitude = longitude !== undefined && longitude !== "" ? parseFloat(longitude) : (existing.longitude !== null && existing.longitude !== undefined ? parseFloat(existing.longitude) : null);
+    
+    const parsedLat = parseFloat(latitude);
+    const final_latitude = !isNaN(parsedLat) ? parsedLat : (existing.latitude !== null && existing.latitude !== undefined ? parseFloat(existing.latitude) : null);
+    
+    const parsedLng = parseFloat(longitude);
+    const final_longitude = !isNaN(parsedLng) ? parsedLng : (existing.longitude !== null && existing.longitude !== undefined ? parseFloat(existing.longitude) : null);
+    
     const final_pincode = pincode !== undefined ? pincode : (existing.pincode || "");
-    const final_rating = rating !== undefined && rating !== "" ? parseFloat(rating) : (existing.rating !== null && existing.rating !== undefined ? parseFloat(existing.rating) : 0.0);
+    
+    const parsedRating = parseFloat(rating);
+    const final_rating = !isNaN(parsedRating) ? parsedRating : (existing.rating !== null && existing.rating !== undefined ? parseFloat(existing.rating) : 0.0);
 
-    const is_open_val = is_open !== undefined 
+    const is_open_val = is_open !== undefined && is_open !== ""
       ? (is_open === "true" || is_open === true) 
       : (existing.is_open !== undefined ? existing.is_open : true);
 
-    const delivery_range_val = delivery_range !== undefined 
-      ? parseFloat(delivery_range) 
-      : (existing.delivery_range !== undefined ? parseFloat(existing.delivery_range) : 5.0);
+    const parsedDeliveryRange = parseFloat(delivery_range);
+    const delivery_range_val = !isNaN(parsedDeliveryRange)
+      ? parsedDeliveryRange 
+      : (existing.delivery_range !== undefined && existing.delivery_range !== null ? parseFloat(existing.delivery_range) : 5.0);
 
     let imageUrl = existing.image_url || "";
     if (req.body.existing_image_url !== undefined) {
