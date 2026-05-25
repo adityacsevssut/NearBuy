@@ -153,30 +153,31 @@ export default function LocationModal() {
     setIsSubmittingPincode(true);
     const toastId = toast.loading("Looking up pincode…");
     try {
-      // 1. Fetch Post Office name from Postal API
+      let lat = null;
+      let lon = null;
       let locationName = `Pincode ${manualPincode}`;
+      
+      // 1. Fetch Post Office name from Postal API
       try {
-        const postalRes = await fetch(
-          `/api/pincode?pin=${manualPincode}`
-        );
+        const postalRes = await fetch(`/api/pincode?pin=${manualPincode}`);
         const postalData = await postalRes.json();
         if (postalData?.[0]?.Status === "Success" && postalData[0].PostOffice?.length > 0) {
           const po = postalData[0].PostOffice[0];
-          locationName = `${po.Name}, ${po.District}`;
+          locationName = po.Name; // Just use the name, exactly like before!
         }
       } catch (err) {
-        console.warn("Postal API proxy lookup failed, falling back to nominatim only.", err);
+        console.warn("Postal API proxy lookup failed.", err);
       }
 
-      // 2. Fetch coordinates for this pincode in India
+      // 2. Fetch coordinates for this pincode using exact basic Nominatim query
       const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json&addressdetails=1&accept-language=en`
+        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&countrycodes=IN&format=json&addressdetails=1&accept-language=en`
       );
       const geoData = await geoRes.json();
       
       if (geoData && geoData.length > 0) {
-        const lat = parseFloat(geoData[0].lat);
-        const lon = parseFloat(geoData[0].lon);
+        lat = parseFloat(geoData[0].lat);
+        lon = parseFloat(geoData[0].lon);
         
         if (locationName.startsWith("Pincode ")) {
           const addr = geoData[0].address || {};
@@ -191,25 +192,39 @@ export default function LocationModal() {
              locationName = parsedName;
           }
         }
+      } else {
+        // Fallback: search by basic query using JUST the location name (original behavior)
+        if (!locationName.startsWith("Pincode ")) {
+          const locRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationName)}&format=json&accept-language=en`
+          );
+          const locData = await locRes.json();
+          if (locData && locData.length > 0) {
+            lat = parseFloat(locData[0].lat);
+            lon = parseFloat(locData[0].lon);
+          }
+        }
+        
+        // Final fallback: try with pincode
+        if (lat === null || lon === null) {
+          const queryRes = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${manualPincode}&format=json&accept-language=en`
+          );
+          const queryData = await queryRes.json();
+          if (queryData && queryData.length > 0) {
+            lat = parseFloat(queryData[0].lat);
+            lon = parseFloat(queryData[0].lon);
+          }
+        }
+      }
 
+      if (lat !== null && lon !== null) {
         setLocation(locationName, manualPincode, lat, lon);
         toast.success(`📍 Location set to ${locationName}`, { id: toastId });
       } else {
-        // Fallback: search by query
-        const queryRes = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${manualPincode}+India&format=json&accept-language=en`
-        );
-        const queryData = await queryRes.json();
-        if (queryData && queryData.length > 0) {
-          const lat = parseFloat(queryData[0].lat);
-          const lon = parseFloat(queryData[0].lon);
-          setLocation(locationName, manualPincode, lat, lon);
-          toast.success(`📍 Location set to ${locationName}`, { id: toastId });
-        } else {
-          // If all geocoding fails, fallback without coordinates
-          setLocation(locationName, manualPincode);
-          toast.error(`Could not resolve coordinates for ${manualPincode}. Range check might be restricted.`, { id: toastId });
-        }
+        // If all geocoding fails, fallback without coordinates
+        setLocation(locationName, manualPincode);
+        toast.error(`Could not resolve coordinates for ${manualPincode}. Range check might be restricted.`, { id: toastId });
       }
     } catch {
       setLocation(`Pincode ${manualPincode}`, manualPincode);

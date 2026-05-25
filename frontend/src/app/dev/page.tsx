@@ -285,19 +285,10 @@ export default function DevDashboard() {
         setFallbackMapCenter({ lat: exactLat, lon: exactLon, name: loc.name });
         toast.success("Location pinpointed accurately!", { id: "geo" });
       } else {
-        // Fallback to district level if exact locality fails
-        const distRes = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.district + ", India")}&format=json&accept-language=en`);
-        const distData = await distRes.json();
-        if (distData && distData.length > 0) {
-           const dLat = parseFloat(distData[0].lat);
-           const dLon = parseFloat(distData[0].lon);
-           setSelectedCenter({ ...loc, lat: dLat, lon: dLon, isExact: true });
-           setFallbackMapCenter({ lat: dLat, lon: dLon, name: loc.name });
-           toast.success("Used district center for location.", { id: "geo" });
-        } else {
-           toast.error("Exact coordinates not found, using generic PIN center.", { id: "geo" });
-           setFallbackMapCenter({ lat: parseFloat(loc.lat), lon: parseFloat(loc.lon), name: loc.name });
-        }
+         // Fallback to generic PIN code center
+         toast.error("Exact coordinates not found, using PIN code center.", { id: "geo" });
+         setSelectedCenter({ ...loc, isExact: true }); // loc already has PIN code lat/lon
+         setFallbackMapCenter({ lat: parseFloat(loc.lat), lon: parseFloat(loc.lon), name: loc.name });
       }
     } catch {
       toast.dismiss("geo");
