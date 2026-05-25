@@ -197,7 +197,7 @@ export default function DevDashboard() {
       // 1. Get fallback Map Coordinates for this PIN code from Nominatim
       let fLat = "20.5937", fLon = "78.9629";
       try {
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${centerPincode}&countrycodes=IN&format=json`);
+        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${centerPincode}&countrycodes=IN&format=json&accept-language=en`);
         const nomData = await nomRes.json();
         if (nomData && nomData.length > 0) {
           fLat = nomData[0].lat;
@@ -240,7 +240,7 @@ export default function DevDashboard() {
     toast.loading("Finding exact location on map...", { id: "geo" });
     try {
       // Fetch exact lat/lon for the specific locality chosen
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.name + ", " + loc.district)}&countrycodes=IN&format=json`);
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.name + ", " + loc.district)}&countrycodes=IN&format=json&accept-language=en`);
       const data = await res.json();
       if (data && data.length > 0) {
         const exactLat = parseFloat(data[0].lat);

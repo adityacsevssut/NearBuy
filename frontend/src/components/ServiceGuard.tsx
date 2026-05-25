@@ -87,7 +87,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               
               // Reverse geocode to get name/pincode (optional but good)
               try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
                 const data = await res.json();
                 const pin = data.address?.postcode || "";
                 const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";

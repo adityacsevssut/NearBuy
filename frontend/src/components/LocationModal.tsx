@@ -51,7 +51,7 @@ export default function LocationModal() {
     setIsResolvingAddress(true);
     try {
       const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
       );
       const data = await res.json();
       const addr = data.address || {};
@@ -170,7 +170,7 @@ export default function LocationModal() {
 
       // 2. Fetch coordinates for this pincode in India
       const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json`
+        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json&accept-language=en`
       );
       const geoData = await geoRes.json();
       
@@ -182,7 +182,7 @@ export default function LocationModal() {
       } else {
         // Fallback: search by query
         const queryRes = await fetch(
-          `https://nominatim.openstreetmap.org/search?q=${manualPincode}+India&format=json`
+          `https://nominatim.openstreetmap.org/search?q=${manualPincode}+India&format=json&accept-language=en`
         );
         const queryData = await queryRes.json();
         if (queryData && queryData.length > 0) {

@@ -89,19 +89,19 @@ export default function EssentialsPage() {
               onClick={() => setIsLocationModalOpen(true)}
               className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm active:bg-blue-50 transition-colors"
             >
-               <div className="flex items-center gap-2.5 overflow-hidden">
-                 <MapPin className="w-6 h-6 text-blue-600 shrink-0" />
-                 <div className="flex flex-col overflow-hidden text-left">
-                   <div className="flex items-center gap-1">
-                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
-                     <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
-                   </div>
-                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
-                 </div>
-               </div>
-               <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shrink-0 ml-2">
-                  <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
-               </div>
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <MapPin className="w-6 h-6 text-blue-600 shrink-0" />
+                <div className="flex flex-col overflow-hidden text-left">
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
+                    <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
+                  </div>
+                  <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
+                </div>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shrink-0 ml-2">
+                <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
+              </div>
             </button>
           </div>
 
@@ -133,7 +133,7 @@ export default function EssentialsPage() {
                 </button>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-blue-200 bg-white shadow-sm focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100/50 transition-all mx-1">
               <Search className="w-4 h-4 text-blue-400 flex-shrink-0" />
               <input
@@ -185,8 +185,8 @@ export default function EssentialsPage() {
                         key={cat.id}
                         onClick={() => setActiveCat(cat.id)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeCat === cat.id
-                            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/20"
-                            : "text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent"
+                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/20"
+                          : "text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent"
                           }`}
                       >
                         <span className="text-lg">{cat.emoji}</span>
@@ -205,8 +205,8 @@ export default function EssentialsPage() {
                         key={r.label}
                         onClick={() => setPriceRange(priceRange === r.label ? null : r.label)}
                         className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all ${priceRange === r.label
-                            ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-md shadow-blue-500/20"
-                            : "text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent font-medium"
+                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-md shadow-blue-500/20"
+                          : "text-gray-600 hover:bg-blue-50 hover:text-blue-600 border border-transparent font-medium"
                           }`}
                       >
                         {r.label}
@@ -224,8 +224,8 @@ export default function EssentialsPage() {
                         key={s}
                         onClick={() => setActiveSort(s)}
                         className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${activeSort === s
-                            ? "text-blue-700 font-bold bg-blue-50/50"
-                            : "text-gray-500 hover:text-gray-800 font-medium hover:bg-gray-50"
+                          ? "text-blue-700 font-bold bg-blue-50/50"
+                          : "text-gray-500 hover:text-gray-800 font-medium hover:bg-gray-50"
                           }`}
                       >
                         {s}
@@ -329,10 +329,10 @@ export default function EssentialsPage() {
                           disabled={!p.inStock}
                           onClick={() => setCart(c => c.includes(p.id) ? c.filter(i => i !== p.id) : [...c, p.id])}
                           className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[13px] font-bold transition-all mt-auto ${!p.inStock
-                              ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                              : inCart
-                                ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-600/20"
-                                : "btn-blue text-white hover:opacity-90 shadow-md shadow-blue-600/20"
+                            ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                            : inCart
+                              ? "bg-blue-600 text-white hover:bg-blue-700 shadow-md shadow-blue-600/20"
+                              : "btn-blue text-white hover:opacity-90 shadow-md shadow-blue-600/20"
                             }`}
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />

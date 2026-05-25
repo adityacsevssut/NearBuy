@@ -76,7 +76,7 @@ export default function HomePage() {
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     fetchRestaurants();
   }, []);
@@ -110,7 +110,7 @@ export default function HomePage() {
       const vendorLon = r.longitude ? parseFloat(r.longitude) : null;
       const centerLat = activeCenter.latitude ? parseFloat(activeCenter.latitude) : null;
       const centerLon = activeCenter.longitude ? parseFloat(activeCenter.longitude) : null;
-      
+
       if (vendorLat !== null && vendorLon !== null && centerLat !== null && centerLon !== null) {
         const distToCenter = getDistance(centerLat, centerLon, vendorLat, vendorLon);
         if (distToCenter !== null) {
@@ -137,19 +137,19 @@ export default function HomePage() {
               onClick={() => setIsLocationModalOpen(true)}
               className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm active:bg-orange-50 transition-colors"
             >
-               <div className="flex items-center gap-2.5 overflow-hidden">
-                 <MapPin className="w-6 h-6 text-orange-500 shrink-0" />
-                 <div className="flex flex-col overflow-hidden text-left">
-                   <div className="flex items-center gap-1">
-                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
-                     <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
-                   </div>
-                   <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
-                 </div>
-               </div>
-               <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center shadow-sm shrink-0 ml-2">
-                  <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
-               </div>
+              <div className="flex items-center gap-2.5 overflow-hidden">
+                <MapPin className="w-6 h-6 text-orange-500 shrink-0" />
+                <div className="flex flex-col overflow-hidden text-left">
+                  <div className="flex items-center gap-1">
+                    <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
+                    <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
+                  </div>
+                  <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
+                </div>
+              </div>
+              <div className="w-9 h-9 rounded-full bg-orange-500 flex items-center justify-center shadow-sm shrink-0 ml-2">
+                <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
+              </div>
             </button>
           </div>
 
@@ -182,11 +182,11 @@ export default function HomePage() {
                 <div className={`relative inline-flex h-4 w-7 items-center rounded-full transition-colors ${foodPref === "veg" ? "bg-green-500" : "bg-gray-300"}`}>
                   <span className={`inline-block h-3 w-3 transform rounded-full bg-white transition-transform shadow-sm ${foodPref === "veg" ? "translate-x-3.5" : "translate-x-0.5"}`} />
                 </div>
-                <input 
-                  type="checkbox" 
-                  className="hidden" 
-                  checked={foodPref === "veg"} 
-                  onChange={(e) => setFoodPref(e.target.checked ? "veg" : "all")} 
+                <input
+                  type="checkbox"
+                  className="hidden"
+                  checked={foodPref === "veg"}
+                  onChange={(e) => setFoodPref(e.target.checked ? "veg" : "all")}
                 />
               </label>
 
@@ -268,160 +268,159 @@ export default function HomePage() {
             <div className="w-full min-w-0 pt-2 relative">
               {/* Mobile Search Replacement */}
               <div className="md:hidden py-3 mb-2">
-            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100/50 transition-all mx-1">
-              <Search className="w-4 h-4 text-orange-400 flex-shrink-0" />
-              <input
-                suppressHydrationWarning
-                type="text"
-                placeholder="Search restaurants..."
-                className="flex-1 bg-transparent text-sm text-gray-800 outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="py-2">
-            <div className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide pb-4 px-1">
-              {quickBites.map(({ label, image }) => (
-                <Link
-                  key={label}
-                  href={`/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="flex-shrink-0 flex flex-col items-center gap-2 group w-20 md:w-24"
-                >
-                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-sm group-hover:shadow-md border border-gray-100 transition-all duration-300 group-hover:scale-105 group-hover:border-orange-300 bg-gray-100 flex-shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt={label} className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-xs md:text-sm font-bold text-gray-700 text-center leading-tight group-hover:text-orange-600 transition-colors">
-                    {label}
-                  </span>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-
-
-          <div className="py-4">
-            <h2 className="text-xl font-black text-orange-500 tracking-tight mb-6">
-              Nearest Vendors & Restaurants
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-              {isLoading ? (
-                <div className="col-span-full py-12 flex justify-center text-orange-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-orange-200 bg-white shadow-sm focus-within:border-orange-400 focus-within:ring-2 focus-within:ring-orange-100/50 transition-all mx-1">
+                  <Search className="w-4 h-4 text-orange-400 flex-shrink-0" />
+                  <input
+                    suppressHydrationWarning
+                    type="text"
+                    placeholder="Search restaurants..."
+                    className="flex-1 bg-transparent text-sm text-gray-800 outline-none"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-              ) : (
-                filtered.map((r) => {
-                  const rawDistance = getDistance(
-                    latitude,
-                    longitude,
-                    r.latitude ? parseFloat(r.latitude) : null,
-                    r.longitude ? parseFloat(r.longitude) : null
-                  );
-                  const maxRange = r.deliveryRange ? parseFloat(r.deliveryRange) : 5.0;
-                  const isOutOfRange = rawDistance !== null && rawDistance > maxRange;
-                  const isClosed = r.isOpen === false;
+              </div>
 
-                  return (
+              <div className="py-2">
+                <div className="flex gap-4 md:gap-6 overflow-x-auto scrollbar-hide pb-4 px-1">
+                  {quickBites.map(({ label, image }) => (
                     <Link
-                      href={`/vendor/${r.id}`}
-                      key={r.id}
-                      className={`group flex flex-col bg-white rounded-2xl border border-gray-200
-                        hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 text-left transition-all duration-300 overflow-hidden ${
-                          (isClosed || isOutOfRange) ? "opacity-75" : ""
-                        }`}
+                      key={label}
+                      href={`/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                      className="flex-shrink-0 flex flex-col items-center gap-2 group w-20 md:w-24"
                     >
-                      <div className="relative w-full h-44 md:h-48 bg-gray-100 flex items-center justify-center border-b border-gray-100 overflow-hidden">
-                        {r.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={r.image} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`} />
-                        ) : (
-                          <div className={`w-full h-full bg-orange-50 flex items-center justify-center ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`}>
-                             <Utensils className="w-12 h-12 text-orange-200" />
-                          </div>
-                        )}
-
-                        {r.badge && (
-                          <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
-                            {r.badge}
-                          </span>
-                        )}
-                        {r.veg && (
-                          <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-orange-600 flex items-center justify-center bg-white shadow-sm z-10">
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
-                          </span>
-                        )}
-
-                        {(isClosed || isOutOfRange) && (
-                          <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-20 pointer-events-none">
-                            <span className="text-red-600 font-black text-sm uppercase tracking-widest px-3 py-1 bg-white/80 rounded-md shadow-sm">
-                              {isClosed ? "Closed Now" : "Out of Range"}
-                            </span>
-                          </div>
-                        )}
+                      <div className="w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden shadow-sm group-hover:shadow-md border border-gray-100 transition-all duration-300 group-hover:scale-105 group-hover:border-orange-300 bg-gray-100 flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={image} alt={label} className="w-full h-full object-cover" />
                       </div>
-
-                      <div className="p-3.5 flex flex-col justify-between flex-1 w-full bg-white">
-                        <div>
-                          <div className="flex justify-between items-start mb-0.5">
-                            <p className="font-black text-gray-900 text-[17px] tracking-tight truncate">{r.name}</p>
-                            <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-orange-600 px-1.5 py-0.5 rounded shadow-sm">
-                              <Star className="w-3 h-3 fill-white" />
-                              {r.rating}
-                            </span>
-                          </div>
-                          <p className="text-[13px] text-gray-500 mb-2 truncate">{r.cuisine}</p>
-
-                          <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500 mb-3">
-                            <span className="flex items-center gap-1 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">
-                              <Clock className="w-3 h-3 text-orange-400" /> {r.time || "30 min"}
-                            </span>
-                            <span className="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">Min ₹{r.minOrder || 0}</span>
-                            {(() => {
-                              const dist = formatDistance(latitude, longitude, pincode, r);
-                              if (dist) {
-                                return (
-                                  <span className="bg-orange-50 border border-orange-100 px-2 py-1 rounded-md shadow-sm text-orange-600 font-bold flex items-center gap-0.5">
-                                    📍 {dist}
-                                  </span>
-                                );
-                              }
-                              return null;
-                            })()}
-                          </div>
-                        </div>
-
-                      <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between">
-                        {r.offer ? (
-                          <div className="flex items-center gap-1.5 text-[11px] text-orange-700 font-bold">
-                            <span className="text-orange-500 text-sm">🏷</span>
-                            {r.offer}
-                          </div>
-                        ) : (
-                          <div className="text-[11px] text-gray-400 font-medium">Explore menu</div>
-                        )}
-                        <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
-                      </div>
-                    </div>
-                  </Link>
-                  );
-                })
-              )}
-            </div>
-              {filtered.length === 0 && (
-                <div className="col-span-full flex flex-col items-center py-20 text-gray-400 bg-white rounded-3xl border border-gray-200">
-                  <span className="text-5xl mb-4">🍽️</span>
-                  <p className="font-bold text-gray-600 text-lg">No restaurants found</p>
-                  <p className="text-sm mt-1">Try changing your filters or search</p>
+                      <span className="text-xs md:text-sm font-bold text-gray-700 text-center leading-tight group-hover:text-orange-600 transition-colors">
+                        {label}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
-              )}
+              </div>
+
+
+
+              <div className="py-4">
+                <h2 className="text-xl font-black text-orange-500 tracking-tight mb-6">
+                  Nearest Vendors & Restaurants
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
+                  {isLoading ? (
+                    <div className="col-span-full py-12 flex justify-center text-orange-500">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                    </div>
+                  ) : (
+                    filtered.map((r) => {
+                      const rawDistance = getDistance(
+                        latitude,
+                        longitude,
+                        r.latitude ? parseFloat(r.latitude) : null,
+                        r.longitude ? parseFloat(r.longitude) : null
+                      );
+                      const maxRange = r.deliveryRange ? parseFloat(r.deliveryRange) : 5.0;
+                      const isOutOfRange = rawDistance !== null && rawDistance > maxRange;
+                      const isClosed = r.isOpen === false;
+
+                      return (
+                        <Link
+                          href={`/vendor/${r.id}`}
+                          key={r.id}
+                          className={`group flex flex-col bg-white rounded-2xl border border-gray-200
+                        hover:border-orange-500 hover:shadow-lg hover:shadow-orange-500/10 text-left transition-all duration-300 overflow-hidden ${(isClosed || isOutOfRange) ? "opacity-75" : ""
+                            }`}
+                        >
+                          <div className="relative w-full h-44 md:h-48 bg-gray-100 flex items-center justify-center border-b border-gray-100 overflow-hidden">
+                            {r.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={r.image} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`} />
+                            ) : (
+                              <div className={`w-full h-full bg-orange-50 flex items-center justify-center ${(isClosed || isOutOfRange) ? 'grayscale' : ''}`}>
+                                <Utensils className="w-12 h-12 text-orange-200" />
+                              </div>
+                            )}
+
+                            {r.badge && (
+                              <span className={`absolute top-3 left-3 text-[10px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10 ${r.badgeColor}`}>
+                                {r.badge}
+                              </span>
+                            )}
+                            {r.veg && (
+                              <span className="absolute top-3 right-3 w-4 h-4 rounded-sm border-2 border-orange-600 flex items-center justify-center bg-white shadow-sm z-10">
+                                <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
+                              </span>
+                            )}
+
+                            {(isClosed || isOutOfRange) && (
+                              <div className="absolute inset-0 bg-white/40 flex items-center justify-center z-20 pointer-events-none">
+                                <span className="text-red-600 font-black text-sm uppercase tracking-widest px-3 py-1 bg-white/80 rounded-md shadow-sm">
+                                  {isClosed ? "Closed Now" : "Out of Range"}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="p-3.5 flex flex-col justify-between flex-1 w-full bg-white">
+                            <div>
+                              <div className="flex justify-between items-start mb-0.5">
+                                <p className="font-black text-gray-900 text-[17px] tracking-tight truncate">{r.name}</p>
+                                <span className="flex items-center gap-1 text-[11px] font-bold text-white bg-orange-600 px-1.5 py-0.5 rounded shadow-sm">
+                                  <Star className="w-3 h-3 fill-white" />
+                                  {r.rating}
+                                </span>
+                              </div>
+                              <p className="text-[13px] text-gray-500 mb-2 truncate">{r.cuisine}</p>
+
+                              <div className="flex items-center gap-2 text-[11px] font-medium text-gray-500 mb-3">
+                                <span className="flex items-center gap-1 bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">
+                                  <Clock className="w-3 h-3 text-orange-400" /> {r.time || "30 min"}
+                                </span>
+                                <span className="bg-gray-50 border border-gray-100 px-2 py-1 rounded-md shadow-sm">Min ₹{r.minOrder || 0}</span>
+                                {(() => {
+                                  const dist = formatDistance(latitude, longitude, pincode, r);
+                                  if (dist) {
+                                    return (
+                                      <span className="bg-orange-50 border border-orange-100 px-2 py-1 rounded-md shadow-sm text-orange-600 font-bold flex items-center gap-0.5">
+                                        📍 {dist}
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </div>
+                            </div>
+
+                            <div className="pt-2.5 border-t border-gray-100 flex items-center justify-between">
+                              {r.offer ? (
+                                <div className="flex items-center gap-1.5 text-[11px] text-orange-700 font-bold">
+                                  <span className="text-orange-500 text-sm">🏷</span>
+                                  {r.offer}
+                                </div>
+                              ) : (
+                                <div className="text-[11px] text-gray-400 font-medium">Explore menu</div>
+                              )}
+                              <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })
+                  )}
+                </div>
+                {filtered.length === 0 && (
+                  <div className="col-span-full flex flex-col items-center py-20 text-gray-400 bg-white rounded-3xl border border-gray-200">
+                    <span className="text-5xl mb-4">🍽️</span>
+                    <p className="font-bold text-gray-600 text-lg">No restaurants found</p>
+                    <p className="text-sm mt-1">Try changing your filters or search</p>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </main>
 
       <Footer />

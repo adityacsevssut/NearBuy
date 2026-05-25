@@ -109,7 +109,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
       async (pos) => {
         const { latitude, longitude } = pos.coords;
         try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`);
           const data = await res.json();
           const address = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
           const pincode = data.address?.postcode || "";
