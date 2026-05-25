@@ -170,13 +170,28 @@ export default function LocationModal() {
 
       // 2. Fetch coordinates for this pincode in India
       const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json&accept-language=en`
+        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&country=India&format=json&addressdetails=1&accept-language=en`
       );
       const geoData = await geoRes.json();
       
       if (geoData && geoData.length > 0) {
         const lat = parseFloat(geoData[0].lat);
         const lon = parseFloat(geoData[0].lon);
+        
+        if (locationName.startsWith("Pincode ")) {
+          const addr = geoData[0].address || {};
+          let parsedName = addr.suburb || addr.neighbourhood || addr.residential || addr.city || addr.town || addr.village || addr.county || addr.state_district || "";
+          
+          if (!parsedName) {
+            const parts = geoData[0].display_name?.split(",") || [];
+            parsedName = parts.length > 1 ? parts[1].trim() : (parts[0] || manualPincode);
+          }
+          
+          if (parsedName && parsedName !== manualPincode) {
+             locationName = parsedName;
+          }
+        }
+
         setLocation(locationName, manualPincode, lat, lon);
         toast.success(`📍 Location set to ${locationName}`, { id: toastId });
       } else {
