@@ -218,14 +218,35 @@ export default function DevDashboard() {
 
   async function handleSaveCenter() {
     if (!selectedCenter) return toast.error("Please select a location first.");
+    
+    // Client-side validations
+    if (!selectedCenter.name || !selectedCenter.name.trim()) {
+      return toast.error("Location name is required.");
+    }
+    
+    if (!centerPincode || !centerPincode.trim()) {
+      return toast.error("PIN code is required.");
+    }
+    
+    const lat = parseFloat(selectedCenter.lat);
+    const lon = parseFloat(selectedCenter.lon);
+    if (isNaN(lat) || isNaN(lon)) {
+      return toast.error("Invalid coordinates. Please re-select the location.");
+    }
+    
+    const radius = parseFloat(centerRadius);
+    if (isNaN(radius) || radius <= 0) {
+      return toast.error("Please enter a valid delivery radius.");
+    }
+
     setSavingCenter(true);
     try {
       const payload = {
         name: selectedCenter.name,
-        pincode: centerPincode,
-        latitude: parseFloat(selectedCenter.lat),
-        longitude: parseFloat(selectedCenter.lon),
-        radius_km: parseFloat(centerRadius)
+        pincode: centerPincode.trim(),
+        latitude: lat,
+        longitude: lon,
+        radius_km: radius
       };
       
       const res = await fetch(`${API}/api/service-centers`, {
@@ -723,10 +744,10 @@ export default function DevDashboard() {
                           <div className="relative z-10">
                             <div className="flex items-start justify-between">
                               <div>
-                                <p className="text-lg font-black text-pink-700 mb-1 leading-tight">{selectedCenter.name}</p>
-                                <span className="inline-block bg-white text-pink-600 px-2 py-0.5 rounded text-xs font-bold border border-pink-100 shadow-sm mb-2">
-                                  PIN: {selectedCenter.pincode || "Not found"}
-                                </span>
+                                 <p className="text-lg font-black text-pink-700 mb-1 leading-tight">{selectedCenter.name}</p>
+                                 <span className="inline-block bg-white text-pink-600 px-2 py-0.5 rounded text-xs font-bold border border-pink-100 shadow-sm mb-2">
+                                   PIN: {centerPincode || "Not found"}
+                                 </span>
                                 <p className="text-xs text-gray-600 font-medium leading-relaxed">{selectedCenter.fullName}</p>
                                 <p className="text-[10px] text-pink-500/80 font-bold mt-2 uppercase tracking-widest">
                                   {selectedCenter.lat.toFixed(5)}, {selectedCenter.lon.toFixed(5)}
@@ -766,6 +787,20 @@ export default function DevDashboard() {
                   {/* Bottom configuration bar */}
                   {selectedCenter && (
                     <div className="bg-white border-t border-gray-200 p-5 shrink-0 flex flex-col sm:flex-row gap-4 items-end shadow-lg relative z-20">
+                      <div className="flex-1 w-full">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pincode</label>
+                        <div className="relative">
+                          <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
+                          <input 
+                            type="text"
+                            value={centerPincode}
+                            onChange={(e) => setCenterPincode(e.target.value)}
+                            placeholder="Enter Pincode"
+                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-black text-gray-900 transition-all"
+                          />
+                        </div>
+                      </div>
+
                       <div className="flex-1 w-full">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Delivery Radius (km)</label>
                         <div className="relative">
