@@ -61,10 +61,16 @@ export default function DevDashboard() {
   const [managers, setManagers] = useState<Manager[]>([]);
   const [centers, setCenters] = useState<ServiceCenter[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+
+  // Settings
+  const [platformFee, setPlatformFee] = useState(5);
+  const [gst, setGst] = useState(10);
+  const [savingSettings, setSavingSettings] = useState(false);
   
   // Panels
   const [showPanel, setShowPanel] = useState(false);
   const [showCentersPanel, setShowCentersPanel] = useState(false);
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
 
   // Manager Modal state
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
@@ -97,14 +103,20 @@ export default function DevDashboard() {
   async function fetchData() {
     setLoadingData(true);
     try {
-      const [resM, resC] = await Promise.all([
+      const [resM, resC, resS] = await Promise.all([
         fetch(`${API}/api/managers`, { headers: { Authorization: `Bearer ${accessToken}` } }),
-        fetch(`${API}/api/service-centers`, { headers: { Authorization: `Bearer ${accessToken}` } })
+        fetch(`${API}/api/service-centers`, { headers: { Authorization: `Bearer ${accessToken}` } }),
+        fetch(`${API}/api/public/settings`)
       ]);
       const dataM = await resM.json();
       const dataC = await resC.json();
+      const dataS = await resS.json();
       if (resM.ok) setManagers(dataM.managers || []);
       if (resC.ok) setCenters(dataC.centers || []);
+      if (resS.ok) {
+        if (dataS.platform_fee !== undefined) setPlatformFee(dataS.platform_fee);
+        if (dataS.gst !== undefined) setGst(dataS.gst);
+      }
     } catch {
       toast.error("Network error. Check your connection.");
     }
@@ -367,6 +379,25 @@ export default function DevDashboard() {
     }
   }
 
+  async function handleSaveSettings() {
+    setSavingSettings(true);
+    try {
+      const res = await fetch(`${API}/api/public/settings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ platform_fee: platformFee, gst })
+      });
+      if (res.ok) {
+        toast.success("Global settings updated!");
+      } else {
+        toast.error("Failed to update settings.");
+      }
+    } catch {
+      toast.error("Network error.");
+    }
+    setSavingSettings(false);
+  }
+
   if (!isLoggedIn || user?.email !== DEV_EMAIL) return null;
 
   const stats = [
@@ -374,6 +405,7 @@ export default function DevDashboard() {
     { label: "Service Centers", value: centers.length, icon: MapPin, color: "from-pink-500 to-rose-500" },
     { label: "Food Managers",  value: managers.filter(m => m.manager_type === "food").length,     icon: Store,      color: "from-orange-400 to-orange-500" },
     { label: "Med Managers",   value: managers.filter(m => m.manager_type === "medicine").length, icon: Pill,       color: "from-blue-400 to-blue-500" },
+    { label: "Essential Managers", value: managers.filter(m => m.manager_type === "store").length, icon: ShoppingBag, color: "from-emerald-400 to-emerald-500" },
   ];
 
   return (
@@ -424,18 +456,25 @@ export default function DevDashboard() {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
               <button
-                onClick={() => { setShowPanel(false); setShowCentersPanel(!showCentersPanel); }}
+                onClick={() => { setShowPanel(false); setShowSettingsPanel(false); setShowCentersPanel(!showCentersPanel); }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showCentersPanel ? 'bg-pink-50 border-pink-200 text-pink-700' : 'bg-white border-gray-200 text-gray-700 hover:border-pink-300'}`}
               >
                 <MapPin className="w-4 h-4" />
                 Start Business Here
               </button>
               <button
-                onClick={() => { setShowCentersPanel(false); setShowPanel(!showPanel); }}
+                onClick={() => { setShowCentersPanel(false); setShowSettingsPanel(false); setShowPanel(!showPanel); }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showPanel ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-gray-200 text-gray-700 hover:border-violet-300'}`}
               >
                 <Users className="w-4 h-4" />
                 Manage Managers
+              </button>
+              <button
+                onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowSettingsPanel(!showSettingsPanel); }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showSettingsPanel ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-700 hover:border-amber-300'}`}
+              >
+                <Tag className="w-4 h-4" />
+                Platform Fees
               </button>
             </div>
           </div>
@@ -659,6 +698,64 @@ export default function DevDashboard() {
                   })}
                 </div>
               )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ══════════════════ SETTINGS PANEL ══════════════════ */}
+      <AnimatePresence>
+        {showSettingsPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
+          >
+            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+                <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+                  <Tag className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-gray-900">Platform Pricing Configuration</h2>
+                  <p className="text-xs text-gray-500 font-medium">Manage global Platform Fee and GST for all carts</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Platform Fee (₹)</label>
+                  <input
+                    type="number"
+                    value={platformFee}
+                    onChange={(e) => setPlatformFee(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed amount charged per order</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">GST (₹)</label>
+                  <input
+                    type="number"
+                    value={gst}
+                    onChange={(e) => setGst(parseFloat(e.target.value) || 0)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed GST applied to all orders instead of Delivery Fee</p>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                <button
+                  onClick={handleSaveSettings}
+                  disabled={savingSettings}
+                  className="px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white rounded-xl font-bold shadow-md active:scale-95 transition-all flex items-center gap-2"
+                >
+                  {savingSettings ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  Save Settings
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

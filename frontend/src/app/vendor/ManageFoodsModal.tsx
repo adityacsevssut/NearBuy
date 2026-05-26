@@ -6,7 +6,7 @@ import {
   X, Plus, Trash2, Pencil, Save, Loader2, Image as ImageIcon,
   ChevronRight, Utensils, Check, ArrowLeft, Package,
   Leaf, Drumstick, LayoutTemplate, AlertTriangle,
-  Star, Clock, Heart,
+  Star, Clock, Heart, ArrowDown,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
@@ -20,6 +20,7 @@ interface MenuItem {
   name: string;
   description: string;
   price: number;
+  actual_price?: number;
   type: "veg" | "non-veg";
   badge: string;
   image_url: string;
@@ -27,6 +28,7 @@ interface MenuItem {
   rating: number;
   prep_time: string;
   reviews: number;
+  front_page_category?: string;
 }
 
 interface Props {
@@ -45,6 +47,7 @@ const blankItem = () => ({
   name: "",
   description: "",
   price: "",
+  actual_price: "",
   type: "veg" as "veg" | "non-veg",
   badge: "",
   rating: "4.5",
@@ -52,6 +55,7 @@ const blankItem = () => ({
   reviews: "0",
   imageFile: null as File | null,
   imagePreview: null as string | null,
+  front_page_category: "",
 });
 
 // ─── Live food item preview card — exact replica of customer view ─────────────
@@ -99,7 +103,16 @@ function FoodItemPreviewCard({
           )}
 
           {/* Price */}
-          <div className="flex items-center gap-1.5 mt-1.5 mb-2">
+          <div className="flex items-baseline gap-1.5 mt-1.5 mb-2">
+            {item.actual_price && Number(item.actual_price) > Number(item.price || 0) && (
+              <>
+                <span className="flex items-center gap-0.5 text-green-600 font-black text-[13px]">
+                  <ArrowDown className="w-3.5 h-3.5" strokeWidth={3} />
+                  {Math.round(((Number(item.actual_price) - Number(item.price || 0)) / Number(item.actual_price)) * 100)}%
+                </span>
+                <span className="text-gray-400 font-semibold line-through text-sm">₹{item.actual_price}</span>
+              </>
+            )}
             <span className="text-base font-black text-gray-900">₹{item.price || "0"}</span>
           </div>
 
@@ -333,11 +346,13 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
       fd.append("name", form.name.trim());
       fd.append("description", form.description.trim());
       fd.append("price", form.price);
+      if (form.actual_price) fd.append("actual_price", form.actual_price);
       fd.append("type", form.type);
       fd.append("badge", form.badge.trim());
       fd.append("rating", form.rating || "0");
       fd.append("prep_time", form.prep_time || "");
       fd.append("reviews", form.reviews || "0");
+      fd.append("front_page_category", form.front_page_category || "");
       if (form.imageFile) fd.append("image", form.imageFile);
 
       const url = editingItem ? `${API}/api/vendor-menu/${editingItem.id}` : `${API}/api/vendor-menu`;
@@ -646,15 +661,17 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                           {itemsInCat.map((item) => (
                             <FoodItemPreviewCard
                               key={item.id}
-                              item={{
-                                ...item,
-                                price: String(item.price),
-                                imageFile: null,
-                                imagePreview: item.image_url || null,
-                                rating: item.rating ? String(item.rating) : "0",
-                                prep_time: item.prep_time || "",
-                                reviews: item.reviews ? String(item.reviews) : "0",
-                              }}
+                                item={{
+                                  ...item,
+                                  price: String(item.price),
+                                  actual_price: item.actual_price ? String(item.actual_price) : "",
+                                  imageFile: null,
+                                  imagePreview: item.image_url || null,
+                                  rating: item.rating ? String(item.rating) : "0",
+                                  prep_time: item.prep_time || "",
+                                  reviews: item.reviews ? String(item.reviews) : "0",
+                                  front_page_category: item.front_page_category || "",
+                                }}
                               actions={
                                 <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-100">
                                   <button
@@ -674,13 +691,15 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                         name: item.name,
                                         description: item.description,
                                         price: String(item.price),
+                                        actual_price: item.actual_price ? String(item.actual_price) : "",
                                         type: item.type,
                                         badge: item.badge,
                                         rating: item.rating ? String(item.rating) : "4.5",
                                         prep_time: item.prep_time || "15 min",
                                         reviews: item.reviews ? String(item.reviews) : "0",
                                         imageFile: null,
-                                        imagePreview: item.image_url || null
+                                        imagePreview: item.image_url || null,
+                                        front_page_category: item.front_page_category || ""
                                       });
                                       setShowForm(true);
                                     }}
@@ -836,6 +855,32 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                     ))}
                                   </div>
                                 </div>
+                              </div>
+
+                              {/* Front Page Category Select */}
+                              <div className="space-y-1">
+                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Quick Bite Category (Optional)</label>
+                                <select
+                                  value={form.front_page_category}
+                                  onChange={(e) => setForm((f) => ({ ...f, front_page_category: e.target.value }))}
+                                  className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all appearance-none cursor-pointer`}
+                                >
+                                  <option value="">None</option>
+                                  <option value="Biryani">Biryani</option>
+                                  <option value="Roll">Roll</option>
+                                  <option value="Dosa">Dosa</option>
+                                  <option value="Chowmin">Chowmin</option>
+                                  <option value="Momo">Momo</option>
+                                  <option value="Pizza">Pizza</option>
+                                  <option value="Burger">Burger</option>
+                                  <option value="Chicken Pokoda">Chicken Pokoda</option>
+                                  <option value="Vada">Vada</option>
+                                  <option value="Manchurrian">Manchurrian</option>
+                                  <option value="Bakery">Bakery</option>
+                                  <option value="Drinks">Drinks</option>
+                                  <option value="Chole Bhature">Chole Bhature</option>
+                                  <option value="Others">Others</option>
+                                </select>
                               </div>
 
                               {/* Rating · Prep Time · Reviews */}

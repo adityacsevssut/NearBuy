@@ -43,6 +43,8 @@ async function ensureTables() {
     ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS rating NUMERIC(3,1) DEFAULT 4.5;
     ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS prep_time TEXT DEFAULT '15 min';
     ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS reviews INTEGER DEFAULT 0;
+    ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS front_page_category TEXT DEFAULT '';
+    ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS actual_price INTEGER DEFAULT 0;
   `).catch(err => console.error("Error adding columns:", err));
 }
 
@@ -64,7 +66,7 @@ router.get("/", authenticate, async (req, res) => {
 
 // ── POST /api/vendor-menu  →  add a new menu item ────────────────────────────
 router.post("/", authenticate, upload.single("image"), async (req, res) => {
-  const { category, name, description, price, type, badge, sort_order, rating, prep_time, reviews } = req.body;
+  const { category, name, description, price, actual_price, type, badge, sort_order, rating, prep_time, reviews, front_page_category } = req.body;
   if (!category || !name || !price) {
     return res.status(400).json({ error: "category, name, and price are required." });
   }
@@ -83,9 +85,9 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
     }
 
     const { rows } = await pool.query(
-      `INSERT INTO vendor_menu_items (vendor_id, category, name, description, price, type, badge, image_url, sort_order, rating, prep_time, reviews)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
-      [req.user.id, category.trim(), name.trim(), description || "", parseInt(price), type || "veg", badge || "", imageUrl, parseInt(sort_order) || 0, rating ? parseFloat(rating) : 4.5, prep_time || "15 min", reviews ? parseInt(reviews) : 0]
+      `INSERT INTO vendor_menu_items (vendor_id, category, name, description, price, actual_price, type, badge, image_url, sort_order, rating, prep_time, reviews, front_page_category)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+      [req.user.id, category.trim(), name.trim(), description || "", parseInt(price), actual_price ? parseInt(actual_price) : 0, type || "veg", badge || "", imageUrl, parseInt(sort_order) || 0, rating ? parseFloat(rating) : 4.5, prep_time || "15 min", reviews ? parseInt(reviews) : 0, front_page_category || ""]
     );
 
     return res.status(201).json({ item: rows[0] });
@@ -107,7 +109,7 @@ router.patch("/:id", authenticate, upload.single("image"), async (req, res) => {
     if (!check.rows.length) return res.status(404).json({ error: "Item not found." });
 
     const existing = check.rows[0];
-    const { category, name, description, price, type, badge, is_available, sort_order, rating, prep_time, reviews } = req.body;
+    const { category, name, description, price, actual_price, type, badge, is_available, sort_order, rating, prep_time, reviews, front_page_category } = req.body;
 
     let imageUrl = existing.image_url;
     if (req.file) {
@@ -127,21 +129,24 @@ router.patch("/:id", authenticate, upload.single("image"), async (req, res) => {
         name = COALESCE($2, name),
         description = COALESCE($3, description),
         price = COALESCE($4, price),
-        type = COALESCE($5, type),
-        badge = COALESCE($6, badge),
-        image_url = $7,
-        is_available = COALESCE($8, is_available),
-        sort_order = COALESCE($9, sort_order),
-        rating = COALESCE($10, rating),
-        prep_time = COALESCE($11, prep_time),
-        reviews = COALESCE($12, reviews),
+        actual_price = COALESCE($5, actual_price),
+        type = COALESCE($6, type),
+        badge = COALESCE($7, badge),
+        image_url = $8,
+        is_available = COALESCE($9, is_available),
+        sort_order = COALESCE($10, sort_order),
+        rating = COALESCE($11, rating),
+        prep_time = COALESCE($12, prep_time),
+        reviews = COALESCE($13, reviews),
+        front_page_category = COALESCE($14, front_page_category),
         updated_at = NOW()
-       WHERE id=$13 AND vendor_id=$14 RETURNING *`,
+       WHERE id=$15 AND vendor_id=$16 RETURNING *`,
       [
         category?.trim() || null,
         name?.trim() || null,
         description !== undefined ? description : null,
         price ? parseInt(price) : null,
+        actual_price ? parseInt(actual_price) : null,
         type || null,
         badge !== undefined ? badge : null,
         imageUrl,
@@ -150,6 +155,7 @@ router.patch("/:id", authenticate, upload.single("image"), async (req, res) => {
         rating ? parseFloat(rating) : null,
         prep_time !== undefined ? prep_time : null,
         reviews ? parseInt(reviews) : null,
+        front_page_category !== undefined ? front_page_category : null,
         id,
         req.user.id,
       ]

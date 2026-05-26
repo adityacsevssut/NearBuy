@@ -16,17 +16,20 @@ import { useWishlist } from "@/context/WishlistContext";
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
 const quickBites = [
-  { label: "Biryani",         image: "https://images.unsplash.com/photo-1633945274405-b6c8069047b0?auto=format&fit=crop&w=200&h=200" },
+  { label: "Biryani",         image: "/biryani_gemini.png" },
   { label: "Roll",            image: "/roll.png" },
   { label: "Dosa",            image: "/dosa.png" },
-  { label: "Chowmin",         image: "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=200&h=200" },
-  { label: "Momo",            image: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=200&h=200" },
-  { label: "Pizza",           image: "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=200&h=200" },
-  { label: "Burger",          image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=200&h=200" },
-  { label: "Chicken Pokoda",  image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=200&h=200" },
+  { label: "Chowmin",         image: "/chowmin_gemini.png" },
+  { label: "Momo",            image: "/momo_gemini.png" },
+  { label: "Pizza",           image: "/pizza_gemini.png" },
+  { label: "Burger",          image: "/burger_gemini.png" },
+  { label: "Chicken Pokoda",  image: "/chicken_pakoda.png" },
   { label: "Vada",            image: "/vada.png" },
-  { label: "Manchurrian",     image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=200&h=200" },
-  { label: "More",            image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=200&h=200" },
+  { label: "Manchurrian",     image: "/manchurian.png" },
+  { label: "Bakery",          image: "/bakery.png" },
+  { label: "Drinks",          image: "/drinks.png" },
+  { label: "Chole Bhature",   image: "/chole_bhature.png" },
+  { label: "Others",          image: "/others_gemini.png" },
 ];
 
 const topCuisines = [
@@ -287,7 +290,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 /* ─── Main Page ────────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [foodPref,    setFoodPref]    = useState<"all"|"veg"|"non-veg">("all");
+  const [foodPref,    setFoodPref]    = useState<"all"|"veg"|"non-veg"|"avail-all"|"avail-veg"|"avail-non-veg">("all");
   const [showFilters, setShowFilters] = useState(false);
   const [reqModal,    setReqModal]    = useState(false);
   const [reqType,     setReqType]     = useState<"student"|"vendor">("vendor");
@@ -313,7 +316,12 @@ export default function HomePage() {
 
   /* filter */
   const filtered = sourceList.filter(r => {
-    const matchVeg  = foodPref==="all"||(foodPref==="veg"?r.veg:!r.veg);
+    let matchVeg = true;
+    if (foodPref === "veg") matchVeg = r.veg;
+    else if (foodPref === "non-veg") matchVeg = !r.veg;
+    else if (foodPref === "avail-all") matchVeg = r.isOpen;
+    else if (foodPref === "avail-veg") matchVeg = r.isOpen && r.veg;
+    else if (foodPref === "avail-non-veg") matchVeg = r.isOpen && !r.veg;
     const matchSrch = !searchQuery
       || r.name.toLowerCase().includes(searchQuery.toLowerCase())
       || r.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
@@ -414,10 +422,10 @@ export default function HomePage() {
                       <p className="font-black text-sm text-gray-900">Dietary Preference</p>
                     </div>
                     <div className="p-2 space-y-1">
-                      {(["all","veg","non-veg"] as const).map(p => {
+                      {(["all","veg","non-veg","avail-all","avail-veg","avail-non-veg"] as const).map(p => {
                         const active = foodPref === p;
-                        const label = p === "all" ? "View All" : p === "veg" ? "Pure Veg" : "Non-Veg Only";
-                        const activeBg = p === "all" ? "bg-orange-500" : p === "veg" ? "bg-green-600" : "bg-red-600";
+                        const label = p === "all" ? "View All" : p === "veg" ? "Pure Veg" : p === "non-veg" ? "Non-Veg Only" : p === "avail-all" ? "Available (ALL)" : p === "avail-veg" ? "Available Veg" : "Available Non-Veg";
+                        const activeBg = (p === "all" || p === "avail-all") ? "bg-orange-500" : (p === "veg" || p === "avail-veg") ? "bg-green-600" : "bg-red-600";
                         return (
                           <button key={p} onClick={() => { setFoodPref(p); setShowFilters(false); }}
                             className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
@@ -453,10 +461,10 @@ export default function HomePage() {
           </div>
           <div className="p-5 space-y-2">
             <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Dietary Preference</p>
-            {(["all","veg","non-veg"] as const).map(p => {
+            {(["all","veg","non-veg","avail-all","avail-veg","avail-non-veg"] as const).map(p => {
               const active = foodPref === p;
-              const label = p === "all" ? "View All" : p === "veg" ? "Pure Veg" : "Non-Veg Only";
-              const activeBg = p === "all" ? "bg-orange-500" : p === "veg" ? "bg-green-600" : "bg-red-600";
+              const label = p === "all" ? "View All" : p === "veg" ? "Pure Veg" : p === "non-veg" ? "Non-Veg Only" : p === "avail-all" ? "Available (ALL)" : p === "avail-veg" ? "Available Veg" : "Available Non-Veg";
+              const activeBg = (p === "all" || p === "avail-all") ? "bg-orange-500" : (p === "veg" || p === "avail-veg") ? "bg-green-600" : "bg-red-600";
               return (
                 <button key={p} onClick={() => { setFoodPref(p); setShowFilters(false); }}
                   className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all ${
@@ -508,7 +516,7 @@ export default function HomePage() {
               <img 
                 src="/home_banner.jpg" 
                 alt="NearBuy Special Offer" 
-                className="w-full h-auto object-contain md:object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
+                className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
               />
             </Link>
           </section>

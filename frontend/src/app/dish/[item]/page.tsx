@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
@@ -22,10 +22,31 @@ export default function DishPage() {
   const [cart, setCart] = useState<Record<number, number>>({});
   const [quantities, setQuantities] = useState<Record<number, number>>({});
 
-  // Generate mock dish data for the searched item
-  const mockDishes: any[] = [];
+  const [dishes, setDishes] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const filteredDishes = mockDishes
+  useEffect(() => {
+    async function fetchDishes() {
+      try {
+        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        // We'll search for the rawItem directly to handle URL-friendly versions like 'chicken-pokoda'
+        // But the front page category could be either. We use rawItem and replace dashes with spaces.
+        const searchCategory = rawItem.replace(/-/g, " ");
+        const res = await fetch(`${API}/api/public/dishes/${encodeURIComponent(searchCategory)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setDishes(data.dishes || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch dishes", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchDishes();
+  }, [rawItem]);
+
+  const filteredDishes = dishes
     .filter((dish) => foodPref === "all" || dish.type === foodPref)
     .sort((a, b) => {
       if (sortOrder === "low-to-high") return a.price - b.price;
@@ -139,7 +160,16 @@ export default function DishPage() {
                         by <span className="text-orange-700">{dish.vendor}</span>
                       </p>
 
-                      <div className="flex items-center gap-1.5 mb-2">
+                      <div className="flex items-baseline gap-1.5 mb-2">
+                        {dish.actual_price && Number(dish.actual_price) > Number(dish.price || 0) && (
+                          <>
+                            <span className="flex items-center gap-0.5 text-green-600 font-black text-[13px]">
+                              <ArrowDown className="w-3.5 h-3.5" strokeWidth={3} />
+                              {Math.round(((Number(dish.actual_price) - Number(dish.price || 0)) / Number(dish.actual_price)) * 100)}%
+                            </span>
+                            <span className="text-gray-400 font-semibold line-through text-sm">₹{dish.actual_price}</span>
+                          </>
+                        )}
                         <span className="text-base font-black text-gray-900">₹{dish.price}</span>
                       </div>
 
@@ -161,8 +191,12 @@ export default function DishPage() {
 
                   {/* Image & Action Section */}
                   <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
-                    <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 flex items-center justify-center text-6xl shadow-inner relative">
-                      {dish.emoji}
+                    <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 flex items-center justify-center text-6xl shadow-inner relative overflow-hidden">
+                      {dish.image_url ? (
+                        <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                      ) : (
+                        dish.emoji || "🍽️"
+                      )}
                       <button
                         onClick={() => setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id])}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
@@ -215,11 +249,16 @@ export default function DishPage() {
               );
             })}
 
-            {filteredDishes.length === 0 && (
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
+                <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p className="font-black text-gray-700 text-xl">Loading dishes...</p>
+              </div>
+            ) : filteredDishes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
                 <span className="text-6xl mb-4">🍽️</span>
                 <p className="font-black text-gray-700 text-xl">No {itemName} found</p>
-                <p className="text-sm mt-2 font-medium">Try disabling the Veg Only filter.</p>
+                <p className="text-sm mt-2 font-medium">Try disabling the Veg Only filter or check back later.</p>
               </div>
             )}
           </div>

@@ -13,8 +13,9 @@ import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { motion, AnimatePresence } from "framer-motion";
 
-const DELIVERY_FEE = 25;
-const PLATFORM_FEE = 5;
+import { useEffect } from "react";
+
+// Platform fee and GST are now fetched dynamically from the backend
 
 function groupByRestaurant(items: ReturnType<typeof useCart>["items"]) {
   const map: Record<string, typeof items> = {};
@@ -31,15 +32,19 @@ function RestaurantOrderCard({
   restItems,
   onUpdateQty,
   onRemove,
+  platformFee,
+  gst,
 }: {
   restId: string;
   restItems: ReturnType<typeof useCart>["items"];
   onUpdateQty: (uid: string, qty: number) => void;
   onRemove: (uid: string) => void;
+  platformFee: number;
+  gst: number;
 }) {
   const restName = restItems[0].restaurantName;
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal + DELIVERY_FEE + PLATFORM_FEE;
+  const total = subtotal + gst + platformFee;
   const totalQty = restItems.reduce((s, i) => s + i.quantity, 0);
 
   const [coupon, setCoupon] = useState("");
@@ -230,13 +235,13 @@ function RestaurantOrderCard({
                 )}
                 <div className="flex justify-between text-sm text-gray-600">
                   <span className="flex items-center gap-1.5">
-                    <Bike className="w-3.5 h-3.5" /> Delivery fee
+                    GST
                   </span>
-                  <span className="font-semibold text-gray-900">₹{DELIVERY_FEE}</span>
+                  <span className="font-semibold text-gray-900">₹{gst}</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>Platform fee</span>
-                  <span className="font-semibold text-gray-900">₹{PLATFORM_FEE}</span>
+                  <span className="font-semibold text-gray-900">₹{platformFee}</span>
                 </div>
                 <div className="flex justify-between pt-2 border-t border-dashed border-gray-200">
                   <span className="font-black text-gray-900">Total to pay</span>
@@ -272,6 +277,20 @@ export default function CartPage() {
   const groups = groupByRestaurant(foodItems);
   const restaurantIds = Object.keys(groups);
   const totalQty = foodItems.reduce((s, i) => s + i.quantity, 0);
+
+  const [platformFee, setPlatformFee] = useState(5);
+  const [gst, setGst] = useState(10);
+
+  useEffect(() => {
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    fetch(`${API}/api/public/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.platform_fee !== undefined) setPlatformFee(data.platform_fee);
+        if (data.gst !== undefined) setGst(data.gst);
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
@@ -355,6 +374,8 @@ export default function CartPage() {
                   restItems={groups[restId]}
                   onUpdateQty={updateQty}
                   onRemove={removeItem}
+                  platformFee={platformFee}
+                  gst={gst}
                 />
               ))}
             </AnimatePresence>

@@ -4,7 +4,7 @@ import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import Link from "next/link";
-import { ArrowLeft, Star, Clock, Utensils, Heart } from "lucide-react";
+import { ArrowLeft, Star, Clock, Utensils, Heart, ArrowDown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
@@ -153,7 +153,16 @@ export default function WishlistPage() {
                         by <span className="font-bold">{dish.restaurantName}</span>
                       </Link>
                       
-                      <div className="flex items-center gap-1.5 mb-2 mt-1">
+                      <div className="flex items-baseline gap-1.5 mb-2 mt-1">
+                        {dish.actual_price && Number(dish.actual_price) > Number(dish.price || 0) && (
+                          <>
+                            <span className="flex items-center gap-0.5 text-green-600 font-black text-[13px]">
+                              <ArrowDown className="w-3.5 h-3.5" strokeWidth={3} />
+                              {Math.round(((Number(dish.actual_price) - Number(dish.price || 0)) / Number(dish.actual_price)) * 100)}%
+                            </span>
+                            <span className="text-gray-400 font-semibold line-through text-sm">₹{dish.actual_price}</span>
+                          </>
+                        )}
                         <span className="text-base font-black text-gray-900">₹{dish.price}</span>
                       </div>
                       

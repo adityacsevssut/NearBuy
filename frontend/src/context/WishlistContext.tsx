@@ -16,6 +16,7 @@ export type WishlistedFood = {
   id: string;
   name: string;
   price: number;
+  actual_price?: number;
   type: string;
   badge: string;
   description: string;
