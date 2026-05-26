@@ -33,87 +33,15 @@ const quickBites = [
 ];
 
 const topCuisines = [
-  { label: "Indian",       emoji: "🍛",  bg: "bg-orange-50",  border: "border-orange-100" },
-  { label: "Chinese",      emoji: "🍜",  bg: "bg-red-50",     border: "border-red-100" },
-  { label: "South Indian", emoji: "🫓",  bg: "bg-yellow-50",  border: "border-yellow-100" },
-  { label: "Fast Food",    emoji: "🍔",  bg: "bg-pink-50",    border: "border-pink-100" },
-  { label: "Desserts",     emoji: "🍨",  bg: "bg-purple-50",  border: "border-purple-100" },
-  { label: "Beverages",   emoji: "🧃",  bg: "bg-green-50",   border: "border-green-100" },
+  { label: "Indian",       image: "/indian_cuisine.png",  bg: "bg-orange-50",  border: "border-orange-100" },
+  { label: "Chinese",      image: "/chinese_cuisine.png", bg: "bg-red-50",     border: "border-red-100" },
+  { label: "South Indian", image: "/south_indian.png",    bg: "bg-yellow-50",  border: "border-yellow-100" },
+  { label: "Fast Food",    image: "/fast_food.png",       bg: "bg-pink-50",    border: "border-pink-100" },
+  { label: "Desserts",     image: "/desserts.png",        bg: "bg-purple-50",  border: "border-purple-100" },
+  { label: "Beverages",    image: "/beverages.png",       bg: "bg-green-50",   border: "border-green-100" },
 ];
 
-/* ─── Dummy restaurants (shown when API returns nothing) ──────────────── */
-const DUMMY_RESTAURANTS = [
-  {
-    id: "d1", name: "Campus Cafe", cuisine: "North Indian · Chinese",
-    rating: "4.5", time: "20 min", minOrder: 80, deliveryRange: 5,
-    offer: "50% off up to ₹80", badge: "Bestseller", badgeColor: "bg-orange-500",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d2", name: "Biryani House", cuisine: "Biryani · Mughlai",
-    rating: "4.6", time: "35 min", minOrder: 120, deliveryRange: 5,
-    offer: "Free delivery on first order", badge: "Popular", badgeColor: "bg-red-500",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d3", name: "Green Leaf", cuisine: "South Indian · Pure Veg",
-    rating: "4.3", time: "25 min", minOrder: 60, deliveryRange: 5,
-    offer: null, badge: "Veg Only", badgeColor: "bg-green-600",
-    veg: true, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1630383249896-424e482df921?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d4", name: "Pizza Planet", cuisine: "Pizza · Fast Food · Italian",
-    rating: "4.4", time: "30 min", minOrder: 100, deliveryRange: 5,
-    offer: "Buy 1 Get 1 on Tuesdays", badge: null, badgeColor: "",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d5", name: "Burger Barn", cuisine: "Burgers · Wraps · Shakes",
-    rating: "4.2", time: "20 min", minOrder: 80, deliveryRange: 5,
-    offer: "20% off on orders above ₹200", badge: "New", badgeColor: "bg-blue-500",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d6", name: "Dosa Corner", cuisine: "South Indian · Breakfast",
-    rating: "4.7", time: "15 min", minOrder: 50, deliveryRange: 5,
-    offer: null, badge: "Top Rated", badgeColor: "bg-yellow-500",
-    veg: true, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d7", name: "Wok & Roll", cuisine: "Chinese · Thai · Noodles",
-    rating: "4.1", time: "30 min", minOrder: 90, deliveryRange: 5,
-    offer: "Flat ₹50 off", badge: null, badgeColor: "",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1552611052-33e04de081de?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d8", name: "Sharma Dhaba", cuisine: "Punjabi · Dal Makhani · Roti",
-    rating: "4.8", time: "40 min", minOrder: 100, deliveryRange: 5,
-    offer: "Free raita on orders above ₹250", badge: "Must Try", badgeColor: "bg-orange-600",
-    veg: false, isOpen: false, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d9", name: "Sweet Cravings", cuisine: "Desserts · Ice Cream · Cakes",
-    rating: "4.5", time: "25 min", minOrder: 70, deliveryRange: 5,
-    offer: "10% off on all desserts", badge: null, badgeColor: "",
-    veg: true, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1551024506-0bccd828d307?auto=format&fit=crop&w=600&h=400",
-  },
-  {
-    id: "d10", name: "Momo Mania", cuisine: "Momos · Tibetan · Snacks",
-    rating: "4.3", time: "20 min", minOrder: 60, deliveryRange: 5,
-    offer: "12 pcs for price of 8", badge: "Trending", badgeColor: "bg-purple-500",
-    veg: false, isOpen: true, latitude: null, longitude: null,
-    image: "https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?auto=format&fit=crop&w=600&h=400",
-  },
-];
+/* ─── Dummy restaurants removed ──────────────────────────────────────────── */
 
 /* ─── Distance helpers ─────────────────────────────────────────────────────── */
 
@@ -311,8 +239,8 @@ export default function HomePage() {
     } catch { /* silent */ } finally { setIsLoading(false); }
   }
 
-  /* Use real data if loaded, otherwise show dummy restaurants for preview */
-  const sourceList = !isLoading && restaurants.length === 0 ? DUMMY_RESTAURANTS : restaurants;
+  /* Use real data */
+  const sourceList = restaurants;
 
   /* filter */
   const filtered = sourceList.filter(r => {
@@ -544,15 +472,17 @@ export default function HomePage() {
           <section className="py-3">
             <SectionHeader title="Top Cuisines" />
             <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
-              {topCuisines.map(({ label, emoji, bg, border }) => (
-                <Link
+              {topCuisines.map(({ label, image, bg, border }) => (
+                <div
                   key={label}
-                  href={`/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  className={`flex-shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-full border ${bg} ${border} hover:border-orange-300 transition-all text-[12px] font-bold text-gray-700 hover:text-orange-600 active:scale-95`}
+                  className={`flex-shrink-0 flex items-center gap-2 pr-3.5 pl-1.5 py-1.5 rounded-full border ${bg} ${border} transition-all text-[12px] font-bold text-gray-700`}
                 >
-                  <span className="text-[15px] leading-none">{emoji}</span>
+                  <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={image} alt={label} className="w-full h-full object-cover" />
+                  </div>
                   {label}
-                </Link>
+                </div>
               ))}
             </div>
           </section>
