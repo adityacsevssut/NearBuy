@@ -675,4 +675,130 @@ router.put(
   }
 );
 
+// ════════════════════════════════════════════════════════════════════════════
+// Ensure user_saved_addresses table exists (idempotent)
+// ════════════════════════════════════════════════════════════════════════════
+(async () => {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS user_saved_addresses (
+        id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name         TEXT NOT NULL,
+        full_address TEXT,
+        pincode      TEXT,
+        latitude     DECIMAL(10, 7),
+        longitude    DECIMAL(10, 7),
+        created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    await pool.query(`
+      CREATE INDEX IF NOT EXISTS idx_user_saved_addresses_user ON user_saved_addresses(user_id)
+    `);
+  } catch (err) {
+    console.error("Could not ensure user_saved_addresses table:", err.message);
+  }
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
+// GET /api/auth/me/saved-addresses
+// List all saved addresses for the logged-in user
+// ════════════════════════════════════════════════════════════════════════════
+router.get("/me/saved-addresses", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT id, name, full_address, pincode, latitude, longitude, created_at
+         FROM user_saved_addresses
+        WHERE user_id = $1
+        ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    return res.json({ addresses: rows });
+  } catch (err) {
+    console.error("get saved-addresses error:", err);
+    return res.status(500).json({ error: "Failed to fetch saved addresses." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/me/saved-addresses
+// Add a new saved address (max 10 per user; deduplicates by name+pincode)
+// ════════════════════════════════════════════════════════════════════════════
+router.post(
+  "/me/saved-addresses",
+  authenticate,
+  [
+    body("name").notEmpty().withMessage("Address name is required"),
+    body("latitude").optional().isFloat(),
+    body("longitude").optional().isFloat(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ error: errors.array()[0].msg });
+
+    const { name, fullAddress, pincode, latitude, longitude } = req.body;
+    try {
+      // Remove duplicate by name + pincode for this user
+      await pool.query(
+        `DELETE FROM user_saved_addresses
+          WHERE user_id = $1 AND name = $2 AND COALESCE(pincode,'') = COALESCE($3,'')`,
+        [req.user.id, name, pincode || ""]
+      );
+
+      // Enforce max 10 saved addresses — delete oldest if over limit
+      await pool.query(
+        `DELETE FROM user_saved_addresses
+          WHERE id IN (
+            SELECT id FROM user_saved_addresses
+             WHERE user_id = $1
+             ORDER BY created_at ASC
+             LIMIT GREATEST(0,
+               (SELECT COUNT(*) FROM user_saved_addresses WHERE user_id = $1) - 9
+             )
+          )`,
+        [req.user.id]
+      );
+
+      const { rows } = await pool.query(
+        `INSERT INTO user_saved_addresses (user_id, name, full_address, pincode, latitude, longitude)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         RETURNING id, name, full_address, pincode, latitude, longitude, created_at`,
+        [
+          req.user.id,
+          name,
+          fullAddress || null,
+          pincode || null,
+          latitude || null,
+          longitude || null,
+        ]
+      );
+
+      return res.status(201).json({ address: rows[0] });
+    } catch (err) {
+      console.error("post saved-addresses error:", err);
+      return res.status(500).json({ error: "Failed to save address." });
+    }
+  }
+);
+
+// ════════════════════════════════════════════════════════════════════════════
+// DELETE /api/auth/me/saved-addresses/:id
+// Remove a saved address
+// ════════════════════════════════════════════════════════════════════════════
+router.delete("/me/saved-addresses/:id", authenticate, async (req, res) => {
+  try {
+    const { rowCount } = await pool.query(
+      `DELETE FROM user_saved_addresses WHERE id = $1 AND user_id = $2`,
+      [req.params.id, req.user.id]
+    );
+    if (!rowCount)
+      return res.status(404).json({ error: "Address not found." });
+    return res.json({ message: "Address deleted." });
+  } catch (err) {
+    console.error("delete saved-address error:", err);
+    return res.status(500).json({ error: "Failed to delete address." });
+  }
+});
+
 module.exports = router;

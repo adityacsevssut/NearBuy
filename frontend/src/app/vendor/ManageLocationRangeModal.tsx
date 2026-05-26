@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, MapPin, Navigation, Check, Loader2, Sparkles, Sliders } from "lucide-react";
+import { X, MapPin, Navigation, Check, Loader2, Sparkles, Sliders, Search } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext, SavedAddress } from "@/context/LocationContext";
+import GooglePlacesSearch, { ResolvedGoogleAddress } from "@/components/GooglePlacesSearch";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ManageLocationRangeModalProps {
   isOpen: boolean;
@@ -17,8 +20,10 @@ export default function ManageLocationRangeModal({
   profile,
 }: ManageLocationRangeModalProps) {
   const { accessToken } = useAuth();
+  const { savedAddresses } = useLocationContext();
   const [isSaving, setIsSaving] = useState(false);
   const [isGpsLoading, setIsGpsLoading] = useState(false);
+  const [showSaved, setShowSaved] = useState(false);
 
   const [formData, setFormData] = useState({
     delivery_range: 5,
@@ -55,24 +60,68 @@ export default function ManageLocationRangeModal({
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`
-          );
-          const data = await res.json();
-          const addressName = data.display_name || `${latitude}, ${longitude}`;
-          const pin = data.address?.postcode || "";
+        let resolved = false;
 
-          setFormData((prev) => ({
-            ...prev,
-            latitude: latitude.toString(),
-            longitude: longitude.toString(),
-            gps_address: addressName,
-            pincode: pin || prev.pincode,
-          }));
-          toast.success("GPS Location detected!");
+        // 1. Try Google Maps API First
+        try {
+          const res = await fetch(`/api/geocode-reverse?lat=${latitude}&lng=${longitude}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              const result = data.results[0];
+              const addressName = result.formatted_address || `${latitude}, ${longitude}`;
+              
+              let pin = "";
+              for (const comp of result.address_components) {
+                if (comp.types.includes("postal_code")) {
+                  pin = comp.long_name;
+                  break;
+                }
+              }
+
+              setFormData((prev) => ({
+                ...prev,
+                latitude: latitude.toString(),
+                longitude: longitude.toString(),
+                gps_address: addressName,
+                pincode: pin || prev.pincode,
+              }));
+              toast.success("GPS Location detected!");
+              resolved = true;
+            }
+          }
         } catch (err) {
-          console.error("OSM lookup error:", err);
+          console.warn("Google reverse geocoding failed:", err);
+        }
+
+        // 2. Fallback to Nominatim (OpenStreetMap)
+        if (!resolved) {
+          try {
+            const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`);
+            if (nomRes.ok) {
+              const data = await nomRes.json();
+              if (data && data.address) {
+                const addressName = data.display_name || `${latitude}, ${longitude}`;
+                const pin = data.address.postcode || "";
+
+                setFormData((prev) => ({
+                  ...prev,
+                  latitude: latitude.toString(),
+                  longitude: longitude.toString(),
+                  gps_address: addressName,
+                  pincode: pin || prev.pincode,
+                }));
+                toast.success("GPS Location detected (Fallback)!");
+                resolved = true;
+              }
+            }
+          } catch (err) {
+            console.warn("Nominatim fallback failed:", err);
+          }
+        }
+
+        // 3. Final Fallback (Raw Coordinates)
+        if (!resolved) {
           setFormData((prev) => ({
             ...prev,
             latitude: latitude.toString(),
@@ -80,9 +129,9 @@ export default function ManageLocationRangeModal({
             gps_address: `Lat: ${latitude}, Lon: ${longitude}`,
           }));
           toast.success("GPS coords saved (Address lookup failed).");
-        } finally {
-          setIsGpsLoading(false);
         }
+
+        setIsGpsLoading(false);
       },
       (err) => {
         toast.error("Could not get GPS. Grant permissions and try again.");
@@ -234,8 +283,76 @@ export default function ManageLocationRangeModal({
             </div>
           </div>
 
-          {/* Manual Address & Pincode */}
+          {/* Manual Address & Pincode using Google Search */}
           <div className="space-y-4 pt-2 border-t border-gray-100">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Search & Auto-fill Details</label>
+              <GooglePlacesSearch 
+                onSelect={(addr) => {
+                  setFormData(prev => ({
+                    ...prev,
+                    latitude: addr.lat.toString(),
+                    longitude: addr.lng.toString(),
+                    gps_address: addr.name,
+                    manual_address: addr.fullAddress,
+                    pincode: addr.pincode
+                  }));
+                  toast.success("Location auto-filled!");
+                }} 
+              />
+            </div>
+            
+            {/* Show Saved Addresses */}
+            {savedAddresses.length > 0 && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowSaved(!showSaved)}
+                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 hover:border-orange-300 rounded-xl transition-all"
+                >
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-orange-500" />
+                    <span className="text-sm font-bold text-gray-700">Use Saved Address</span>
+                  </div>
+                  <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-black">{savedAddresses.length}</span>
+                </button>
+                
+                <AnimatePresence>
+                  {showSaved && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="overflow-hidden mt-2 space-y-2"
+                    >
+                      {savedAddresses.map((addr) => (
+                        <button
+                          key={addr.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData(prev => ({
+                              ...prev,
+                              latitude: addr.latitude?.toString() || prev.latitude,
+                              longitude: addr.longitude?.toString() || prev.longitude,
+                              gps_address: addr.name,
+                              manual_address: addr.full_address || "",
+                              pincode: addr.pincode || ""
+                            }));
+                            toast.success(`Auto-filled from ${addr.name}`);
+                            setShowSaved(false);
+                          }}
+                          className="w-full flex flex-col text-left px-4 py-3 bg-white border border-gray-100 hover:border-orange-300 hover:bg-orange-50/50 rounded-xl transition-colors shadow-sm"
+                        >
+                          <span className="text-sm font-black text-gray-800">{addr.name}</span>
+                          <span className="text-xs text-gray-400 truncate mt-0.5">{addr.full_address}</span>
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Manual Address Detail</label>
               <textarea 

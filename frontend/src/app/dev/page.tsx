@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import dynamic from 'next/dynamic';
+import GooglePlacesSearch, { ResolvedGoogleAddress } from "@/components/GooglePlacesSearch";
+
 
 const DevMap = dynamic(() => import('@/components/DevMap'), { 
   ssr: false, 
@@ -199,113 +201,20 @@ export default function DevDashboard() {
   }
 
   // ---- Service Center Logic ----
-  async function handleSearchPincode() {
-    if (!centerPincode) return toast.error("Enter a PIN code");
-    setSearchingLocation(true);
-    setFallbackMapCenter(null);
-    setSelectedCenter(null);
-    
-    try {
-      // 1. Get fallback Map Coordinates for this PIN code from Nominatim
-      let fLat = "20.5937", fLon = "78.9629";
-      let fName = `PIN: ${centerPincode}`;
-      let fDistrict = "Unknown";
-      let fState = "Unknown";
-      
-      try {
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/search?postalcode=${centerPincode}&countrycodes=IN&format=json&addressdetails=1&accept-language=en`);
-        const nomData = await nomRes.json();
-        if (nomData && nomData.length > 0) {
-          fLat = nomData[0].lat;
-          fLon = nomData[0].lon;
-          const addr = nomData[0].address || {};
-          
-          fDistrict = addr.state_district || addr.county || addr.region || addr.city || "Unknown Location";
-          fState = addr.state || "India";
-          fName = nomData[0].name || addr.suburb || addr.town || addr.village || addr.city || `PIN: ${centerPincode}`;
-
-          setFallbackMapCenter({ lat: parseFloat(fLat), lon: parseFloat(fLon), name: fName });
-        }
-      } catch (err) {
-        console.warn("Nominatim fallback failed");
-      }
-
-      // 2. Fetch all exact localities/Post Offices for this PIN code from Indian Post API via Proxy
-      let formatted: any[] = [];
-      try {
-        const res = await fetch(`/api/pincode?pin=${centerPincode}`);
-        const data = await res.json();
-        
-        if (data && data[0] && data[0].Status === "Success") {
-          const offices = data[0].PostOffice;
-          formatted = offices.map((o: any) => ({
-            name: o.Name,
-            district: o.District,
-            state: o.State,
-            pincode: o.Pincode,
-            lat: fLat,
-            lon: fLon,
-            isExact: false,
-            fullName: `${o.Name}, ${o.District}, ${o.State}`
-          }));
-        }
-      } catch (err) {
-        console.warn("Postal API failed", err);
-      }
-
-      if (formatted.length > 0) {
-        setSearchResults(formatted);
-      } else if (fLat !== "20.5937") {
-        setSearchResults([{
-          name: fName,
-          district: fDistrict,
-          state: fState,
-          pincode: centerPincode,
-          lat: fLat,
-          lon: fLon,
-          isExact: false,
-          fullName: `${fName}, ${fDistrict}, ${fState}`
-        }]);
-      } else {
-        toast.error("No specific localities found for this PIN code.");
-        setSearchResults([]);
-      }
-    } catch (err) {
-      toast.error("Failed to fetch location data.");
-    }
-    setSearchingLocation(false);
-  }
-
-  async function handleSelectLocality(loc: any) {
-    setSelectedCenter(loc);
-    toast.loading("Finding exact location on map...", { id: "geo" });
-    try {
-      // Fetch exact lat/lon for the specific locality chosen using Nominatim
-      // We refine the query to be as exact as possible.
-      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(loc.name + ", " + loc.district + ", India")}&format=json&accept-language=en`);
-      const data = await res.json();
-      if (data && data.length > 0) {
-        const exactLat = parseFloat(data[0].lat);
-        const exactLon = parseFloat(data[0].lon);
-        
-        setSelectedCenter({
-          ...loc,
-          lat: exactLat,
-          lon: exactLon,
-          isExact: true
-        });
-        setFallbackMapCenter({ lat: exactLat, lon: exactLon, name: loc.name });
-        toast.success("Location pinpointed accurately!", { id: "geo" });
-      } else {
-         // Fallback to generic PIN code center
-         toast.error("Exact coordinates not found, using PIN code center.", { id: "geo" });
-         setSelectedCenter({ ...loc, isExact: true }); // loc already has PIN code lat/lon
-         setFallbackMapCenter({ lat: parseFloat(loc.lat), lon: parseFloat(loc.lon), name: loc.name });
-      }
-    } catch {
-      toast.dismiss("geo");
-    }
-  }
+  const handleSelectGoogleLocation = (addr: ResolvedGoogleAddress) => {
+    setCenterPincode(addr.pincode);
+    const center = {
+      name: addr.name,
+      pincode: addr.pincode,
+      lat: addr.lat,
+      lon: addr.lng,
+      isExact: true,
+      fullName: addr.fullAddress
+    };
+    setSelectedCenter(center);
+    setFallbackMapCenter({ lat: addr.lat, lon: addr.lng, name: addr.name });
+    toast.success("Location pinpointed accurately!", { id: "geo" });
+  };
 
   async function handleSaveCenter() {
     if (!selectedCenter) return toast.error("Please select a location first.");
@@ -792,63 +701,50 @@ export default function DevDashboard() {
               <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
                 {/* Left Panel: Search and List */}
                 <div className="w-full md:w-1/3 bg-white border-r border-gray-100 p-5 flex flex-col h-full overflow-y-auto custom-scrollbar">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search PIN Code</label>
-                  <div className="flex gap-2 mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                      <input 
-                        type="text" 
-                        placeholder="e.g. 768018" 
-                        value={centerPincode}
-                        onChange={(e) => setCenterPincode(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-sm font-bold text-gray-900 transition-all"
-                      />
-                    </div>
-                    <button 
-                      onClick={handleSearchPincode}
-                      disabled={searchingLocation}
-                      className="px-5 bg-gray-900 hover:bg-black text-white rounded-xl font-bold text-sm transition-colors shadow-md active:scale-95 flex items-center justify-center"
-                    >
-                      {searchingLocation ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Find'}
-                    </button>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search Location</label>
+                  <div className="mb-4">
+                    <GooglePlacesSearch 
+                      onSelect={handleSelectGoogleLocation} 
+                      placeholder="Search by Name or PIN Code..." 
+                    />
                   </div>
 
-                  {searchResults.length > 0 && (
+                  {selectedCenter ? (
                     <div className="flex-1 flex flex-col">
                       <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Select Central Place</p>
-                        <span className="text-[10px] font-bold bg-pink-100 text-pink-700 px-2 py-0.5 rounded-full">{searchResults.length} found</span>
+                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Selected Place</p>
                       </div>
                       
                       <div className="space-y-2 flex-1 overflow-y-auto pr-1 custom-scrollbar">
-                        {searchResults.map((loc: any, idx) => {
-                          const isSelected = selectedCenter?.name === loc.name;
-                          return (
-                            <div 
-                              key={idx} 
-                              onClick={() => handleSelectLocality(loc)}
-                              className={`p-3 border rounded-xl cursor-pointer transition-all ${isSelected ? 'bg-pink-50 border-pink-400 shadow-sm' : 'bg-white border-gray-200 hover:border-pink-300 hover:bg-pink-50/50'}`}
-                            >
-                              <div className="flex items-start justify-between">
-                                <div>
-                                  <p className={`text-sm font-black ${isSelected ? 'text-pink-700' : 'text-gray-900'}`}>{loc.name}</p>
-                                  <p className="text-xs text-gray-500 mt-1 line-clamp-1 font-medium">{loc.district}, {loc.state}</p>
-                                </div>
-                                {isSelected && <Check className="w-4 h-4 text-pink-600 shrink-0" />}
+                        <div className="p-4 border rounded-xl bg-pink-50 border-pink-400 shadow-sm transition-all relative overflow-hidden">
+                          <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                            <MapPin className="w-16 h-16 text-pink-700" />
+                          </div>
+                          <div className="relative z-10">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <p className="text-lg font-black text-pink-700 mb-1 leading-tight">{selectedCenter.name}</p>
+                                <span className="inline-block bg-white text-pink-600 px-2 py-0.5 rounded text-xs font-bold border border-pink-100 shadow-sm mb-2">
+                                  PIN: {selectedCenter.pincode || "Not found"}
+                                </span>
+                                <p className="text-xs text-gray-600 font-medium leading-relaxed">{selectedCenter.fullName}</p>
+                                <p className="text-[10px] text-pink-500/80 font-bold mt-2 uppercase tracking-widest">
+                                  {selectedCenter.lat.toFixed(5)}, {selectedCenter.lon.toFixed(5)}
+                                </p>
                               </div>
+                              <Check className="w-5 h-5 text-pink-600 shrink-0" />
                             </div>
-                          );
-                        })}
+                          </div>
+                        </div>
                       </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 px-4">
+                      <MapPin className="w-10 h-10 text-gray-300 mb-3" />
+                      <p className="text-sm font-bold text-gray-500">Search an area name or PIN code to create an operational zone</p>
                     </div>
                   )}
 
-                  {!searchResults.length && !searchingLocation && (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 px-4">
-                      <MapPin className="w-10 h-10 text-gray-300 mb-3" />
-                      <p className="text-sm font-bold text-gray-500">Enter a PIN code to reveal operational zones</p>
-                    </div>
-                  )}
                 </div>
 
                 {/* Right Panel: Map and Confirmation */}

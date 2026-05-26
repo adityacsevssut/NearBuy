@@ -89,3 +89,19 @@ CREATE TABLE IF NOT EXISTS vendor_requests (
   status        TEXT NOT NULL DEFAULT 'pending',
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- User Saved Addresses Table
+CREATE TABLE IF NOT EXISTS user_saved_addresses (
+  id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id      UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name         TEXT NOT NULL,
+  full_address TEXT,
+  pincode      TEXT,
+  latitude     DECIMAL(10, 7),
+  longitude    DECIMAL(10, 7),
+  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_saved_addresses_user ON user_saved_addresses(user_id);
+CREATE POLICY "service role bypass" ON user_saved_addresses FOR ALL USING (true);
+ALTER TABLE user_saved_addresses ENABLE ROW LEVEL SECURITY;

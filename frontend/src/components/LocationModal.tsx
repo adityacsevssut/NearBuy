@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, MapPin, Search, Crosshair, CheckCircle,
-  Navigation, ChevronLeft, Loader2
+  X, MapPin, Search, Navigation, ChevronLeft, Loader2,
+  CheckCircle, Crosshair, Building2, Clock, Trash2,
 } from "lucide-react";
-import { useLocationContext } from "@/context/LocationContext";
+import { useLocationContext, SavedAddress } from "@/context/LocationContext";
 import toast from "react-hot-toast";
+import GooglePlacesSearch, { ResolvedGoogleAddress } from "./GooglePlacesSearch";
 
 // Dynamically import map to avoid SSR issues with Leaflet
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -23,50 +24,89 @@ const MapPicker = dynamic(() => import("./MapPicker"), {
   ),
 });
 
-type View = "menu" | "map" | "pincode";
+type View = "menu" | "map" | "search";
 
-interface ResolvedAddress {
-  name: string;
-  fullAddress: string;
-  pincode: string;
-  lat: number;
-  lng: number;
-}
+// ── Main Modal ────────────────────────────────────────────────────────────────
 
 export default function LocationModal() {
-  const { isLocationModalOpen, setIsLocationModalOpen, setLocation } =
-    useLocationContext();
+  const {
+    isLocationModalOpen, setIsLocationModalOpen, setLocation,
+    savedAddresses, addSavedAddress, removeSavedAddress,
+  } = useLocationContext();
 
   const [view, setView] = useState<View>("menu");
-  const [manualPincode, setManualPincode] = useState("");
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [resolvedAddress, setResolvedAddress] = useState<ResolvedAddress | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<ResolvedGoogleAddress | null>(null);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
-  const [isSubmittingPincode, setIsSubmittingPincode] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   /* ── Helpers ─────────────────────────────────────────── */
 
   const resolveAddress = useCallback(async (lat: number, lng: number) => {
     setIsResolvingAddress(true);
+    let resolved = false;
+
+    // 1. Try Google Maps API First
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
-      );
-      const data = await res.json();
-      const addr = data.address || {};
-      const name =
-        addr.suburb || addr.neighbourhood || addr.residential ||
-        addr.city || addr.town || addr.village || addr.county ||
-        data.display_name?.split(",")[0] || "My Location";
-      setResolvedAddress({
-        name,
-        fullAddress: data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-        pincode: addr.postcode || "",
-        lat,
-        lng,
-      });
-    } catch {
+      const res = await fetch(`/api/geocode-reverse?lat=${lat}&lng=${lng}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const result = data.results[0];
+          const fullAddress = result.formatted_address;
+          
+          let name = "My Location";
+          for (const comp of result.address_components) {
+            if (comp.types.includes("sublocality") || comp.types.includes("neighborhood") || comp.types.includes("locality")) {
+              name = comp.long_name;
+              break;
+            }
+          }
+          
+          let pincode = "";
+          for (const comp of result.address_components) {
+            if (comp.types.includes("postal_code")) {
+              pincode = comp.long_name;
+              break;
+            }
+          }
+
+          setResolvedAddress({
+            name,
+            fullAddress,
+            pincode,
+            lat,
+            lng,
+          });
+          resolved = true;
+        }
+      }
+    } catch (err) {
+      console.warn("Google reverse geocoding failed", err);
+    }
+
+    // 2. Fallback to Nominatim (OpenStreetMap) if Google fails (Quota Exceeded, etc.)
+    if (!resolved) {
+      try {
+        const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`);
+        if (nomRes.ok) {
+           const data = await nomRes.json();
+           if (data && data.address) {
+              const name = data.address.suburb || data.address.neighbourhood || data.address.village || data.address.city || data.address.town || "My Location";
+              const pincode = data.address.postcode || "";
+              const fullAddress = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+              setResolvedAddress({ name, fullAddress, pincode, lat, lng });
+              resolved = true;
+           }
+        }
+      } catch (err) {
+        console.warn("Nominatim fallback failed", err);
+      }
+    }
+
+    // 3. Final Fallback (Raw Coordinates) if both fail
+    if (!resolved) {
       setResolvedAddress({
         name: "My Location",
         fullAddress: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
@@ -74,27 +114,19 @@ export default function LocationModal() {
         lat,
         lng,
       });
-    } finally {
-      setIsResolvingAddress(false);
     }
+
+    setIsResolvingAddress(false);
   }, []);
 
-  const handleMapMove = useCallback(
-    (lat: number, lng: number) => {
-      setMapCoords({ lat, lng });
-      resolveAddress(lat, lng);
-    },
-    [resolveAddress]
-  );
+  const handleMapMove = useCallback((lat: number, lng: number) => {
+    setMapCoords({ lat, lng });
+    resolveAddress(lat, lng);
+  }, [resolveAddress]);
 
   const handleClose = () => {
     setIsLocationModalOpen(false);
-    setTimeout(() => {
-      setView("menu");
-      setManualPincode("");
-      setMapCoords(null);
-      setResolvedAddress(null);
-    }, 350);
+    setTimeout(() => { setView("menu"); setMapCoords(null); setResolvedAddress(null); }, 350);
   };
 
   /* ── GPS → Map ───────────────────────────────────────── */
@@ -102,137 +134,59 @@ export default function LocationModal() {
   const handleDetectAndOpenMap = async () => {
     setIsDetecting(true);
     try {
-      if (!navigator.geolocation) {
-        toast.error("Geolocation not supported by your browser");
-        return;
-      }
+      if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
       const position = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-        })
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
       );
       const { latitude, longitude } = position.coords;
       setMapCoords({ lat: latitude, lng: longitude });
       await resolveAddress(latitude, longitude);
       setView("map");
     } catch (err: any) {
-      toast.error(
-        err.code === 1
-          ? "Location permission denied. Enable it in your browser settings."
-          : "Could not get GPS signal. Try again."
-      );
+      toast.error(err.code === 1 ? "Location permission denied." : "Could not get GPS signal.");
     } finally {
       setIsDetecting(false);
     }
   };
 
-  /* ── Confirm map location ────────────────────────────── */
+  /* ── Save address (DB + context) ─────────────────────── */
 
-  const handleConfirmMapLocation = () => {
+  const handleSaveAddress = () => {
     if (!resolvedAddress) return;
+    setIsSaving(true);
+    try {
+      setLocation(resolvedAddress.name, resolvedAddress.pincode, resolvedAddress.lat, resolvedAddress.lng);
+      addSavedAddress({
+        name: resolvedAddress.name,
+        full_address: resolvedAddress.fullAddress,
+        pincode: resolvedAddress.pincode,
+        latitude: resolvedAddress.lat,
+        longitude: resolvedAddress.lng,
+      });
+      toast.success(`📍 Location saved: ${resolvedAddress.name}`);
+      handleClose();
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  /* ── Pick saved address ──────────────────────────────── */
+
+  const handlePickSaved = (saved: SavedAddress) => {
     setLocation(
-      resolvedAddress.name,
-      resolvedAddress.pincode,
-      resolvedAddress.lat,
-      resolvedAddress.lng
+      saved.name,
+      saved.pincode || "",
+      saved.latitude != null ? parseFloat(String(saved.latitude)) : undefined,
+      saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined
     );
-    toast.success(`📍 Location set to ${resolvedAddress.name}`);
+    toast.success(`📍 Switched to ${saved.name}`);
     handleClose();
   };
 
-  /* ── Pincode submit ──────────────────────────────────── */
-
-  const handlePincodeSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (manualPincode.length < 6) {
-      toast.error("Enter a valid 6-digit pincode");
-      return;
-    }
-    setIsSubmittingPincode(true);
-    const toastId = toast.loading("Looking up pincode…");
-    try {
-      let lat = null;
-      let lon = null;
-      let locationName = `Pincode ${manualPincode}`;
-      
-      // 1. Fetch Post Office name from Postal API
-      try {
-        const postalRes = await fetch(`/api/pincode?pin=${manualPincode}`);
-        const postalData = await postalRes.json();
-        if (postalData?.[0]?.Status === "Success" && postalData[0].PostOffice?.length > 0) {
-          const po = postalData[0].PostOffice[0];
-          locationName = po.Name; // Just use the name, exactly like before!
-        }
-      } catch (err) {
-        console.warn("Postal API proxy lookup failed.", err);
-      }
-
-      // 2. Fetch coordinates for this pincode using exact basic Nominatim query
-      const geoRes = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${manualPincode}&countrycodes=IN&format=json&addressdetails=1&accept-language=en`
-      );
-      const geoData = await geoRes.json();
-      
-      if (geoData && geoData.length > 0) {
-        lat = parseFloat(geoData[0].lat);
-        lon = parseFloat(geoData[0].lon);
-        
-        if (locationName.startsWith("Pincode ")) {
-          const addr = geoData[0].address || {};
-          let parsedName = addr.suburb || addr.neighbourhood || addr.residential || addr.city || addr.town || addr.village || addr.county || addr.state_district || "";
-          
-          if (!parsedName) {
-            const parts = geoData[0].display_name?.split(",") || [];
-            parsedName = parts.length > 1 ? parts[1].trim() : (parts[0] || manualPincode);
-          }
-          
-          if (parsedName && parsedName !== manualPincode) {
-             locationName = parsedName;
-          }
-        }
-      } else {
-        // Fallback: search by basic query using JUST the location name (original behavior)
-        if (!locationName.startsWith("Pincode ")) {
-          const locRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationName)}&format=json&accept-language=en`
-          );
-          const locData = await locRes.json();
-          if (locData && locData.length > 0) {
-            lat = parseFloat(locData[0].lat);
-            lon = parseFloat(locData[0].lon);
-          }
-        }
-        
-        // Final fallback: try with pincode
-        if (lat === null || lon === null) {
-          const queryRes = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${manualPincode}&format=json&accept-language=en`
-          );
-          const queryData = await queryRes.json();
-          if (queryData && queryData.length > 0) {
-            lat = parseFloat(queryData[0].lat);
-            lon = parseFloat(queryData[0].lon);
-          }
-        }
-      }
-
-      if (lat !== null && lon !== null) {
-        setLocation(locationName, manualPincode, lat, lon);
-        toast.success(`📍 Location set to ${locationName}`, { id: toastId });
-      } else {
-        // If all geocoding fails, fallback without coordinates
-        setLocation(locationName, manualPincode);
-        toast.error(`Could not resolve coordinates for ${manualPincode}. Range check might be restricted.`, { id: toastId });
-      }
-    } catch {
-      setLocation(`Pincode ${manualPincode}`, manualPincode);
-      toast.error(`Lookup failed.`, { id: toastId });
-    } finally {
-      setIsSubmittingPincode(false);
-    }
-    handleClose();
+  const handleDeleteSaved = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    removeSavedAddress(id);
+    toast.success("Address removed");
   };
 
   /* ── Render ──────────────────────────────────────────── */
@@ -241,260 +195,259 @@ export default function LocationModal() {
     <AnimatePresence>
       {isLocationModalOpen && (
         <>
-          {/* ── Backdrop ── */}
           <motion.div
             key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm"
             onClick={handleClose}
           />
-
-          {/* ── Centered card ── */}
           <div className="fixed inset-0 z-[301] flex items-center justify-center p-4 pointer-events-none">
-          <motion.div
-            key="card"
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 20 }}
-            transition={{ type: "spring", damping: 28, stiffness: 320 }}
-            className={[
-              "pointer-events-auto",
-              "w-full max-w-md",
-              "bg-white rounded-3xl shadow-2xl",
-              "flex flex-col overflow-hidden",
-              view === "map" ? "h-[75dvh]" : "max-h-[80dvh]",
-            ].join(" ")}
-          >
-            {/* ════════════ MENU VIEW ════════════ */}
-            {view === "menu" && (
-              <div className="flex flex-col overflow-y-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
-                  <div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                      Set Delivery Location
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      Where should we deliver to?
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleClose}
-                    className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-                </div>
+            <motion.div
+              key="card"
+              initial={{ opacity: 0, scale: 0.92, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 20 }}
+              transition={{ type: "spring", damping: 28, stiffness: 320 }}
+              className={[
+                "pointer-events-auto w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden",
+                view === "map" ? "h-[78dvh]" : "max-h-[88dvh]",
+              ].join(" ")}
+            >
 
-                {/* Options */}
-                <div className="p-5 space-y-4 pb-8">
-                  {/* GPS */}
-                  <button
-                    onClick={handleDetectAndOpenMap}
-                    disabled={isDetecting}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-white border border-gray-200 hover:border-orange-400 hover:shadow-sm rounded-xl transition-all group disabled:opacity-60 active:scale-[0.98]"
-                  >
-                    {isDetecting ? (
-                      <Loader2 className="w-5 h-5 text-orange-400 animate-spin shrink-0" />
-                    ) : (
-                      <Navigation className="w-5 h-5 text-orange-500 shrink-0" />
-                    )}
-                    <span className="font-bold text-gray-700 group-hover:text-orange-600 text-[15px]">
-                      {isDetecting ? "Fetching GPS…" : "Fetch Exact Location"}
-                    </span>
-                  </button>
-
-                  <div className="flex items-center gap-3 px-2">
-                    <div className="flex-1 h-px bg-gray-100" />
-                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">
-                      OR
-                    </span>
-                    <div className="flex-1 h-px bg-gray-100" />
-                  </div>
-
-                  {/* Pincode */}
-                  <button
-                    onClick={() => setView("pincode")}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-white border border-gray-200 hover:border-gray-400 hover:shadow-sm rounded-xl transition-all group active:scale-[0.98]"
-                  >
-                    <Search className="w-5 h-5 text-gray-500 group-hover:text-gray-700 shrink-0" />
-                    <span className="font-bold text-gray-700 group-hover:text-gray-900 text-[15px]">
-                      Enter Pincode Here
-                    </span>
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* ════════════ PINCODE VIEW ════════════ */}
-            {view === "pincode" && (
-              <div className="flex flex-col">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
-                  <button
-                    onClick={() => setView("menu")}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <h2 className="text-xl font-black text-gray-900 tracking-tight">
-                      Enter Pincode
-                    </h2>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                      We'll find your area automatically
-                    </p>
-                  </div>
-                </div>
-
-                {/* Form */}
-                <form
-                  onSubmit={handlePincodeSubmit}
-                  className="p-5 space-y-4 pb-10"
-                >
-                  <div className="relative">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      maxLength={6}
-                      value={manualPincode}
-                      onChange={(e) =>
-                        setManualPincode(e.target.value.replace(/\D/g, ""))
-                      }
-                      placeholder="e.g. 759100"
-                      className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-2xl font-black text-gray-900 placeholder:text-gray-300 placeholder:font-normal tracking-[0.4em] focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all"
-                    />
-                  </div>
-
-                  {/* digit progress dots */}
-                  <div className="flex justify-center gap-2">
-                    {[0, 1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                          i < manualPincode.length
-                            ? "bg-orange-500 scale-125"
-                            : "bg-gray-200"
-                        }`}
-                      />
-                    ))}
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={manualPincode.length < 6 || isSubmittingPincode}
-                    className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl shadow-lg shadow-orange-500/20 disabled:opacity-40 disabled:shadow-none transition-all active:scale-[0.98] text-[16px] flex items-center justify-center gap-2"
-                  >
-                    {isSubmittingPincode ? (
-                      <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
-                        Looking up…
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="w-5 h-5" />
-                        Confirm Location
-                      </>
-                    )}
-                  </button>
-                </form>
-              </div>
-            )}
-
-            {/* ════════════ MAP VIEW ════════════ */}
-            {view === "map" && (
-              <div className="flex flex-col flex-1 min-h-0">
-                {/* Header */}
-                <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 shrink-0 bg-white">
-                  <button
-                    onClick={() => setView("menu")}
-                    className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <div>
-                    <h2 className="text-[17px] font-black text-gray-900 tracking-tight">
-                      Confirm Your Location
-                    </h2>
-                    <p className="text-xs text-gray-500 font-medium">
-                      Tap map or drag pin to adjust
-                    </p>
-                  </div>
-                </div>
-
-                {/* Map */}
-                <div className="flex-1 relative min-h-0">
-                  {mapCoords && (
-                    <MapPicker
-                      lat={mapCoords.lat}
-                      lng={mapCoords.lng}
-                      onLocationChange={handleMapMove}
-                    />
-                  )}
-                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-bold text-gray-600 pointer-events-none whitespace-nowrap">
-                    📍 Tap anywhere or drag pin to adjust
-                  </div>
-                </div>
-
-                {/* Address confirmation */}
-                <div className="shrink-0 bg-white border-t border-gray-100 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
-                  {isResolvingAddress ? (
-                    <div className="flex items-center gap-3 py-2">
-                      <Loader2 className="w-5 h-5 animate-spin text-orange-500 shrink-0" />
-                      <span className="text-sm font-medium text-gray-500">
-                        Resolving address…
-                      </span>
+              {/* ════════════ MENU VIEW ════════════ */}
+              {view === "menu" && (
+                <div className="flex flex-col overflow-y-auto">
+                  {/* Header */}
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+                    <div>
+                      <h2 className="text-xl font-black text-gray-900 tracking-tight">Set Delivery Location</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">How would you like to set your location?</p>
                     </div>
-                  ) : resolvedAddress ? (
-                    <>
-                      <div className="flex items-start gap-3 mb-4">
-                        <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                          <MapPin className="w-5 h-5 text-orange-500" />
+                    <button onClick={handleClose} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* GPS + Search buttons */}
+                  <div className="p-5 space-y-3">
+                    <button
+                      onClick={handleDetectAndOpenMap}
+                      disabled={isDetecting}
+                      className="w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 hover:border-orange-400 hover:shadow-md rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]"
+                    >
+                      <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30">
+                        {isDetecting ? <Loader2 className="w-6 h-6 text-white animate-spin" /> : <Crosshair className="w-6 h-6 text-white" />}
+                      </div>
+                      <div className="text-left">
+                        <p className="font-black text-gray-800 text-[15px] group-hover:text-orange-700">
+                          {isDetecting ? "Detecting your location…" : "Use GPS / Current Location"}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-0.5">Automatically detect where you are</p>
+                      </div>
+                      {!isDetecting && <Navigation className="w-5 h-5 text-orange-400 ml-auto shrink-0" />}
+                    </button>
+
+                    <div className="flex items-center gap-3 px-2">
+                      <div className="flex-1 h-px bg-gray-100" />
+                      <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">OR</span>
+                      <div className="flex-1 h-px bg-gray-100" />
+                    </div>
+
+                    <button
+                      onClick={() => setView("search")}
+                      className="w-full flex items-center gap-4 px-5 py-4 bg-gray-50 border-2 border-gray-200 hover:border-gray-400 hover:shadow-md rounded-2xl transition-all group active:scale-[0.98]"
+                    >
+                      <div className="w-11 h-11 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
+                        <Search className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-black text-gray-800 text-[15px] group-hover:text-gray-900">Search by Name or Pincode</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Type an area, street or PIN code</p>
+                      </div>
+                      <Building2 className="w-5 h-5 text-gray-400 ml-auto shrink-0" />
+                    </button>
+                  </div>
+
+                  {/* ── Saved Addresses Section ── */}
+                  {savedAddresses.length > 0 && (
+                    <div className="px-5 pb-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest">
+                          Your Saved Addresses
+                        </h3>
+                      </div>
+                      <div className="space-y-2">
+                        {savedAddresses.map((addr) => (
+                          <motion.div
+                            key={addr.id}
+                            onClick={() => handlePickSaved(addr)}
+                            whileHover={{ scale: 1.01 }}
+                            whileTap={{ scale: 0.98 }}
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => e.key === "Enter" && handlePickSaved(addr)}
+                            className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-gray-200 hover:border-orange-300 hover:bg-orange-50/60 rounded-2xl transition-all group text-left shadow-sm cursor-pointer"
+                          >
+                            <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-200 transition-colors">
+                              <MapPin className="w-4 h-4 text-orange-500" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-black text-gray-800 leading-tight truncate group-hover:text-orange-700">
+                                {addr.name}
+                              </p>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                {addr.pincode && (
+                                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 shrink-0">
+                                    PIN {addr.pincode}
+                                  </span>
+                                )}
+                                <p className="text-[11px] text-gray-400 truncate">
+                                  {(addr.full_address || "").split(",").slice(0, 2).join(",")}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => handleDeleteSaved(e, addr.id)}
+                              className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+                              title="Remove"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ════════════ SEARCH VIEW ════════════ */}
+              {view === "search" && (
+                <div className="flex flex-col overflow-hidden" style={{ maxHeight: "88dvh" }}>
+                  <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
+                    <button
+                      onClick={() => { setView("menu"); setResolvedAddress(null); setMapCoords(null); }}
+                      className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                      <h2 className="text-xl font-black text-gray-900 tracking-tight">Search Location</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">Enter area name, street or pincode</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col flex-1 overflow-y-auto p-5 space-y-4">
+                    <GooglePlacesSearch 
+                      onSelect={(addr) => { 
+                        setResolvedAddress(addr); 
+                        if (addr.lat && addr.lng) {
+                          setMapCoords({ lat: addr.lat, lng: addr.lng }); 
+                        }
+                      }} 
+                      autoFocus
+                    />
+                    {mapCoords && resolvedAddress && (
+                      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-3">
+                        <div className="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                          <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={(lat, lng) => { setMapCoords({ lat, lng }); resolveAddress(lat, lng); }} />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-black text-gray-900 text-[16px] leading-tight">
-                            {resolvedAddress.name}
-                          </p>
-                          {resolvedAddress.pincode !== undefined && (
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="text-xs text-orange-600 font-bold">Pincode:</span>
+                        <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+                          <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0">
+                            <MapPin className="w-4 h-4 text-white" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-gray-900 text-[15px] leading-tight">{resolvedAddress.name}</p>
+                            {resolvedAddress.pincode && (
+                              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
+                                📮 PIN: {resolvedAddress.pincode}
+                              </span>
+                            )}
+                            <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={handleSaveAddress}
+                          disabled={isSaving}
+                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg shadow-orange-500/25 disabled:opacity-40 transition-all active:scale-[0.98] text-[15px] flex items-center justify-center gap-2"
+                        >
+                          {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</> : <><CheckCircle className="w-5 h-5" />Save This Address</>}
+                        </button>
+                      </motion.div>
+                    )}
+                    {!resolvedAddress && (
+                      <div className="flex flex-col items-center justify-center py-10 text-center text-gray-400">
+                        <Search className="w-10 h-10 mb-3 opacity-30" />
+                        <p className="text-sm font-semibold">Start typing to search</p>
+                        <p className="text-xs mt-1 opacity-70">Works with area names, streets &amp; PIN codes</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ════════════ MAP VIEW (GPS) ════════════ */}
+              {view === "map" && (
+                <div className="flex flex-col flex-1 min-h-0">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 shrink-0 bg-white">
+                    <button onClick={() => setView("menu")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <div>
+                      <h2 className="text-[17px] font-black text-gray-900 tracking-tight">Confirm Your Location</h2>
+                      <p className="text-xs text-gray-500 font-medium">Tap map or drag pin to adjust</p>
+                    </div>
+                  </div>
+                  <div className="flex-1 relative min-h-0">
+                    {mapCoords && <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={handleMapMove} />}
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+                      📍 Tap anywhere or drag pin to adjust
+                    </div>
+                  </div>
+                  <div className="shrink-0 bg-white border-t border-gray-100 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
+                    {isResolvingAddress ? (
+                      <div className="flex items-center gap-3 py-2">
+                        <Loader2 className="w-5 h-5 animate-spin text-orange-500 shrink-0" />
+                        <span className="text-sm font-medium text-gray-500">Resolving address…</span>
+                      </div>
+                    ) : resolvedAddress ? (
+                      <>
+                        <div className="flex items-start gap-3 mb-4">
+                          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <MapPin className="w-5 h-5 text-orange-500" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-black text-gray-900 text-[16px] leading-tight">{resolvedAddress.name}</p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              <span className="text-xs text-orange-600 font-bold">PIN:</span>
                               <input
                                 type="text"
                                 maxLength={6}
                                 value={resolvedAddress.pincode}
-                                onChange={(e) => setResolvedAddress({...resolvedAddress, pincode: e.target.value.replace(/\D/g, "")})}
-                                className="px-2 py-0.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors"
-                                placeholder="Edit Pincode"
+                                onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
+                                className="px-2 py-0.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors w-24"
+                                placeholder="Enter pincode"
                                 onClick={(e) => e.stopPropagation()}
                               />
                             </div>
-                          )}
-                          <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">
-                            {resolvedAddress.fullAddress}
-                          </p>
+                            <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                          </div>
                         </div>
-                      </div>
-                      <button
-                        onClick={handleConfirmMapLocation}
-                        className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-[15px]"
-                      >
-                        <CheckCircle className="w-5 h-5" />
-                        Confirm this address
-                      </button>
-                    </>
-                  ) : (
-                    <p className="text-sm text-gray-400 text-center py-2">
-                      Tap the map to pick a location
-                    </p>
-                  )}
+                        <button
+                          onClick={handleSaveAddress}
+                          disabled={isSaving}
+                          className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-[15px] disabled:opacity-40"
+                        >
+                          {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</> : <><CheckCircle className="w-5 h-5" />Save This Address</>}
+                        </button>
+                      </>
+                    ) : (
+                      <p className="text-sm text-gray-400 text-center py-2">Tap the map to pick a location</p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </motion.div>
+              )}
+            </motion.div>
           </div>
         </>
       )}

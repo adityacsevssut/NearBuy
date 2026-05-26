@@ -1,15 +1,16 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import Link from "next/link";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { 
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, 
   MapPin, Calendar, Clock, Mail, MessageCircle, 
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle, Code2
+  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -17,9 +18,11 @@ const DEV_EMAIL = "nahakaditya344@gmail.com";
 
 function AccountContent() {
   const { user, accessToken, logout, isLoggedIn } = useAuth();
+  const { savedAddresses, removeSavedAddress, setIsLocationModalOpen } = useLocationContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isBlue = searchParams.get('theme') === 'blue';
+  const [showAddresses, setShowAddresses] = useState(false);
 
   const theme = {
     gradient: isBlue ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
@@ -159,7 +162,84 @@ function AccountContent() {
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">My Activity</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
             <ModernRow icon={ShoppingBag} label="Purchase History" theme={theme} />
-            <ModernRow icon={MapPin} label="Saved Addresses" theme={theme} />
+            
+            {/* ── Saved Addresses — expandable ── */}
+            <div>
+              <button
+                onClick={() => setShowAddresses((v) => !v)}
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+                    <MapPin className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+                  </div>
+                  <div className="text-left">
+                    <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Saved Addresses</span>
+                    {savedAddresses.length > 0 && (
+                      <span className={`ml-2 text-[11px] font-black px-1.5 py-0.5 rounded-full ${isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>
+                        {savedAddresses.length}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <ChevronDown className={`w-4 h-4 text-gray-300 transition-transform duration-200 ${showAddresses ? "rotate-180" : ""}`} />
+              </button>
+
+              {/* Expanded list */}
+              {showAddresses && (
+                <div className="px-5 pb-4 space-y-2">
+                  {savedAddresses.length === 0 ? (
+                    <div className="text-center py-6">
+                      <MapPin className="w-8 h-8 text-gray-200 mx-auto mb-2" />
+                      <p className="text-sm font-bold text-gray-400">No saved addresses yet</p>
+                      <button
+                        onClick={() => { router.back(); setIsLocationModalOpen(true); }}
+                        className={`mt-3 text-xs font-bold ${theme.textPrimary} underline underline-offset-2`}
+                      >
+                        + Add Address
+                      </button>
+                    </div>
+                  ) : (
+                    savedAddresses.map((addr) => (
+                      <div
+                        key={addr.id}
+                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group"
+                      >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isBlue ? "bg-blue-50" : "bg-orange-50"}`}>
+                          <MapPin className={`w-4 h-4 ${theme.textPrimary}`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[13px] font-black text-gray-800 leading-tight truncate">{addr.name}</p>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            {addr.pincode && (
+                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-600 border-orange-100"}`}>
+                                PIN {addr.pincode}
+                              </span>
+                            )}
+                            {addr.full_address && (
+                              <p className="text-[11px] text-gray-400 truncate">
+                                {addr.full_address.split(",").slice(0, 2).join(",")}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={async () => {
+                            await removeSavedAddress(addr.id);
+                            toast.success("Address removed");
+                          }}
+                          className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors shrink-0"
+                          title="Delete address"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
             <ModernRow icon={Calendar} label="Active Subscriptions" theme={theme} />
             <ModernRow icon={Clock} label="Buy Again" theme={theme} />
           </div>

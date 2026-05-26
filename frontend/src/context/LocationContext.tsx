@@ -1,7 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthContext";
+
+// ── Types ──────────────────────────────────────────────────────────────────────
+
+export interface SavedAddress {
+  id: string;
+  name: string;
+  full_address: string | null;
+  pincode: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+}
 
 interface LocationContextType {
   locationName: string;
@@ -9,40 +21,66 @@ interface LocationContextType {
   latitude: number | null;
   longitude: number | null;
   setLocation: (name: string, pin: string, lat?: number, lon?: number) => void;
-  // Kept for compatibility but no longer used internally (map handles GPS now)
-  fetchExactLocation: () => Promise<void>;
+  fetchExactLocation: () => Promise<void>; // kept for interface compat
   isFetchingLocation: boolean;
   isLocationModalOpen: boolean;
   setIsLocationModalOpen: (open: boolean) => void;
   activeCenter: any | null;
+  // Saved addresses
+  savedAddresses: SavedAddress[];
+  addSavedAddress: (addr: Omit<SavedAddress, "id" | "created_at">) => Promise<void>;
+  removeSavedAddress: (id: string) => Promise<void>;
+  refreshSavedAddresses: () => Promise<void>;
 }
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
-// Distance calculation using Haversine formula
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
 function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
-  const R = 6371; // Radius of the earth in km
+  const R = 6371;
   const dLat = (lat2 - lat1) * (Math.PI / 180);
   const dLon = (lon2 - lon1) * (Math.PI / 180);
-  const a = 
+  const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
-    Math.sin(dLon / 2) * Math.sin(dLon / 2); 
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); 
-  return R * c; // Distance in km
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
+
+const SAVED_ADDRESSES_LS = "nearbuy_saved_addresses";
+
+function lsGetSavedAddresses(): SavedAddress[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(SAVED_ADDRESSES_LS) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function lsSetSavedAddresses(addresses: SavedAddress[]) {
+  localStorage.setItem(SAVED_ADDRESSES_LS, JSON.stringify(addresses));
+}
+
+// ── Provider ───────────────────────────────────────────────────────────────────
 
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locationName, setLocationName] = useState("Select Location");
   const [pincode, setPincode] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+  const [isFetchingLocation] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [activeCenter, setActiveCenter] = useState<any | null>(null);
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+
   const { user, accessToken, isLoggedIn } = useAuth();
 
-  // Restore saved location from localStorage on app boot
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+
+  // ── Restore from localStorage on boot ──────────────────────────────────────
   useEffect(() => {
     const savedName = localStorage.getItem("nearbuy_locationName");
     const savedPin = localStorage.getItem("nearbuy_pincode");
@@ -52,49 +90,77 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     if (savedPin) setPincode(savedPin);
     if (savedLat) setLatitude(parseFloat(savedLat));
     if (savedLon) setLongitude(parseFloat(savedLon));
+    // Load saved addresses from localStorage (offline/pre-login cache)
+    setSavedAddresses(lsGetSavedAddresses());
   }, []);
 
-  // Sync DB-stored user location details into context state on login
+  // ── Sync DB location on login ───────────────────────────────────────────────
   useEffect(() => {
     if (isLoggedIn && user) {
       if (user.locationName || user.latitude) {
+        const localTimestamp = localStorage.getItem("nearbuy_location_ts");
+        const dbTimestamp = localStorage.getItem("nearbuy_location_db_ts");
+        if (localTimestamp && dbTimestamp && localTimestamp > dbTimestamp) {
+          localStorage.setItem("nearbuy_location_db_ts", new Date().toISOString());
+          return;
+        }
         const name = user.locationName || "Select Location";
         const pin = user.pincode || "";
-        const lat = user.latitude !== undefined && user.latitude !== null ? parseFloat(user.latitude.toString()) : null;
-        const lon = user.longitude !== undefined && user.longitude !== null ? parseFloat(user.longitude.toString()) : null;
-
+        const lat = user.latitude != null ? parseFloat(user.latitude.toString()) : null;
+        const lon = user.longitude != null ? parseFloat(user.longitude.toString()) : null;
         setLocationName(name);
         setPincode(pin);
         setLatitude(lat);
         setLongitude(lon);
-
         localStorage.setItem("nearbuy_locationName", name);
         localStorage.setItem("nearbuy_pincode", pin);
-        if (lat !== null) {
-          localStorage.setItem("nearbuy_latitude", lat.toString());
-        } else {
-          localStorage.removeItem("nearbuy_latitude");
-        }
-        if (lon !== null) {
-          localStorage.setItem("nearbuy_longitude", lon.toString());
-        } else {
-          localStorage.removeItem("nearbuy_longitude");
-        }
+        localStorage.setItem("nearbuy_location_db_ts", new Date().toISOString());
+        localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
+        if (lat !== null) localStorage.setItem("nearbuy_latitude", lat.toString());
+        else localStorage.removeItem("nearbuy_latitude");
+        if (lon !== null) localStorage.setItem("nearbuy_longitude", lon.toString());
+        else localStorage.removeItem("nearbuy_longitude");
       }
     }
   }, [isLoggedIn, user]);
 
-  // Fetch active centers and resolve the active center based on user coordinates or pincode
+  // ── Fetch saved addresses from DB on login ──────────────────────────────────
+  const refreshSavedAddresses = useCallback(async () => {
+    if (!isLoggedIn || !accessToken) {
+      setSavedAddresses(lsGetSavedAddresses());
+      return;
+    }
+    try {
+      const res = await fetch(`${apiBase}/api/auth/me/saved-addresses`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const addresses: SavedAddress[] = data.addresses || [];
+        setSavedAddresses(addresses);
+        lsSetSavedAddresses(addresses); // keep local cache in sync
+      }
+    } catch {
+      // fall back to localStorage cache
+      setSavedAddresses(lsGetSavedAddresses());
+    }
+  }, [isLoggedIn, accessToken, apiBase]);
+
+  useEffect(() => {
+    if (isLoggedIn && accessToken) {
+      refreshSavedAddresses();
+    }
+  }, [isLoggedIn, accessToken, refreshSavedAddresses]);
+
+  // ── Active center resolution ────────────────────────────────────────────────
   useEffect(() => {
     if ((latitude === null || longitude === null) && !pincode) {
       setActiveCenter(null);
       return;
     }
-
-    const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-    fetch(`${apiBase}/api/public/service-centers`, { cache: 'no-store' })
-      .then(res => res.json())
-      .then(data => {
+    fetch(`${apiBase}/api/public/service-centers`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
         const centers = data.centers || [];
         let matchingCenter = null;
         if (latitude !== null && longitude !== null) {
@@ -107,34 +173,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         }
         setActiveCenter(matchingCenter || null);
       })
-      .catch(err => {
-        console.error("Failed to fetch service centers for context", err);
-      });
-  }, [latitude, longitude, pincode]);
+      .catch((err) => console.error("Failed to fetch service centers", err));
+  }, [latitude, longitude, pincode, apiBase]);
 
-  const syncLocationToBackend = async (
-    name: string,
-    pin: string,
-    lat?: number,
-    lon?: number
-  ) => {
+  // ── Sync active location to backend ────────────────────────────────────────
+  const syncLocationToBackend = async (name: string, pin: string, lat?: number, lon?: number) => {
     if (!isLoggedIn || !accessToken) return;
     try {
-      const apiBase = (
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-      ).replace(/\/+$/, "");
       await fetch(`${apiBase}/api/auth/me/location`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          locationName: name,
-          pincode: pin,
-          latitude: lat,
-          longitude: lon,
-        }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ locationName: name, pincode: pin, latitude: lat, longitude: lon }),
       });
     } catch (err) {
       console.error("Failed to sync location to backend", err);
@@ -160,10 +209,73 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       setLongitude(null);
       localStorage.removeItem("nearbuy_longitude");
     }
+    localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
     syncLocationToBackend(name, pin, lat, lon);
   };
 
-  // No-op kept for interface compatibility; GPS is now handled inside LocationModal/MapPicker
+  // ── Add a saved address (DB + localStorage) ─────────────────────────────────
+  const addSavedAddress = useCallback(
+    async (addr: Omit<SavedAddress, "id" | "created_at">) => {
+      // Optimistic local update
+      const tempEntry: SavedAddress = {
+        ...addr,
+        id: `temp_${Date.now()}`,
+        created_at: new Date().toISOString(),
+      };
+      const optimistic = [tempEntry, ...savedAddresses.filter(
+        (a) => !(a.name === addr.name && a.pincode === addr.pincode)
+      )].slice(0, 10);
+      setSavedAddresses(optimistic);
+      lsSetSavedAddresses(optimistic);
+
+      if (!isLoggedIn || !accessToken) return; // localStorage only for guests
+
+      try {
+        const res = await fetch(`${apiBase}/api/auth/me/saved-addresses`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
+          body: JSON.stringify({
+            name: addr.name,
+            fullAddress: addr.full_address,
+            pincode: addr.pincode,
+            latitude: addr.latitude,
+            longitude: addr.longitude,
+          }),
+        });
+        if (res.ok) {
+          // Refresh the real list from DB to get the correct UUID
+          await refreshSavedAddresses();
+        }
+      } catch {
+        // keep local optimistic state
+      }
+    },
+    [isLoggedIn, accessToken, apiBase, savedAddresses, refreshSavedAddresses]
+  );
+
+  // ── Remove a saved address (DB + localStorage) ──────────────────────────────
+  const removeSavedAddress = useCallback(
+    async (id: string) => {
+      // Optimistic remove
+      const updated = savedAddresses.filter((a) => a.id !== id);
+      setSavedAddresses(updated);
+      lsSetSavedAddresses(updated);
+
+      if (!isLoggedIn || !accessToken || id.startsWith("temp_")) return;
+
+      try {
+        await fetch(`${apiBase}/api/auth/me/saved-addresses/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+      } catch {
+        // local state already updated
+      }
+    },
+    [isLoggedIn, accessToken, apiBase, savedAddresses]
+  );
+
+  // kept for interface compat
   const fetchExactLocation = async () => {};
 
   return (
@@ -179,6 +291,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         isLocationModalOpen,
         setIsLocationModalOpen,
         activeCenter,
+        savedAddresses,
+        addSavedAddress,
+        removeSavedAddress,
+        refreshSavedAddresses,
       }}
     >
       {children}
