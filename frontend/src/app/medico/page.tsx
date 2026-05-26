@@ -10,6 +10,7 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import { useLocationContext } from "@/context/LocationContext";
+import { useAuth } from "@/context/AuthContext";
 
 const categories = [
   { id: "all", label: "All", emoji: "🛒" },
@@ -50,6 +51,7 @@ export default function MedicoPage() {
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
   const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
+  const { isLoggedIn, openLoginModal } = useAuth();
 
   const filtered = products
     .filter((p) => {
@@ -278,7 +280,10 @@ export default function MedicoPage() {
                         )}
                         {/* Wishlist */}
                         <button
-                          onClick={() => setWishlist(w => w.includes(p.id) ? w.filter(i => i !== p.id) : [...w, p.id])}
+                          onClick={() => {
+                            if (!isLoggedIn) return openLoginModal();
+                            setWishlist(w => w.includes(p.id) ? w.filter(i => i !== p.id) : [...w, p.id]);
+                          }}
                           className="absolute top-3 right-3 p-2 rounded-full bg-white border border-gray-200
                             shadow-sm hover:scale-110 transition-transform z-10"
                         >
@@ -325,7 +330,10 @@ export default function MedicoPage() {
 
                         <button
                           disabled={!p.inStock}
-                          onClick={() => setCart(c => c.includes(p.id) ? c.filter(i => i !== p.id) : [...c, p.id])}
+                          onClick={() => {
+                            if (!isLoggedIn) return openLoginModal();
+                            setCart(c => c.includes(p.id) ? c.filter(i => i !== p.id) : [...c, p.id]);
+                          }}
                           className={`w-full flex items-center justify-center gap-2 py-2 rounded-xl text-[13px] font-bold transition-all mt-auto ${!p.inStock
                             ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                             : inCart

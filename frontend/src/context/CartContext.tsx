@@ -4,6 +4,7 @@ import {
   createContext, useContext, useState,
   useCallback, useEffect, ReactNode
 } from "react";
+import { useAuth } from "./AuthContext";
 
 export interface CartItem {
   id: number;
@@ -34,6 +35,7 @@ const CartContext = createContext<CartContextType | null>(null);
 const STORAGE_KEY = "nearbuy_cart_v2";
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { isLoggedIn, openLoginModal } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -55,6 +57,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity" | "uid">, qty = 1) => {
+      if (!isLoggedIn) {
+        openLoginModal();
+        return;
+      }
       const uid = `${newItem.restaurantId}__${newItem.id}`;
       setItems((prev) => {
         const existing = prev.find((i) => i.uid === uid);
@@ -66,7 +72,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         return [...prev, { ...newItem, uid, quantity: qty }];
       });
     },
-    []
+    [isLoggedIn, openLoginModal]
   );
 
   const removeItem = useCallback((uid: string) => {

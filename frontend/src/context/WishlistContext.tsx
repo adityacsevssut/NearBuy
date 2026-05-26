@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
+import { useAuth } from "./AuthContext";
 
 export type WishlistedRestaurant = {
   id: string;
@@ -41,6 +42,7 @@ type WishlistContextType = {
 const WishlistContext = createContext<WishlistContextType | null>(null);
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
+  const { isLoggedIn, openLoginModal } = useAuth();
   const [restaurantWishlist, setRestaurantWishlist] = useState<WishlistedRestaurant[]>([]);
   const [foodWishlist, setFoodWishlist] = useState<WishlistedFood[]>([]);
 
@@ -60,6 +62,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   }, [foodWishlist]);
 
   const toggleRestaurant = (restaurant: WishlistedRestaurant) => {
+    if (!isLoggedIn) {
+      openLoginModal();
+      return;
+    }
     setRestaurantWishlist(prev => {
       const exists = prev.some(r => r.id === restaurant.id);
       if (exists) return prev.filter(r => r.id !== restaurant.id);
@@ -68,6 +74,10 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
   };
 
   const toggleFood = (food: WishlistedFood) => {
+    if (!isLoggedIn) {
+      openLoginModal();
+      return;
+    }
     setFoodWishlist(prev => {
       const exists = prev.some(f => f.id === food.id);
       if (exists) return prev.filter(f => f.id !== food.id);

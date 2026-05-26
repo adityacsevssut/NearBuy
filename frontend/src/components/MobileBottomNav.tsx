@@ -4,7 +4,6 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, Search, ClipboardList, User, LogIn, Heart } from "lucide-react";
-import LoginModal from "./LoginModal";
 import { useAuth } from "../context/AuthContext";
 
 export default function MobileBottomNav() {
@@ -15,8 +14,7 @@ export default function MobileBottomNav() {
   const activeBg = isEssentials ? "bg-blue-50/70" : isMedico ? "bg-emerald-50/70" : "bg-orange-50/70";
   const activeText = isEssentials ? "text-blue-600" : isMedico ? "text-emerald-600" : "text-orange-600";
 
-  const { isLoggedIn } = useAuth();
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const { isLoggedIn, openLoginModal } = useAuth();
 
   const homeHref = isEssentials ? "/essentials" : isMedico ? "/medico" : "/";
 
@@ -48,7 +46,7 @@ export default function MobileBottomNav() {
             const handleClick = (e: React.MouseEvent) => {
               if (id === "mobile-nav-auth" && !isLoggedIn) {
                 e.preventDefault();
-                setIsLoginModalOpen(true);
+                openLoginModal();
               }
             };
 
@@ -83,8 +81,6 @@ export default function MobileBottomNav() {
           })}
         </div>
       </nav>
-      
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} isMedico={isMedico} />
     </>
   );
 }

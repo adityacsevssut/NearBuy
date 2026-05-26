@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, RefreshCw, AlertCircle } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { usePathname } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
 
@@ -10,7 +11,7 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace
 
 type Flow = "choose" | "pick-user" | "login" | "signup-info" | "signup-otp" | "forgot-email" | "forgot-otp" | "forgot-reset" | "success" | "vendor-login" | "manager-login";
 
-interface Props { isOpen: boolean; onClose: () => void; isEssentials?: boolean; isMedico?: boolean; }
+interface Props { isOpen: boolean; onClose: () => void; }
 
 const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, showEye, onEyeClick, isEyeOpen, ...props }: any) => (
   <div className="relative group">
@@ -35,7 +36,10 @@ const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, sh
   </div>
 );
 
-export default function LoginModal({ isOpen, onClose, isEssentials = false, isMedico = false }: Props) {
+export default function LoginModal({ isOpen, onClose }: Props) {
+  const pathname = usePathname();
+  const isEssentials = pathname?.startsWith("/essentials") || false;
+  const isMedico = pathname?.startsWith("/medico") || false;
   // Theme: orange for Food, blue for Essentials, emerald for Medico
   const t = isEssentials ? {
     logoText: "text-blue-500",

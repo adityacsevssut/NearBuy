@@ -1,6 +1,7 @@
 "use client";
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import toast from "react-hot-toast";
+import LoginModal from "@/components/LoginModal";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -25,6 +26,9 @@ interface AuthContextType {
   login: (user: AuthUser, accessToken: string, refreshToken: string) => void;
   logout: () => void;
   isLoggedIn: boolean;
+  isLoginModalOpen: boolean;
+  openLoginModal: () => void;
+  closeLoginModal: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -32,7 +36,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const openLoginModal = () => setIsLoginModalOpen(true);
+  const closeLoginModal = () => setIsLoginModalOpen(false);
 
   // ── Silently refresh the access token using the stored refresh token ──
   const refreshAccessToken = async (): Promise<string | null> => {
@@ -147,8 +155,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout, isLoggedIn: !!user }}>
+    <AuthContext.Provider value={{ user, accessToken, login, logout, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal }}>
       {children}
+      <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </AuthContext.Provider>
   );
 }

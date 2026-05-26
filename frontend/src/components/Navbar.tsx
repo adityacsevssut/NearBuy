@@ -21,14 +21,13 @@ const DEV_EMAIL = "nahakaditya344@gmail.com";
 export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, openLoginModal } = useAuth();
   const { locationName, setIsLocationModalOpen } = useLocationContext();
   const { restaurantCount: cartCount } = useCart();
   const pathname = usePathname();
@@ -529,7 +528,7 @@ export default function Navbar() {
           ) : (
             <button
               id="login-signup-btn"
-              onClick={() => setIsLoginModalOpen(true)}
+              onClick={openLoginModal}
               className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 text-white ${primaryBg}`}
             >
               Login
@@ -538,7 +537,6 @@ export default function Navbar() {
         </div>
       </div>
       </nav>
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} isMedico={isMedico} />
       <LocationModal />
     </>
   );

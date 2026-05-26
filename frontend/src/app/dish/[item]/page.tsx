@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DishPage() {
   const params = useParams();
@@ -21,6 +22,7 @@ export default function DishPage() {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const [cart, setCart] = useState<Record<number, number>>({});
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const { isLoggedIn, openLoginModal } = useAuth();
 
   const [dishes, setDishes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -198,7 +200,10 @@ export default function DishPage() {
                         dish.emoji || "🍽️"
                       )}
                       <button
-                        onClick={() => setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id])}
+                        onClick={() => {
+                          if (!isLoggedIn) return openLoginModal();
+                          setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id]);
+                        }}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
                       >
                         <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
@@ -230,6 +235,7 @@ export default function DishPage() {
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
+                            if (!isLoggedIn) return openLoginModal();
                             const q = quantities[dish.id] || 1;
                             setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
                             setQuantities(q => ({ ...q, [dish.id]: 1 }));

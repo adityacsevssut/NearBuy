@@ -86,22 +86,26 @@ export default function LocationModal() {
       console.warn("Google reverse geocoding failed", err);
     }
 
-    // 2. Fallback to Nominatim (OpenStreetMap) if Google fails (Quota Exceeded, etc.)
+    // 2. Fallback to BigDataCloud (Free, No API Key, No CORS issues) if Google fails
     if (!resolved) {
       try {
-        const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`);
-        if (nomRes.ok) {
-           const data = await nomRes.json();
-           if (data && data.address) {
-              const name = data.address.suburb || data.address.neighbourhood || data.address.village || data.address.city || data.address.town || "My Location";
-              const pincode = data.address.postcode || "";
-              const fullAddress = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        const fallbackRes = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`);
+        if (fallbackRes.ok) {
+           const data = await fallbackRes.json();
+           if (data && (data.locality || data.city || data.principalSubdivision)) {
+              const name = data.locality || data.city || data.principalSubdivision || "My Location";
+              const pincode = data.postcode || "";
+              const fullAddressComponents = [data.locality, data.city, data.principalSubdivision, data.countryName].filter(Boolean);
+              // Remove duplicates just in case locality and city are same
+              const uniqueAddress = Array.from(new Set(fullAddressComponents)).join(", ");
+              const fullAddress = uniqueAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+              
               setResolvedAddress({ name, fullAddress, pincode, lat, lng });
               resolved = true;
            }
         }
       } catch (err) {
-        console.warn("Nominatim fallback failed", err);
+        console.warn("BigDataCloud fallback failed", err);
       }
     }
 
@@ -343,6 +347,12 @@ export default function LocationModal() {
                         setResolvedAddress(addr); 
                         if (addr.lat && addr.lng) {
                           setMapCoords({ lat: addr.lat, lng: addr.lng }); 
+                          
+                          // If selected address is a postcode or digits-only, reverse-geocode to get the actual city/locality name
+                          const isPincodeOnly = addr.isPostcode || /^\d+$/.test(addr.name.trim()) || (addr.pincode && addr.name.trim() === addr.pincode.trim());
+                          if (isPincodeOnly) {
+                            resolveAddress(addr.lat, addr.lng);
+                          }
                         }
                       }} 
                       autoFocus

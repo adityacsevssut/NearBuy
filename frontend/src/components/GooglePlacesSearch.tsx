@@ -10,6 +10,7 @@ export interface ResolvedGoogleAddress {
   pincode: string;
   lat: number;
   lng: number;
+  isPostcode?: boolean;
 }
 
 interface GooglePlacesSearchProps {
@@ -69,7 +70,17 @@ export default function GooglePlacesSearch({
             if (data.features) {
               const mapped = data.features.map((f: any, idx: number) => {
                 const props = f.properties;
-                const mainText = props.name || props.city || props.street || "Unknown Location";
+                let mainText = props.name || props.city || props.street || "Unknown Location";
+                
+                // If mainText is purely a postcode or osm_value is postcode, make it more readable by adding area/city info
+                const isPostcode = props.osm_value === "postcode" || /^\d+$/.test(mainText);
+                if (isPostcode) {
+                  const area = props.city || props.county || props.district;
+                  if (area) {
+                    mainText = `${area} (${props.name})`;
+                  }
+                }
+
                 const secTextParts = [];
                 if (props.street && props.name !== props.street) secTextParts.push(props.street);
                 if (props.city && props.name !== props.city) secTextParts.push(props.city);
@@ -84,6 +95,7 @@ export default function GooglePlacesSearch({
                     secondary_text: secTextParts.join(", ")
                   },
                   isPhoton: true,
+                  isPhotonPostcode: isPostcode,
                   photonData: f
                 };
               });
@@ -122,7 +134,8 @@ export default function GooglePlacesSearch({
           fullAddress: p.description,
           pincode: props.postcode || "",
           lat: coords[1],
-          lng: coords[0]
+          lng: coords[0],
+          isPostcode: p.isPhotonPostcode
        };
        onSelect(resolved);
        setIsLoading(false);
@@ -148,12 +161,16 @@ export default function GooglePlacesSearch({
           }
         }
 
+        const types = result.types || [];
+        const isPostcode = types.includes("postal_code") || types.includes("postal_code_prefix");
+
         const resolved: ResolvedGoogleAddress = {
           name: result.name || p.description.split(",")[0],
           fullAddress: result.formatted_address || p.description,
           pincode,
           lat,
           lng,
+          isPostcode,
         };
         
         // Refresh session token after a successful selection
