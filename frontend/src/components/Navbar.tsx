@@ -4,10 +4,11 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
+import {
   MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, Code2,
-  CreditCard, Bell, Heart, ShoppingBag, Calendar, Clock, Mail, MessageCircle, 
-  QrCode, Globe, Percent, Star, Users, Trash2, Pencil, ChevronRight
+  CreditCard, Bell, Heart, ShoppingBag, Calendar, Clock, Mail, MessageCircle,
+  QrCode, Globe, Percent, Star, Users, Trash2, Pencil, ChevronRight, Menu,
+  UtensilsCrossed, Pill
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
@@ -22,29 +23,41 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const notifRef = useRef<HTMLDivElement>(null);
   const { user, isLoggedIn, logout } = useAuth();
   const { locationName, setIsLocationModalOpen } = useLocationContext();
   const { restaurantCount: cartCount } = useCart();
   const pathname = usePathname();
 
+  // Close menus on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
       }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setMobileMenuOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setNotifOpen(false);
+      }
     }
-    if (userMenuOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [userMenuOpen]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-  const isEssentials = pathname === "/essentials";
-  const isMedico = pathname === "/medico";
-  
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  const isEssentials = pathname === "/essentials" || pathname.startsWith("/essentials/");
+  const isMedico = pathname === "/medico" || pathname.startsWith("/medico/");
+
   const theme = {
     gradient: isEssentials ? "from-blue-500 to-blue-400" : isMedico ? "from-emerald-500 to-emerald-400" : "from-orange-500 to-orange-400",
     textPrimary: isEssentials ? "text-blue-500" : isMedico ? "text-emerald-500" : "text-orange-500",
@@ -58,9 +71,6 @@ export default function Navbar() {
   };
 
   const primaryText = theme.textPrimary;
-  const primaryHoverText = theme.hoverText;
-  const primaryBorder = isEssentials ? "border-blue-400" : isMedico ? "border-emerald-400" : "border-orange-400";
-  const primaryBorderHover = isEssentials ? "hover:border-blue-400" : isMedico ? "hover:border-emerald-400" : "hover:border-orange-400";
   const primaryBg = isEssentials ? "bg-blue-500" : isMedico ? "bg-emerald-500" : "bg-orange-500";
 
   const suggestions = [
@@ -70,33 +80,125 @@ export default function Navbar() {
     "🥤 Late Night Maggi",
   ];
 
+  // Sample notifications
+  const notifications = [
+    { id: 1, title: "Order Delivered!", body: "Your Biryani order has been delivered.", time: "2m ago", read: false, icon: "🎉" },
+    { id: 2, title: "Flash Sale 🔥", body: "50% off on essentials for the next 1 hour!", time: "15m ago", read: false, icon: "⚡" },
+    { id: 3, title: "New Store Nearby", body: "QuickMart just joined NearBuy near you.", time: "1h ago", read: true, icon: "🏪" },
+    { id: 4, title: "Medico Discount", body: "Get 20% off on all medicines today.", time: "3h ago", read: true, icon: "💊" },
+  ];
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const navPages = [
+    { href: "/", label: "Food", icon: UtensilsCrossed, activeColor: "text-orange-600", activeBg: "bg-orange-50", isActive: !isEssentials && !isMedico },
+    { href: "/essentials", label: "Store", icon: Package, activeColor: "text-blue-600", activeBg: "bg-blue-50", isActive: isEssentials },
+    { href: "/medico", label: "Medico", icon: Pill, activeColor: "text-emerald-600", activeBg: "bg-emerald-50", isActive: isMedico },
+  ];
+
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 shadow-sm transition-colors duration-300 ${isEssentials ? 'bg-blue-500' : isMedico ? 'bg-emerald-500' : 'bg-orange-500'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4">
+    <>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 backdrop-blur-md shadow-sm ${
+        isEssentials ? "bg-blue-500/95" : isMedico ? "bg-emerald-500/95" : "bg-orange-500/95"
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
-        <Link href="/" className="flex-shrink-0 flex items-center gap-1.5 md:gap-2 group">
-          <div className="flex items-center -skew-x-6 pr-1">
-            <span className={`font-black text-2xl md:text-3xl tracking-tighter drop-shadow-sm transition-colors text-white`}>
-              N
-            </span>
-            <span className="text-black font-black text-2xl md:text-3xl tracking-tighter drop-shadow-sm transition-colors">
-              B
-            </span>
-          </div>
-          <span className="font-black text-xl tracking-tight hidden lg:block">
-            <span className="text-white">Near</span>
-            <span className="text-black">Buy</span>
-          </span>
-        </Link>
+        {/* ── Hamburger (Mobile only) ── */}
+        <div className="flex items-center flex-shrink-0 md:hidden" ref={mobileMenuRef}>
+          <button
+            id="hamburger-btn"
+            onClick={() => setMobileMenuOpen(prev => !prev)}
+            aria-label="Open menu"
+            className="flex items-center justify-center w-10 h-10 -ml-2 rounded-xl hover:bg-gray-100 transition-colors"
+          >
+            {mobileMenuOpen
+              ? <X className="w-6 h-6 text-gray-800" />
+              : <Menu className="w-6 h-6 text-gray-800" />
+            }
+          </button>
 
-        {/* ── App Mode Toggle (Food vs Essentials vs Medico) ── */}
-        <div className="flex bg-black/10 p-1 rounded-xl shadow-inner border border-white/10 flex-shrink-0 backdrop-blur-sm">
+          {/* ── Mobile Dropdown Menu ── */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, scale: 0.96 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.96 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="absolute left-0 top-full mt-3 w-[260px] bg-white/95 backdrop-blur-xl rounded-[28px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-gray-100/80 overflow-hidden z-50 p-2"
+              >
+                <div className="space-y-1">
+                  {/* Page Links */}
+                  {navPages.map(({ href, label, icon: Icon, activeColor, activeBg, isActive }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
+                        isActive
+                          ? `${activeBg} ${activeColor}`
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                      }`}
+                    >
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                        isActive ? `${activeBg}` : "bg-gray-100 group-hover:bg-gray-200"
+                      }`}>
+                        <Icon className={`w-4.5 h-4.5 ${isActive ? activeColor : "text-gray-500 group-hover:text-gray-700"}`} />
+                      </div>
+                      <span className="font-bold text-sm">{label}</span>
+                      {isActive && (
+                        <span className={`ml-auto text-[10px] font-black uppercase tracking-wider ${activeColor} opacity-70`}>
+                          Active
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+
+                  {/* Divider */}
+                  <div className="border-t border-gray-100 my-1" />
+
+                  {/* Cart Button */}
+                  <Link
+                    href="/cart"
+                    className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 group"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center relative transition-colors">
+                      <ShoppingCart className="w-4.5 h-4.5 text-gray-500 group-hover:text-gray-700" />
+                      {cartCount > 0 && (
+                        <span className={`absolute -top-1 -right-1 w-4 h-4 ${primaryBg} rounded-full text-white text-[9px] font-black flex items-center justify-center`}>
+                          {cartCount}
+                        </span>
+                      )}
+                    </div>
+                    <span className="font-bold text-sm">Cart</span>
+                    {cartCount > 0 && (
+                      <span className={`ml-auto text-[11px] font-black ${primaryText}`}>
+                        {cartCount} item{cartCount > 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* ── Logo ── */}
+        <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center flex-shrink-0">
+          <Link href="/" className="flex items-center group">
+            <span className="font-black text-2xl md:text-3xl tracking-tight">
+              <span className="text-white drop-shadow-sm">Near</span>
+              <span className="text-black drop-shadow-sm">Buy</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* ── App Mode Toggle (Desktop only) ── */}
+        <div className="hidden md:flex bg-gray-100 p-1 rounded-xl flex-shrink-0 border border-gray-200/50">
           <Link
             href="/"
             className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
               !isEssentials && !isMedico
                 ? `bg-white text-orange-600 shadow-sm`
-                : "text-white/80 hover:text-white hover:bg-white/10"
+                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
             }`}
           >
             <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -108,7 +210,7 @@ export default function Navbar() {
             className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
               isEssentials
                 ? `bg-white text-blue-600 shadow-sm`
-                : "text-white/80 hover:text-white hover:bg-white/10"
+                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
             }`}
           >
             <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -120,7 +222,7 @@ export default function Navbar() {
             className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
               isMedico
                 ? `bg-white text-emerald-600 shadow-sm`
-                : "text-white/80 hover:text-white hover:bg-white/10"
+                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
             }`}
           >
             <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -130,13 +232,13 @@ export default function Navbar() {
         </div>
 
         {/* ── Universal Search ── */}
-        <div className="relative flex-1 hidden md:block max-w-md">
+        <div className="relative flex-1 hidden md:block max-w-md ml-4">
           <div
             className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border
-              transition-all duration-300 bg-white ${
+              transition-all duration-300 bg-gray-50 ${
               searchFocused
-                ? `border-white shadow-[0_0_0_3px_rgba(255,255,255,0.3)]`
-                : "border-transparent hover:border-white/50"
+                ? `${isEssentials ? 'border-blue-400 ring-2 ring-blue-100' : isMedico ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-orange-400 ring-2 ring-orange-100'} bg-white`
+                : "border-gray-200 hover:border-gray-300"
             }`}
           >
             <Search
@@ -190,47 +292,122 @@ export default function Navbar() {
         </div>
 
         {/* ── Action Icons ── */}
-        <div className="flex items-center gap-0.5 flex-shrink-0">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0 ml-auto md:ml-0">
           <button
             id="location-picker"
             onClick={() => setIsLocationModalOpen(true)}
             className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
-              border border-white/30 hover:bg-white/10 bg-white/20 text-white
-              transition-all duration-200 group mr-2 max-w-[200px]`}
+              border border-gray-200 hover:bg-gray-50 bg-white text-gray-700
+              transition-all duration-200 group max-w-[200px]`}
           >
-            <MapPin className={`w-3.5 h-3.5 text-white shrink-0`} />
+            <MapPin className="w-3.5 h-3.5 text-gray-500 shrink-0" />
             <span className="font-semibold text-xs tracking-tight truncate">
               {locationName}
             </span>
-            <ChevronDown className={`w-3 h-3 text-white/70 group-hover:text-white transition-colors shrink-0`} />
+            <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors shrink-0" />
           </button>
 
+          {/* Cart – hidden on mobile (lives in hamburger) */}
           <Link
             href="/cart"
             id="cart-btn"
-            className="relative p-2.5 rounded-xl hover:bg-white/10 transition-colors group"
+            className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group hidden md:flex"
           >
-            <ShoppingCart className="w-5 h-5 text-white group-hover:text-white transition-colors" />
+            <ShoppingCart className="w-[22px] h-[22px] text-gray-700 group-hover:text-gray-900 transition-colors" />
             {cartCount > 0 && (
-              <span className={`absolute top-1 right-1 w-4 h-4 bg-white rounded-full
-                ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'} text-[10px] font-black flex items-center justify-center shadow-sm`}>
+              <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full
+                ${primaryBg} text-white text-[10px] font-black flex items-center justify-center shadow-sm`}>
                 {cartCount}
               </span>
             )}
           </Link>
 
+          {/* ── Notification Bell ── */}
+          <div className="relative" ref={notifRef}>
+            <button
+              id="notification-btn"
+              onClick={() => setNotifOpen(prev => !prev)}
+              aria-label="Notifications"
+              className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group"
+            >
+              <Bell className="w-[22px] h-[22px] text-gray-800 group-hover:text-black transition-colors fill-current" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-sm">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            <AnimatePresence>
+              {notifOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                >
+                  {/* Notif Header */}
+                  <div className={`bg-gradient-to-r ${theme.gradient} px-4 py-3 flex items-center justify-between`}>
+                    <div>
+                      <p className="text-white font-black text-sm">Notifications</p>
+                      <p className="text-white/70 text-[11px] font-medium">{unreadCount} unread</p>
+                    </div>
+                    <button className="text-white/80 hover:text-white text-xs font-bold underline underline-offset-2 transition-colors">
+                      Mark all read
+                    </button>
+                  </div>
+
+                  {/* Notif List */}
+                  <div className="max-h-[340px] overflow-y-auto divide-y divide-gray-50">
+                    {notifications.map((notif) => (
+                      <button
+                        key={notif.id}
+                        className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors ${!notif.read ? 'bg-orange-50/30' : ''}`}
+                      >
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${!notif.read ? 'bg-orange-100' : 'bg-gray-100'}`}>
+                          {notif.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className={`text-[13px] font-bold truncate ${!notif.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                              {notif.title}
+                            </p>
+                            {!notif.read && (
+                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${primaryBg}`} />
+                            )}
+                          </div>
+                          <p className="text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{notif.body}</p>
+                          <p className="text-[10px] text-gray-300 mt-1 font-semibold">{notif.time}</p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Footer */}
+                  <div className="px-4 py-3 border-t border-gray-100 text-center">
+                    <button className={`text-xs font-bold ${primaryText} hover:opacity-70 transition-opacity`}>
+                      View All Notifications
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* User Menu (Desktop) */}
           {isLoggedIn ? (
-            <div className="relative ml-2 hidden md:block" ref={userMenuRef}>
+            <div className="relative ml-1 hidden md:block" ref={userMenuRef}>
               <button
                 id="user-avatar-btn"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/30 hover:border-white hover:bg-white/10 transition-all duration-200"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-white ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'} text-xs font-bold`}>
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-tr ${theme.avatarBg} ${primaryText} text-xs font-bold`}>
                   {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
                 </div>
-                <span className="hidden sm:block text-sm font-semibold text-white">{user?.firstName || user?.email?.split('@')[0]}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-white/70 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
+                <span className="hidden sm:block text-sm font-semibold text-gray-700">{user?.firstName || user?.email?.split('@')[0]}</span>
+                <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
               </button>
 
               <AnimatePresence>
@@ -261,7 +438,7 @@ export default function Navbar() {
                             <Pencil className="w-2.5 h-2.5" />
                           </button>
                         </div>
-                        
+
                         <div className="ml-4 flex-1 min-w-0">
                           <h2 className="text-[17px] font-black text-gray-800 tracking-tight leading-tight truncate">
                             {user?.firstName || "NearBuy"} {user?.lastName || "User"}
@@ -336,7 +513,7 @@ export default function Navbar() {
 
                       {/* Danger Zone */}
                       <div className={`bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden`}>
-                        <button 
+                        <button
                           onClick={() => { logout(); setUserMenuOpen(false); }}
                           className={`w-full flex items-center justify-center gap-2 px-4 py-3 ${theme.dangerText} font-bold ${theme.dangerHoverBg} transition-colors`}
                         >
@@ -353,16 +530,17 @@ export default function Navbar() {
             <button
               id="login-signup-btn"
               onClick={() => setIsLoginModalOpen(true)}
-              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 bg-white ${isEssentials ? 'text-blue-600' : isMedico ? 'text-emerald-600' : 'text-orange-600'}`}
+              className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 text-white ${primaryBg}`}
             >
               Login
             </button>
           )}
         </div>
       </div>
+      </nav>
       <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} isEssentials={isEssentials} isMedico={isMedico} />
       <LocationModal />
-    </nav>
+    </>
   );
 }
 

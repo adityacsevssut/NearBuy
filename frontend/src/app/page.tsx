@@ -503,27 +503,14 @@ export default function HomePage() {
 
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
           <section className="px-4 py-3">
-            <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-[#ff6b00] via-[#ff8c00] to-[#ffa500] p-5 flex items-center justify-between shadow-lg shadow-orange-300/40 min-h-[110px]">
-              {/* Decorative circles */}
-              <div className="absolute w-40 h-40 rounded-full bg-white/10 -right-10 -top-10" />
-              <div className="absolute w-28 h-28 rounded-full bg-white/10 -right-4 -bottom-8" />
-              <div className="absolute w-20 h-20 rounded-full bg-white/15 right-16 top-2" />
-
-              {/* Left content */}
-              <div className="relative z-10">
-                <p className="text-white/80 text-[11px] font-bold uppercase tracking-widest mb-0.5">Limited Time Offer</p>
-                <p className="text-white font-black text-3xl leading-none tracking-tight mb-0.5">
-                  50% <span className="text-yellow-200">OFF</span>
-                </p>
-                <p className="text-white/90 text-xs font-semibold mb-3">ON YOUR FIRST ORDER</p>
-                <button className="bg-white text-orange-600 font-black text-[11px] px-4 py-1.5 rounded-full shadow-md hover:scale-105 active:scale-95 transition-transform uppercase tracking-wide">
-                  ORDER NOW →
-                </button>
-              </div>
-
-              {/* Right emoji */}
-              <div className="relative z-10 text-5xl select-none drop-shadow-lg">🍱</div>
-            </div>
+            <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img 
+                src="/home_banner.jpg" 
+                alt="NearBuy Special Offer" 
+                className="w-full h-auto object-contain md:object-cover group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
+              />
+            </Link>
           </section>
 
           {/* ── 3. Popular Near You ─────────────────────────────────────────── */}
