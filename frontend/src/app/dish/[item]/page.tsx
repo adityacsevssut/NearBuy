@@ -8,6 +8,17 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
+import { useLocationContext } from "@/context/LocationContext";
+
+function deg2rad(d: number) { return d * (Math.PI / 180); }
+
+function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lon2: number|null) {
+  if (lat1==null||lon1==null||lat2==null||lon2==null) return null;
+  const R = 6371, dLat = deg2rad(lat2-lat1), dLon = deg2rad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
 
 export default function DishPage() {
   const params = useParams();
@@ -21,9 +32,10 @@ export default function DishPage() {
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
   const { toggleFood, isFoodWished } = useWishlist();
-  const [cart, setCart] = useState<Record<number, number>>({});
+  const { addItem, itemQty } = useCart();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { isLoggedIn, openLoginModal } = useAuth();
+  const { latitude, longitude } = useLocationContext();
 
   const [dishes, setDishes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,10 +146,17 @@ export default function DishPage() {
           <div className="space-y-4">
             {filteredDishes.map((dish) => {
               const wished = isFoodWished(dish.id);
+              const inCartCount = itemQty(dish.id, dish.vendor_id);
+              
+              const vendorLat = dish.latitude ? parseFloat(dish.latitude) : null;
+              const vendorLon = dish.longitude ? parseFloat(dish.longitude) : null;
+              const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
+              const isOutOfRange = rawDistance != null && rawDistance > (dish.delivery_range ? parseFloat(dish.delivery_range) : 5);
+
               return (
                 <div
                   key={dish.id}
-                  className="bg-white p-4 rounded-2xl border border-gray-200 shadow-sm hover:border-orange-300 hover:shadow-md transition-all duration-300 flex gap-4"
+                  className={`bg-white p-4 rounded-2xl border border-gray-200 shadow-sm transition-all duration-300 flex gap-4 ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -202,6 +221,7 @@ export default function DishPage() {
                       )}
                       <button
                         onClick={() => {
+                          if (isOutOfRange) return;
                           toggleFood({
                             id: dish.id,
                             name: dish.name,
@@ -219,15 +239,21 @@ export default function DishPage() {
                             is_available: dish.is_available
                           });
                         }}
-                        className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'bg-white/80 border-gray-200 hover:scale-110'}`}
+                        disabled={isOutOfRange}
                       >
                         <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                       </button>
+                      {isOutOfRange && (
+                        <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 rounded-xl z-20">
+                          <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">Out of Range</span>
+                        </div>
+                      )}
                     </div>
 
                     {/* Quantity Selector and ADD Button */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                      <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
+                      <div className={`flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange ? 'opacity-50 pointer-events-none' : ''}`}>
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -251,18 +277,31 @@ export default function DishPage() {
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
+                          if (isOutOfRange) return;
                           if (!isLoggedIn) return openLoginModal();
                           const q = quantities[dish.id] || 1;
-                          setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
+                          addItem({
+                            id: dish.id,
+                            name: dish.name,
+                            price: dish.price,
+                            image: dish.image_url || "",
+                            type: dish.type,
+                            restaurantId: dish.vendor_id,
+                            restaurantName: dish.vendor,
+                            section: "food"
+                          }, q);
                           setQuantities(q => ({ ...q, [dish.id]: 1 }));
                         }}
-                        className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                          cart[dish.id]
-                            ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                            : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                        disabled={isOutOfRange}
+                        className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                          isOutOfRange 
+                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                            : inCartCount > 0
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                              : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
                         }`}
                       >
-                        {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                        {inCartCount > 0 ? `ADDED (${inCartCount})` : "ADD"}
                       </button>
                     </div>
                   </div>

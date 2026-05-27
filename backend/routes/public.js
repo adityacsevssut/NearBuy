@@ -129,7 +129,7 @@ router.get("/dishes/:category", async (req, res) => {
       `SELECT 
          m.id, m.category, m.name, m.description as desc, m.price, m.actual_price, m.type, m.badge, m.image_url as image_url, 
          m.is_available, m.sort_order, m.rating, m.prep_time as time, m.reviews, m.front_page_category,
-         v.restaurant_name as vendor, v.user_id as vendor_id
+         v.restaurant_name as vendor, v.user_id as vendor_id, v.latitude, v.longitude, v.delivery_range
        FROM vendor_menu_items m
        JOIN vendor_profiles v ON m.vendor_id = v.user_id
        WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE`,
