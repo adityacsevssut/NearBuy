@@ -29,6 +29,8 @@ interface Order {
   delivery_address: any;
   status: string;
   created_at: string;
+  owner_number?: string;
+  delivery_boy_number?: string;
 }
 
 const STATUS_STEPS = ["pending", "confirmed", "shipment", "out for delivery", "delivered"];
