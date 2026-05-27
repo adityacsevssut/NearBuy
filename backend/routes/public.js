@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
+const validate = require("../middleware/validate");
+const { updateSettingsSchema } = require("../validators/manager.validators");
 
 // GET /api/public/vendors
 router.get("/vendors", async (req, res) => {
@@ -179,7 +181,7 @@ router.get("/settings", async (req, res) => {
 });
 
 // POST /api/public/settings
-router.post("/settings", async (req, res) => {
+router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
   try {
     const { platform_fee, gst } = req.body;
     

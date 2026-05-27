@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require("multer");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
+const validate = require("../middleware/validate");
+const { upsertProfileSchema } = require("../validators/vendorProfile.validators");
 const { createClient } = require("@supabase/supabase-js");
 
 // Initialize Supabase Storage client
@@ -36,7 +38,7 @@ router.get("/", authenticate, async (req, res) => {
 });
 
 // POST /api/vendor-profile
-router.post("/", authenticate, upload.single("image"), async (req, res) => {
+router.post("/", authenticate, upload.single("image"), validate(upsertProfileSchema), async (req, res) => {
   try {
     console.log("POST /api/vendor-profile body:", req.body);
     

@@ -3,6 +3,8 @@ const router = express.Router();
 const multer = require("multer");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
+const validate = require("../middleware/validate");
+const { createMenuItemSchema, updateMenuItemSchema } = require("../validators/vendorMenu.validators");
 const { createClient } = require("@supabase/supabase-js");
 
 const supabase = createClient(
@@ -65,11 +67,8 @@ router.get("/", authenticate, async (req, res) => {
 });
 
 // ── POST /api/vendor-menu  →  add a new menu item ────────────────────────────
-router.post("/", authenticate, upload.single("image"), async (req, res) => {
+router.post("/", authenticate, upload.single("image"), validate(createMenuItemSchema), async (req, res) => {
   const { category, name, description, price, actual_price, type, badge, sort_order, rating, prep_time, reviews, front_page_category } = req.body;
-  if (!category || !name || !price) {
-    return res.status(400).json({ error: "category, name, and price are required." });
-  }
 
   try {
     let imageUrl = "";
@@ -98,7 +97,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
 });
 
 // ── PATCH /api/vendor-menu/:id  →  update a menu item ────────────────────────
-router.patch("/:id", authenticate, upload.single("image"), async (req, res) => {
+router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuItemSchema), async (req, res) => {
   const { id } = req.params;
   try {
     // Verify ownership

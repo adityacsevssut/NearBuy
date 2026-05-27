@@ -3,7 +3,12 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
-const { body, validationResult } = require("express-validator");
+const validate = require("../middleware/validate");
+const {
+  sendOtpSchema, verifyOtpSchema, signupSchema, signupFirebaseSchema,
+  loginSchema, typedLoginSchema, resetPasswordSchema,
+  updateLocationSchema, saveAddressSchema
+} = require("../validators/auth.validators");
 
 const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
@@ -75,10 +80,8 @@ function safeUser(u) {
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/send-otp",
-  [body("purpose").isIn(["signup", "reset"])],
+  validate(sendOtpSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { email, mobile, purpose } = req.body;
 
@@ -137,13 +140,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/verify-otp",
-  [
-    body("otp").isLength({ min: 6, max: 6 }),
-    body("purpose").isIn(["signup", "reset"]),
-  ],
+  validate(verifyOtpSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { email, mobile, otp, purpose } = req.body;
 
@@ -183,16 +181,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/signup",
-  [
-    body("verificationToken").notEmpty(),
-    body("firstName").trim().notEmpty().withMessage("First name is required"),
-    body("lastName").trim().notEmpty().withMessage("Last name is required"),
-    body("mobile").optional().isMobilePhone(),
-    body("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters"),
-  ],
+  validate(signupSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { verificationToken, firstName, lastName, mobile, password } = req.body;
     try {
@@ -244,16 +234,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/signup-firebase",
-  [
-    body("firstName").trim().notEmpty(),
-    body("lastName").trim().notEmpty(),
-    body("email").isEmail().normalizeEmail(),
-    body("mobile").isMobilePhone(),
-    body("password").isLength({ min: 8 }),
-  ],
+  validate(signupFirebaseSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { firstName, lastName, email, mobile, password } = req.body;
     try {
@@ -290,10 +272,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/login",
-  [body("email").isEmail().normalizeEmail(), body("password").notEmpty()],
+  validate(loginSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { email, password } = req.body;
     try {
@@ -326,10 +306,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/vendor-login",
-  [body("email").isEmail().normalizeEmail(), body("password").notEmpty(), body("type").notEmpty()],
+  validate(typedLoginSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { email, password, type } = req.body;
     try {
@@ -368,10 +346,8 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/manager-login",
-  [body("email").isEmail().normalizeEmail(), body("password").notEmpty(), body("type").notEmpty()],
+  validate(typedLoginSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { email, password, type } = req.body;
     try {
@@ -519,13 +495,8 @@ router.post("/google", async (req, res) => {
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/reset-password",
-  [
-    body("verificationToken").notEmpty(),
-    body("newPassword").isLength({ min: 8 }).withMessage("Password must be at least 8 characters"),
-  ],
+  validate(resetPasswordSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { verificationToken, newPassword } = req.body;
     try {
@@ -642,16 +613,8 @@ router.delete("/me", authenticate, async (req, res) => {
 router.put(
   "/me/location",
   authenticate,
-  [
-    body("locationName").notEmpty().withMessage("Location name is required"),
-    body("pincode").optional(),
-    body("landmark").optional(),
-    body("latitude").optional().isFloat(),
-    body("longitude").optional().isFloat(),
-  ],
+  validate(updateLocationSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { locationName, pincode, landmark, latitude, longitude } = req.body;
     try {
@@ -731,15 +694,8 @@ router.get("/me/saved-addresses", authenticate, async (req, res) => {
 router.post(
   "/me/saved-addresses",
   authenticate,
-  [
-    body("name").notEmpty().withMessage("Address name is required"),
-    body("latitude").optional().isFloat(),
-    body("longitude").optional().isFloat(),
-  ],
+  validate(saveAddressSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty())
-      return res.status(400).json({ error: errors.array()[0].msg });
 
     const { name, fullAddress, pincode, landmark, latitude, longitude } = req.body;
     try {

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require("express-validator");
+const validate = require("../middleware/validate");
+const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 
@@ -9,26 +10,8 @@ const { authenticate } = require("../middleware/auth");
 router.post(
   "/",
   authenticate,
-  [
-    body("vendor_id").isUUID().withMessage("Valid vendor ID is required"),
-    body("items").isArray({ min: 1 }).withMessage("Items must be a non-empty array"),
-    body("subtotal").isFloat({ min: 0 }),
-    body("gst").isFloat({ min: 0 }),
-    body("platform_fee").isFloat({ min: 0 }),
-    body("total_amount").isFloat({ min: 0 }),
-    body("payment_method").notEmpty(),
-    body("delivery_address").notEmpty(),
-    body("customer_mobile")
-      .notEmpty().withMessage("Primary mobile number is required")
-      .matches(/^[6-9]\d{9}$/).withMessage("Must be a valid 10-digit Indian mobile number"),
-    body("alternate_mobile").optional({ checkFalsy: true }).matches(/^[6-9]\d{9}$/).withMessage("Alternate mobile must be valid if provided"),
-    body("cooking_instructions").optional()
-  ],
+  validate(createOrderSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ error: errors.array()[0].msg });
-    }
 
     const {
       vendor_id,

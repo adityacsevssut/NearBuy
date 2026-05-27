@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-const { body, validationResult } = require("express-validator");
+const validate = require("../middleware/validate");
+const { createManagerSchema, updateManagerSchema, createVendorAccountSchema, editVendorAccountSchema } = require("../validators/manager.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 
@@ -41,15 +42,8 @@ router.post(
   "/",
   authenticate,
   devOnly,
-  [
-    body("email").isEmail().normalizeEmail().withMessage("Valid email required"),
-    body("password").isLength({ min: 8 }).withMessage("Password must be at least 8 characters"),
-    body("managerType").isIn(["food", "medicine", "store"]).withMessage("Type must be food, medicine, or store"),
-  ],
+  validate(createManagerSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
-
     const { email, password, managerType } = req.body;
     try {
       // Check if email already exists
@@ -81,15 +75,8 @@ router.patch(
   "/:id",
   authenticate,
   devOnly,
-  [
-    body("email").optional().isEmail().normalizeEmail(),
-    body("password").optional().isLength({ min: 8 }),
-    body("managerType").optional().isIn(["food", "medicine", "store"]),
-  ],
+  validate(updateManagerSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
-
     const { id } = req.params;
     const { email, password, managerType } = req.body;
 
@@ -179,19 +166,11 @@ router.get("/vendors", authenticate, async (req, res) => {
 router.post(
   "/vendor",
   authenticate,
-  [
-    body("businessName").trim().notEmpty().withMessage("Business name is required"),
-    body("ownerName").trim().notEmpty().withMessage("Owner name is required"),
-    body("email").isEmail().normalizeEmail().withMessage("Valid email required"),
-    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
-    body("mobile").optional().isMobilePhone(),
-  ],
+  validate(createVendorAccountSchema),
   async (req, res) => {
     if (req.user.role !== "manager" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied." });
     }
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { businessName, ownerName, email, password, mobile } = req.body;
     const vendorType = (req.user.manager_type || "food").toLowerCase();
@@ -228,16 +207,11 @@ router.post(
 router.patch(
   "/vendor/:id",
   authenticate,
-  [
-    body("email").optional().isEmail().normalizeEmail(),
-    body("password").optional().isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
-  ],
+  validate(editVendorAccountSchema),
   async (req, res) => {
     if (req.user.role !== "manager" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied." });
     }
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { id } = req.params;
     const { firstName, lastName, email, mobile, password } = req.body;

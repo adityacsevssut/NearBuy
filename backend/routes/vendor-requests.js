@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { body, validationResult } = require("express-validator");
+const validate = require("../middleware/validate");
+const { createVendorRequestSchema, editVendorRequestSchema } = require("../validators/vendorRequests.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 const bcrypt = require("bcryptjs");
@@ -8,16 +9,8 @@ const bcrypt = require("bcryptjs");
 // POST /api/vendor-requests — create a new vendor request
 router.post(
   "/",
-  [
-    body("ownerName").notEmpty().withMessage("Owner name is required"),
-    body("ownerMobile").notEmpty().withMessage("Mobile is required"),
-    body("ownerEmail").isEmail().withMessage("Valid email required"),
-    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
-    body("vendorType").isIn(["food", "medicine", "store"]).withMessage("Type must be food, medicine, or store"),
-  ],
+  validate(createVendorRequestSchema),
   async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
     const { ownerName, ownerMobile, ownerEmail, password, vendorType, requestType, collegeName } = req.body;
     try {
@@ -213,7 +206,7 @@ router.delete("/:id", authenticate, async (req, res) => {
 });
 
 // PUT /api/vendor-requests/:id — edit vendor details (name, email, mobile)
-router.put("/:id", authenticate, async (req, res) => {
+router.put("/:id", authenticate, validate(editVendorRequestSchema), async (req, res) => {
   const { id } = req.params;
   const { owner_name, owner_email, owner_mobile } = req.body;
   try {

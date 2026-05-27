@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
+const validate = require("../middleware/validate");
+const { createServiceCenterSchema, patchServiceCenterSchema } = require("../validators/serviceCenters.validators");
 
 // Only developer can access these
 const isDev = (req, res, next) => {
@@ -23,11 +25,8 @@ router.get("/", async (req, res) => {
 });
 
 // POST new service center
-router.post("/", authenticate, isDev, async (req, res) => {
+router.post("/", authenticate, isDev, validate(createServiceCenterSchema), async (req, res) => {
   const { name, landmark, pincode, latitude, longitude, radius_km } = req.body;
-  if (!name || !pincode || !latitude || !longitude) {
-    return res.status(400).json({ error: "Missing required fields" });
-  }
 
   try {
     const { rows } = await pool.query(
@@ -43,7 +42,7 @@ router.post("/", authenticate, isDev, async (req, res) => {
 });
 
 // PATCH update status or radius
-router.patch("/:id", authenticate, isDev, async (req, res) => {
+router.patch("/:id", authenticate, isDev, validate(patchServiceCenterSchema), async (req, res) => {
   const { id } = req.params;
   const { is_active, radius_km } = req.body;
   

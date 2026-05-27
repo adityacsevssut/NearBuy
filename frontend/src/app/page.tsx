@@ -29,6 +29,7 @@ const quickBites = [
   { label: "Bakery",          image: "/bakery.png" },
   { label: "Drinks",          image: "/drinks.png" },
   { label: "Chole Bhature",   image: "/chole_bhature.png" },
+  { label: "Samosa",          image: "/samosa_gemini.png" },
   { label: "Others",          image: "/others_gemini.png" },
 ];
 
@@ -107,8 +108,8 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         {r.badge && <span className="absolute top-2 left-2 bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">{r.badge}</span>}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-            <span className="text-white font-black text-[10px] uppercase bg-black/50 px-2 py-0.5 rounded-full">{closed?"Closed":"Out of Range"}</span>
+          <div className="absolute inset-0 bg-black/10 flex items-center justify-center rounded-t-2xl z-20">
+            <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">{closed?"Closed":"Out of Range"}</span>
           </div>
         )}
       </div>
@@ -173,8 +174,8 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         )}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-white/30 flex items-center justify-center">
-            <span className="text-red-600 font-black text-sm uppercase tracking-widest bg-white/90 px-3 py-1 rounded-lg shadow-sm">{closed?"Closed Now":"Out of Range"}</span>
+          <div className="absolute inset-0 bg-black/10 flex items-center justify-center rounded-t-2xl z-20">
+            <span className="text-white font-black text-[12px] uppercase bg-black/60 px-3 py-1 rounded-full">{closed?"Closed":"Out of Range"}</span>
           </div>
         )}
       </div>
@@ -425,9 +426,9 @@ export default function HomePage() {
                   href={`/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                   className="flex-shrink-0 flex flex-col items-center gap-1.5 group"
                 >
-                  <div className="w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 shadow-sm group-hover:shadow-md transition-all duration-200 group-hover:scale-105">
+                  <div className="w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 shadow-sm group-hover:shadow-md transition-all duration-200 isolate">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={image} alt={label} className="w-full h-full object-cover" />
+                    <img src={image} alt={label} className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110" />
                   </div>
                   <span className="text-[11px] font-bold text-gray-700 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
                     {label}
