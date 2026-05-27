@@ -59,6 +59,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
       latitude,
       longitude,
       pincode,
+      landmark,
       rating,
       is_open,
       delivery_range,
@@ -83,6 +84,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
     const final_longitude = !isNaN(parsedLng) ? parsedLng : (existing.longitude !== null && existing.longitude !== undefined ? parseFloat(existing.longitude) : null);
     
     const final_pincode = pincode !== undefined ? pincode : (existing.pincode || "");
+    const final_landmark = landmark !== undefined ? landmark : (existing.landmark || "");
     
     const parsedRating = parseFloat(rating);
     const final_rating = !isNaN(parsedRating) ? parsedRating : (existing.rating !== null && existing.rating !== undefined ? parseFloat(existing.rating) : 0.0);
@@ -136,9 +138,9 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
       `INSERT INTO vendor_profiles (
         user_id, restaurant_name, cuisine, delivery_time, min_order, 
         offer, badge, image_url, gps_address, manual_address, 
-        latitude, longitude, pincode, rating, is_open, delivery_range
+        latitude, longitude, pincode, landmark, rating, is_open, delivery_range
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
        ON CONFLICT (user_id) DO UPDATE SET
         restaurant_name = EXCLUDED.restaurant_name,
         cuisine = EXCLUDED.cuisine,
@@ -152,6 +154,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
         latitude = EXCLUDED.latitude,
         longitude = EXCLUDED.longitude,
         pincode = EXCLUDED.pincode,
+        landmark = EXCLUDED.landmark,
         rating = EXCLUDED.rating,
         is_open = EXCLUDED.is_open,
         delivery_range = EXCLUDED.delivery_range,
@@ -171,6 +174,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
         final_latitude,
         final_longitude,
         final_pincode,
+        final_landmark,
         final_rating,
         is_open_val,
         delivery_range_val,

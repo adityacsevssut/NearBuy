@@ -10,15 +10,16 @@ import {
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, 
   MapPin, Calendar, Clock, Mail, MessageCircle, 
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation
+  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus
 } from "lucide-react";
+import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
 
 function AccountContent() {
   const { user, accessToken, logout, isLoggedIn } = useAuth();
-  const { savedAddresses, removeSavedAddress, setIsLocationModalOpen } = useLocationContext();
+  const { savedAddresses, removeSavedAddress, setIsLocationModalOpen, setLocation } = useLocationContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isBlue = searchParams.get('theme') === 'blue';
@@ -110,10 +111,14 @@ function AccountContent() {
   if (!isLoggedIn) return null;
 
   return (
-    <div className={`min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8F9FA] pb-24 md:hidden font-sans ${theme.selection}`}>
+    <div className={`min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8F9FA] pb-24 font-sans ${theme.selection}`}>
       
+      <div className="hidden md:block mb-8">
+        <Navbar />
+      </div>
+
       {/* Dynamic Brand Header */}
-      <div className={`bg-gradient-to-br ${theme.gradient} pt-6 pb-20 px-4 rounded-b-[40px] relative shadow-lg`}>
+      <div className={`bg-gradient-to-br ${theme.gradient} pt-6 pb-20 px-4 rounded-b-[40px] relative shadow-lg md:hidden`}>
         <div className="flex items-center justify-between text-white relative z-10 mb-2">
           <button onClick={() => router.back()} className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
@@ -127,7 +132,7 @@ function AccountContent() {
         <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-32 h-32 rounded-full border-[16px] border-white/10"></div>
       </div>
 
-      <div className="px-5 space-y-6 max-w-lg mx-auto -mt-14 relative z-20">
+      <div className="px-5 space-y-6 max-w-lg mx-auto md:pt-28 md:mt-0 -mt-14 relative z-20">
         
         {/* Floating Profile Card */}
         <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50/50">
@@ -193,7 +198,7 @@ function AccountContent() {
                       <MapPin className="w-8 h-8 text-gray-200 mx-auto mb-2" />
                       <p className="text-sm font-bold text-gray-400">No saved addresses yet</p>
                       <button
-                        onClick={() => { router.back(); setIsLocationModalOpen(true); }}
+                        onClick={() => setIsLocationModalOpen(true)}
                         className={`mt-3 text-xs font-bold ${theme.textPrimary} underline underline-offset-2`}
                       >
                         + Add Address
@@ -203,28 +208,42 @@ function AccountContent() {
                     savedAddresses.map((addr) => (
                       <div
                         key={addr.id}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl border border-gray-100 group"
+                        onClick={() => {
+                          setLocation(
+                            addr.name,
+                            addr.pincode || "",
+                            addr.landmark || "",
+                            addr.latitude != null ? parseFloat(String(addr.latitude)) : undefined,
+                            addr.longitude != null ? parseFloat(String(addr.longitude)) : undefined
+                          );
+                          toast.success(`📍 Switched to ${addr.name}`);
+                          router.push("/");
+                        }}
+                        className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-orange-50/50 cursor-pointer rounded-2xl border border-gray-100 hover:border-orange-200 transition-all group"
                       >
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isBlue ? "bg-blue-50" : "bg-orange-50"}`}>
                           <MapPin className={`w-4 h-4 ${theme.textPrimary}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-black text-gray-800 leading-tight truncate">{addr.name}</p>
+                          <p className="text-[13px] font-black text-gray-800 leading-tight truncate">
+                            {addr.landmark ? addr.landmark : addr.name}
+                          </p>
                           <div className="flex items-center gap-1.5 mt-0.5">
                             {addr.pincode && (
                               <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-600 border-orange-100"}`}>
                                 PIN {addr.pincode}
                               </span>
                             )}
-                            {addr.full_address && (
+                            {(addr.full_address || addr.landmark) && (
                               <p className="text-[11px] text-gray-400 truncate">
-                                {addr.full_address.split(",").slice(0, 2).join(",")}
+                                {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
                               </p>
                             )}
                           </div>
                         </div>
                         <button
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             await removeSavedAddress(addr.id);
                             toast.success("Address removed");
                           }}
@@ -235,6 +254,15 @@ function AccountContent() {
                         </button>
                       </div>
                     ))
+                  )}
+                  {savedAddresses.length > 0 && (
+                    <button
+                      onClick={() => setIsLocationModalOpen(true)}
+                      className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors mt-2`}
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span className="text-xs font-bold">Add New Address</span>
+                    </button>
                   )}
                 </div>
               )}
@@ -319,7 +347,7 @@ function AccountContent() {
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] pb-24 md:hidden"></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] pb-24"></div>}>
       <AccountContent />
     </Suspense>
   );

@@ -62,6 +62,7 @@ function safeUser(u) {
     manager_type: u.manager_type,
     locationName: u.location_name,
     pincode: u.pincode,
+    landmark: u.landmark,
     latitude: u.latitude ? parseFloat(u.latitude) : null,
     longitude: u.longitude ? parseFloat(u.longitude) : null
   };
@@ -644,6 +645,7 @@ router.put(
   [
     body("locationName").notEmpty().withMessage("Location name is required"),
     body("pincode").optional(),
+    body("landmark").optional(),
     body("latitude").optional().isFloat(),
     body("longitude").optional().isFloat(),
   ],
@@ -651,18 +653,19 @@ router.put(
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ error: errors.array()[0].msg });
 
-    const { locationName, pincode, latitude, longitude } = req.body;
+    const { locationName, pincode, landmark, latitude, longitude } = req.body;
     try {
       const { rows } = await pool.query(
         `UPDATE users SET 
            location_name = $1, 
            pincode = $2, 
-           latitude = $3, 
-           longitude = $4,
+           landmark = $3,
+           latitude = $4, 
+           longitude = $5,
            updated_at = NOW()
-         WHERE id = $5 AND is_active = TRUE 
+         WHERE id = $6 AND is_active = TRUE 
          RETURNING *`,
-        [locationName, pincode || null, latitude || null, longitude || null, req.user.id]
+        [locationName, pincode || null, landmark || null, latitude || null, longitude || null, req.user.id]
       );
 
       if (!rows.length) return res.status(404).json({ error: "User not found." });
@@ -687,6 +690,7 @@ router.put(
         name         TEXT NOT NULL,
         full_address TEXT,
         pincode      TEXT,
+        landmark     TEXT,
         latitude     DECIMAL(10, 7),
         longitude    DECIMAL(10, 7),
         created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -707,7 +711,7 @@ router.put(
 router.get("/me/saved-addresses", authenticate, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT id, name, full_address, pincode, latitude, longitude, created_at
+      `SELECT id, name, full_address, pincode, landmark, latitude, longitude, created_at
          FROM user_saved_addresses
         WHERE user_id = $1
         ORDER BY created_at DESC`,
@@ -737,13 +741,13 @@ router.post(
     if (!errors.isEmpty())
       return res.status(400).json({ error: errors.array()[0].msg });
 
-    const { name, fullAddress, pincode, latitude, longitude } = req.body;
+    const { name, fullAddress, pincode, landmark, latitude, longitude } = req.body;
     try {
-      // Remove duplicate by name + pincode for this user
+      // Remove duplicate by name + pincode + landmark for this user
       await pool.query(
         `DELETE FROM user_saved_addresses
-          WHERE user_id = $1 AND name = $2 AND COALESCE(pincode,'') = COALESCE($3,'')`,
-        [req.user.id, name, pincode || ""]
+          WHERE user_id = $1 AND name = $2 AND COALESCE(pincode,'') = COALESCE($3,'') AND COALESCE(landmark,'') = COALESCE($4,'')`,
+        [req.user.id, name, pincode || "", landmark || ""]
       );
 
       // Enforce max 10 saved addresses — delete oldest if over limit
@@ -761,14 +765,15 @@ router.post(
       );
 
       const { rows } = await pool.query(
-        `INSERT INTO user_saved_addresses (user_id, name, full_address, pincode, latitude, longitude)
-         VALUES ($1, $2, $3, $4, $5, $6)
-         RETURNING id, name, full_address, pincode, latitude, longitude, created_at`,
+        `INSERT INTO user_saved_addresses (user_id, name, full_address, pincode, landmark, latitude, longitude)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         RETURNING id, name, full_address, pincode, landmark, latitude, longitude, created_at`,
         [
           req.user.id,
           name,
           fullAddress || null,
           pincode || null,
+          landmark || null,
           latitude || null,
           longitude || null,
         ]

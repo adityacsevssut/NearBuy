@@ -24,16 +24,16 @@ router.get("/", async (req, res) => {
 
 // POST new service center
 router.post("/", authenticate, isDev, async (req, res) => {
-  const { name, pincode, latitude, longitude, radius_km } = req.body;
+  const { name, landmark, pincode, latitude, longitude, radius_km } = req.body;
   if (!name || !pincode || !latitude || !longitude) {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
   try {
     const { rows } = await pool.query(
-      `INSERT INTO service_centers (name, pincode, latitude, longitude, radius_km)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [name, pincode, latitude, longitude, radius_km || 8.0]
+      `INSERT INTO service_centers (name, landmark, pincode, latitude, longitude, radius_km)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [name, landmark || null, pincode, latitude, longitude, radius_km || 8.0]
     );
     res.json({ message: "Service center created successfully", center: rows[0] });
   } catch (err) {

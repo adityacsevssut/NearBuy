@@ -98,9 +98,9 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
                 const data = await res.json();
                 const pin = data.address?.postcode || "";
                 const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-                setLocation(name, pin, lat, lon);
+                setLocation(name, pin, "", lat, lon);
               } catch {
-                setLocation("Current Location", "", lat, lon);
+                setLocation("Current Location", "", "", lat, lon);
               }
             },
             (err) => {
@@ -163,10 +163,10 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           const data = await res.json();
           const pin = data.address?.postcode || "";
           const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-          setLocation(name, pin, lat, lon);
+          setLocation(name, pin, "", lat, lon);
           toast.success("Location detected!", { id: toastId });
         } catch {
-          setLocation("Current Location", "", lat, lon);
+          setLocation("Current Location", "", "", lat, lon);
           toast.success("Location detected!", { id: toastId });
         } finally {
           setIsDetecting(false);
@@ -262,6 +262,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }
 
   if (status === "denied") {
+    const activeCenters = centers.filter((c: any) => c.is_active !== false);
     return (
       <div className="min-h-screen bg-orange-50/40 flex flex-col pt-16">
         <Navbar />
@@ -275,32 +276,36 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               <div className="absolute inset-0 rounded-full border border-red-500/20 animate-ping opacity-75"></div>
               <ShieldAlert className="w-10 h-10 text-red-500" />
             </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Service not available at your address</h1>
-            <p className="text-gray-500 mb-4 leading-relaxed font-medium text-[15px]">
-              We are currently expanding our operational zones. We will be available in your area soon!
+            <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Out of Service Zone</h1>
+            <p className="text-gray-500 mb-6 leading-relaxed font-medium text-[15px]">
+              We currently don&apos;t deliver to your area. But we&apos;re available at these locations:
             </p>
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 border border-gray-100 text-left text-xs text-gray-600 font-mono overflow-auto">
-              <p className="font-bold mb-1 text-gray-800">Debug Information:</p>
-              <p>User Lat/Lon: {latitude?.toFixed(4) || "null"}, {longitude?.toFixed(4) || "null"}</p>
-              {centers.length > 0 ? (
-                <div className="mt-2 space-y-2">
-                  <p>Active Centers:</p>
-                  {centers.map(c => {
-                    const dist = (latitude && longitude) ? getDistance(latitude, longitude, parseFloat(c.latitude), parseFloat(c.longitude)).toFixed(2) : "N/A";
-                    return (
-                      <div key={c.id} className="pl-2 border-l-2 border-orange-200">
-                        <p>{c.name} (PIN: {c.pincode})</p>
-                        <p>Center: {parseFloat(c.latitude).toFixed(4)}, {parseFloat(c.longitude).toFixed(4)}</p>
-                        <p>Radius: {c.radius_km}km</p>
-                        <p className="font-bold text-red-500">Distance: {dist}km</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <p>No active centers found in database.</p>
-              )}
-            </div>
+
+            {/* Available landmarks / centers */}
+            {activeCenters.length > 0 && (
+              <div className="mb-6 space-y-2 text-left">
+                {activeCenters.map((c: any) => (
+                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 bg-orange-50 border border-orange-200 rounded-2xl">
+                    <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
+                      <MapPin className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      {c.landmark ? (
+                        <>
+                          <p className="font-black text-gray-900 text-[15px] leading-tight truncate">{c.landmark}</p>
+                          <p className="text-xs text-gray-500 font-medium truncate">{c.name} · PIN {c.pincode}</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-black text-gray-900 text-[15px] leading-tight truncate">{c.name}</p>
+                          <p className="text-xs text-gray-500 font-medium">PIN {c.pincode}</p>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
             
             <div className="space-y-3">
               <button 
@@ -325,6 +330,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       </div>
     );
   }
+
 
   return <>{children}</>;
 }

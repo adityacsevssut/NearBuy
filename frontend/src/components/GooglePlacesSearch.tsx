@@ -8,6 +8,7 @@ export interface ResolvedGoogleAddress {
   name: string;
   fullAddress: string;
   pincode: string;
+  landmark?: string;
   lat: number;
   lng: number;
   isPostcode?: boolean;
@@ -133,6 +134,7 @@ export default function GooglePlacesSearch({
           name: props.name || props.city || p.structured_formatting.main_text,
           fullAddress: p.description,
           pincode: props.postcode || "",
+          landmark: "",
           lat: coords[1],
           lng: coords[0],
           isPostcode: p.isPhotonPostcode
@@ -168,6 +170,7 @@ export default function GooglePlacesSearch({
           name: result.name || p.description.split(",")[0],
           fullAddress: result.formatted_address || p.description,
           pincode,
+          landmark: "",
           lat,
           lng,
           isPostcode,

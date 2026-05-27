@@ -32,6 +32,7 @@ export default function ManageLocationRangeModal({
     latitude: "",
     longitude: "",
     pincode: "",
+    landmark: "",
   });
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export default function ManageLocationRangeModal({
         latitude: profile.latitude?.toString() || "",
         longitude: profile.longitude?.toString() || "",
         pincode: profile.pincode || "",
+        landmark: profile.landmark || "",
       });
     }
   }, [profile]);
@@ -364,15 +366,28 @@ export default function ManageLocationRangeModal({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode</label>
-              <input 
-                type="text"
-                value={formData.pincode}
-                onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
-                placeholder="768018"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Landmark</label>
+                <input 
+                  type="text"
+                  value={formData.landmark}
+                  onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                  placeholder="e.g. Pulaha Hall"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode</label>
+                <input 
+                  type="text"
+                  value={formData.pincode}
+                  onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                  placeholder="768018"
+                />
+              </div>
             </div>
           </div>
 

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Plus, Pencil, Trash2, X, Check, Eye, EyeOff,
   ChevronRight, Store, Pill, ShoppingBag, Shield, AlertTriangle,
-  Mail, Lock, Tag, RefreshCw, UserCircle, LogOut, MapPin, Search, Navigation
+  Mail, Lock, Tag, RefreshCw, UserCircle, LogOut, MapPin, Search, Navigation, Building2
 } from "lucide-react";
 import toast from "react-hot-toast";
 import dynamic from 'next/dynamic';
@@ -42,6 +42,7 @@ interface Manager {
 interface ServiceCenter {
   id: string;
   name: string;
+  landmark: string | null;
   pincode: string;
   latitude: string;
   longitude: string;
@@ -90,6 +91,7 @@ export default function DevDashboard() {
   const [selectedCenter, setSelectedCenter] = useState<any>(null);
   const [fallbackMapCenter, setFallbackMapCenter] = useState<{lat: number, lon: number, name: string} | null>(null);
   const [centerRadius, setCenterRadius] = useState("8.0");
+  const [centerLandmark, setCenterLandmark] = useState("");
   const [savingCenter, setSavingCenter] = useState(false);
 
   // Guard: only the developer
@@ -243,6 +245,7 @@ export default function DevDashboard() {
     try {
       const payload = {
         name: selectedCenter.name,
+        landmark: centerLandmark.trim() || undefined,
         pincode: centerPincode.trim(),
         latitude: lat,
         longitude: lon,
@@ -258,6 +261,7 @@ export default function DevDashboard() {
         toast.success("Service Center added successfully!");
         setCenterModalOpen(false);
         setCenterPincode("");
+        setCenterLandmark("");
         setSearchResults([]);
         setSelectedCenter(null);
         setFallbackMapCenter(null);
@@ -453,7 +457,7 @@ export default function DevDashboard() {
                   </div>
                 </div>
                 <button
-                  onClick={() => { setCenterModalOpen(true); setSelectedCenter(null); setSearchResults([]); setCenterPincode(""); setFallbackMapCenter(null); }}
+                  onClick={() => { setCenterModalOpen(true); setSelectedCenter(null); setSearchResults([]); setCenterPincode(""); setCenterLandmark(""); setFallbackMapCenter(null); }}
                   className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-400 hover:to-rose-500 rounded-xl text-white text-sm font-bold shadow-md hover:-translate-y-0.5 transition-all"
                 >
                   <Plus className="w-4 h-4" />
@@ -487,6 +491,7 @@ export default function DevDashboard() {
                           </div>
                           <div>
                             <h3 className="font-bold text-gray-900 leading-tight">{c.name}</h3>
+                            {c.landmark && <p className="text-xs font-bold text-pink-600 mt-0.5">{c.landmark}</p>}
                             <p className="text-xs text-gray-500 font-medium">PIN: {c.pincode}</p>
                           </div>
                         </div>
@@ -719,9 +724,9 @@ export default function DevDashboard() {
                 </button>
               </div>
 
-              <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
+              <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden custom-scrollbar">
                 {/* Left Panel: Search and List */}
-                <div className="w-full md:w-1/3 bg-white border-r border-gray-100 p-5 flex flex-col h-full overflow-y-auto custom-scrollbar">
+                <div className="w-full md:w-1/3 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-5 flex flex-col md:h-full md:overflow-y-auto custom-scrollbar shrink-0">
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search Location</label>
                   <div className="mb-4">
                     <GooglePlacesSearch 
@@ -768,26 +773,42 @@ export default function DevDashboard() {
 
                 </div>
 
-                {/* Right Panel: Map and Confirmation */}
-                <div className="w-full md:w-2/3 bg-gray-50 flex flex-col h-full relative">
-                  {fallbackMapCenter ? (
-                    <div className="flex-1 relative p-2">
-                      <div className="w-full h-full bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden relative">
-                         <DevMap lat={fallbackMapCenter.lat} lon={fallbackMapCenter.lon} title={fallbackMapCenter.name} />
+                {/* Right Panel: Map + Config */}
+                <div className="w-full md:w-2/3 bg-gray-50 flex flex-col md:h-full md:overflow-hidden shrink-0">
+
+                  {/* Map */}
+                  <div className="relative bg-gray-100 w-full" style={{ height: "300px", minHeight: "300px", flexShrink: 0 }}>
+                    {fallbackMapCenter ? (
+                      <div className="absolute inset-2 bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden">
+                        <DevMap lat={fallbackMapCenter.lat} lon={fallbackMapCenter.lon} title={fallbackMapCenter.name} />
                       </div>
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                       <p className="text-gray-400 font-bold uppercase tracking-widest text-sm flex items-center gap-2">
-                         <Navigation className="w-4 h-4" /> Map Preview
-                       </p>
-                    </div>
-                  )}
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <p className="text-gray-400 font-bold uppercase tracking-widest text-sm flex items-center gap-2">
+                          <Navigation className="w-4 h-4" /> Map Preview
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Bottom configuration bar */}
                   {selectedCenter && (
-                    <div className="bg-white border-t border-gray-200 p-5 shrink-0 flex flex-col sm:flex-row gap-4 items-end shadow-lg relative z-20">
-                      <div className="flex-1 w-full">
+                    <div className="bg-white border-t border-gray-200 p-5 flex flex-col sm:flex-row flex-wrap gap-4 items-end shadow-lg relative z-20 md:shrink-0">
+                      <div className="flex-1 w-full min-w-[160px]">
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Center Landmark / Name</label>
+                        <div className="relative">
+                          <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
+                          <input 
+                            type="text"
+                            value={centerLandmark}
+                            onChange={(e) => setCenterLandmark(e.target.value)}
+                            placeholder="E.g. Pulaha Hall, VSSUT Campus"
+                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-medium text-gray-900 transition-all"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex-1 w-full min-w-[140px]">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pincode</label>
                         <div className="relative">
                           <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
@@ -801,7 +822,7 @@ export default function DevDashboard() {
                         </div>
                       </div>
 
-                      <div className="flex-1 w-full">
+                      <div className="flex-1 w-full min-w-[140px]">
                         <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Delivery Radius (km)</label>
                         <div className="relative">
                           <Navigation className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />

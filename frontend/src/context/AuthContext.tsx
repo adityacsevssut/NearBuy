@@ -16,6 +16,7 @@ interface AuthUser {
   manager_type?: string;
   locationName?: string;
   pincode?: string;
+  landmark?: string;
   latitude?: number | null;
   longitude?: number | null;
 }

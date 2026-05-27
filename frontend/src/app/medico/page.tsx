@@ -50,7 +50,7 @@ export default function MedicoPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
-  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
 
   const filtered = products
@@ -96,7 +96,7 @@ export default function MedicoPage() {
                     <span className="font-black text-gray-900 text-lg tracking-tight leading-none truncate">Delivery Location</span>
                     <ChevronDown className="w-4 h-4 text-emerald-600 shrink-0" />
                   </div>
-                  <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
+                  <span className="text-[12px] text-gray-500 font-medium leading-tight truncate">{landmark ? `${landmark}, ${locationName}` : locationName}{pincode ? ` · ${pincode}` : ''}</span>
                 </div>
               </div>
               <div className="w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center shadow-sm shrink-0 ml-2">

@@ -223,7 +223,7 @@ export default function HomePage() {
   const [reqModal,    setReqModal]    = useState(false);
   const [reqType,     setReqType]     = useState<"student"|"vendor">("vendor");
 
-  const { locationName, pincode, latitude, longitude, setIsLocationModalOpen, activeCenter } = useLocationContext();
+  const { locationName, landmark, pincode, latitude, longitude, setIsLocationModalOpen, activeCenter } = useLocationContext();
   const { restaurantWishlist, toggleRestaurant } = useWishlist();
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
@@ -293,7 +293,7 @@ export default function HomePage() {
                 <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left">
                   <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Deliver to</span>
                   <span className="text-[13px] font-black text-gray-900 flex items-center gap-0.5 mt-0.5">
-                    <span className="truncate max-w-[160px] sm:max-w-xs">{locationName}</span>
+                    <span className="truncate max-w-[160px] sm:max-w-xs">{landmark ? `${landmark}, ${locationName}` : locationName}</span>
                     <ChevronDown className="w-3.5 h-3.5 text-orange-500 shrink-0 ml-0.5" />
                   </span>
                 </div>

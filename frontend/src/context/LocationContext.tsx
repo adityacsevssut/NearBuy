@@ -10,6 +10,7 @@ export interface SavedAddress {
   name: string;
   full_address: string | null;
   pincode: string | null;
+  landmark: string | null;
   latitude: number | null;
   longitude: number | null;
   created_at: string;
@@ -18,9 +19,10 @@ export interface SavedAddress {
 interface LocationContextType {
   locationName: string;
   pincode: string;
+  landmark: string;
   latitude: number | null;
   longitude: number | null;
-  setLocation: (name: string, pin: string, lat?: number, lon?: number) => void;
+  setLocation: (name: string, pin: string, landmark?: string, lat?: number, lon?: number) => void;
   fetchExactLocation: () => Promise<void>; // kept for interface compat
   isFetchingLocation: boolean;
   isLocationModalOpen: boolean;
@@ -69,6 +71,7 @@ function lsSetSavedAddresses(addresses: SavedAddress[]) {
 export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locationName, setLocationName] = useState("Select Location");
   const [pincode, setPincode] = useState("");
+  const [landmark, setLandmark] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isFetchingLocation] = useState(false);
@@ -84,10 +87,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedName = localStorage.getItem("nearbuy_locationName");
     const savedPin = localStorage.getItem("nearbuy_pincode");
+    const savedLandmark = localStorage.getItem("nearbuy_landmark");
     const savedLat = localStorage.getItem("nearbuy_latitude");
     const savedLon = localStorage.getItem("nearbuy_longitude");
     if (savedName) setLocationName(savedName);
     if (savedPin) setPincode(savedPin);
+    if (savedLandmark) setLandmark(savedLandmark);
     if (savedLat) setLatitude(parseFloat(savedLat));
     if (savedLon) setLongitude(parseFloat(savedLon));
     // Load saved addresses from localStorage (offline/pre-login cache)
@@ -106,14 +111,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         }
         const name = user.locationName || "Select Location";
         const pin = user.pincode || "";
+        const lmk = user.landmark || "";
         const lat = user.latitude != null ? parseFloat(user.latitude.toString()) : null;
         const lon = user.longitude != null ? parseFloat(user.longitude.toString()) : null;
         setLocationName(name);
         setPincode(pin);
+        setLandmark(lmk);
         setLatitude(lat);
         setLongitude(lon);
         localStorage.setItem("nearbuy_locationName", name);
         localStorage.setItem("nearbuy_pincode", pin);
+        localStorage.setItem("nearbuy_landmark", lmk);
         localStorage.setItem("nearbuy_location_db_ts", new Date().toISOString());
         localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
         if (lat !== null) localStorage.setItem("nearbuy_latitude", lat.toString());
@@ -177,24 +185,26 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   }, [latitude, longitude, pincode, apiBase]);
 
   // ── Sync active location to backend ────────────────────────────────────────
-  const syncLocationToBackend = async (name: string, pin: string, lat?: number, lon?: number) => {
+  const syncLocationToBackend = async (name: string, pin: string, lmk?: string, lat?: number, lon?: number) => {
     if (!isLoggedIn || !accessToken) return;
     try {
       await fetch(`${apiBase}/api/auth/me/location`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${accessToken}` },
-        body: JSON.stringify({ locationName: name, pincode: pin, latitude: lat, longitude: lon }),
+        body: JSON.stringify({ locationName: name, pincode: pin, landmark: lmk, latitude: lat, longitude: lon }),
       });
     } catch (err) {
       console.error("Failed to sync location to backend", err);
     }
   };
 
-  const setLocation = (name: string, pin: string, lat?: number, lon?: number) => {
+  const setLocation = (name: string, pin: string, lmk?: string, lat?: number, lon?: number) => {
     setLocationName(name);
     setPincode(pin);
+    setLandmark(lmk || "");
     localStorage.setItem("nearbuy_locationName", name);
     localStorage.setItem("nearbuy_pincode", pin);
+    localStorage.setItem("nearbuy_landmark", lmk || "");
     if (lat !== undefined && lat !== null) {
       setLatitude(lat);
       localStorage.setItem("nearbuy_latitude", lat.toString());
@@ -210,7 +220,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("nearbuy_longitude");
     }
     localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
-    syncLocationToBackend(name, pin, lat, lon);
+    syncLocationToBackend(name, pin, lmk, lat, lon);
   };
 
   // ── Add a saved address (DB + localStorage) ─────────────────────────────────
@@ -223,7 +233,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         created_at: new Date().toISOString(),
       };
       const optimistic = [tempEntry, ...savedAddresses.filter(
-        (a) => !(a.name === addr.name && a.pincode === addr.pincode)
+        (a) => !(a.name === addr.name && (a.pincode || "") === (addr.pincode || "") && (a.landmark || "") === (addr.landmark || ""))
       )].slice(0, 10);
       setSavedAddresses(optimistic);
       lsSetSavedAddresses(optimistic);
@@ -238,6 +248,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
             name: addr.name,
             fullAddress: addr.full_address,
             pincode: addr.pincode,
+            landmark: addr.landmark,
             latitude: addr.latitude,
             longitude: addr.longitude,
           }),
@@ -283,6 +294,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       value={{
         locationName,
         pincode,
+        landmark,
         latitude,
         longitude,
         setLocation,

@@ -8,7 +8,7 @@ import {
   MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, Code2,
   CreditCard, Bell, Heart, ShoppingBag, Calendar, Clock, Mail, MessageCircle,
   QrCode, Globe, Percent, Star, Users, Trash2, Pencil, ChevronRight, Menu,
-  UtensilsCrossed, Pill
+  UtensilsCrossed, Pill, User as UserIcon
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
@@ -28,9 +28,10 @@ export default function Navbar() {
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const { user, isLoggedIn, logout, openLoginModal } = useAuth();
-  const { locationName, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, landmark, pincode, setIsLocationModalOpen, activeCenter } = useLocationContext();
   const { restaurantCount: cartCount } = useCart();
   const pathname = usePathname();
+  const router = useRouter();
 
   // Close menus on outside click
   useEffect(() => {
@@ -291,19 +292,28 @@ export default function Navbar() {
         </div>
 
         {/* ── Action Icons ── */}
-        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0 ml-auto md:ml-0">
+        <div className="flex items-center gap-1 md:gap-2 shrink ml-auto md:ml-0 min-w-0">
           <button
             id="location-picker"
             onClick={() => setIsLocationModalOpen(true)}
-            className={`hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-full
-              border border-gray-200 hover:bg-gray-50 bg-white text-gray-700
-              transition-all duration-200 group max-w-[200px]`}
+            className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl
+              bg-gray-100/80 hover:bg-gray-200 text-gray-700
+              transition-all duration-200 group min-w-0 shrink max-w-[200px] xl:max-w-[260px] border border-gray-200/50 hover:border-gray-300`}
           >
-            <MapPin className="w-3.5 h-3.5 text-gray-500 shrink-0" />
-            <span className="font-semibold text-xs tracking-tight truncate">
-              {locationName}
-            </span>
-            <ChevronDown className="w-3 h-3 text-gray-400 group-hover:text-gray-600 transition-colors shrink-0" />
+            <div className="flex items-center gap-2 flex-1 min-w-0 pr-1">
+              <MapPin className="w-[18px] h-[18px] text-orange-500 shrink-0" />
+              <div className="flex flex-col items-start min-w-0 leading-tight">
+                <span className="font-bold text-[9px] tracking-widest text-slate-400 uppercase">
+                  {activeCenter ? (activeCenter.landmark || activeCenter.name) : "Deliver To"}
+                </span>
+                <div className="flex items-center gap-1 w-full min-w-0">
+                  <span className="font-black text-[13px] text-gray-900 tracking-tight truncate block min-w-0">
+                    {landmark ? `${landmark}, ${locationName}` : locationName}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 shrink-0" />
+                </div>
+              </div>
+            </div>
           </button>
 
           {/* Cart – hidden on mobile (lives in hamburger) */}
@@ -394,137 +404,23 @@ export default function Navbar() {
             </AnimatePresence>
           </div>
 
-          {/* User Menu (Desktop) */}
+          {/* User Account Button (Desktop) */}
           {isLoggedIn ? (
-            <div className="relative ml-1 hidden md:block" ref={userMenuRef}>
-              <button
-                id="user-avatar-btn"
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200"
-              >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gradient-to-tr ${theme.avatarBg} ${primaryText} text-xs font-bold`}>
-                  {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
-                </div>
-                <span className="hidden sm:block text-sm font-semibold text-gray-700">{user?.firstName || user?.email?.split('@')[0]}</span>
-                <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform duration-200 ${userMenuOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              <AnimatePresence>
-                {userMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                    transition={{ duration: 0.18 }}
-                    className="absolute right-0 top-full mt-2 bg-[#F8F9FA] rounded-[32px] shadow-[0_16px_60px_rgba(0,0,0,0.1)] border border-gray-100 w-[340px] z-50 overflow-hidden max-h-[85vh] overflow-y-auto custom-scrollbar"
-                  >
-                    {/* Header bg matches mobile */}
-                    <div className={`bg-gradient-to-br ${theme.gradient} pt-5 pb-16 px-4 relative`}>
-                      <div className="absolute top-0 right-0 -mr-16 -mt-16 w-40 h-40 rounded-full border-[20px] border-white/10"></div>
-                      <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-28 h-28 rounded-full border-[12px] border-white/10"></div>
-                    </div>
-
-                    <div className="px-4 space-y-5 -mt-12 relative z-20 pb-5">
-                      {/* Floating Profile Card */}
-                      <div className="bg-white rounded-3xl p-4 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50/50">
-                        <div className="relative">
-                          <div className={`w-14 h-14 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white shadow-sm rotate-3`}>
-                            <span className={`text-xl font-black ${theme.textPrimary} -rotate-3`}>
-                              {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
-                            </span>
-                          </div>
-                          <button className="absolute -bottom-2 -right-2 bg-gray-800 p-1 rounded-full border-2 border-white text-white hover:bg-black transition-colors">
-                            <Pencil className="w-2.5 h-2.5" />
-                          </button>
-                        </div>
-
-                        <div className="ml-4 flex-1 min-w-0">
-                          <h2 className="text-[17px] font-black text-gray-800 tracking-tight leading-tight truncate">
-                            {user?.firstName || "NearBuy"} {user?.lastName || "User"}
-                          </h2>
-                          <p className="text-[12px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
-                        </div>
-                      </div>
-
-                      {/* Action Pills */}
-                      <div className="flex gap-2 justify-between">
-                        <ActionPill icon={CreditCard} label="Wallet" color="text-blue-500" bg="bg-blue-50" />
-                        <ActionPill icon={Bell} label="Alerts" color="text-purple-500" bg="bg-purple-50" />
-                        <ActionPill icon={Heart} label="Saved" color="text-rose-500" bg="bg-rose-50" />
-                      </div>
-
-                      {/* Section: Activity */}
-                      <div className="space-y-2">
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">My Activity</h3>
-                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-                          <ModernRow icon={ShoppingBag} label="Purchase History" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={MapPin} label="Saved Addresses" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Calendar} label="Active Subscriptions" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Clock} label="Buy Again" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                        </div>
-                      </div>
-
-                      {/* Section: Help Center */}
-                      <div className="space-y-2">
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Help Center</h3>
-                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-                          <ModernRow icon={Mail} label="Contact Support" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={MessageCircle} label="Chat on WhatsApp" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                        </div>
-                      </div>
-
-                      {/* Section: Settings */}
-                      <div className="space-y-2">
-                        <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Preferences & More</h3>
-                        <div className="bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-                          <ModernRow icon={QrCode} label="My QR Code" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Percent} label="Exclusive Offers" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Users} label="Invite Friends" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Star} label="Rate NearBuy" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                          <ModernRow icon={Globe} label="App Language" theme={theme} onClick={() => setUserMenuOpen(false)} />
-                        </div>
-                      </div>
-
-                      {/* Developer Section */}
-                      {user?.email === DEV_EMAIL && (
-                        <div className="space-y-2">
-                          <h3 className="text-[10px] font-black text-violet-400 uppercase tracking-widest px-2">⚡ Developer</h3>
-                          <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-violet-100 overflow-hidden py-1">
-                            <Link
-                              href="/dev"
-                              onClick={() => setUserMenuOpen(false)}
-                              className="w-full flex items-center justify-between px-4 py-3 hover:bg-violet-100/50 transition-colors group"
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
-                                  <Code2 className="w-4 h-4 text-violet-600" />
-                                </div>
-                                <div>
-                                  <span className="text-[13.5px] font-bold text-gray-700 group-hover:text-gray-900 block leading-tight">Dev Dashboard</span>
-                                  <span className="text-[10px] text-violet-400 font-medium leading-tight">Manage managers & platform</span>
-                                </div>
-                              </div>
-                              <ChevronRight className="w-4 h-4 text-violet-300 group-hover:translate-x-0.5 transition-all" />
-                            </Link>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Danger Zone */}
-                      <div className={`bg-white rounded-2xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden`}>
-                        <button
-                          onClick={() => { logout(); setUserMenuOpen(false); }}
-                          className={`w-full flex items-center justify-center gap-2 px-4 py-3 ${theme.dangerText} font-bold ${theme.dangerHoverBg} transition-colors`}
-                        >
-                          <LogOut className="w-4 h-4" /> Log Out
-                        </button>
-                      </div>
-
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+            <button
+              onClick={() => {
+                if (pathname === '/account') {
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                  router.push('/account');
+                }
+              }}
+              className="hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 group"
+            >
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gray-100 group-hover:bg-gray-200 transition-colors`}>
+                <UserIcon className="w-4 h-4 text-gray-600" />
+              </div>
+              <span className="text-sm font-bold text-gray-700">Account</span>
+            </button>
           ) : (
             <button
               id="login-signup-btn"
@@ -543,9 +439,9 @@ export default function Navbar() {
 }
 
 // Subcomponents matching the mobile Account Page style
-function ActionPill({ icon: Icon, label, color, bg }: { icon: any, label: string, color: string, bg: string }) {
+function ActionPill({ icon: Icon, label, color, bg, onClick }: { icon: any, label: string, color: string, bg: string, onClick?: () => void }) {
   return (
-    <button className="flex-1 bg-white py-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 transition-transform active:scale-95">
+    <button onClick={onClick} className="flex-1 bg-white py-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 transition-transform active:scale-95">
       <div className={`p-2 rounded-xl ${bg}`}>
         <Icon className={`w-4 h-4 ${color}`} />
       </div>

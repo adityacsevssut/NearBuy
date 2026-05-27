@@ -76,6 +76,7 @@ export default function LocationModal() {
             name,
             fullAddress,
             pincode,
+            landmark: "",
             lat,
             lng,
           });
@@ -100,7 +101,7 @@ export default function LocationModal() {
               const uniqueAddress = Array.from(new Set(fullAddressComponents)).join(", ");
               const fullAddress = uniqueAddress || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
               
-              setResolvedAddress({ name, fullAddress, pincode, lat, lng });
+              setResolvedAddress({ name, fullAddress, pincode, landmark: "", lat, lng });
               resolved = true;
            }
         }
@@ -115,6 +116,7 @@ export default function LocationModal() {
         name: "My Location",
         fullAddress: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
         pincode: "",
+        landmark: "",
         lat,
         lng,
       });
@@ -159,11 +161,12 @@ export default function LocationModal() {
     if (!resolvedAddress) return;
     setIsSaving(true);
     try {
-      setLocation(resolvedAddress.name, resolvedAddress.pincode, resolvedAddress.lat, resolvedAddress.lng);
+      setLocation(resolvedAddress.name, resolvedAddress.pincode, resolvedAddress.landmark || "", resolvedAddress.lat, resolvedAddress.lng);
       addSavedAddress({
         name: resolvedAddress.name,
         full_address: resolvedAddress.fullAddress,
         pincode: resolvedAddress.pincode,
+        landmark: resolvedAddress.landmark || "",
         latitude: resolvedAddress.lat,
         longitude: resolvedAddress.lng,
       });
@@ -180,6 +183,7 @@ export default function LocationModal() {
     setLocation(
       saved.name,
       saved.pincode || "",
+      saved.landmark || "",
       saved.latitude != null ? parseFloat(String(saved.latitude)) : undefined,
       saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined
     );
@@ -214,7 +218,7 @@ export default function LocationModal() {
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
               className={[
                 "pointer-events-auto w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden",
-                view === "map" ? "h-[78dvh]" : "max-h-[88dvh]",
+                view === "map" ? "h-[85dvh]" : "max-h-[88dvh]",
               ].join(" ")}
             >
 
@@ -298,7 +302,7 @@ export default function LocationModal() {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="text-sm font-black text-gray-800 leading-tight truncate group-hover:text-orange-700">
-                                {addr.name}
+                                {addr.landmark ? addr.landmark : addr.name}
                               </p>
                               <div className="flex items-center gap-1.5 mt-0.5">
                                 {addr.pincode && (
@@ -307,7 +311,7 @@ export default function LocationModal() {
                                   </span>
                                 )}
                                 <p className="text-[11px] text-gray-400 truncate">
-                                  {(addr.full_address || "").split(",").slice(0, 2).join(",")}
+                                  {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
                                 </p>
                               </div>
                             </div>
@@ -362,18 +366,40 @@ export default function LocationModal() {
                         <div className="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
                           <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={(lat, lng) => { setMapCoords({ lat, lng }); resolveAddress(lat, lng); }} />
                         </div>
-                        <div className="flex items-start gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
-                          <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0">
-                            <MapPin className="w-4 h-4 text-white" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-black text-gray-900 text-[15px] leading-tight">{resolvedAddress.name}</p>
-                            {resolvedAddress.pincode && (
-                              <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-bold rounded-full">
-                                📮 PIN: {resolvedAddress.pincode}
-                              </span>
-                            )}
-                            <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                        <div className="flex flex-col gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+                          <div className="flex items-start gap-3">
+                            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                              <MapPin className="w-4 h-4 text-white" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-black text-gray-900 text-[15px] leading-tight">{resolvedAddress.name}</p>
+                              <p className="text-[11px] text-gray-500 font-medium mt-1 mb-3 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                              <div className="space-y-2">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-orange-700 font-bold w-16">PIN:</span>
+                                  <input
+                                    type="text"
+                                    maxLength={6}
+                                    value={resolvedAddress.pincode}
+                                    onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
+                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1"
+                                    placeholder="Auto-fetched or enter PIN"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-orange-700 font-bold w-16">Landmark:</span>
+                                  <input
+                                    type="text"
+                                    value={resolvedAddress.landmark || ""}
+                                    onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
+                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1"
+                                    placeholder="E.g. Plot Name, Hostel Name"
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                         <button
@@ -428,19 +454,32 @@ export default function LocationModal() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-black text-gray-900 text-[16px] leading-tight">{resolvedAddress.name}</p>
-                            <div className="flex items-center gap-2 mt-1.5">
-                              <span className="text-xs text-orange-600 font-bold">PIN:</span>
-                              <input
-                                type="text"
-                                maxLength={6}
-                                value={resolvedAddress.pincode}
-                                onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                className="px-2 py-0.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors w-24"
-                                placeholder="Enter pincode"
-                                onClick={(e) => e.stopPropagation()}
-                              />
+                            <p className="text-[11px] text-gray-400 font-medium mt-1 mb-2 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-orange-600 font-bold w-16">PIN:</span>
+                                <input
+                                  type="text"
+                                  maxLength={6}
+                                  value={resolvedAddress.pincode}
+                                  onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
+                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1"
+                                  placeholder="Auto-fetched or enter PIN"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-orange-600 font-bold w-16">Landmark:</span>
+                                <input
+                                  type="text"
+                                  value={resolvedAddress.landmark || ""}
+                                  onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
+                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1"
+                                  placeholder="E.g. Plot Name, Hostel Name"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                              </div>
                             </div>
-                            <p className="text-[11px] text-gray-400 font-medium mt-1 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
                           </div>
                         </div>
                         <button
