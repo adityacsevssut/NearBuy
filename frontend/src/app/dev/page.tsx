@@ -780,7 +780,17 @@ export default function DevDashboard() {
                   <div className="relative bg-gray-100 w-full" style={{ height: "300px", minHeight: "300px", flexShrink: 0 }}>
                     {fallbackMapCenter ? (
                       <div className="absolute inset-2 bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden">
-                        <DevMap lat={fallbackMapCenter.lat} lon={fallbackMapCenter.lon} title={fallbackMapCenter.name} />
+                        <DevMap 
+                          lat={fallbackMapCenter.lat} 
+                          lon={fallbackMapCenter.lon} 
+                          title={fallbackMapCenter.name} 
+                          onLocationChange={(lat, lon) => {
+                            setFallbackMapCenter({ ...fallbackMapCenter, lat, lon });
+                            if (selectedCenter) {
+                              setSelectedCenter({ ...selectedCenter, lat, lon });
+                            }
+                          }}
+                        />
                       </div>
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center">

@@ -431,13 +431,13 @@ export default function LocationModal() {
                     </button>
                     <div>
                       <h2 className="text-[17px] font-black text-gray-900 tracking-tight">Confirm Your Location</h2>
-                      <p className="text-xs text-gray-500 font-medium">Tap map or drag pin to adjust</p>
+                      <p className="text-xs text-gray-500 font-medium">Drag the map to adjust your location</p>
                     </div>
                   </div>
                   <div className="flex-1 relative min-h-0">
                     {mapCoords && <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={handleMapMove} />}
                     <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-bold text-gray-600 pointer-events-none whitespace-nowrap">
-                      📍 Tap anywhere or drag pin to adjust
+                      📍 Drag the map to place the pin
                     </div>
                   </div>
                   <div className="shrink-0 bg-white border-t border-gray-100 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
