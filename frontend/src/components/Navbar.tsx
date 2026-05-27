@@ -209,90 +209,33 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* ── Universal Search ── */}
-        <div className="relative flex-1 hidden md:block max-w-md ml-4">
-          <div
-            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl border
-              transition-all duration-300 bg-gray-50 ${
-              searchFocused
-                ? `${isEssentials ? 'border-blue-400 ring-2 ring-blue-100' : isMedico ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-orange-400 ring-2 ring-orange-100'} bg-white`
-                : "border-gray-200 hover:border-gray-300"
-            }`}
+        {/* ── Desktop Quick Links ── */}
+        <div className="hidden md:flex items-center gap-3 ml-6">
+          <Link
+            href="/wishlist"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
           >
-            <Search
-              className={`w-4 h-4 flex-shrink-0 transition-colors ${
-                searchFocused ? (isEssentials ? 'text-blue-500' : isMedico ? 'text-emerald-500' : 'text-orange-500') : "text-gray-400"
-              }`}
-            />
-            <input
-              id="search-bar"
-              suppressHydrationWarning
-              type="text"
-              placeholder={isEssentials ? "Search for notebooks, chargers..." : isMedico ? "Search for medicines..." : "Search for Biryani, Pizza..."}
-              className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 outline-none h-6"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-              onBlur={() => setTimeout(() => setSearchFocused(false), 150)}
-            />
-            {searchQuery && (
-              <button onClick={() => setSearchQuery("")}>
-                <X className="w-3.5 h-3.5 text-gray-400 hover:text-gray-700 transition-colors" />
-              </button>
-            )}
-          </div>
-
-          <AnimatePresence>
-            {searchFocused && (
-              <motion.div
-                initial={{ opacity: 0, y: -6, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -6, scale: 0.98 }}
-                transition={{ duration: 0.15 }}
-                className="absolute top-full mt-2 left-0 right-0 bg-white rounded-xl p-2
-                  border border-gray-200 shadow-xl z-50"
-              >
-                <p className="px-3 py-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-1">
-                  Quick Searches
-                </p>
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-600
-                      hover:text-gray-900 hover:bg-gray-50 transition-colors"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+            <Heart className="w-4 h-4 fill-white text-white" />
+            <span>Wishlist</span>
+          </Link>
+          <button
+            onClick={(e) => {
+              if (!isLoggedIn) {
+                e.preventDefault();
+                openLoginModal();
+              } else {
+                router.push("/orders");
+              }
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
+          >
+            <ShoppingBag className="w-4 h-4 text-white" />
+            <span>My Orders</span>
+          </button>
         </div>
 
         {/* ── Action Icons ── */}
         <div className="flex items-center gap-1 md:gap-2 shrink ml-auto md:ml-0 min-w-0">
-          <button
-            id="location-picker"
-            onClick={() => setIsLocationModalOpen(true)}
-            className={`hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-2xl
-              bg-gray-100/80 hover:bg-gray-200 text-gray-700
-              transition-all duration-200 group min-w-0 shrink max-w-[200px] xl:max-w-[260px] border border-gray-200/50 hover:border-gray-300`}
-          >
-            <div className="flex items-center gap-2 flex-1 min-w-0 pr-1">
-              <MapPin className="w-[18px] h-[18px] text-orange-500 shrink-0" />
-              <div className="flex flex-col items-start min-w-0 leading-tight">
-                <span className="font-bold text-[9px] tracking-widest text-slate-400 uppercase">
-                  {activeCenter ? (activeCenter.landmark || activeCenter.name) : "Deliver To"}
-                </span>
-                <div className="flex items-center gap-1 w-full min-w-0">
-                  <span className="font-black text-[13px] text-gray-900 tracking-tight truncate block min-w-0">
-                    {landmark ? `${landmark}, ${locationName}` : locationName}
-                  </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 shrink-0" />
-                </div>
-              </div>
-            </div>
-          </button>
 
           {/* Cart – hidden on mobile (lives in hamburger) */}
           <Link

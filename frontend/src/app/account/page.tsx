@@ -166,7 +166,7 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">My Activity</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-            <ModernRow icon={ShoppingBag} label="Purchase History" theme={theme} />
+            <ModernRow icon={ShoppingBag} label="Purchase History" theme={theme} onClick={() => router.push("/orders")} />
             
             {/* ── Saved Addresses — expandable ── */}
             <div>
