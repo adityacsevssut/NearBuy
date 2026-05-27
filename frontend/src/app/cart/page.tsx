@@ -61,6 +61,23 @@ function RestaurantOrderCard({
   const discount = couponApplied ? Math.floor(subtotal * 0.1) : 0;
   const grandTotal = total - discount;
 
+  const [minOrder, setMinOrder] = useState<number>(0);
+
+  useEffect(() => {
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    fetch(`${API}/api/public/vendors/${restId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.minOrder !== undefined) {
+          setMinOrder(data.minOrder);
+        }
+      })
+      .catch(console.error);
+  }, [restId]);
+
+  const meetsMinOrder = subtotal >= minOrder;
+  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder;
+
   return (
     <motion.div
       layout
@@ -263,22 +280,34 @@ function RestaurantOrderCard({
 
       {/* ── Place Order button for THIS restaurant ── */}
       <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30">
+        {!meetsMinOrder && minOrder > 0 && (
+          <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
+            <span className="text-red-500 font-black mt-0.5">!</span>
+            <p className="text-xs text-red-600 font-semibold leading-snug">
+              The Minimum Amount To order from the vendor is ₹{minOrder}. Add more items to exceed min value.
+            </p>
+          </div>
+        )}
         <button 
-          disabled={!canPlaceOrder}
+          disabled={!finalCanPlaceOrder}
           onClick={() => {
-            if (canPlaceOrder) {
+            if (finalCanPlaceOrder) {
               onPlaceOrder(restId, restItems, subtotal, gst, platformFee, grandTotal);
             }
           }}
           className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${
-            canPlaceOrder
+            finalCanPlaceOrder
               ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/30 active:scale-[0.98]"
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          {canPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
+          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
-          {canPlaceOrder ? `Place Order · ₹${grandTotal}` : "Select Address & Payment"}
+          {finalCanPlaceOrder 
+            ? `Place Order · ₹${grandTotal}` 
+            : !meetsMinOrder && minOrder > 0 
+              ? `Minimum Amount is ₹${minOrder}` 
+              : "Select Address & Payment"}
         </button>
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
           Delivered by {restName} · Est. 15–25 min
@@ -345,7 +374,17 @@ export default function CartPage() {
         },
         body: JSON.stringify({
           vendor_id: restId,
-          items: orderItems,
+          items: orderItems.map((item: any) => ({
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            qty: item.quantity,       // backend expects `qty`, cart uses `quantity`
+            image: item.image ?? "",
+            type: item.type,
+            restaurantId: item.restaurantId,
+            restaurantName: item.restaurantName,
+            section: item.section,
+          })),
           subtotal,
           gst: gstAmount,
           platform_fee: platformFeeAmount,

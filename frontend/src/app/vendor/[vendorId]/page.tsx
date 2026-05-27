@@ -189,7 +189,7 @@ export default function VendorPage() {
                 </p>
               )}
               
-              <div className="flex items-center gap-4 text-xs font-semibold text-gray-600">
+              <div className="flex items-center gap-4 text-xs font-semibold text-gray-600 flex-wrap">
                 <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">
                   <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                   {vendor.rating} <span className="font-normal text-gray-400">({vendor.reviews})</span>
@@ -197,6 +197,11 @@ export default function VendorPage() {
                 <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">
                   <Clock className="w-3.5 h-3.5 text-gray-400" /> {vendor.time}
                 </span>
+                {vendor.minOrder > 0 && (
+                  <span className="flex items-center gap-1 bg-white px-2 py-1 rounded-md shadow-sm border border-gray-100">
+                    Min Order: ₹{vendor.minOrder}
+                  </span>
+                )}
               </div>
             </div>
           </div>
