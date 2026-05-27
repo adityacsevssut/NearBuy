@@ -25,6 +25,7 @@ interface CartContextType {
   removeItem: (uid: string) => void;
   updateQty: (uid: string, qty: number) => void;
   clearCart: () => void;
+  clearVendorCart: (vendorId: string) => void;
   restaurantCount: number;   // unique restaurants (shown as badge)
   totalItems: number;        // total quantity across all items
   totalPrice: number;
@@ -91,6 +92,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => setItems([]), []);
 
+  const clearVendorCart = useCallback((vendorId: string) => {
+    setItems((prev) => prev.filter((i) => i.restaurantId !== vendorId));
+  }, []);
+
   const foodItems = items.filter((i) => i.section === "food");
   const restaurantCount = new Set(foodItems.map((i) => i.restaurantId)).size;
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
@@ -107,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   return (
     <CartContext.Provider
       value={{
-        items, addItem, removeItem, updateQty, clearCart,
+        items, addItem, removeItem, updateQty, clearCart, clearVendorCart,
         restaurantCount, totalItems, totalPrice, itemQty,
       }}
     >

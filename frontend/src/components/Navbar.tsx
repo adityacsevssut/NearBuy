@@ -152,29 +152,7 @@ export default function Navbar() {
                     </Link>
                   ))}
 
-                  {/* Divider */}
-                  <div className="border-t border-gray-100 my-1" />
 
-                  {/* Cart Button */}
-                  <Link
-                    href="/cart"
-                    className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 group"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-gray-100 group-hover:bg-gray-200 flex items-center justify-center relative transition-colors">
-                      <ShoppingCart className="w-4.5 h-4.5 text-gray-500 group-hover:text-gray-700" />
-                      {cartCount > 0 && (
-                        <span className={`absolute -top-1 -right-1 w-4 h-4 ${primaryBg} rounded-full text-white text-[9px] font-black flex items-center justify-center`}>
-                          {cartCount}
-                        </span>
-                      )}
-                    </div>
-                    <span className="font-bold text-sm">Cart</span>
-                    {cartCount > 0 && (
-                      <span className={`ml-auto text-[11px] font-black ${primaryText}`}>
-                        {cartCount} item{cartCount > 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </Link>
                 </div>
               </motion.div>
             )}

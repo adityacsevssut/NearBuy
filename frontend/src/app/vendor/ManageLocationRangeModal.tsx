@@ -145,6 +145,10 @@ export default function ManageLocationRangeModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.landmark?.trim() || !formData.pincode?.trim()) {
+      toast.error("Please fill in both Landmark and Pincode");
+      return;
+    }
     setIsSaving(true);
 
     try {
@@ -368,7 +372,7 @@ export default function ManageLocationRangeModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Landmark</label>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Landmark <span className="text-red-500">*</span></label>
                 <input 
                   type="text"
                   value={formData.landmark}
@@ -379,7 +383,7 @@ export default function ManageLocationRangeModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode</label>
+                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode <span className="text-red-500">*</span></label>
                 <input 
                   type="text"
                   value={formData.pincode}

@@ -7,6 +7,7 @@ import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown } from "lucide-r
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export default function DishPage() {
   const params = useParams();
@@ -19,7 +20,7 @@ export default function DishPage() {
 
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
-  const [wishlist, setWishlist] = useState<number[]>([]);
+  const { toggleFood, isFoodWished } = useWishlist();
   const [cart, setCart] = useState<Record<number, number>>({});
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { isLoggedIn, openLoginModal } = useAuth();
@@ -132,7 +133,7 @@ export default function DishPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
           <div className="space-y-4">
             {filteredDishes.map((dish) => {
-              const wished = wishlist.includes(dish.id);
+              const wished = isFoodWished(dish.id);
               return (
                 <div
                   key={dish.id}
@@ -201,54 +202,68 @@ export default function DishPage() {
                       )}
                       <button
                         onClick={() => {
-                          if (!isLoggedIn) return openLoginModal();
-                          setWishlist(w => w.includes(dish.id) ? w.filter(i => i !== dish.id) : [...w, dish.id]);
+                          toggleFood({
+                            id: dish.id,
+                            name: dish.name,
+                            price: dish.price,
+                            actual_price: dish.actual_price,
+                            type: dish.type,
+                            badge: dish.badge || "",
+                            description: dish.desc || "",
+                            image_url: dish.image_url || "",
+                            rating: dish.rating?.toString() || "0",
+                            prep_time: dish.time || "30 min",
+                            reviews: dish.reviews?.toString() || "0",
+                            restaurantId: dish.vendor_id || "",
+                            restaurantName: dish.vendor || "Unknown",
+                            is_available: dish.is_available
+                          });
                         }}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
                       >
                         <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                       </button>
+                    </div>
 
-                      {/* Quantity Selector and ADD Button */}
-                      <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center">
-                        <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
-                          <button 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
-                            }}
-                            className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                          >
-                            -
-                          </button>
-                          <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
-                          <button 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
-                            }}
-                            className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
-                          >
-                            +
-                          </button>
-                        </div>
+                    {/* Quantity Selector and ADD Button */}
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
+                      <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
-                            if (!isLoggedIn) return openLoginModal();
-                            const q = quantities[dish.id] || 1;
-                            setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
-                            setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                            setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
                           }}
-                          className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                            cart[dish.id]
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                              : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
-                          }`}
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
                         >
-                          {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                          -
+                        </button>
+                        <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                        <button 
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                          }}
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                        >
+                          +
                         </button>
                       </div>
+                      <button 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (!isLoggedIn) return openLoginModal();
+                          const q = quantities[dish.id] || 1;
+                          setCart(c => ({ ...c, [dish.id]: (c[dish.id] || 0) + q }));
+                          setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                        }}
+                        className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                          cart[dish.id]
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                            : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                        }`}
+                      >
+                        {cart[dish.id] ? `ADDED (${cart[dish.id]})` : "ADD"}
+                      </button>
                     </div>
                   </div>
                 </div>

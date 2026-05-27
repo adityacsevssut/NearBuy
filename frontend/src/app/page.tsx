@@ -519,7 +519,7 @@ export default function HomePage() {
             </div>
 
             {isLoading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-4">
                 {[1,2,3,4,5,6].map(i => <div key={i} className="h-64 bg-gray-100 rounded-2xl animate-pulse" />)}
               </div>
             ) : filtered.length === 0 ? (
@@ -529,7 +529,7 @@ export default function HomePage() {
                 <p className="text-sm text-gray-400 mt-1">Try changing your filters or search</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 px-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
                 {filtered.map(r => <RestCard key={r.id} r={r} {...cp} />)}
               </div>
             )}

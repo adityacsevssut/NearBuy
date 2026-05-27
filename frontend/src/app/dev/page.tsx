@@ -230,6 +230,10 @@ export default function DevDashboard() {
       return toast.error("PIN code is required.");
     }
     
+    if (!centerLandmark || !centerLandmark.trim()) {
+      return toast.error("Landmark is required.");
+    }
+    
     const lat = parseFloat(selectedCenter.lat);
     const lon = parseFloat(selectedCenter.lon);
     if (isNaN(lat) || isNaN(lon)) {
@@ -805,7 +809,7 @@ export default function DevDashboard() {
                   {selectedCenter && (
                     <div className="bg-white border-t border-gray-200 p-5 flex flex-col sm:flex-row flex-wrap gap-4 items-end shadow-lg relative z-20 md:shrink-0">
                       <div className="flex-1 w-full min-w-[160px]">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Center Landmark / Name</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Center Landmark / Name <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
                           <input 
@@ -819,7 +823,7 @@ export default function DevDashboard() {
                       </div>
 
                       <div className="flex-1 w-full min-w-[140px]">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pincode</label>
+                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pincode <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
                           <input 

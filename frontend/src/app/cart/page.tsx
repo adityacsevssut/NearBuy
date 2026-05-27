@@ -2,16 +2,20 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   MapPin, ChevronRight, ChevronLeft, Plus, Minus, Trash2,
   Tag, CheckCircle, Bike, ShoppingBag, Utensils, Store,
-  CreditCard, Smartphone, Wallet, ChevronDown, ChevronUp
+  CreditCard, Smartphone, Wallet, ChevronDown, ChevronUp,
+  Phone, FileText, MessageSquare
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
+import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 
 import { useEffect } from "react";
 
@@ -34,6 +38,8 @@ function RestaurantOrderCard({
   onRemove,
   platformFee,
   gst,
+  canPlaceOrder,
+  onPlaceOrder,
 }: {
   restId: string;
   restItems: ReturnType<typeof useCart>["items"];
@@ -41,6 +47,8 @@ function RestaurantOrderCard({
   onRemove: (uid: string) => void;
   platformFee: number;
   gst: number;
+  canPlaceOrder: boolean;
+  onPlaceOrder: (restId: string, items: any[], subtotal: number, gst: number, platformFee: number, total: number) => void;
 }) {
   const restName = restItems[0].restaurantName;
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -255,10 +263,22 @@ function RestaurantOrderCard({
 
       {/* ── Place Order button for THIS restaurant ── */}
       <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30">
-        <button className="w-full py-4 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-black rounded-2xl text-[15px] shadow-xl shadow-orange-500/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 group relative overflow-hidden">
-          <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />
+        <button 
+          disabled={!canPlaceOrder}
+          onClick={() => {
+            if (canPlaceOrder) {
+              onPlaceOrder(restId, restItems, subtotal, gst, platformFee, grandTotal);
+            }
+          }}
+          className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${
+            canPlaceOrder
+              ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/30 active:scale-[0.98]"
+              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+          }`}
+        >
+          {canPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
-          Place Order · ₹{grandTotal}
+          {canPlaceOrder ? `Place Order · ₹${grandTotal}` : "Select Address & Payment"}
         </button>
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
           Delivered by {restName} · Est. 15–25 min
@@ -270,8 +290,10 @@ function RestaurantOrderCard({
 
 /* ── Main Cart Page ───────────────────────────────────── */
 export default function CartPage() {
+  const router = useRouter();
   const { items, updateQty, removeItem, clearCart, restaurantCount } = useCart();
-  const { locationName } = useLocationContext();
+  const { locationName, landmark, pincode, latitude, longitude, setIsLocationModalOpen } = useLocationContext();
+  const { isLoggedIn, accessToken, openLoginModal } = useAuth();
 
   const foodItems = items.filter((i) => i.section === "food");
   const groups = groupByRestaurant(foodItems);
@@ -280,6 +302,18 @@ export default function CartPage() {
 
   const [platformFee, setPlatformFee] = useState(5);
   const [gst, setGst] = useState(10);
+
+  // Address and Payment state
+  const [paymentMethod, setPaymentMethod] = useState("");
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [customerMobile, setCustomerMobile] = useState("");
+  const [alternateMobile, setAlternateMobile] = useState("");
+  const [cookingInstructions, setCookingInstructions] = useState("");
+
+  const isMobileValid = /^[6-9]\d{9}$/.test(customerMobile);
+  const isAltMobileValid = alternateMobile === "" || /^[6-9]\d{9}$/.test(alternateMobile);
+
+  const canPlaceOrder = paymentMethod !== "" && !isPlacingOrder && locationName !== "Select Location" && isMobileValid && isAltMobileValid;
 
   useEffect(() => {
     const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
@@ -291,6 +325,51 @@ export default function CartPage() {
       })
       .catch(console.error);
   }, []);
+
+  const handlePlaceOrder = async (restId: string, orderItems: any[], subtotal: number, gstAmount: number, platformFeeAmount: number, totalAmount: number) => {
+    if (!isLoggedIn) {
+      openLoginModal();
+      return;
+    }
+    
+    setIsPlacingOrder(true);
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    const addressDetails = { locationName, landmark, pincode, latitude, longitude };
+
+    try {
+      const res = await fetch(`${API}/api/orders`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+          vendor_id: restId,
+          items: orderItems,
+          subtotal,
+          gst: gstAmount,
+          platform_fee: platformFeeAmount,
+          total_amount: totalAmount,
+          payment_method: paymentMethod,
+          delivery_address: addressDetails,
+          customer_mobile: customerMobile,
+          alternate_mobile: alternateMobile,
+          cooking_instructions: cookingInstructions,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to place order");
+
+      toast.success("Order placed! Wait for confirmation.");
+      orderItems.forEach(item => removeItem(item.uid));
+      router.push("/orders");
+    } catch (err: any) {
+      toast.error(err.message || "An error occurred");
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
@@ -344,16 +423,110 @@ export default function CartPage() {
         ) : (
           <>
             {/* Delivery address bar */}
-            <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+            <div 
+              onClick={() => setIsLocationModalOpen(true)}
+              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform"
+            >
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
                   <MapPin className="w-4 h-4 text-orange-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Delivering to</p>
-                  <p className="text-sm font-black text-gray-900 truncate">{locationName}</p>
+                  <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Delivery Address <span className="text-red-500 text-xs">*</span></p>
+                  <p className="text-sm font-black text-gray-900 truncate">
+                    {landmark ? `${landmark}, ${locationName}` : locationName}
+                  </p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />
+              </div>
+            </div>
+
+            {/* Additional Details Section */}
+            <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm shadow-orange-500/5 mt-4">
+              <h3 className="font-black text-gray-900 mb-4 text-lg">Contact & Instructions</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                    <Phone className="w-3.5 h-3.5" /> Mobile Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    placeholder="Enter 10-digit mobile number"
+                    value={customerMobile}
+                    onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ''))}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:outline-none transition-all ${
+                      customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                    }`}
+                  />
+                  {customerMobile && !isMobileValid && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1.5">Must be a valid 10-digit Indian number starting with 6-9</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                    <Phone className="w-3.5 h-3.5" /> Alternate Mobile (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    maxLength={10}
+                    placeholder="Enter alternate 10-digit number"
+                    value={alternateMobile}
+                    onChange={(e) => setAlternateMobile(e.target.value.replace(/\D/g, ''))}
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:outline-none transition-all ${
+                      alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                    }`}
+                  />
+                  {alternateMobile && !isAltMobileValid && (
+                    <p className="text-[10px] text-red-500 font-bold mt-1.5">Must be a valid 10-digit Indian number</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Cooking Instructions (Optional)
+                  </label>
+                  <textarea
+                    rows={3}
+                    placeholder="e.g. Make it spicy, no onions, etc."
+                    value={cookingInstructions}
+                    onChange={(e) => setCookingInstructions(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all custom-scrollbar resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+            {/* Payment Method Section */}
+            <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm shadow-orange-500/5 mt-4 mb-4">
+              <h3 className="font-black text-gray-900 mb-3 text-lg">Payment Method <span className="text-red-500">*</span></h3>
+              <div className="space-y-3">
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50/30' : 'border-gray-100 bg-white hover:border-gray-200'}`}>
+                  <input 
+                    type="radio" 
+                    name="payment" 
+                    checked={paymentMethod === 'cod'} 
+                    onChange={() => setPaymentMethod('cod')}
+                    className="w-4 h-4 text-orange-500 accent-orange-500"
+                  />
+                  <Wallet className="w-5 h-5 text-gray-700" />
+                  <span className="font-bold text-gray-900 text-sm flex-1">Cash on Delivery</span>
+                </label>
+                
+                <div 
+                  onClick={() => toast("This feature will be available soon", { icon: "ℹ️" })}
+                  className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+                >
+                  <input 
+                    type="radio" 
+                    name="payment" 
+                    disabled
+                    className="w-4 h-4 text-gray-300"
+                  />
+                  <Smartphone className="w-5 h-5 text-gray-500" />
+                  <span className="font-bold text-gray-500 text-sm flex-1">Online Payment</span>
+                  <span className="text-[10px] font-black uppercase text-gray-400 bg-gray-200 px-2 py-0.5 rounded">Soon</span>
+                </div>
               </div>
             </div>
 
@@ -376,6 +549,8 @@ export default function CartPage() {
                   onRemove={removeItem}
                   platformFee={platformFee}
                   gst={gst}
+                  canPlaceOrder={canPlaceOrder || !isLoggedIn}
+                  onPlaceOrder={handlePlaceOrder}
                 />
               ))}
             </AnimatePresence>

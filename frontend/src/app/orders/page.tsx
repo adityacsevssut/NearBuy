@@ -1,0 +1,304 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  Package, MapPin, ChevronLeft, Clock,
+  CheckCircle, Loader2, Store, FileText, ChevronRight,
+  Eye, Truck, AlertCircle
+} from "lucide-react";
+import Navbar from "@/components/Navbar";
+import MobileBottomNav from "@/components/MobileBottomNav";
+import { useAuth } from "@/context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
+
+interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  type: "veg" | "non-veg";
+}
+
+interface Order {
+  id: string;
+  vendor_id: string;
+  restaurant_name: string;
+  image_url: string;
+  items: OrderItem[];
+  subtotal: string;
+  gst: string;
+  platform_fee: string;
+  total_amount: string;
+  payment_method: string;
+  delivery_address: any;
+  status: string;
+  created_at: string;
+}
+
+export default function OrdersPage() {
+  const { isLoggedIn, accessToken } = useAuth();
+  const router = useRouter();
+  
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedOrderForItems, setSelectedOrderForItems] = useState<Order | null>(null);
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoggedIn) {
+      router.push("/");
+    }
+  }, [mounted, isLoggedIn, router]);
+
+  useEffect(() => {
+    if (isLoggedIn && accessToken) {
+      fetchOrders();
+    }
+  }, [isLoggedIn, accessToken]);
+
+  const fetchOrders = async () => {
+    setIsLoading(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/me`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOrders(data.orders || []);
+      } else {
+        toast.error(data.error || "Failed to fetch orders");
+      }
+    } catch (err) {
+      toast.error("Network error while fetching orders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending": return "text-orange-600 bg-orange-100 border-orange-200";
+      case "confirmed": return "text-blue-600 bg-blue-100 border-blue-200";
+      case "out for delivery": return "text-violet-600 bg-violet-100 border-violet-200";
+      case "delivered": return "text-green-600 bg-green-100 border-green-200";
+      case "cancelled": return "text-red-600 bg-red-100 border-red-200";
+      default: return "text-gray-600 bg-gray-100 border-gray-200";
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "pending": return <Clock className="w-4 h-4" />;
+      case "confirmed": return <CheckCircle className="w-4 h-4" />;
+      case "out for delivery": return <Truck className="w-4 h-4" />;
+      case "delivered": return <Package className="w-4 h-4" />;
+      case "cancelled": return <AlertCircle className="w-4 h-4" />;
+      default: return <Clock className="w-4 h-4" />;
+    }
+  };
+
+  if (!mounted || (!isLoggedIn && mounted)) return null;
+
+  return (
+    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
+      <Navbar />
+
+      {/* Page Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-16 z-20">
+        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
+          <Link href="/" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+            <ChevronLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="font-black text-gray-900 text-lg tracking-tight">Your Orders</h1>
+        </div>
+      </div>
+
+      <div className="flex-1 max-w-2xl mx-auto w-full p-4 space-y-4">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
+            <p className="text-gray-500 font-medium">Fetching your orders...</p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <Package className="w-10 h-10 text-gray-400" />
+            </div>
+            <h2 className="text-xl font-black text-gray-900 mb-2">No orders yet</h2>
+            <p className="text-gray-500 mb-6 text-sm">Looks like you haven't placed any orders.</p>
+            <Link href="/" className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95">
+              Explore Nearby Shops
+            </Link>
+          </div>
+        ) : (
+          orders.map((order) => (
+            <motion.div
+              key={order.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+            >
+              {/* Card Header (Vendor Info) */}
+              <div className="p-5 border-b border-gray-50 flex items-start gap-4">
+                <div className="w-14 h-14 bg-gray-100 rounded-2xl overflow-hidden shrink-0 border border-gray-100 shadow-sm">
+                  {order.image_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={order.image_url} alt={order.restaurant_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Store className="w-6 h-6 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h3 className="font-black text-gray-900 text-lg truncate leading-tight mb-1">
+                    {order.restaurant_name}
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                    <MapPin className="w-3.5 h-3.5 shrink-0" />
+                    <span className="truncate">{order.delivery_address?.locationName || "Unknown Location"}</span>
+                  </div>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-lg font-black text-gray-900">₹{order.total_amount}</p>
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                    {new Date(order.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+              </div>
+
+              {/* Status Banner */}
+              <div className={`px-5 py-3 border-b border-gray-50 flex items-center justify-between`}>
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
+                  {getStatusIcon(order.status)}
+                  {order.status}
+                </div>
+                <p className="text-xs font-semibold text-gray-500">
+                  {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="p-4 bg-gray-50/50 flex gap-3">
+                <button
+                  onClick={() => setSelectedOrderForItems(order)}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-200 hover:border-gray-300 rounded-xl text-sm font-bold text-gray-700 transition-all active:scale-[0.98]"
+                >
+                  <Eye className="w-4 h-4" />
+                  See Items
+                </button>
+                <Link
+                  href={`/orders/${order.id}`}
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl text-sm font-bold text-orange-600 transition-all active:scale-[0.98]"
+                >
+                  <Package className="w-4 h-4" />
+                  Track Status
+                </Link>
+              </div>
+            </motion.div>
+          ))
+        )}
+      </div>
+
+      <MobileBottomNav />
+
+      {/* Items Modal */}
+      <AnimatePresence>
+        {selectedOrderForItems && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedOrderForItems(null)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: "100%" }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md bg-white rounded-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+            >
+              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-gray-900 text-lg">Order Items</h2>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{selectedOrderForItems.restaurant_name}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedOrderForItems(null)}
+                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto custom-scrollbar">
+                <div className="space-y-4">
+                  {selectedOrderForItems.items.map((item, idx) => (
+                    <div key={idx} className="flex items-start justify-between">
+                      <div className="flex gap-3">
+                        <div className={`mt-0.5 w-4 h-4 rounded-sm border flex items-center justify-center shrink-0 ${item.type === 'veg' ? 'border-green-500' : 'border-red-500'}`}>
+                          <div className={`w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}`} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 leading-tight">{item.name}</p>
+                          <p className="text-xs font-medium text-gray-500 mt-0.5">₹{item.price} × {item.quantity}</p>
+                        </div>
+                      </div>
+                      <div className="font-black text-gray-900">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 pt-5 border-t border-gray-100 border-dashed space-y-2">
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>Item Total</span>
+                    <span>₹{selectedOrderForItems.subtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>GST & Taxes</span>
+                    <span>₹{selectedOrderForItems.gst}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>Platform Fee</span>
+                    <span>₹{selectedOrderForItems.platform_fee}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-100 mt-3">
+                    <span>Grand Total</span>
+                    <span>₹{selectedOrderForItems.total_amount}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-5 bg-gray-50 border-t border-gray-100">
+                <button
+                  onClick={() => setSelectedOrderForItems(null)}
+                  className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]"
+                >
+                  Close Receipt
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

@@ -159,6 +159,10 @@ export default function LocationModal() {
 
   const handleSaveAddress = () => {
     if (!resolvedAddress) return;
+    if (!resolvedAddress.pincode?.trim() || !resolvedAddress.landmark?.trim()) {
+      toast.error("Please fill in both PIN code and Landmark");
+      return;
+    }
     setIsSaving(true);
     try {
       setLocation(resolvedAddress.name, resolvedAddress.pincode, resolvedAddress.landmark || "", resolvedAddress.lat, resolvedAddress.lng);

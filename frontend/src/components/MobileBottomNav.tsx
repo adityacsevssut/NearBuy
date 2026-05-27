@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Home, Search, ClipboardList, User, LogIn, Heart } from "lucide-react";
+import { Home, Search, ClipboardList, User, LogIn, Heart, ShoppingCart } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
@@ -15,12 +16,14 @@ export default function MobileBottomNav() {
   const activeText = isEssentials ? "text-blue-600" : isMedico ? "text-emerald-600" : "text-orange-600";
 
   const { isLoggedIn, openLoginModal } = useAuth();
+  const { restaurantCount: cartCount } = useCart();
 
   const homeHref = isEssentials ? "/essentials" : isMedico ? "/medico" : "/";
 
   const tabs = [
     { id: "mobile-nav-home", label: "Home", icon: Home, href: homeHref },
     { id: "mobile-nav-wishlist", label: "Wishlist", icon: Heart, href: "/wishlist" },
+    { id: "mobile-nav-cart", label: "Cart", icon: ShoppingCart, href: "/cart", badge: cartCount },
     { id: "mobile-nav-orders", label: "Orders", icon: ClipboardList, href: "/orders" },
     { 
       id: "mobile-nav-auth", 
@@ -37,10 +40,11 @@ export default function MobileBottomNav() {
         className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe transition-colors duration-300"
       >
         <div className="flex items-center justify-around px-3 py-2">
-          {tabs.map(({ id, label, icon: Icon, href }) => {
+          {tabs.map((tab) => {
+            const { id, label, icon: Icon, href, badge } = tab;
             const cleanHref = href.split('?')[0];
             const active = id === "mobile-nav-home"
-              ? pathname === cleanHref || (!pathname.startsWith('/search') && !pathname.startsWith('/orders') && !pathname.startsWith('/account'))
+              ? pathname === cleanHref || (!pathname.startsWith('/search') && !pathname.startsWith('/orders') && !pathname.startsWith('/account') && !pathname.startsWith('/cart') && !pathname.startsWith('/wishlist'))
               : pathname.startsWith(cleanHref) && cleanHref !== "#";
             
             const handleClick = (e: React.MouseEvent) => {
@@ -56,20 +60,27 @@ export default function MobileBottomNav() {
                 id={id}
                 href={href}
                 onClick={handleClick}
-                className={`flex flex-col items-center gap-1 w-20 py-1.5 rounded-2xl transition-all duration-300 group cursor-pointer relative ${
+                className={`flex flex-col items-center gap-1 flex-1 py-1.5 rounded-2xl transition-all duration-300 group cursor-pointer relative ${
                   active 
                     ? `${activeBg} ${activeText} scale-105` 
                     : "text-gray-400 hover:text-gray-600 hover:bg-gray-50/50"
                 }`}
               >
                 <div
-                  className={`p-0.5 rounded-xl transition-all duration-300 ${
+                  className={`p-0.5 rounded-xl transition-all duration-300 relative ${
                     active ? "-translate-y-0.5" : "group-hover:-translate-y-0.5"
                   }`}
                 >
                   <Icon
                     className="w-[22px] h-[22px] transition-colors duration-300"
                   />
+                  {badge ? (
+                    <span className={`absolute -top-1 -right-1.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow-sm ${
+                      isEssentials ? 'bg-blue-500' : isMedico ? 'bg-emerald-500' : 'bg-orange-500'
+                    }`}>
+                      {badge}
+                    </span>
+                  ) : null}
                 </div>
                 <span
                   className="text-[10px] font-black tracking-tight transition-all duration-300"
