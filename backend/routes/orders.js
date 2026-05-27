@@ -76,12 +76,31 @@ router.get("/me", authenticate, async (req, res) => {
   }
 });
 
+// GET /api/orders/vendor
+// Get orders for a specific vendor
+router.get("/vendor", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT o.*, u.first_name, u.last_name 
+       FROM orders o
+       JOIN users u ON o.user_id = u.id
+       WHERE o.vendor_id = $1 
+       ORDER BY o.created_at DESC`,
+      [req.user.id]
+    );
+    return res.json({ orders: rows });
+  } catch (err) {
+    console.error("Get vendor orders error:", err);
+    return res.status(500).json({ error: "Failed to fetch vendor orders." });
+  }
+});
+
 // GET /api/orders/:id
 // Get specific order details
 router.get("/:id", authenticate, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode 
+      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode, v.owner_number, v.delivery_boy_number
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
        WHERE o.id = $1 AND o.user_id = $2`,
@@ -94,6 +113,76 @@ router.get("/:id", authenticate, async (req, res) => {
   } catch (err) {
     console.error("Get order error:", err);
     return res.status(500).json({ error: "Failed to fetch order details." });
+  }
+});
+
+
+// PATCH /api/orders/:id/status
+// Update order status by vendor
+router.patch("/:id/status", authenticate, async (req, res) => {
+  const { status, delivery_charge } = req.body;
+  
+  if (!status) {
+    return res.status(400).json({ error: "Status is required." });
+  }
+
+  try {
+    let query = `UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 AND vendor_id = $3 RETURNING *`;
+    let values = [status, req.params.id, req.user.id];
+
+    if (status === "Confirmed" && delivery_charge !== undefined) {
+      // Also update delivery_charge and recalculate total_amount
+      query = `
+        UPDATE orders 
+        SET status = $1, 
+            delivery_charge = $4,
+            total_amount = subtotal + gst + platform_fee + $4,
+            updated_at = NOW() 
+        WHERE id = $2 AND vendor_id = $3 
+        RETURNING *
+      `;
+      values = [status, req.params.id, req.user.id, delivery_charge];
+    }
+
+    const { rows } = await pool.query(query, values);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Order not found or unauthorized." });
+    }
+    
+    return res.json({ message: "Status updated successfully", order: rows[0] });
+  } catch (err) {
+    console.error("Update order status error:", err);
+    return res.status(500).json({ error: "Failed to update order status." });
+  }
+});
+
+// PATCH /api/orders/:id/cancel
+// Cancel order by user
+router.patch("/:id/cancel", authenticate, async (req, res) => {
+  try {
+    // First, check the current status of the order to see if it's eligible for cancellation
+    const checkQuery = `SELECT status FROM orders WHERE id = $1 AND user_id = $2`;
+    const checkResult = await pool.query(checkQuery, [req.params.id, req.user.id]);
+    
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: "Order not found or unauthorized." });
+    }
+    
+    const currentStatus = checkResult.rows[0].status.toLowerCase();
+    if (currentStatus !== "pending" && currentStatus !== "confirmed") {
+      return res.status(400).json({ error: "Order cannot be cancelled at this stage." });
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE orders SET status = 'Cancelled', updated_at = NOW() WHERE id = $1 AND user_id = $2 RETURNING *`,
+      [req.params.id, req.user.id]
+    );
+    
+    return res.json({ message: "Order cancelled successfully", order: rows[0] });
+  } catch (err) {
+    console.error("Cancel order error:", err);
+    return res.status(500).json({ error: "Failed to cancel order." });
   }
 });
 

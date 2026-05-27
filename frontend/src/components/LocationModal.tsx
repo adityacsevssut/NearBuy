@@ -191,7 +191,7 @@ export default function LocationModal() {
       saved.latitude != null ? parseFloat(String(saved.latitude)) : undefined,
       saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined
     );
-    toast.success(`📍 Switched to ${saved.name}`);
+    toast.success(`📍 Switched to ${saved.landmark ? saved.landmark : saved.name}`);
     handleClose();
   };
 
@@ -321,10 +321,10 @@ export default function LocationModal() {
                             </div>
                             <button
                               onClick={(e) => handleDeleteSaved(e, addr.id)}
-                              className="p-1.5 rounded-lg text-gray-300 hover:text-red-400 hover:bg-red-50 transition-colors shrink-0 opacity-0 group-hover:opacity-100"
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 active:scale-90 shrink-0"
                               title="Remove"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </motion.div>
                         ))}

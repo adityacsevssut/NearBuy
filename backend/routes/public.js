@@ -26,7 +26,9 @@ router.get("/vendors", async (req, res) => {
         v.gps_address as "gpsAddress",
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
-        u.manager_type
+        u.manager_type,
+        u.first_name,
+        u.last_name
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
       WHERE v.is_active = TRUE AND u.is_active = TRUE AND u.role = 'vendor'
@@ -38,7 +40,8 @@ router.get("/vendors", async (req, res) => {
       badgeColor: "bg-orange-100 text-orange-700",
       rating: r.rating !== null && r.rating !== undefined ? parseFloat(r.rating) : 0.0,
       reviews: 120,
-      veg: r.cuisine ? r.cuisine.toLowerCase().includes('veg') : false
+      veg: r.cuisine ? r.cuisine.toLowerCase().includes('veg') : false,
+      ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim()
     }));
 
     return res.json(formatted);
@@ -70,6 +73,7 @@ router.get("/vendors/:id", async (req, res) => {
         v.gps_address as "gpsAddress",
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
+        v.owner_number,
         u.manager_type
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id

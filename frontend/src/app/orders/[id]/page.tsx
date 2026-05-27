@@ -5,8 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
-  Clock, Store, Phone, Info, Loader2, Navigation
+  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 
@@ -22,6 +23,7 @@ interface Order {
   subtotal: string;
   gst: string;
   platform_fee: string;
+  delivery_charge?: string;
   total_amount: string;
   payment_method: string;
   delivery_address: any;
@@ -29,7 +31,7 @@ interface Order {
   created_at: string;
 }
 
-const STATUS_STEPS = ["pending", "confirmed", "out for delivery", "delivered"];
+const STATUS_STEPS = ["pending", "confirmed", "shipment", "out for delivery", "delivered"];
 
 export default function OrderStatusPage() {
   const { id } = useParams();
@@ -38,7 +40,7 @@ export default function OrderStatusPage() {
   
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
+  const [showBilling, setShowBilling] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -74,6 +76,30 @@ export default function OrderStatusPage() {
     } catch (err) {
       toast.error("Network error while fetching order details");
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async () => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) return;
+    
+    setIsLoading(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/${id}/cancel`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Order cancelled successfully");
+        fetchOrderDetails();
+      } else {
+        toast.error(data.error || "Failed to cancel order");
+        setIsLoading(false);
+      }
+    } catch (err) {
+      toast.error("Network error");
       setIsLoading(false);
     }
   };
@@ -119,8 +145,9 @@ export default function OrderStatusPage() {
                 {isCancelled ? "Order Cancelled" : 
                  currentStepIndex === 0 ? "Awaiting Confirmation" :
                  currentStepIndex === 1 ? "Preparing your order" :
-                 currentStepIndex === 2 ? "Out for Delivery" :
-                 currentStepIndex === 3 ? "Order Delivered!" : "Processing..."}
+                 currentStepIndex === 2 ? "Order has been Shipped" :
+                 currentStepIndex === 3 ? "Out for Delivery" :
+                 currentStepIndex === 4 ? "Order Delivered!" : "Processing..."}
               </h2>
               <p className="text-white/80 font-medium text-sm">
                 Placed on {new Date(order.created_at).toLocaleTimeString("en-IN", { hour: '2-digit', minute: '2-digit' })}
@@ -167,8 +194,9 @@ export default function OrderStatusPage() {
                         } ${isCurrent ? 'ring-4 ring-orange-500/20 scale-110' : ''}`}>
                           {index === 0 ? <Clock className="w-4 h-4" /> :
                            index === 1 ? <CheckCircle className="w-4 h-4" /> :
-                           index === 2 ? <Truck className="w-4 h-4" /> :
-                           <Package className="w-4 h-4" />}
+                           index === 2 ? <Package className="w-4 h-4" /> :
+                           index === 3 ? <Truck className="w-4 h-4" /> :
+                           <CheckCircle className="w-4 h-4" />}
                         </div>
                       </div>
                       <div className={`pt-2 transition-opacity duration-500 ${isCompleted ? 'opacity-100' : 'opacity-40'}`}>
@@ -179,7 +207,8 @@ export default function OrderStatusPage() {
                           <p className="text-xs text-gray-500 font-medium mt-0.5">
                             {index === 0 ? "Vendor is reviewing your order" :
                              index === 1 ? "Your items are being packed" :
-                             index === 2 ? "Delivery partner is on the way" :
+                             index === 2 ? "Order has been shipped" :
+                             index === 3 ? "Delivery partner is on the way" :
                              "Hope you enjoyed it!"}
                           </p>
                         )}
@@ -241,13 +270,123 @@ export default function OrderStatusPage() {
           </div>
         </div>
 
-        {/* Need Help Button */}
-        <button className="w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 rounded-2xl flex items-center justify-center gap-2 text-gray-600 font-bold text-sm transition-colors shadow-sm mb-8">
-          <Phone className="w-4 h-4" />
-          Need help with this order?
-        </button>
+        {/* Buttons Grid */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+          {currentStepIndex <= 1 && !isCancelled && (
+            <button 
+              onClick={handleCancelOrder}
+              className="w-full py-4 bg-red-50 hover:bg-red-100 border border-red-200 rounded-2xl flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors shadow-sm"
+            >
+              Cancel Order
+            </button>
+          )}
+          
+          {currentStepIndex >= 1 && !isCancelled && (
+            <button 
+              onClick={() => setShowBilling(true)}
+              className={`w-full py-4 bg-gray-900 hover:bg-black border border-gray-900 rounded-2xl flex items-center justify-center gap-2 text-white font-bold text-sm transition-colors shadow-sm ${currentStepIndex <= 1 ? 'col-span-1' : 'col-span-2'}`}
+            >
+              <FileText className="w-4 h-4" />
+              Final Billing
+            </button>
+          )}
+          
+          <a 
+            href={order.owner_number ? `tel:${order.owner_number}` : "#"}
+            className={`w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 rounded-2xl flex items-center justify-center gap-2 text-gray-600 font-bold text-sm transition-colors shadow-sm ${currentStepIndex > 1 || isCancelled ? 'col-span-2 sm:col-span-1' : 'col-span-2'}`}
+          >
+            <Phone className="w-4 h-4" />
+            Need help?
+          </a>
+
+          {currentStepIndex >= 1 && !isCancelled && order.delivery_boy_number && (
+            <a 
+              href={`tel:${order.delivery_boy_number}`}
+              className="w-full py-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center gap-2 text-orange-600 font-bold text-sm transition-colors shadow-sm col-span-2 sm:col-span-1"
+            >
+              <Phone className="w-4 h-4" />
+              Call Delivery Boy
+            </a>
+          )}
+        </div>
 
       </div>
+
+      {/* Billing Modal */}
+      <AnimatePresence>
+        {showBilling && (
+          <div className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowBilling(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-800">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-gray-900 text-lg">Final Billing</h2>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Order Breakdown</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowBilling(false)}
+                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-4 pt-2">
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>Subtotal</span>
+                    <span>₹{order.subtotal}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>GST & Taxes</span>
+                    <span>₹{order.gst}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <span>Platform Fee</span>
+                    <span>₹{order.platform_fee}</span>
+                  </div>
+                  {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
+                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                      <span>Delivery Charge</span>
+                      <span>+ ₹{order.delivery_charge}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-xl font-black text-gray-900 pt-4 border-t border-gray-100 mt-4">
+                    <span>Grand Total</span>
+                    <span>₹{order.total_amount}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-5 bg-gray-50 border-t border-gray-100">
+                <button
+                  onClick={() => setShowBilling(false)}
+                  className="w-full py-4 bg-gray-900 hover:bg-black text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]"
+                >
+                  Got it
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

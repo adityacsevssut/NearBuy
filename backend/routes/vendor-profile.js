@@ -210,4 +210,35 @@ router.delete("/", authenticate, async (req, res) => {
   }
 });
 
+// PATCH /api/vendor-profile/contact
+router.patch("/contact", authenticate, async (req, res) => {
+  try {
+    const { owner_number, delivery_boy_number } = req.body;
+    
+    // Using UPSERT behavior for just the contact numbers might require all other fields if it's an insert,
+    // but typically a vendor saves their profile first. We'll update if exists.
+    const { rows } = await pool.query(
+      `UPDATE vendor_profiles 
+       SET owner_number = $1, delivery_boy_number = $2 
+       WHERE user_id = $3 RETURNING *`,
+      [owner_number || "", delivery_boy_number || "", req.user.id]
+    );
+    
+    if (rows.length === 0) {
+      // If profile doesn't exist yet, insert a basic one with just the user_id and numbers.
+      const { rows: newRows } = await pool.query(
+        `INSERT INTO vendor_profiles (user_id, restaurant_name, owner_number, delivery_boy_number)
+         VALUES ($1, 'My Store', $2, $3) RETURNING *`,
+        [req.user.id, owner_number || "", delivery_boy_number || ""]
+      );
+      return res.json({ message: "Contact details created successfully!", profile: newRows[0] });
+    }
+
+    return res.json({ message: "Contact details updated successfully!", profile: rows[0] });
+  } catch (err) {
+    console.error("PATCH /api/vendor-profile/contact error:", err);
+    return res.status(500).json({ error: "Failed to update contact details." });
+  }
+});
+
 module.exports = router;

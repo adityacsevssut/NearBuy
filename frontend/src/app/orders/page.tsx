@@ -257,11 +257,11 @@ export default function OrdersPage() {
                         </div>
                         <div>
                           <p className="font-bold text-gray-900 leading-tight">{item.name}</p>
-                          <p className="text-xs font-medium text-gray-500 mt-0.5">₹{item.price} × {item.quantity}</p>
+                          <p className="text-xs font-medium text-gray-500 mt-0.5">₹{item.price} × {item.quantity || (item as any).qty}</p>
                         </div>
                       </div>
                       <div className="font-black text-gray-900">
-                        ₹{(item.price * item.quantity).toFixed(2)}
+                        ₹{(item.price * (item.quantity || (item as any).qty)).toFixed(2)}
                       </div>
                     </div>
                   ))}

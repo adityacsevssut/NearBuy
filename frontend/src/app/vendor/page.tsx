@@ -6,13 +6,14 @@ import { useEffect, useState } from "react";
 import {
   LogOut, Store, ShoppingBag, LayoutTemplate,
   Utensils, MessageSquare, UserCircle, ChevronRight,
-  Pill, Package, TrendingUp, Star, Boxes, MapPin, ChevronDown
+  Pill, Package, TrendingUp, Star, Boxes, MapPin, ChevronDown, CheckCircle, Save, PhoneCall
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useLocationContext } from "@/context/LocationContext";
 import ManageFrontPageModal from "./ManageFrontPageModal";
 import ManageLocationRangeModal from "./ManageLocationRangeModal";
 import ManageFoodsModal from "./ManageFoodsModal";
+import ManageContactDetailsModal from "./ManageContactDetailsModal";
 import LocationModal from "@/components/LocationModal";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -93,6 +94,7 @@ export default function VendorDashboard() {
   const [isFrontPageOpen, setIsFrontPageOpen] = useState(false);
   const [isRangeModalOpen, setIsRangeModalOpen] = useState(false);
   const [isFoodsOpen, setIsFoodsOpen] = useState(false);
+  const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [isOpenToggle, setIsOpenToggle] = useState(true);
 
@@ -217,6 +219,17 @@ export default function VendorDashboard() {
       cardIconColor: "text-green-500",
       badge: "Menu",
       badgeBg: "bg-green-100 text-green-700 border-green-200",
+    },
+    {
+      id: "contact",
+      title: "Contact Details",
+      description:
+        "Save your owner and delivery boy contact numbers to help customers reach out easily.",
+      icon: PhoneCall,
+      cardIconBg: "bg-teal-50",
+      cardIconColor: "text-teal-500",
+      badge: "Support",
+      badgeBg: "bg-teal-100 text-teal-700 border-teal-200",
     },
     {
       id: "feedbacks",
@@ -410,6 +423,10 @@ export default function VendorDashboard() {
                     setIsRangeModalOpen(true);
                   } else if (card.id === "foods") {
                     setIsFoodsOpen(true);
+                  } else if (card.id === "contact") {
+                    setIsContactModalOpen(true);
+                  } else if (card.id === "orders") {
+                    router.push("/vendor/orders");
                   }
                 }}
                 className={`group text-left flex flex-col p-6 bg-white rounded-3xl border ${t.cardBorder} hover:shadow-xl ${t.cardShadow} transition-all duration-300 relative overflow-hidden cursor-pointer`}
@@ -494,6 +511,15 @@ export default function VendorDashboard() {
             onClose={() => setIsFoodsOpen(false)}
             vendorType={vType}
             onOpenFrontPage={() => setIsFrontPageOpen(true)}
+          />
+          <ManageContactDetailsModal
+            isOpen={isContactModalOpen}
+            onClose={() => {
+              setIsContactModalOpen(false);
+              fetchProfile();
+            }}
+            profile={profile}
+            vendorType={vType}
           />
           <LocationModal />
         </>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
@@ -160,9 +160,17 @@ export default function VendorPage() {
           <div className="bg-white border-b border-gray-200 shadow-sm relative">
         <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-orange-100/50 opacity-50 pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative overflow-visible">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 mb-4 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </Link>
+          <div className="flex items-center gap-2 mb-4">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-orange-600 hover:text-orange-700 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit border border-orange-100">
+              <ArrowLeft className="w-4 h-4" /> Back to Home
+            </Link>
+            
+            {vendor.owner_number && (
+              <a href={`tel:${vendor.owner_number}`} className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors bg-white/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm w-fit border border-gray-200">
+                <Phone className="w-4 h-4 text-orange-500" /> Call Vendor
+              </a>
+            )}
+          </div>
 
           <div className="flex gap-4 items-center mb-6">
             <div className="w-20 h-20 bg-gray-100 rounded-2xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 flex items-center justify-center">
