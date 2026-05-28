@@ -110,7 +110,7 @@ export default function VendorDashboard() {
         const data = await res.json();
         if (data.profile) {
           setProfile(data.profile);
-          setIsOpenToggle(data.profile.is_open ?? true);
+          setIsOpenToggle(data.profile.is_open ?? false);
         }
       }
     } catch (err) {

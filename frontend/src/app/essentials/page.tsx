@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   Search, Star, SlidersHorizontal, ChevronDown,
@@ -54,6 +54,21 @@ export default function EssentialsPage() {
   const [cart, setCart] = useState<string[]>([]);
   const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchPoster() {
+      try {
+        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${API}/api/homepage-poster?type=store`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
+        }
+      } catch { /* silent */ }
+    }
+    fetchPoster();
+  }, []);
 
   const filtered = products
     .filter((p) => {
@@ -110,14 +125,19 @@ export default function EssentialsPage() {
           {/* ── Banner Section ── */}
           <div className="py-4 md:py-6 w-full">
             <div className="relative w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-blue-50">
-              <Image
-                src="/store_hero_v4.png"
-                alt="NearBuy Store Banner"
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                className="object-cover object-center"
-                priority
-              />
+              {posterUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-cover object-center" />
+              ) : (
+                <Image
+                  src="/store_hero_v4.png"
+                  alt="NearBuy Store Banner"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
+                  className="object-cover object-center"
+                  priority
+                />
+              )}
             </div>
           </div>
 

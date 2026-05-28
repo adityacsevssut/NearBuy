@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Search, Star, Clock, MapPin, ChevronDown,
@@ -229,8 +229,20 @@ export default function HomePage() {
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading,   setIsLoading]   = useState(true);
+  const [posterUrl,   setPosterUrl]   = useState<string | null>(null);
 
-  useEffect(() => { fetchRestaurants(); }, []);
+  useEffect(() => { fetchRestaurants(); fetchFoodPoster(); }, []);
+
+  async function fetchFoodPoster() {
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/homepage-poster?type=food`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
+      }
+    } catch { /* silent — fallback to static image */ }
+  }
 
   async function fetchRestaurants() {
     try {
@@ -459,7 +471,7 @@ export default function HomePage() {
             <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src="/1000242984.png" 
+                src={posterUrl || "/1000242984.png"} 
                 alt="NearBuy Special Offer" 
                 className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
               />

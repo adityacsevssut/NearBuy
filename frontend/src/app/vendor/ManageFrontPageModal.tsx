@@ -19,6 +19,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
   const [isDeleting, setIsDeleting] = useState(false);
   const [isGpsLoading, setIsGpsLoading] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
+  const [currentIsOpen, setCurrentIsOpen] = useState<boolean | null>(null);
 
   const [formData, setFormData] = useState({
     restaurant_name: "",
@@ -72,6 +73,8 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
           landmark: data.profile.landmark || "",
           rating: data.profile.rating?.toString() || "0.0",
         });
+        // Preserve the current open/closed state so saving this modal never resets it
+        setCurrentIsOpen(data.profile.is_open ?? false);
         if (data.profile.image_url) {
           setImagePreview(data.profile.image_url);
         }
@@ -153,9 +156,13 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
     try {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
       const form = new FormData();
-      Object.entries(formData).forEach(([key, value]) => {
-        form.append(key, value);
-      });
+      Object.entries(formData).forEach(([key, value]) =>
+        form.append(key, value)
+      );
+      // Always send back the current is_open value so we don't accidentally reset it
+      if (currentIsOpen !== null) {
+        form.append("is_open", String(currentIsOpen));
+      }
       if (imageFile) {
         form.append("image", imageFile);
       } else if (imagePreview && imagePreview.startsWith("data:")) {

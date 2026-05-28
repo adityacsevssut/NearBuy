@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2 } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
@@ -12,7 +12,7 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace
 export default function PartnerDashboard() {
   const { user, logout, isLoggedIn, accessToken } = useAuth();
   const router = useRouter();
-  const [view, setView] = useState<"dashboard" | "vendors" | "requests">("dashboard");
+  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend">("dashboard");
   const [requests, setRequests] = useState<any[]>([]);
   const [loadingReqs, setLoadingReqs] = useState(false);
   const [editingReq, setEditingReq] = useState<any | null>(null);
@@ -28,6 +28,71 @@ export default function PartnerDashboard() {
   const [editVendorForm, setEditVendorForm] = useState({ firstName: "", lastName: "", email: "", mobile: "", newPassword: "" });
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [submittingEdit, setSubmittingEdit] = useState(false);
+
+  // Manage Frontend state
+  const [currentPoster, setCurrentPoster] = useState<string | null>(null);
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [loadingPoster, setLoadingPoster] = useState(false);
+  const [savingPoster, setSavingPoster] = useState(false);
+  const [posterSaved, setPosterSaved] = useState(false);
+
+  const fetchCurrentPoster = async () => {
+    setLoadingPoster(true);
+    try {
+      const mType = (user?.manager_type || "food").toLowerCase();
+      const res = await fetch(`${API}/api/homepage-poster?type=${mType}`);
+      const data = await res.json();
+      if (data.poster?.image_url) {
+        setCurrentPoster(data.poster.image_url);
+        setPosterPreview(data.poster.image_url);
+      } else {
+        setCurrentPoster(null);
+        setPosterPreview(null);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setLoadingPoster(false);
+  };
+
+  const handlePosterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.size > 8 * 1024 * 1024) {
+        toast.error("Image must be under 8 MB");
+        return;
+      }
+      setPosterFile(file);
+      const reader = new FileReader();
+      reader.onload = () => setPosterPreview(reader.result as string);
+      reader.readAsDataURL(file);
+      setPosterSaved(false);
+    }
+  };
+
+  const handlePosterSave = async () => {
+    if (!posterFile) { toast.error("Please select an image first"); return; }
+    setSavingPoster(true);
+    try {
+      const form = new FormData();
+      form.append("image", posterFile);
+      const res = await fetch(`${API}/api/homepage-poster`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to save poster");
+      toast.success("Poster published successfully!");
+      setCurrentPoster(data.poster.image_url);
+      setPosterFile(null);
+      setPosterSaved(true);
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setSavingPoster(false);
+  };
 
   const fetchRequests = async () => {
     setLoadingReqs(true);
@@ -181,6 +246,7 @@ export default function PartnerDashboard() {
   useEffect(() => {
     if (view === "requests" && accessToken) fetchRequests();
     if (view === "vendors" && accessToken) fetchVendors();
+    if (view === "frontend" && accessToken) fetchCurrentPoster();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, accessToken]);
 
@@ -303,7 +369,9 @@ export default function PartnerDashboard() {
               className="grid grid-cols-1 md:grid-cols-3 gap-6"
             >
               {/* Button 1: Manage Frontend */}
-              <button className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
+              <button
+                onClick={() => setView("frontend")}
+                className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
                   <LayoutTemplate className="w-24 h-24" />
                 </div>
@@ -312,7 +380,7 @@ export default function PartnerDashboard() {
                 </div>
                 <h3 className="text-lg font-black text-gray-900 mb-2">Manage Frontend</h3>
                 <p className="text-sm text-gray-500 leading-relaxed relative z-10">
-                  Customize the look, banners, and categories of your frontend platform page.
+                  Upload and publish the promotional banner/poster shown on your category home page.
                 </p>
               </button>
 
@@ -681,6 +749,134 @@ export default function PartnerDashboard() {
                   </div>
                 </div>
               )}
+            </motion.div>
+          ) : view === "frontend" ? (
+            <motion.div
+              key="frontend"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">Manage Frontend Poster</h2>
+                  <p className="text-xs text-gray-500 mt-1 capitalize">
+                    This image is shown as the promotional banner on the{" "}
+                    <span className={`font-bold ${theme.textDark}`}>
+                      {type === "food" ? "Home (Food)" : type === "medicine" ? "Medico" : "Store (Essentials)"}
+                    </span>{" "}page.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchCurrentPoster}
+                  className={`p-2 rounded-xl ${theme.bg} border ${theme.border} ${theme.text} hover:opacity-80 transition-opacity`}
+                  title="Refresh"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loadingPoster ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+
+              {/* Current live poster */}
+              <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Current Live Poster</p>
+                {loadingPoster ? (
+                  <div className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+                ) : currentPoster ? (
+                  <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={currentPoster} alt="Current poster" className="w-full object-cover max-h-64" />
+                    <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full ${theme.bg} border ${theme.border} text-[10px] font-black ${theme.textDark} uppercase tracking-widest shadow-sm`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                      Live
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`h-48 ${theme.bg} rounded-2xl border-2 border-dashed ${theme.border} flex flex-col items-center justify-center gap-3`}>
+                    <ImageIcon className={`w-10 h-10 ${theme.text} opacity-40`} />
+                    <p className="text-sm font-semibold text-gray-400">No poster uploaded yet</p>
+                    <p className="text-xs text-gray-400">Upload one below to make it live</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Upload new poster */}
+              <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Upload New Poster</p>
+
+                {/* Drop zone */}
+                <label
+                  htmlFor="poster-upload"
+                  className={`relative flex flex-col items-center justify-center w-full min-h-56 rounded-2xl border-2 border-dashed transition-all cursor-pointer group ${
+                    posterPreview && posterPreview !== currentPoster
+                      ? `border-transparent`
+                      : `${theme.border} hover:border-opacity-60 ${theme.bg}`
+                  }`}
+                >
+                  {posterPreview && posterPreview !== currentPoster ? (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={posterPreview} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
+                        <span className="text-white font-black text-sm bg-black/50 px-4 py-2 rounded-full">Change Image</span>
+                      </div>
+                      <div className="absolute top-3 right-3 bg-white/90 text-xs font-bold text-gray-700 px-2.5 py-1 rounded-full shadow">
+                        Preview
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center gap-3 py-10 px-6 text-center">
+                      <div className={`w-14 h-14 rounded-2xl ${theme.bg} border ${theme.border} flex items-center justify-center`}>
+                        <Upload className={`w-6 h-6 ${theme.text}`} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-gray-700 text-sm">Drag & drop or click to upload</p>
+                        <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP — max 8 MB</p>
+                        <p className="text-xs text-gray-400">Recommended: 1200 × 400 px (landscape)</p>
+                      </div>
+                    </div>
+                  )}
+                  <input
+                    id="poster-upload"
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    onChange={handlePosterFileChange}
+                  />
+                </label>
+
+                {/* Info / status row */}
+                {posterFile && (
+                  <div className={`mt-3 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${theme.bg} ${theme.textDark}`}>
+                    <ImageIcon className="w-3.5 h-3.5" />
+                    {posterFile.name} — {(posterFile.size / 1024).toFixed(0)} KB
+                  </div>
+                )}
+
+                {/* Save button */}
+                <button
+                  onClick={handlePosterSave}
+                  disabled={!posterFile || savingPoster}
+                  className={`mt-4 w-full py-3 rounded-xl font-black text-white text-sm transition-all flex items-center justify-center gap-2 ${
+                    posterFile && !savingPoster
+                      ? `bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90 shadow-lg ${theme.shadow} active:scale-[0.99]`
+                      : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  }`}
+                >
+                  {savingPoster ? (
+                    <><RefreshCw className="w-4 h-4 animate-spin" /> Publishing…</>
+                  ) : posterSaved ? (
+                    <><CheckCircle className="w-4 h-4" /> Published!</>
+                  ) : (
+                    <><Upload className="w-4 h-4" /> Publish Poster</>
+                  )}
+                </button>
+
+                {/* Tip */}
+                <div className="mt-4 flex items-start gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                  <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                  <p>The poster goes live instantly after publishing. Previous posters are overwritten. Use high-resolution landscape images for the best result.</p>
+                </div>
+              </div>
             </motion.div>
           ) : null}
         </AnimatePresence>
