@@ -79,7 +79,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [activeCenter, setActiveCenter] = useState<any | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
 
-  const { user, accessToken, isLoggedIn } = useAuth();
+  const { user, accessToken, isLoggedIn, updateUser } = useAuth();
 
   const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -220,6 +220,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("nearbuy_longitude");
     }
     localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
+    if (isLoggedIn && updateUser) {
+      updateUser({
+        locationName: name,
+        pincode: pin,
+        landmark: lmk,
+        latitude: lat,
+        longitude: lon,
+      });
+    }
     syncLocationToBackend(name, pin, lmk, lat, lon);
   };
 

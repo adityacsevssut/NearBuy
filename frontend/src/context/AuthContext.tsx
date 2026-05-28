@@ -30,6 +30,7 @@ interface AuthContextType {
   isLoginModalOpen: boolean;
   openLoginModal: () => void;
   closeLoginModal: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -155,8 +156,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const updateUser = (updates: Partial<AuthUser>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const updated = { ...prev, ...updates };
+      localStorage.setItem("nb_user", JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal }}>
+    <AuthContext.Provider value={{ user, accessToken, login, logout, updateUser, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal }}>
       {children}
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </AuthContext.Provider>

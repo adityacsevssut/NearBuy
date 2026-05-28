@@ -35,7 +35,7 @@ export default function DishPage() {
   const { addItem, itemQty } = useCart();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { isLoggedIn, openLoginModal } = useAuth();
-  const { latitude, longitude } = useLocationContext();
+  const { latitude, longitude, pincode } = useLocationContext();
 
   const [dishes, setDishes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +62,28 @@ export default function DishPage() {
   }, [rawItem]);
 
   const filteredDishes = dishes
-    .filter((dish) => foodPref === "all" || dish.type === foodPref)
+    .filter((dish) => {
+      if (foodPref !== "all" && dish.type !== foodPref) return false;
+
+      let matchRange = true;
+      if (latitude !== null && longitude !== null && dish.latitude && dish.longitude) {
+        const vendorLat = parseFloat(dish.latitude);
+        const vendorLon = parseFloat(dish.longitude);
+        const dist = getDistance(
+          typeof latitude === "string" ? parseFloat(latitude) : latitude,
+          typeof longitude === "string" ? parseFloat(longitude) : longitude,
+          vendorLat,
+          vendorLon
+        );
+        const limit = dish.delivery_range ? parseFloat(dish.delivery_range) : 5;
+        if (dist != null) {
+          matchRange = dist <= limit;
+        }
+      } else if (pincode && dish.pincode) {
+        matchRange = pincode === dish.pincode;
+      }
+      return matchRange;
+    })
     .sort((a, b) => {
       if (sortOrder === "low-to-high") return a.price - b.price;
       if (sortOrder === "high-to-low") return b.price - a.price;

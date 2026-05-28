@@ -264,7 +264,21 @@ export default function HomePage() {
         if (d!=null) matchCenter = d <= parseFloat(activeCenter.radius_km);
       }
     }
-    return matchVeg && matchSrch && matchCenter;
+
+    let matchRange = true;
+    if (latitude !== null && longitude !== null && r.latitude && r.longitude) {
+      const vLat = parseFloat(r.latitude);
+      const vLon = parseFloat(r.longitude);
+      const d = getDistance(latitude, longitude, vLat, vLon);
+      const limit = r.deliveryRange ? parseFloat(r.deliveryRange) : 5;
+      if (d != null) {
+        matchRange = d <= limit;
+      }
+    } else if (pincode && r.pincode) {
+      matchRange = pincode === r.pincode;
+    }
+
+    return matchVeg && matchSrch && matchCenter && matchRange;
   });
 
   const popular = filtered.slice(0, 8);
