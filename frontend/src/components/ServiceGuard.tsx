@@ -262,68 +262,60 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }
 
   if (status === "denied") {
-    const activeCenters = centers.filter((c: any) => c.is_active !== false);
     return (
-      <div className="min-h-screen bg-orange-50/40 flex flex-col pt-16">
+      <div className="min-h-screen bg-white flex flex-col pt-16 font-sans">
         <Navbar />
-        <main className="flex-1 flex items-center justify-center p-4 relative overflow-hidden my-8">
-          {/* Background decorations */}
-          <div className="absolute -top-40 -right-40 w-96 h-96 bg-orange-500/5 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-red-500/5 rounded-full blur-3xl"></div>
+        <main className="flex-1 flex flex-col items-center p-6 mt-4 text-center">
+          
+          {/* Main Hero Image */}
+          <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6">
+            <img src="/images/food_hero.png" alt="Out of Service Area" className="w-full h-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
+          </div>
 
-          <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-2xl shadow-gray-200/50 border border-gray-100 relative z-10">
-            <div className="w-24 h-24 bg-gradient-to-br from-red-50 to-orange-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-red-100 relative">
-              <div className="absolute inset-0 rounded-full border border-red-500/20 animate-ping opacity-75"></div>
-              <ShieldAlert className="w-10 h-10 text-red-500" />
-            </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-2 tracking-tight">Out of Service Zone</h1>
-            <p className="text-gray-500 mb-6 leading-relaxed font-medium text-[15px]">
-              We currently don&apos;t deliver to your area. But we&apos;re available at these locations:
+          {/* Heading */}
+          <h1 className="text-3xl font-black text-[#3d4152] tracking-tight mb-2">
+            Delivering in select cities
+          </h1>
+          <p className="text-[#7e808c] text-[17px] font-medium mb-10">
+            Stay tuned for updates!
+          </p>
+
+          {/* Dotted divider */}
+          <div className="w-full max-w-md mx-auto flex items-center justify-center gap-3 mb-10 overflow-hidden opacity-30 px-4">
+            {[...Array(15)].map((_, i) => (
+              <div key={i} className="w-1.5 h-1.5 rotate-45 bg-gray-500 flex-shrink-0"></div>
+            ))}
+          </div>
+
+          {/* Bottom Section */}
+          <div className="flex flex-col items-center">
+            <p className="text-[#93959f] font-bold text-[15px] tracking-wide mb-0.5">
+              NearBuy
             </p>
-
-            {/* Available landmarks / centers */}
-            {activeCenters.length > 0 && (
-              <div className="mb-6 space-y-2 text-left">
-                {activeCenters.map((c: any) => (
-                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 bg-orange-50 border border-orange-200 rounded-2xl">
-                    <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-sm">
-                      <MapPin className="w-4 h-4 text-white" />
-                    </div>
-                    <div className="min-w-0">
-                      {c.landmark ? (
-                        <>
-                          <p className="font-black text-gray-900 text-[15px] leading-tight truncate">{c.landmark}</p>
-                          <p className="text-xs text-gray-500 font-medium truncate">{c.name} · PIN {c.pincode}</p>
-                        </>
-                      ) : (
-                        <>
-                          <p className="font-black text-gray-900 text-[15px] leading-tight truncate">{c.name}</p>
-                          <p className="text-xs text-gray-500 font-medium">PIN {c.pincode}</p>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            <div className="space-y-3">
-              <button 
-                onClick={() => {
-                  toast.success("Request recorded! We'll notify you when we arrive.");
-                }}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 rounded-xl text-white font-bold transition-all shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 active:translate-y-0"
-              >
-                Request service in this area
-              </button>
-              <button 
-                onClick={() => setIsLocationModalOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-white border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 rounded-xl text-gray-700 font-bold transition-all"
-              >
-                Change Location <ArrowRight className="w-4 h-4" />
-              </button>
+            <p className="text-[#d4d5d9] font-black text-2xl tracking-tighter mb-4">
+              Your Nearest Market Place
+            </p>
+            <div className="w-48 mx-auto mb-10">
+              <img src="/images/delivery_boy_bottom.png" alt="Delivery Info" className="w-full h-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
             </div>
           </div>
+
+          {/* Action buttons (Added so user can escape this screen easily) */}
+          <div className="w-full max-w-sm mx-auto space-y-3 pb-8">
+             <button 
+                onClick={() => setIsLocationModalOpen(true)}
+                className="w-full py-4 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-bold transition-all shadow-lg active:scale-[0.98]"
+              >
+                Change Location
+              </button>
+              <button 
+                onClick={() => toast.success("We'll notify you when we expand to your area!")}
+                className="w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-gray-700 font-bold transition-all active:scale-[0.98]"
+              >
+                Notify Me
+              </button>
+          </div>
+
         </main>
         <Footer />
         <MobileBottomNav />

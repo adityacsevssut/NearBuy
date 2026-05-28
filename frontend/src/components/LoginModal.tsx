@@ -1,7 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { X, Eye, EyeOff, Mail, Lock, User, Phone, ArrowLeft, CheckCircle, RefreshCw, AlertCircle, ChevronRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -408,7 +408,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
-            className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-[440px] overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
+            className="relative bg-white rounded-xl shadow-2xl w-full max-w-[440px] overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
           >
             {/* Subtle background gradient glow */}
             <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${t.headerGlow} to-transparent pointer-events-none`} />
@@ -423,34 +423,52 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                   {/* User Login */}
                   <button
                     onClick={() => reset("pick-user")}
-                    className={`w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 ${t.panelHover} transition-all duration-300 group shadow-sm hover:shadow-md bg-white`}
+                    className={`w-full p-4 flex items-center gap-4 rounded-lg border border-orange-200/60 bg-orange-50/40 ${t.panelHover} transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5`}
                   >
-                    <div className={`w-10 h-10 ${t.panelIcon} rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                      <User className="w-5 h-5" />
+                    <div className={`w-12 h-12 ${t.panelIcon} rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                      <User className="w-6 h-6" />
                     </div>
-                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-gray-900 transition-colors">User Login</span>
+                    <div className="flex flex-col items-start flex-1 text-left">
+                      <span className="font-black text-gray-900 text-[16px] group-hover:text-gray-900 transition-colors">User Login</span>
+                      <span className="text-[12px] text-gray-400 font-medium mt-0.5">Order food & essentials</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-gray-200 transition-all">
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                    </div>
                   </button>
 
                   {/* Vendor Login */}
                   <button
                     onClick={() => reset("vendor-login")}
-                    className="w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
+                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-emerald-200/60 bg-emerald-50/40 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                      <Phone className="w-5 h-5" />
+                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                      <Phone className="w-6 h-6" />
                     </div>
-                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-emerald-900 transition-colors">Vendor Login</span>
+                    <div className="flex flex-col items-start flex-1 text-left">
+                      <span className="font-black text-gray-900 text-[16px] transition-colors">Vendor Login</span>
+                      <span className="text-[12px] text-emerald-600/70 font-medium mt-0.5">Manage your store</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-emerald-50/50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-emerald-200 transition-all">
+                      <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 transition-colors" />
+                    </div>
                   </button>
 
                   {/* Manager Login */}
                   <button
                     onClick={() => reset("manager-login")}
-                    className="w-full py-3 flex items-center justify-center gap-3 rounded-full border-2 border-gray-100 hover:border-violet-400 hover:bg-violet-50 transition-all duration-300 group shadow-sm hover:shadow-md bg-white"
+                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-violet-200/60 bg-violet-50/40 hover:border-violet-300 hover:bg-violet-50 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
                   >
-                    <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-full flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform duration-300">
-                      <Lock className="w-5 h-5" />
+                    <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                      <Lock className="w-6 h-6" />
                     </div>
-                    <span className="font-bold text-gray-800 text-[16px] group-hover:text-violet-900 transition-colors">Manager Login</span>
+                    <div className="flex flex-col items-start flex-1 text-left">
+                      <span className="font-black text-gray-900 text-[16px] transition-colors">Manager Login</span>
+                      <span className="text-[12px] text-violet-600/70 font-medium mt-0.5">Admin dashboard</span>
+                    </div>
+                    <div className="w-8 h-8 rounded-full bg-violet-50/50 flex items-center justify-center group-hover:bg-white border border-transparent group-hover:border-violet-200 transition-all">
+                      <ChevronRight className="w-4 h-4 text-violet-400 group-hover:text-violet-600 transition-colors" />
+                    </div>
                   </button>
                 </div>
               </>

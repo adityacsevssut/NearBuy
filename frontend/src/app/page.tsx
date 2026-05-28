@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Search, Star, Clock, MapPin, ChevronDown,
-  SlidersHorizontal, X, Utensils, Heart, Bell
+  SlidersHorizontal, X, Utensils, Heart, Bell, GraduationCap
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -88,7 +88,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   return (
     <Link
       href={`/vendor/${r.id}`}
-      className={`flex-shrink-0 w-[148px] bg-white rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.08)] border border-gray-100 transition-all active:scale-[0.97] ${dim ? "opacity-60" : ""}`}
+      className={`group flex-shrink-0 w-[148px] bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200 hover:border-orange-200/80 hover:bg-orange-50 transition-all active:scale-[0.97] ${dim ? "opacity-60" : ""}`}
     >
       {/* Image */}
       <div className="relative h-[100px] bg-gray-100 overflow-hidden">
@@ -148,7 +148,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   return (
     <Link
       href={`/vendor/${r.id}`}
-      className={`group bg-white rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.07)] border border-gray-100 transition-all duration-200 hover:shadow-[0_6px_24px_rgba(249,115,22,0.15)] hover:-translate-y-0.5 ${dim?"opacity-70":""}`}
+      className={`group bg-white rounded-2xl overflow-hidden shadow-md border border-gray-200 hover:border-orange-200/80 hover:bg-orange-50 transition-all duration-200 hover:shadow-[0_6px_24px_rgba(249,115,22,0.18)] hover:-translate-y-0.5 ${dim?"opacity-70":""}`}
     >
       {/* Image */}
       <div className="relative h-40 bg-gray-100 overflow-hidden">
@@ -283,24 +283,26 @@ export default function HomePage() {
             {/* ─────────────────────────────────────────────────────────────
                 ROW 1 — Location (full width, bordered)
             ───────────────────────────────────────────────────────────── */}
-            <div className="w-full pt-2.5 pb-2.5 border-b border-gray-100">
+            <div className="w-full pt-3 pb-3 border-b border-gray-100">
               <button
                 suppressHydrationWarning
                 onClick={() => setIsLocationModalOpen(true)}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 bg-gray-100 rounded-xl border border-gray-200 hover:border-orange-300 hover:bg-orange-50/40 active:scale-[0.99] transition-all"
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-2xl border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:border-orange-300 hover:bg-orange-50/50 hover:shadow-md active:scale-[0.99] transition-all duration-200"
               >
-                <MapPin className="w-4 h-4 text-orange-500 shrink-0" />
+                <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0 border border-gray-100">
+                  <MapPin className="w-4 h-4 text-orange-500" />
+                </div>
                 {/* Location name + chevron */}
                 <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left">
-                  <span className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Deliver to</span>
-                  <span className="text-[13px] font-black text-gray-900 flex items-center gap-0.5 mt-0.5">
-                    <span className="truncate max-w-[160px] sm:max-w-xs">{landmark ? `${landmark}, ${locationName}` : locationName}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-orange-500 shrink-0 ml-0.5" />
+                  <span className="text-[11px] text-gray-500 font-bold uppercase tracking-wider">Deliver to</span>
+                  <span className="text-[14px] font-black text-gray-900 flex items-center gap-1 mt-1">
+                    <span className="truncate max-w-[180px] sm:max-w-xs">{landmark ? `${landmark}, ${locationName}` : locationName}</span>
+                    <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
                   </span>
                 </div>
                 {/* Pincode pushed to far right */}
                 {pincode && (
-                  <span className="ml-auto shrink-0 text-[11px] font-bold text-orange-500 bg-orange-50 border border-orange-200 px-2.5 py-1 rounded-full">
+                  <span className="ml-auto shrink-0 text-[12px] font-black text-orange-600 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
                     📍 {pincode}
                   </span>
                 )}
@@ -310,20 +312,20 @@ export default function HomePage() {
             {/* ─────────────────────────────────────────────────────────────
                 ROW 2 — Search bar + Filter (full width)
             ───────────────────────────────────────────────────────────── */}
-            <div className="w-full flex items-center gap-2.5 py-2.5">
-              <div className="flex-1 flex items-center gap-2 bg-gray-100 rounded-xl px-3 py-2.5 focus-within:bg-white focus-within:ring-2 focus-within:ring-orange-400/30 focus-within:border focus-within:border-orange-300 transition-all">
-                <Search className="w-4 h-4 text-gray-400 shrink-0" />
+            <div className="w-full flex items-center gap-3 py-3">
+              <div className="flex-1 flex items-center gap-2.5 bg-gray-50 rounded-2xl px-4 py-3.5 border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-500/15 focus-within:border-orange-400 transition-all duration-200">
+                <Search className="w-5 h-5 text-gray-500 shrink-0" />
                 <input
                   suppressHydrationWarning
                   type="text"
                   placeholder="Search for restaurants or cuisines"
-                  className="flex-1 bg-transparent text-[13px] text-gray-800 outline-none placeholder:text-gray-400 font-medium"
+                  className="flex-1 bg-transparent text-[14px] text-gray-900 outline-none placeholder:text-gray-500 font-semibold"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
                 />
                 {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="w-4 h-4 rounded-full bg-gray-400 flex items-center justify-center shrink-0">
-                    <X className="w-2.5 h-2.5 text-white" />
+                  <button onClick={() => setSearchQuery("")} className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center shrink-0 hover:bg-gray-500 transition-colors">
+                    <X className="w-3 h-3 text-white" />
                   </button>
                 )}
               </div>
@@ -332,15 +334,15 @@ export default function HomePage() {
               <div className="relative shrink-0">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-[12px] font-bold border transition-all ${
+                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
                     showFilters || foodPref !== "all"
-                      ? "bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-200"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-orange-300"
+                      ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
+                      : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-white hover:border-orange-300 hover:text-orange-600"
                   }`}
                 >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                  <SlidersHorizontal className="w-4 h-4" />
                   <span className="hidden sm:inline">Filter</span>
-                  {foodPref !== "all" && <span className="w-1.5 h-1.5 rounded-full bg-white opacity-90" />}
+                  {foodPref !== "all" && <span className="w-2 h-2 rounded-full bg-white shadow-sm" />}
                 </button>
 
                 {/* Desktop dropdown */}
@@ -476,9 +478,9 @@ export default function HomePage() {
               {topCuisines.map(({ label, image, bg, border }) => (
                 <div
                   key={label}
-                  className={`flex-shrink-0 flex items-center gap-2 pr-3.5 pl-1.5 py-1.5 rounded-full border ${bg} ${border} transition-all text-[12px] font-bold text-gray-700`}
+                  className={`group flex-shrink-0 flex items-center gap-2 pr-3.5 pl-1.5 py-1.5 rounded-full border ${bg} ${border} hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-[12px] font-bold text-gray-700 hover:text-gray-900 cursor-default`}
                 >
-                  <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0">
+                  <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 transition-transform duration-300 group-hover:scale-110">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={image} alt={label} className="w-full h-full object-cover" />
                   </div>
@@ -537,6 +539,64 @@ export default function HomePage() {
           </section>
 
         </div>
+
+        {/* ══ QUICK ACTION CARDS — below all restaurants, above footer ══════════ */}
+        <div className="max-w-7xl mx-auto px-4 py-6">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+
+            {/* Card 1 — Register as Student */}
+            <button
+              onClick={() => { setReqType("student"); setReqModal(true); }}
+              className="group bg-white rounded-2xl border border-gray-200 shadow-md
+                p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+                hover:shadow-lg hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
+                transition-all duration-200 active:scale-[0.98]"
+            >
+              <div className="flex items-start justify-between w-full">
+                {/* Orange icon */}
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}>
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                {/* Arrow */}
+                <div className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
+                  group-hover:bg-orange-100 group-hover:border-orange-300 transition-colors shrink-0">
+                  <ChevronDown className="w-3.5 h-3.5 text-orange-400 -rotate-90 group-hover:text-orange-600 transition-colors" />
+                </div>
+              </div>
+              <div className="w-full">
+                <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Register as Student</p>
+              </div>
+            </button>
+
+            {/* Card 2 — Register as a Vendor */}
+            <button
+              onClick={() => { setReqType("vendor"); setReqModal(true); }}
+              className="group bg-white rounded-2xl border border-gray-200 shadow-md
+                p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+                hover:shadow-lg hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
+                transition-all duration-200 active:scale-[0.98]"
+            >
+              <div className="flex items-start justify-between w-full">
+                {/* Orange icon */}
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+                  style={{ background: "linear-gradient(135deg, #f97316, #ea580c)" }}>
+                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                </div>
+                {/* Arrow */}
+                <div className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
+                  group-hover:bg-orange-100 group-hover:border-orange-300 transition-colors shrink-0">
+                  <ChevronDown className="w-3.5 h-3.5 text-orange-400 -rotate-90 group-hover:text-orange-600 transition-colors" />
+                </div>
+              </div>
+              <div className="w-full">
+                <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Register as a Vendor</p>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
       </main>
 
       <Footer />

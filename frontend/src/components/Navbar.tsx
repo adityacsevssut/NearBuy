@@ -108,11 +108,11 @@ export default function Navbar() {
             id="hamburger-btn"
             onClick={() => setMobileMenuOpen(prev => !prev)}
             aria-label="Open menu"
-            className="flex items-center justify-center w-10 h-10 -ml-2 rounded-xl hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 group"
           >
             {mobileMenuOpen
-              ? <X className="w-6 h-6 text-gray-800" />
-              : <Menu className="w-6 h-6 text-gray-800" />
+              ? <X className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
+              : <Menu className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
             }
           </button>
 
@@ -124,7 +124,7 @@ export default function Navbar() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.96 }}
                 transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute left-0 top-full mt-3 w-[260px] bg-white/95 backdrop-blur-xl rounded-[28px] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] border border-gray-100/80 overflow-hidden z-50 p-2"
+                className="absolute left-0 top-full mt-3 w-[260px] bg-white/95 backdrop-blur-xl rounded-md shadow-xl border border-gray-200 overflow-hidden z-50 p-2"
               >
                 <div className="space-y-1">
                   {/* Page Links */}
@@ -132,13 +132,13 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group ${
+                      className={`flex items-center gap-3 px-3 py-3 rounded-md transition-all duration-200 group ${
                         isActive
                           ? `${activeBg} ${activeColor}`
                           : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                       }`}
                     >
-                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center transition-colors ${
+                      <div className={`w-9 h-9 rounded-md flex items-center justify-center transition-colors ${
                         isActive ? `${activeBg}` : "bg-gray-100 group-hover:bg-gray-200"
                       }`}>
                         <Icon className={`w-4.5 h-4.5 ${isActive ? activeColor : "text-gray-500 group-hover:text-gray-700"}`} />

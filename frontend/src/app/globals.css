@@ -27,8 +27,13 @@
   --nb-placeholder: #D1D5DB;
 }
 
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   background: var(--background);
@@ -39,13 +44,32 @@ body {
   overflow-x: hidden;
 }
 
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: #F9FAFB; }
-::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #f97316; }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
 
-.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-.scrollbar-hide::-webkit-scrollbar { display: none; }
+::-webkit-scrollbar-track {
+  background: #F9FAFB;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f97316;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
 
 /* Emerald gradient text */
 .gradient-text {
@@ -85,27 +109,42 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 .btn-orange:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 8px 24px rgba(249, 115, 22, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
-.btn-orange:active { transform: translateY(0px); }
+
+.btn-orange:active {
+  transform: translateY(0px);
+}
 
 /* Subtle card shadow */
 .card-shadow {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
   transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
+
 .card-shadow:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08), 0 16px 40px rgba(249, 115, 22, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(249, 115, 22, 0.08);
   transform: translateY(-2px);
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-6px); }
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-6px);
+  }
 }
-.float-anim { animation: float 4s ease-in-out infinite; }
+
+.float-anim {
+  animation: float 4s ease-in-out infinite;
+}
 
 /* Skeuomorphic-lite blue button */
 .btn-blue {
@@ -116,8 +155,12 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
+
 .btn-blue:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255,255,255,0.25);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
 }
-.btn-blue:active { transform: translateY(0px); }
+
+.btn-blue:active {
+  transform: translateY(0px);
+}
