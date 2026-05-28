@@ -53,6 +53,7 @@ export default function MedicoPage() {
   const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [posterLoading, setPosterLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPoster() {
@@ -63,7 +64,9 @@ export default function MedicoPage() {
           const data = await res.json();
           if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
         }
-      } catch { /* silent */ }
+      } catch { /* silent */ } finally {
+        setPosterLoading(false);
+      }
     }
     fetchPoster();
   }, []);
@@ -123,7 +126,9 @@ export default function MedicoPage() {
           {/* ── Banner Section ── */}
           <div className="py-4 md:py-6 w-full">
             <div className="relative w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1] rounded-3xl overflow-hidden shadow-xl border border-emerald-100 bg-emerald-50">
-              {posterUrl ? (
+              {posterLoading ? (
+                <div className="w-full h-full bg-emerald-100/50 animate-pulse"></div>
+              ) : posterUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={posterUrl} alt="NearBuy Medico Banner" className="w-full h-full object-cover object-center" />
               ) : (

@@ -161,8 +161,16 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center flex-shrink-0">
-          <Link href="/" className="flex items-center group">
-            <span className="font-black text-2xl md:text-3xl tracking-tight">
+          <Link href="/" className="flex items-center gap-1.5 md:gap-2 group">
+            {/* NB Logo */}
+            <div className="flex items-center justify-center w-8 h-8 md:w-9 md:h-9 rounded-xl bg-white/20 backdrop-blur-md shadow-sm border border-white/40 group-hover:scale-105 transition-transform duration-300">
+              <span className="font-black text-lg md:text-xl tracking-tighter flex items-center">
+                <span className="text-white drop-shadow-sm">N</span>
+                <span className="text-black drop-shadow-sm">B</span>
+              </span>
+            </div>
+            {/* Text */}
+            <span className="font-black text-2xl md:text-3xl tracking-tight hidden sm:block">
               <span className="text-white drop-shadow-sm">Near</span>
               <span className="text-black drop-shadow-sm">Buy</span>
             </span>

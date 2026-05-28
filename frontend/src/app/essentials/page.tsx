@@ -55,6 +55,7 @@ export default function EssentialsPage() {
   const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [posterLoading, setPosterLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPoster() {
@@ -65,7 +66,9 @@ export default function EssentialsPage() {
           const data = await res.json();
           if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
         }
-      } catch { /* silent */ }
+      } catch { /* silent */ } finally {
+        setPosterLoading(false);
+      }
     }
     fetchPoster();
   }, []);
@@ -125,7 +128,9 @@ export default function EssentialsPage() {
           {/* ── Banner Section ── */}
           <div className="py-4 md:py-6 w-full">
             <div className="relative w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-blue-50">
-              {posterUrl ? (
+              {posterLoading ? (
+                <div className="w-full h-full bg-blue-100/50 animate-pulse"></div>
+              ) : posterUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-cover object-center" />
               ) : (

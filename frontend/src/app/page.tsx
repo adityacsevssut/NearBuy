@@ -230,6 +230,7 @@ export default function HomePage() {
   const [restaurants, setRestaurants] = useState<any[]>([]);
   const [isLoading,   setIsLoading]   = useState(true);
   const [posterUrl,   setPosterUrl]   = useState<string | null>(null);
+  const [posterLoading, setPosterLoading] = useState(true);
 
   useEffect(() => { fetchRestaurants(); fetchFoodPoster(); }, []);
 
@@ -241,7 +242,9 @@ export default function HomePage() {
         const data = await res.json();
         if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
       }
-    } catch { /* silent — fallback to static image */ }
+    } catch { /* silent — fallback to static image */ } finally {
+      setPosterLoading(false);
+    }
   }
 
   async function fetchRestaurants() {
@@ -468,14 +471,18 @@ export default function HomePage() {
 
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
           <section className="px-4 py-3">
-            <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img 
-                src={posterUrl || "/1000242984.png"} 
-                alt="NearBuy Special Offer" 
-                className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
-              />
-            </Link>
+            {posterLoading ? (
+              <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 rounded-2xl animate-pulse"></div>
+            ) : (
+              <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img 
+                  src={posterUrl || "/1000242984.png"} 
+                  alt="NearBuy Special Offer" 
+                  className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
+                />
+              </Link>
+            )}
           </section>
 
           {/* ── 3. Popular Near You ─────────────────────────────────────────── */}
