@@ -5,8 +5,12 @@ import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 
 function MapEventsHandler({
+  lat,
+  lng,
   onLocationChange,
 }: {
+  lat: number;
+  lng: number;
   onLocationChange: (lat: number, lng: number) => void;
 }) {
   const map = useMap();
@@ -32,7 +36,12 @@ function MapEventsHandler({
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         const center = map.getCenter();
-        onLocationChange(center.lat, center.lng);
+        const dist = Math.sqrt(Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lng, 2));
+        // Only trigger location change if the map moved by a small threshold (~5 meters)
+        // This prevents resize events (e.g. keyboard opening) from triggering infinite re-renders.
+        if (dist > 0.00005) {
+          onLocationChange(center.lat, center.lng);
+        }
       }, 400);
     },
   });
@@ -76,7 +85,7 @@ export default function MapPicker({ lat, lng, onLocationChange }: MapPickerProps
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <RecenterMap lat={lat} lng={lng} />
-        <MapEventsHandler onLocationChange={onLocationChange} />
+        <MapEventsHandler lat={lat} lng={lng} onLocationChange={onLocationChange} />
       </MapContainer>
 
       {/* Fixed Center Pin */}
