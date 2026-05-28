@@ -104,7 +104,7 @@ function FoodItemPreviewCard({
 
           {/* Price */}
           <div className="flex items-baseline gap-1.5 mt-1.5 mb-2">
-            {item.actual_price && Number(item.actual_price) > Number(item.price || 0) && (
+            {Number(item.actual_price) > Number(item.price || 0) && (
               <>
                 <span className="flex items-center gap-0.5 text-green-600 font-black text-[13px]">
                   <ArrowDown className="w-3.5 h-3.5" strokeWidth={3} />
@@ -781,20 +781,33 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                 </div>
                               </div>
 
+                              {/* Name */}
+                              <div className="space-y-1">
+                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Item Name *</label>
+                                <input
+                                  value={form.name}
+                                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                                  placeholder="e.g. Chicken Biryani"
+                                  className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
+                                />
+                              </div>
+
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {/* Name */}
+                                {/* Actual Price */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Item Name *</label>
+                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Actual Price / MRP (₹)</label>
                                   <input
-                                    value={form.name}
-                                    onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                                    placeholder="e.g. Chicken Biryani"
+                                    type="number"
+                                    min={0}
+                                    value={form.actual_price}
+                                    onChange={(e) => setForm((f) => ({ ...f, actual_price: e.target.value }))}
+                                    placeholder="e.g. 200"
                                     className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
                                   />
                                 </div>
                                 {/* Price */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Price (₹) *</label>
+                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Selling Price (₹) *</label>
                                   <input
                                     type="number"
                                     min={1}

@@ -370,7 +370,7 @@ export default function VendorPage() {
                             </h3>
                             
                             <div className="flex items-baseline gap-1.5 mb-2 mt-2">
-                              {dish.actual_price && Number(dish.actual_price) > Number(dish.price || 0) && (
+                              {Number(dish.actual_price) > Number(dish.price || 0) && (
                                 <>
                                   <span className="flex items-center gap-0.5 text-green-600 font-black text-[13px]">
                                     <ArrowDown className="w-3.5 h-3.5" strokeWidth={3} />
