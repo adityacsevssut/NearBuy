@@ -268,13 +268,16 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         <main className="flex-1 flex flex-col items-center p-6 mt-4 text-center">
           
           {/* Main Hero Image */}
-          <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6">
-            <img src="/images/food_hero.png" alt="Out of Service Area" className="w-full h-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
+          <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6 flex justify-center items-center">
+            <img src="/images/out_of_service_hero.png" alt="Out of Service Area" className="w-full h-auto mx-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
           </div>
 
           {/* Heading */}
-          <h1 className="text-3xl font-black text-[#3d4152] tracking-tight mb-2">
-            Delivering in select cities
+          <h1 
+            className="text-4xl font-bold text-orange-500 mb-2 tracking-wide"
+            style={{ fontFamily: "cursive" }}
+          >
+            Not Available At Your Location
           </h1>
           <p className="text-[#7e808c] text-[17px] font-medium mb-10">
             Stay tuned for updates!
