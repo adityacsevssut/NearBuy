@@ -23,7 +23,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-white text-gray-900 pt-20 pb-10 border-t border-orange-100 relative overflow-hidden mt-12">
+      <footer className="bg-white text-gray-900 pt-10 md:pt-20 pb-24 md:pb-10 border-t border-orange-100 relative overflow-hidden mt-6 md:mt-12">
         {/* Subtle Background Glow */}
         <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isEssentials ? 'from-blue-50/50' : 'from-orange-50/80'} to-transparent blur-[80px] pointer-events-none`} />
 

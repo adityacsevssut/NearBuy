@@ -274,7 +274,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-white flex flex-col pt-16">
       <Navbar />
 
-      <main className="flex-1 pb-24 md:pb-6">
+      <main className="flex-1 pb-8 md:pb-6">
 
         {/* ══ STICKY TOP BAR (below orange navbar) ════════════════════════════ */}
         <div className="sticky top-16 z-40 bg-white border-b border-gray-100 shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
@@ -445,7 +445,7 @@ export default function HomePage() {
             <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img 
-                src="/home_banner.jpg" 
+                src="/1000242984.png" 
                 alt="NearBuy Special Offer" 
                 className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
               />
