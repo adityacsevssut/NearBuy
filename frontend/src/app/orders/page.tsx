@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Package, MapPin, ChevronLeft, Clock,
   CheckCircle, Loader2, Store, FileText, ChevronRight,
@@ -36,11 +36,15 @@ interface Order {
   delivery_address: any;
   status: string;
   created_at: string;
+  updated_at?: string;
+  delivery_charge?: string;
 }
 
-export default function OrdersPage() {
+function OrdersPageContent() {
   const { isLoggedIn, accessToken } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isHistory = searchParams.get('history') === 'true';
   
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -108,6 +112,18 @@ export default function OrdersPage() {
 
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
+  const displayedOrders = orders.filter((order) => {
+    const isDeliveredOrCancelled = order.status.toLowerCase() === "delivered" || order.status.toLowerCase() === "cancelled";
+    
+    // Calculate if it has been 1 hour since update
+    const lastUpdate = new Date(order.updated_at || order.created_at).getTime();
+    const isOlderThanOneHour = (Date.now() - lastUpdate) > 60 * 60 * 1000;
+    
+    const shouldBeInHistory = isDeliveredOrCancelled && isOlderThanOneHour;
+
+    return isHistory ? shouldBeInHistory : !shouldBeInHistory;
+  });
+
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
       <Navbar />
@@ -115,10 +131,12 @@ export default function OrdersPage() {
       {/* Page Header */}
       <div className="bg-white border-b border-gray-200 sticky top-16 z-20">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href="/" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+          <Link href={isHistory ? "/account" : "/"} className="p-2 -ml-2 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-black text-gray-900 text-lg tracking-tight">Your Orders</h1>
+          <h1 className="font-black text-gray-900 text-lg tracking-tight">
+            {isHistory ? "Recently Ordered" : "Your Orders"}
+          </h1>
         </div>
       </div>
 
@@ -128,19 +146,21 @@ export default function OrdersPage() {
             <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
             <p className="text-gray-500 font-medium">Fetching your orders...</p>
           </div>
-        ) : orders.length === 0 ? (
+        ) : displayedOrders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
               <Package className="w-10 h-10 text-gray-400" />
             </div>
             <h2 className="text-xl font-black text-gray-900 mb-2">No orders yet</h2>
-            <p className="text-gray-500 mb-6 text-sm">Looks like you haven't placed any orders.</p>
+            <p className="text-gray-500 mb-6 text-sm">
+              {isHistory ? "You have no past orders." : "Looks like you haven't placed any orders or they are all completed."}
+            </p>
             <Link href="/" className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95">
               Explore Nearby Shops
             </Link>
           </div>
         ) : (
-          orders.map((order) => (
+          displayedOrders.map((order) => (
             <motion.div
               key={order.id}
               initial={{ opacity: 0, y: 10 }}
@@ -196,13 +216,15 @@ export default function OrdersPage() {
                   <Eye className="w-4 h-4" />
                   See Items
                 </button>
-                <Link
-                  href={`/orders/${order.id}`}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl text-sm font-bold text-orange-600 transition-all active:scale-[0.98]"
-                >
-                  <Package className="w-4 h-4" />
-                  Track Status
-                </Link>
+                {!isHistory && (
+                  <Link
+                    href={`/orders/${order.id}`}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl text-sm font-bold text-orange-600 transition-all active:scale-[0.98]"
+                  >
+                    <Package className="w-4 h-4" />
+                    Track Status
+                  </Link>
+                )}
               </div>
             </motion.div>
           ))
@@ -280,6 +302,12 @@ export default function OrdersPage() {
                     <span>Platform Fee</span>
                     <span>₹{selectedOrderForItems.platform_fee}</span>
                   </div>
+                  {selectedOrderForItems.delivery_charge && parseFloat(selectedOrderForItems.delivery_charge) > 0 && (
+                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                      <span>Delivery Charge</span>
+                      <span>+ ₹{selectedOrderForItems.delivery_charge}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-100 mt-3">
                     <span>Grand Total</span>
                     <span>₹{selectedOrderForItems.total_amount}</span>
@@ -300,5 +328,13 @@ export default function OrdersPage() {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-orange-500" /></div>}>
+      <OrdersPageContent />
+    </Suspense>
   );
 }

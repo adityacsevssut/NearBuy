@@ -38,6 +38,7 @@ interface Order {
   created_at: string;
   customer_mobile?: string;
   alternate_mobile?: string;
+  delivery_charge?: string;
 }
 
 const ORDER_STATUSES = [
@@ -367,6 +368,12 @@ export default function VendorOrdersPage() {
                     <span>Platform Fee</span>
                     <span>₹{selectedOrderForItems.platform_fee}</span>
                   </div>
+                  {selectedOrderForItems.delivery_charge && parseFloat(selectedOrderForItems.delivery_charge) > 0 && (
+                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                      <span>Delivery Charge</span>
+                      <span>+ ₹{selectedOrderForItems.delivery_charge}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-100 mt-3">
                     <span>Grand Total</span>
                     <span>₹{selectedOrderForItems.total_amount}</span>

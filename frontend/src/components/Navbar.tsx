@@ -26,6 +26,7 @@ export default function Navbar() {
   const [notifOpen, setNotifOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const { user, isLoggedIn, logout, openLoginModal } = useAuth();
   const { locationName, landmark, pincode, setIsLocationModalOpen, activeCenter } = useLocationContext();
@@ -39,7 +40,7 @@ export default function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
         setUserMenuOpen(false);
       }
-      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node) && (!mobileOverlayRef.current || !mobileOverlayRef.current.contains(event.target as Node))) {
         setMobileMenuOpen(false);
       }
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
@@ -108,55 +109,13 @@ export default function Navbar() {
             id="hamburger-btn"
             onClick={() => setMobileMenuOpen(prev => !prev)}
             aria-label="Open menu"
-            className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/15 backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 group"
+            className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 group"
           >
             {mobileMenuOpen
               ? <X className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
               : <Menu className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
             }
           </button>
-
-          {/* ── Mobile Dropdown Menu ── */}
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.96 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="absolute left-0 top-full mt-3 w-[260px] bg-white/95 backdrop-blur-xl rounded-md shadow-xl border border-gray-200 overflow-hidden z-50 p-2"
-              >
-                <div className="space-y-1">
-                  {/* Page Links */}
-                  {navPages.map(({ href, label, icon: Icon, activeColor, activeBg, isActive }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={`flex items-center gap-3 px-3 py-3 rounded-md transition-all duration-200 group ${
-                        isActive
-                          ? `${activeBg} ${activeColor}`
-                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                      }`}
-                    >
-                      <div className={`w-9 h-9 rounded-md flex items-center justify-center transition-colors ${
-                        isActive ? `${activeBg}` : "bg-gray-100 group-hover:bg-gray-200"
-                      }`}>
-                        <Icon className={`w-4.5 h-4.5 ${isActive ? activeColor : "text-gray-500 group-hover:text-gray-700"}`} />
-                      </div>
-                      <span className="font-bold text-sm">{label}</span>
-                      {isActive && (
-                        <span className={`ml-auto text-[10px] font-black uppercase tracking-wider ${activeColor} opacity-70`}>
-                          Active
-                        </span>
-                      )}
-                    </Link>
-                  ))}
-
-
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* ── Logo ── */}
@@ -185,30 +144,20 @@ export default function Navbar() {
             <span className="hidden sm:block">Food Delivery</span>
             <span className="sm:hidden">Food</span>
           </Link>
-          <Link
-            href="/essentials"
-            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
-              isEssentials
-                ? `bg-white text-blue-600 shadow-sm`
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
-            }`}
+          <button
+            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 opacity-60 cursor-not-allowed text-gray-500`}
           >
             <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:block">Essentials</span>
+            <span className="hidden sm:block">Essentials (Soon)</span>
             <span className="sm:hidden">Store</span>
-          </Link>
-          <Link
-            href="/medico"
-            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
-              isMedico
-                ? `bg-white text-emerald-600 shadow-sm`
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
-            }`}
+          </button>
+          <button
+            className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 opacity-60 cursor-not-allowed text-gray-500`}
           >
             <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:block">Medico</span>
+            <span className="hidden sm:block">Medico (Soon)</span>
             <span className="sm:hidden">Medico</span>
-          </Link>
+          </button>
         </div>
 
         {/* ── Desktop Quick Links ── */}
@@ -356,6 +305,69 @@ export default function Navbar() {
         </div>
       </div>
       </nav>
+
+      {/* ── Mobile Full-Screen CardNav Menu ── */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            ref={mobileOverlayRef}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed top-16 left-0 right-0 bottom-0 w-full bg-[#F8F9FA] z-[99] pt-10 px-5 pb-6 overflow-y-auto"
+          >
+            <div className="flex flex-wrap gap-4 max-w-sm mx-auto w-full pb-10 justify-center">
+              {/* Food Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: 0.05, ease: [0.25, 1, 0.5, 1] }}
+                className="w-[calc(50%-8px)] aspect-square bg-orange-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end"
+                onClick={() => { router.push("/"); setMobileMenuOpen(false); }}
+              >
+                <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
+                  <UtensilsCrossed className="w-16 h-16 text-white" />
+                </div>
+                <h2 className="text-xl font-black text-white relative z-10 leading-tight">Food</h2>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Order Now</p>
+              </motion.div>
+
+              {/* Store Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: 0.15, ease: [0.25, 1, 0.5, 1] }}
+                className="w-[calc(50%-8px)] aspect-square bg-blue-500 rounded-3xl p-4 shadow-xl relative overflow-hidden transition-transform flex flex-col justify-end opacity-60 cursor-not-allowed"
+              >
+                <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
+                  <Package className="w-16 h-16 text-white" />
+                </div>
+                <h2 className="text-xl font-black text-white relative z-10 leading-tight">Store</h2>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Coming Soon</p>
+              </motion.div>
+
+              {/* Medico Card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ delay: 0.25, ease: [0.25, 1, 0.5, 1] }}
+                className="w-[calc(50%-8px)] aspect-square bg-emerald-500 rounded-3xl p-4 shadow-xl relative overflow-hidden transition-transform flex flex-col justify-end opacity-60 cursor-not-allowed"
+              >
+                <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
+                  <Pill className="w-16 h-16 text-white" />
+                </div>
+                <h2 className="text-xl font-black text-white relative z-10 leading-tight">Medico</h2>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Coming Soon</p>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <LocationModal />
     </>
   );
