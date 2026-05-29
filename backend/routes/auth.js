@@ -14,6 +14,7 @@ const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
 const { sendOtpSms } = require("../config/sms");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
+const { authenticate } = require("../middleware/auth");
 
 // Comma-separated list allowed (e.g. web + staging). Must include the same client id as
 // NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend or verifyIdToken returns 401.
@@ -581,7 +582,7 @@ router.post("/logout", async (req, res) => {
 // DELETE /api/auth/me
 // Delete current user account and all associated data
 // ════════════════════════════════════════════════════════════════════════════
-const { authenticate } = require("../middleware/auth");
+
 
 router.delete("/me", authenticate, async (req, res) => {
   try {
@@ -662,8 +663,17 @@ router.put(
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_user_saved_addresses_user ON user_saved_addresses(user_id)
     `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS app_ratings (
+        id SERIAL PRIMARY KEY,
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        rating INT NOT NULL CHECK(rating BETWEEN 1 AND 5),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
   } catch (err) {
-    console.error("Could not ensure user_saved_addresses table:", err.message);
+    console.error("Could not ensure tables exist:", err.message);
   }
 })();
 
@@ -761,5 +771,60 @@ router.delete("/me/saved-addresses/:id", authenticate, async (req, res) => {
     return res.status(500).json({ error: "Failed to delete address." });
   }
 });
+
+// ════════════════════════════════════════════════════════════════════════════
+// POST /api/auth/rate-app
+// Submit a rating for the app
+// ════════════════════════════════════════════════════════════════════════════
+router.post("/rate-app", authenticate, async (req, res) => {
+  const { rating } = req.body;
+  if (!rating || rating < 1 || rating > 5) {
+    return res.status(400).json({ error: "Rating must be between 1 and 5." });
+  }
+  
+  try {
+    // Upsert rating so user only has 1 rating
+    await pool.query(
+      `INSERT INTO app_ratings (user_id, rating) 
+       VALUES ($1, $2)
+       ON CONFLICT (id) DO NOTHING`, // Since id is serial, we can't easily upsert by user_id without unique constraint. Let's just insert multiple or delete previous.
+      [req.user.id, rating]
+    ); // Wait, there's no unique constraint on user_id. Let's just delete their previous ratings.
+    
+    await pool.query(`DELETE FROM app_ratings WHERE user_id = $1`, [req.user.id]);
+    await pool.query(
+      `INSERT INTO app_ratings (user_id, rating) VALUES ($1, $2)`,
+      [req.user.id, rating]
+    );
+
+    return res.json({ message: "Thanks for giving rating!" });
+  } catch (err) {
+    console.error("rate-app error:", err);
+    return res.status(500).json({ error: "Failed to submit rating." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PUT /api/auth/profile
+// Update user profile info (firstName, lastName)
+// ════════════════════════════════════════════════════════════════════════════
+router.put(
+  "/profile",
+  authenticate,
+  async (req, res) => {
+    try {
+      const { firstName, lastName } = req.body;
+      const result = await pool.query(
+        "UPDATE users SET first_name = $1, last_name = $2 WHERE id = $3 RETURNING *",
+        [firstName, lastName, req.user.id]
+      );
+      if (!result.rows.length) return res.status(404).json({ error: "User not found" });
+      res.json({ message: "Profile updated successfully", user: safeUser(result.rows[0]) });
+    } catch (err) {
+      console.error("Update profile error:", err);
+      res.status(500).json({ error: "Failed to update profile" });
+    }
+  }
+);
 
 module.exports = router;

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import {
   Search, Star, Clock, MapPin, ChevronDown,
-  SlidersHorizontal, X, Utensils, Heart, Bell, GraduationCap
+  SlidersHorizontal, X, Utensils, Heart, Bell, GraduationCap, Share2, Navigation, Send
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -163,6 +163,41 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center active:scale-90 transition-transform"
         >
           <Heart className={`w-4 h-4 ${wishlist.some((w:any)=>w.id===r.id)?"fill-rose-500 text-rose-500":"text-gray-400"}`} />
+        </button>
+        {/* Share */}
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            try {
+              const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+              const res = await fetch(`${API}/api/share`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'restaurant', target_id: r.id })
+              });
+              if (res.ok) {
+                const { id } = await res.json();
+                const shareUrl = `${window.location.origin}/s/${id}`;
+                if (navigator.share) {
+                  await navigator.share({
+                    title: 'NearBuy',
+                    text: `Hii Get Your favourite Food From ${r.name}`,
+                    url: shareUrl
+                  });
+                } else {
+                  // Fallback for desktop/unsupported browsers
+                  await navigator.clipboard.writeText(`Hii Get Your favourite Food From ${r.name} ${shareUrl}`);
+                  alert("Link copied to clipboard!");
+                }
+              }
+            } catch (err) {
+              console.error("Error sharing:", err);
+            }
+          }}
+          className="absolute top-2.5 right-12 w-8 h-8 rounded-full bg-white/90 shadow flex items-center justify-center active:scale-90 transition-transform"
+        >
+          <Send className="w-4 h-4 text-orange-500 fill-orange-500" />
         </button>
         {/* Badge */}
         {r.badge && <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase shadow-sm">{r.badge}</span>}

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Users, Plus, Pencil, Trash2, X, Check, Eye, EyeOff,
   ChevronRight, Store, Pill, ShoppingBag, Shield, AlertTriangle,
-  Mail, Lock, Tag, RefreshCw, UserCircle, LogOut, MapPin, Search, Navigation, Building2
+  Mail, Lock, Tag, RefreshCw, UserCircle, LogOut, MapPin, Search, Navigation, Building2, TrendingUp, TrendingDown, Activity, Star
 } from "lucide-react";
 import toast from "react-hot-toast";
 import dynamic from 'next/dynamic';
@@ -68,12 +68,18 @@ export default function DevDashboard() {
   // Settings
   const [platformFee, setPlatformFee] = useState(5);
   const [gst, setGst] = useState(10);
+  const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
+  const [foodEmail, setFoodEmail] = useState("manager@nearbuy.com");
+  const [medicineEmail, setMedicineEmail] = useState("manager@nearbuy.com");
+  const [storeEmail, setStoreEmail] = useState("manager@nearbuy.com");
   const [savingSettings, setSavingSettings] = useState(false);
   
   // Panels
   const [showPanel, setShowPanel] = useState(false);
   const [showCentersPanel, setShowCentersPanel] = useState(false);
   const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+  const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
 
   // Manager Modal state
   const [modalMode, setModalMode] = useState<"add" | "edit" | null>(null);
@@ -107,19 +113,27 @@ export default function DevDashboard() {
   async function fetchData() {
     setLoadingData(true);
     try {
-      const [resM, resC, resS] = await Promise.all([
+      const [resM, resC, resS, resStats] = await Promise.all([
         fetch(`${API}/api/managers`, { headers: { Authorization: `Bearer ${accessToken}` } }),
         fetch(`${API}/api/service-centers`, { headers: { Authorization: `Bearer ${accessToken}` } }),
-        fetch(`${API}/api/public/settings`)
+        fetch(`${API}/api/public/settings`),
+        fetch(`${API}/api/managers/dashboard-stats`, { headers: { Authorization: `Bearer ${accessToken}` } })
       ]);
       const dataM = await resM.json();
       const dataC = await resC.json();
       const dataS = await resS.json();
+      const dataStats = await resStats.json();
+      
       if (resM.ok) setManagers(dataM.managers || []);
       if (resC.ok) setCenters(dataC.centers || []);
+      if (resStats.ok) setDashboardStats(dataStats);
       if (resS.ok) {
         if (dataS.platform_fee !== undefined) setPlatformFee(dataS.platform_fee);
         if (dataS.gst !== undefined) setGst(dataS.gst);
+        if (dataS.instagram_link !== undefined) setInstagramLink(dataS.instagram_link);
+        if (dataS.food_email !== undefined) setFoodEmail(dataS.food_email);
+        if (dataS.medicine_email !== undefined) setMedicineEmail(dataS.medicine_email);
+        if (dataS.store_email !== undefined) setStoreEmail(dataS.store_email);
       }
     } catch {
       toast.error("Network error. Check your connection.");
@@ -323,7 +337,14 @@ export default function DevDashboard() {
       const res = await fetch(`${API}/api/public/settings`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform_fee: platformFee, gst })
+        body: JSON.stringify({ 
+          platform_fee: platformFee, 
+          gst,
+          instagram_link: instagramLink,
+          food_email: foodEmail,
+          medicine_email: medicineEmail,
+          store_email: storeEmail
+        })
       });
       if (res.ok) {
         toast.success("Global settings updated!");
@@ -394,25 +415,32 @@ export default function DevDashboard() {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
               <button
-                onClick={() => { setShowPanel(false); setShowSettingsPanel(false); setShowCentersPanel(!showCentersPanel); }}
+                onClick={() => { setShowPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(false); setShowCentersPanel(!showCentersPanel); }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showCentersPanel ? 'bg-pink-50 border-pink-200 text-pink-700' : 'bg-white border-gray-200 text-gray-700 hover:border-pink-300'}`}
               >
                 <MapPin className="w-4 h-4" />
                 Start Business Here
               </button>
               <button
-                onClick={() => { setShowCentersPanel(false); setShowSettingsPanel(false); setShowPanel(!showPanel); }}
+                onClick={() => { setShowCentersPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(false); setShowPanel(!showPanel); }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showPanel ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-gray-200 text-gray-700 hover:border-violet-300'}`}
               >
                 <Users className="w-4 h-4" />
                 Manage Managers
               </button>
               <button
-                onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowSettingsPanel(!showSettingsPanel); }}
+                onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowAnalyticsPanel(false); setShowSettingsPanel(!showSettingsPanel); }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showSettingsPanel ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-700 hover:border-amber-300'}`}
               >
                 <Tag className="w-4 h-4" />
                 Platform Fees
+              </button>
+              <button
+                onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(!showAnalyticsPanel); }}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showAnalyticsPanel ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'}`}
+              >
+                <Activity className="w-4 h-4" />
+                Platform Analytics
               </button>
             </div>
           </div>
@@ -662,7 +690,7 @@ export default function DevDashboard() {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl">
+              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Platform Fee (₹)</label>
                   <input
@@ -685,6 +713,47 @@ export default function DevDashboard() {
                 </div>
               </div>
 
+              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6 pt-6 border-t border-gray-100">
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Instagram Link</label>
+                  <input
+                    type="url"
+                    value={instagramLink}
+                    onChange={(e) => setInstagramLink(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    placeholder="https://instagram.com/your_handle"
+                  />
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Full URL for 'Contact Us here' button</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Food Support Email</label>
+                  <input
+                    type="email"
+                    value={foodEmail}
+                    onChange={(e) => setFoodEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Medicine Support Email</label>
+                  <input
+                    type="email"
+                    value={medicineEmail}
+                    onChange={(e) => setMedicineEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                  />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Store Support Email</label>
+                  <input
+                    type="email"
+                    value={storeEmail}
+                    onChange={(e) => setStoreEmail(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                  />
+                </div>
+              </div>
+
               <div className="mt-8 flex justify-end">
                 <button
                   onClick={handleSaveSettings}
@@ -695,6 +764,94 @@ export default function DevDashboard() {
                   Save Settings
                 </button>
               </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ══════════════════ ANALYTICS PANEL ══════════════════ */}
+      <AnimatePresence>
+        {showAnalyticsPanel && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
+          >
+            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-gray-900">Platform Analytics</h2>
+                  <p className="text-xs text-gray-500 font-medium">View key metrics and user engagement data</p>
+                </div>
+              </div>
+
+              {dashboardStats ? (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Total Users */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
+                        <Users className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Users</span>
+                    </div>
+                    <div className="text-3xl font-black text-gray-900">{dashboardStats.totalUsers}</div>
+                  </div>
+
+                  {/* Users Today */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
+                        <Plus className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">New Today</span>
+                    </div>
+                    <div className="text-3xl font-black text-gray-900">{dashboardStats.usersToday}</div>
+                    <div className="mt-2 text-xs font-bold text-gray-400">
+                      vs {dashboardStats.usersYesterday} yesterday
+                    </div>
+                  </div>
+
+                  {/* Growth Rate */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${dashboardStats.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        {dashboardStats.growthRate >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Growth Rate</span>
+                    </div>
+                    <div className={`text-3xl font-black ${dashboardStats.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                      {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate}%
+                    </div>
+                    <div className="mt-2 text-xs font-bold text-gray-400">Daily active signups</div>
+                  </div>
+
+                  {/* Average Rating */}
+                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center">
+                        <Star className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Avg Rating</span>
+                    </div>
+                    <div className="text-3xl font-black text-gray-900 flex items-baseline gap-1">
+                      {dashboardStats.avgRating} <span className="text-sm font-bold text-amber-500">★</span>
+                    </div>
+                    <div className="mt-2 text-xs font-bold text-gray-400">
+                      Based on {dashboardStats.totalRatings} ratings
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-16 gap-4">
+                  <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
+                  <p className="text-gray-500 font-medium">Loading analytics...</p>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

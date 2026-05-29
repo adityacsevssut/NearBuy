@@ -7,10 +7,10 @@ import { useEffect, Suspense, useState } from "react";
 import Link from "next/link";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { 
-  ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, 
-  MapPin, Calendar, Clock, Mail, MessageCircle, 
+  ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, ShoppingCart, Utensils,
+  MapPin, Calendar, Clock, Mail, MessageCircle, Phone,
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus
+  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus, X, Check
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
@@ -18,12 +18,74 @@ import toast from "react-hot-toast";
 const DEV_EMAIL = "nahakaditya344@gmail.com";
 
 function AccountContent() {
-  const { user, accessToken, logout, isLoggedIn } = useAuth();
+  const { user, accessToken, logout, isLoggedIn, updateUser } = useAuth();
   const { savedAddresses, removeSavedAddress, setIsLocationModalOpen, setLocation } = useLocationContext();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isBlue = searchParams.get('theme') === 'blue';
   const [showAddresses, setShowAddresses] = useState(false);
+  const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
+  const [supportEmail, setSupportEmail] = useState("manager@nearbuy.com");
+  
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [appLanguage, setAppLanguage] = useState("English");
+  
+  // Rating state
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [ratingValue, setRatingValue] = useState(0);
+  const [submittingRating, setSubmittingRating] = useState(false);
+
+  // Profile Edit State
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${apiBase}/api/auth/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ firstName: editFirstName, lastName: editLastName })
+      });
+      if (res.ok) {
+        updateUser({ firstName: editFirstName, lastName: editLastName });
+        setIsEditingProfile(false);
+        toast.success("Profile updated successfully!");
+      } else {
+        toast.error("Failed to update profile.");
+      }
+    } catch (err) {
+      toast.error("Network error. Please try again.");
+    }
+    setSavingProfile(false);
+  };
+
+  const [orderStats, setOrderStats] = useState({ total: 0, received: 0 });
+
+  useEffect(() => {
+    async function fetchStats() {
+      if (!isLoggedIn || !accessToken) return;
+      try {
+        const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${apiBase}/api/orders/stats`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setOrderStats({ total: data.totalOrders, received: data.receivedOrders });
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchStats();
+  }, [isLoggedIn, accessToken]);
 
   const theme = {
     gradient: isBlue ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
@@ -43,6 +105,23 @@ function AccountContent() {
     }, 100);
     return () => clearTimeout(timer);
   }, [isLoggedIn, router]);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${apiBase}/api/public/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.instagram_link) setInstagramLink(data.instagram_link);
+          if (data.food_email) setSupportEmail(data.food_email); // Defaulting to food manager for account page
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings", err);
+      }
+    }
+    fetchSettings();
+  }, []);
 
   const handleDeleteAccount = () => {
     toast((t) => (
@@ -108,6 +187,60 @@ function AccountContent() {
     });
   };
 
+  const handleRatingSubmit = async () => {
+    if (ratingValue < 1 || ratingValue > 5) {
+      toast.error("Please select a rating from 1 to 5.");
+      return;
+    }
+    setSubmittingRating(true);
+    try {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${apiBase}/api/auth/rate-app`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ rating: ratingValue })
+      });
+      if (res.ok) {
+        toast.success("Thanks for giving rating!");
+        setShowRatingModal(false);
+      } else {
+        toast.error("Failed to submit rating. Please try again.");
+      }
+    } catch (err) {
+      toast.error("Network error. Please try again.");
+    }
+    setSubmittingRating(false);
+  };
+
+  const handleInvite = async () => {
+    const inviteText = "Hey! I'm inviting you to join NearBuy, an awesome app where you can get food from your nearest kitchens, medicine, and groceries from your local market places delivered fast right to your doorstep!";
+    const inviteUrl = window.location.origin;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Join NearBuy",
+          text: inviteText,
+          url: inviteUrl,
+        });
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          console.error("Error sharing", err);
+        }
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(`${inviteText} ${inviteUrl}`);
+        toast.success("Invite link copied to clipboard!");
+      } catch (err) {
+        toast.error("Failed to copy link.");
+      }
+    }
+  };
+
   if (!isLoggedIn) return null;
 
   return (
@@ -136,35 +269,171 @@ function AccountContent() {
         
         {/* Floating Profile Card */}
         <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50/50">
-          <div className="relative">
+          <div className="relative shrink-0">
             <div className={`w-16 h-16 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white shadow-sm rotate-3`}>
               <span className={`text-2xl font-black ${theme.textPrimary} -rotate-3`}>
                 {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
               </span>
             </div>
-            <button className="absolute -bottom-2 -right-2 bg-gray-800 p-1.5 rounded-full border-2 border-white text-white hover:bg-black transition-colors">
-              <Pencil className="w-3 h-3" />
-            </button>
+            {!isEditingProfile && (
+              <button 
+                onClick={() => {
+                  setEditFirstName(user?.firstName || "");
+                  setEditLastName(user?.lastName || "");
+                  setIsEditingProfile(true);
+                }} 
+                className="absolute -bottom-2 -right-2 bg-gray-800 p-1.5 rounded-full border-2 border-white text-white hover:bg-black transition-colors"
+              >
+                <Pencil className="w-3 h-3" />
+              </button>
+            )}
           </div>
           
-          <div className="ml-5 flex-1">
-            <h2 className="text-[19px] font-black text-gray-800 tracking-tight leading-tight">
-              {user?.firstName || "NearBuy"} {user?.lastName || "User"}
-            </h2>
-            <p className="text-[13px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
+          <div className="ml-5 flex-1 min-w-0">
+            {isEditingProfile ? (
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={editFirstName} 
+                    onChange={e => setEditFirstName(e.target.value)} 
+                    placeholder="First Name" 
+                    className="w-full text-sm font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
+                  />
+                  <input 
+                    type="text" 
+                    value={editLastName} 
+                    onChange={e => setEditLastName(e.target.value)} 
+                    placeholder="Last Name" 
+                    className="w-full text-sm font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={handleSaveProfile} 
+                    disabled={savingProfile || (!editFirstName.trim() && !editLastName.trim())} 
+                    className="text-xs font-bold bg-gray-800 text-white px-3 py-1.5 rounded-lg hover:bg-black disabled:opacity-50"
+                  >
+                    {savingProfile ? "Saving..." : "Save"}
+                  </button>
+                  <button 
+                    onClick={() => setIsEditingProfile(false)} 
+                    disabled={savingProfile}
+                    className="text-xs font-bold text-gray-500 hover:text-gray-700 px-2 py-1.5"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h2 className="text-[19px] font-black text-gray-800 tracking-tight leading-tight truncate">
+                  {user?.firstName || "NearBuy"} {user?.lastName || "User"}
+                </h2>
+                <p className="text-[13px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Action Pills */}
-        <div className="flex gap-3 justify-between">
-          <ActionPill icon={CreditCard} label="Wallet" color="text-blue-500" bg="bg-blue-50" />
-          <ActionPill icon={Bell} label="Alerts" color="text-purple-500" bg="bg-purple-50" />
-          <ActionPill icon={Heart} label="Saved" color="text-rose-500" bg="bg-rose-50" />
+
+
+        {/* Quick Actions Grid */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 mt-2">
+          
+          {/* Cart Button */}
+          <button
+            onClick={() => router.push("/cart")}
+            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+              p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
+              transition-all duration-200 active:scale-[0.98]"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-orange-50 border-2 border-orange-500 group-hover:bg-orange-100 transition-colors">
+                <ShoppingCart className="w-5 h-5 text-orange-500" />
+              </div>
+              <div className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
+                group-hover:bg-orange-100 group-hover:border-orange-300 transition-colors shrink-0">
+                <ChevronRight className="w-3.5 h-3.5 text-orange-400 group-hover:text-orange-600 transition-colors" />
+              </div>
+            </div>
+            <div className="w-full">
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Food Cart</p>
+            </div>
+          </button>
+
+          {/* Wishlist Button */}
+          <button
+            onClick={() => router.push("/wishlist")}
+            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+              p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 hover:border-rose-200/80
+              transition-all duration-200 active:scale-[0.98]"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-rose-50 border-2 border-rose-500 group-hover:bg-rose-100 transition-colors">
+                <Heart className="w-5 h-5 text-rose-500" />
+              </div>
+              <div className="w-7 h-7 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center
+                group-hover:bg-rose-100 group-hover:border-rose-300 transition-colors shrink-0">
+                <ChevronRight className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 transition-colors" />
+              </div>
+            </div>
+            <div className="w-full">
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Wishlist</p>
+            </div>
+          </button>
+
+          {/* Browse Restaurant Button */}
+          <button
+            onClick={() => router.push("/")}
+            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+              p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-50 hover:border-blue-200/80
+              transition-all duration-200 active:scale-[0.98]"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-blue-50 border-2 border-blue-500 group-hover:bg-blue-100 transition-colors">
+                <Utensils className="w-5 h-5 text-blue-500" />
+              </div>
+              <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center
+                group-hover:bg-blue-100 group-hover:border-blue-300 transition-colors shrink-0">
+                <ChevronRight className="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 transition-colors" />
+              </div>
+            </div>
+            <div className="w-full">
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Browse Restaurants</p>
+            </div>
+          </button>
+
+          {/* Your Orders Button */}
+          <button
+            onClick={() => router.push("/orders?history=true")}
+            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+              p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 hover:border-purple-200/80
+              transition-all duration-200 active:scale-[0.98]"
+          >
+            <div className="flex items-start justify-between w-full">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-purple-50 border-2 border-purple-500 group-hover:bg-purple-100 transition-colors">
+                <ShoppingBag className="w-5 h-5 text-purple-500" />
+              </div>
+              <div className="w-7 h-7 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center
+                group-hover:bg-purple-100 group-hover:border-purple-300 transition-colors shrink-0">
+                <ChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover:text-purple-600 transition-colors" />
+              </div>
+            </div>
+            <div className="w-full">
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Your Orders</p>
+            </div>
+          </button>
+
         </div>
 
         {/* Section: Activity */}
         <div className="space-y-3">
-          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">My Activity</h3>
+          <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Saved Information</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
             <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push("/orders?history=true")} />
             
@@ -275,8 +544,8 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Help Center</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-            <ModernRow icon={Mail} label="Contact Support" theme={theme} />
-            <ModernRow icon={MessageCircle} label="Chat on WhatsApp" theme={theme} />
+            <ModernRow icon={Globe} label="Contact Us here" onClick={() => window.open(instagramLink, '_blank')} theme={theme} />
+            <ModernRow icon={Mail} label="Need Help ? Facing Issues ?" onClick={() => window.location.href = `mailto:${supportEmail}?subject=Facing%20Issue`} theme={theme} />
           </div>
         </div>
 
@@ -284,9 +553,9 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Preferences & More</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-            <ModernRow icon={Users} label="Invite Friends" theme={theme} />
-            <ModernRow icon={Star} label="Rate NearBuy" theme={theme} />
-            <ModernRow icon={Globe} label="App Language" theme={theme} />
+            <ModernRow icon={Users} label="Invite Friends" onClick={handleInvite} theme={theme} />
+            <ModernRow icon={Star} label="Rate NearBuy" onClick={() => setShowRatingModal(true)} theme={theme} />
+            <ModernRow icon={Globe} label="App Language" value={appLanguage} onClick={() => setShowLanguageModal(true)} theme={theme} />
           </div>
         </div>
 
@@ -337,6 +606,89 @@ function AccountContent() {
       </div>
 
       <MobileBottomNav />
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowRatingModal(false)} />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowRatingModal(false)}
+              className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-center mb-6">
+              <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 bg-gradient-to-tr ${theme.avatarBg}`}>
+                <Star className={`w-8 h-8 ${theme.textPrimary}`} />
+              </div>
+              <h3 className="text-xl font-black text-gray-900">Rate NearBuy</h3>
+              <p className="text-sm font-medium text-gray-500 mt-1">How much do you love using our app?</p>
+            </div>
+            
+            <div className="flex justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  onClick={() => setRatingValue(star)}
+                  className={`p-2 transition-all duration-200 hover:scale-110 active:scale-95 ${ratingValue >= star ? theme.textPrimary : 'text-gray-300'}`}
+                >
+                  <Star className="w-8 h-8 fill-current" />
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={handleRatingSubmit}
+              disabled={ratingValue === 0 || submittingRating}
+              className={`w-full py-3.5 rounded-xl text-white font-bold text-sm shadow-md transition-all active:scale-95 flex items-center justify-center bg-gradient-to-r ${theme.gradient} disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              {submittingRating ? "Submitting..." : "Submit Rating"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Language Modal */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowLanguageModal(false)} />
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <button 
+              onClick={() => setShowLanguageModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Globe className="w-8 h-8 text-blue-500" />
+              </div>
+              <h3 className="text-xl font-black text-gray-900">Select Language</h3>
+              <p className="text-sm text-gray-500 mt-1 font-medium">Choose your preferred app language</p>
+            </div>
+            
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setAppLanguage("English");
+                  setShowLanguageModal(false);
+                  toast.success("Language set to English");
+                }}
+                className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
+                  appLanguage === "English" 
+                    ? `border-blue-500 bg-blue-50` 
+                    : "border-gray-100 hover:border-gray-200"
+                }`}
+              >
+                <span className={`font-bold ${appLanguage === "English" ? "text-blue-700" : "text-gray-700"}`}>English</span>
+                {appLanguage === "English" && <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center"><Check className="w-3 h-3 text-white" /></div>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -362,7 +714,7 @@ function ActionPill({ icon: Icon, label, color, bg }: { icon: any, label: string
   );
 }
 
-function ModernRow({ icon: Icon, label, onClick, theme }: { icon: any, label: string, onClick?: () => void, theme: any }) {
+function ModernRow({ icon: Icon, label, value, onClick, theme }: { icon: any, label: string, value?: string, onClick?: () => void, theme: any }) {
   return (
     <button onClick={onClick} className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group">
       <div className="flex items-center gap-4">
@@ -371,7 +723,10 @@ function ModernRow({ icon: Icon, label, onClick, theme }: { icon: any, label: st
         </div>
         <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">{label}</span>
       </div>
-      <ChevronRight className={`w-4 h-4 text-gray-300 ${theme.hoverText} group-hover:translate-x-0.5 transition-all`} />
+      <div className="flex items-center gap-2">
+        {value && <span className="text-[13px] font-bold text-gray-400">{value}</span>}
+        <ChevronRight className={`w-4 h-4 text-gray-300 ${theme.hoverText} group-hover:translate-x-0.5 transition-all`} />
+      </div>
     </button>
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
@@ -431,6 +431,43 @@ export default function VendorPage() {
                               className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
                             >
                               <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
+                            </button>
+                            <button
+                              onClick={async (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                try {
+                                  const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                                  const res = await fetch(`${API}/api/share`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ 
+                                      type: 'item', 
+                                      target_id: dish.id, 
+                                      extra_data: { vendor_id: vendor.id } 
+                                    })
+                                  });
+                                  if (res.ok) {
+                                    const { id } = await res.json();
+                                    const shareUrl = `${window.location.origin}/s/${id}`;
+                                    if (navigator.share) {
+                                      await navigator.share({
+                                        title: 'NearBuy',
+                                        text: `Hii get Your favourite ${dish.name} at just ₹${dish.price} grab it before it goes out of stock`,
+                                        url: shareUrl
+                                      });
+                                    } else {
+                                      await navigator.clipboard.writeText(`Hii get Your favourite ${dish.name} at just ₹${dish.price} grab it before it goes out of stock ${shareUrl}`);
+                                      alert("Link copied to clipboard!");
+                                    }
+                                  }
+                                } catch (err) {
+                                  console.error("Error sharing:", err);
+                                }
+                              }}
+                              className="absolute top-10 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                            >
+                              <Send className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
                             </button>
                           </div>
 

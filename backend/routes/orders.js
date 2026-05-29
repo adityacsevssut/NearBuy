@@ -95,6 +95,27 @@ router.get("/vendor", authenticate, async (req, res) => {
   }
 });
 
+// GET /api/orders/stats
+// Get order statistics for the user
+router.get("/stats", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT 
+        COUNT(*) as total_orders,
+        COUNT(CASE WHEN status ILIKE 'delivered' THEN 1 END) as received_orders
+       FROM orders WHERE user_id = $1`,
+      [req.user.id]
+    );
+    return res.json({
+      totalOrders: parseInt(rows[0].total_orders) || 0,
+      receivedOrders: parseInt(rows[0].received_orders) || 0
+    });
+  } catch (err) {
+    console.error("Get order stats error:", err);
+    return res.status(500).json({ error: "Failed to fetch order stats." });
+  }
+});
+
 // GET /api/orders/:id
 // Get specific order details
 router.get("/:id", authenticate, async (req, res) => {

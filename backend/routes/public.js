@@ -162,7 +162,11 @@ router.get("/settings", async (req, res) => {
       CREATE TABLE IF NOT EXISTS global_settings (
         id INT PRIMARY KEY DEFAULT 1,
         platform_fee DECIMAL(10,2) NOT NULL DEFAULT 5.00,
-        gst DECIMAL(10,2) NOT NULL DEFAULT 10.00
+        gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
+        instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
+        food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
+        medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
+        store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
       );
     `);
     
@@ -173,10 +177,20 @@ router.get("/settings", async (req, res) => {
       ON CONFLICT (id) DO NOTHING;
     `);
 
-    const { rows } = await pool.query("SELECT platform_fee, gst FROM global_settings WHERE id = 1");
+    // Ensure columns exist (for migration)
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+
+    const { rows } = await pool.query("SELECT platform_fee, gst, instagram_link, food_email, medicine_email, store_email FROM global_settings WHERE id = 1");
     return res.json({
       platform_fee: parseFloat(rows[0].platform_fee),
-      gst: parseFloat(rows[0].gst)
+      gst: parseFloat(rows[0].gst),
+      instagram_link: rows[0].instagram_link,
+      food_email: rows[0].food_email,
+      medicine_email: rows[0].medicine_email,
+      store_email: rows[0].store_email
     });
   } catch (err) {
     console.error("GET /api/public/settings error:", err);
@@ -187,21 +201,36 @@ router.get("/settings", async (req, res) => {
 // POST /api/public/settings
 router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
   try {
-    const { platform_fee, gst } = req.body;
+    const { platform_fee, gst, instagram_link, food_email, medicine_email, store_email } = req.body;
     
     await pool.query(`
       CREATE TABLE IF NOT EXISTS global_settings (
         id INT PRIMARY KEY DEFAULT 1,
         platform_fee DECIMAL(10,2) NOT NULL DEFAULT 5.00,
-        gst DECIMAL(10,2) NOT NULL DEFAULT 10.00
+        gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
+        instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
+        food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
+        medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
+        store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
       );
     `);
+
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     
     await pool.query(`
-      INSERT INTO global_settings (id, platform_fee, gst)
-      VALUES (1, $1, $2)
-      ON CONFLICT (id) DO UPDATE SET platform_fee = $1, gst = $2;
-    `, [platform_fee, gst]);
+      INSERT INTO global_settings (id, platform_fee, gst, instagram_link, food_email, medicine_email, store_email)
+      VALUES (1, $1, $2, $3, $4, $5, $6)
+      ON CONFLICT (id) DO UPDATE SET 
+        platform_fee = EXCLUDED.platform_fee, 
+        gst = EXCLUDED.gst,
+        instagram_link = EXCLUDED.instagram_link,
+        food_email = EXCLUDED.food_email,
+        medicine_email = EXCLUDED.medicine_email,
+        store_email = EXCLUDED.store_email;
+    `, [platform_fee, gst, instagram_link || '', food_email || '', medicine_email || '', store_email || '']);
 
     return res.json({ success: true });
   } catch (err) {

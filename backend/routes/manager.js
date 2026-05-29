@@ -278,5 +278,57 @@ router.delete("/vendor/:id", authenticate, async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/dashboard-stats
+// Fetch user analytics and rating stats (Developer only)
+// ════════════════════════════════════════════════════════════════════
+router.get("/dashboard-stats", authenticate, devOnly, async (req, res) => {
+  try {
+    // 1. Total users
+    const totalUsersResult = await pool.query("SELECT COUNT(*) FROM users WHERE role='user'");
+    const totalUsers = parseInt(totalUsersResult.rows[0].count, 10);
+
+    // 2. Users today
+    const usersTodayResult = await pool.query("SELECT COUNT(*) FROM users WHERE role='user' AND created_at >= CURRENT_DATE");
+    const usersToday = parseInt(usersTodayResult.rows[0].count, 10);
+
+    // 3. Users yesterday
+    const usersYesterdayResult = await pool.query("SELECT COUNT(*) FROM users WHERE role='user' AND created_at >= CURRENT_DATE - INTERVAL '1 day' AND created_at < CURRENT_DATE");
+    const usersYesterday = parseInt(usersYesterdayResult.rows[0].count, 10);
+
+    // 4. Growth Rate
+    let growthRate = 0;
+    if (usersYesterday > 0) {
+      growthRate = ((usersToday - usersYesterday) / usersYesterday) * 100;
+    } else if (usersYesterday === 0 && usersToday > 0) {
+      growthRate = 100; // Cap at 100% if going from 0 to something
+    }
+
+    // 5. Ratings
+    let avgRating = 0;
+    let totalRatings = 0;
+    try {
+      const ratingsResult = await pool.query("SELECT AVG(rating) as avg, COUNT(*) as total FROM app_ratings");
+      avgRating = parseFloat(ratingsResult.rows[0].avg) || 0;
+      totalRatings = parseInt(ratingsResult.rows[0].total, 10);
+    } catch (e) {
+      // Table might not exist yet if no ratings ever made or error
+      console.error("No app_ratings table or error:", e.message);
+    }
+
+    return res.json({
+      totalUsers,
+      usersToday,
+      usersYesterday,
+      growthRate: parseFloat(growthRate.toFixed(1)),
+      avgRating: parseFloat(avgRating.toFixed(1)),
+      totalRatings
+    });
+  } catch (err) {
+    console.error("dashboard stats error:", err);
+    return res.status(500).json({ error: "Failed to fetch dashboard stats." });
+  }
+});
+
 module.exports = router;
 

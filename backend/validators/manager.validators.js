@@ -54,7 +54,11 @@ const updateSettingsSchema = Joi.object({
     "any.required": "gst is required",
     "number.min": "GST cannot be negative",
     "number.max": "GST cannot exceed 100%"
-  })
+  }),
+  instagram_link: Joi.string().uri().allow("", null).optional(),
+  food_email: email.allow("", null).optional(),
+  medicine_email: email.allow("", null).optional(),
+  store_email: email.allow("", null).optional()
 });
 
 module.exports = {
