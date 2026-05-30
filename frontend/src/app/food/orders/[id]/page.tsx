@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
-  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X
+  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -104,6 +104,108 @@ export default function OrderStatusPage() {
       toast.error("Network error");
       setIsLoading(false);
     }
+  };
+
+  const generateReceipt = async () => {
+    if (!order) return;
+    
+    const { jsPDF } = await import("jspdf");
+    const autoTable = (await import("jspdf-autotable")).default;
+    
+    const doc = new jsPDF();
+
+    // NearBuy Heading
+    doc.setTextColor(249, 115, 22); // Orange-500
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(26);
+    doc.text("NearBuy", 105, 20, { align: "center" });
+
+    // Header
+    doc.setTextColor(0, 0, 0); // Black
+    doc.setFontSize(14);
+    doc.text("Order Receipt", 105, 30, { align: "center" });
+    
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Order ID: ${order.id}`, 14, 45);
+    doc.text(`Date: ${new Date(order.created_at).toLocaleString()}`, 14, 51);
+    doc.text(`Restaurant: ${order.restaurant_name}`, 14, 57);
+
+    // Items table
+    const tableColumn = ["Item", "Quantity", "Price", "Total"];
+    const tableRows = order.items.map(item => [
+      item.name,
+      item.quantity || item.qty || 1,
+      `Rs ${item.price}`,
+      `Rs ${(item.price * (item.quantity || item.qty || 1)).toFixed(2)}`
+    ]);
+
+    autoTable(doc, {
+      startY: 65,
+      head: [tableColumn],
+      body: tableRows,
+      theme: "striped",
+      styles: { fontSize: 9, cellPadding: 4 },
+      headStyles: { fillColor: [249, 115, 22] },
+      columnStyles: {
+        0: { cellWidth: 80 },
+        1: { halign: 'center' },
+        2: { halign: 'right' },
+        3: { halign: 'right' }
+      }
+    });
+
+    const finalY = (doc as any).lastAutoTable.finalY || 65;
+
+    // Billing summary aligned to right
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const marginRight = 14;
+
+    doc.setFontSize(10);
+    
+    // Helper for right aligned text
+    const printRightAligned = (label: string, value: string, yPos: number, isBold: boolean = false) => {
+      if (isBold) {
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0, 0, 0);
+      } else {
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(80, 80, 80);
+      }
+      doc.text(label, pageWidth - marginRight - 60, yPos);
+      doc.text(value, pageWidth - marginRight, yPos, { align: "right" });
+    };
+
+    let currentY = finalY + 12;
+    
+    printRightAligned("Item Total", `Rs ${order.subtotal}`, currentY);
+    currentY += 8;
+    printRightAligned("GST & Taxes", `Rs ${order.gst}`, currentY);
+    currentY += 8;
+    printRightAligned("Platform Fee", `Rs ${order.platform_fee}`, currentY);
+    currentY += 8;
+    
+    if (order.delivery_charge && parseFloat(order.delivery_charge) > 0) {
+      printRightAligned("Delivery Charge", `+ Rs ${order.delivery_charge}`, currentY);
+      currentY += 8;
+    }
+
+    // Line
+    doc.setDrawColor(200, 200, 200);
+    doc.line(pageWidth - marginRight - 60, currentY - 4, pageWidth - marginRight, currentY - 4);
+    
+    // Grand Total
+    doc.setFontSize(12);
+    printRightAligned("Grand Total", `Rs ${order.total_amount}`, currentY + 4, true);
+
+    // Footer
+    doc.setFont("helvetica", "italic");
+    doc.setFontSize(9);
+    doc.setTextColor(150, 150, 150);
+    doc.text("Thank you for ordering with NearBuy!", 105, currentY + 25, { align: "center" });
+
+    doc.save(`NearBuy-Receipt-${order.id}.pdf`);
   };
 
   if (!mounted || (!isLoggedIn && mounted)) return null;
@@ -213,6 +315,14 @@ export default function OrderStatusPage() {
                              index === 3 ? "Delivery partner is on the way" :
                              "Hope you enjoyed it!"}
                           </p>
+                        )}
+                        {isCurrent && index === 4 && (
+                          <button
+                            onClick={generateReceipt}
+                            className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit"
+                          >
+                            <FileDown className="w-3.5 h-3.5" /> Download Receipt
+                          </button>
                         )}
                       </div>
                     </div>
@@ -355,14 +465,6 @@ export default function OrderStatusPage() {
                   <div className="flex justify-between text-sm font-medium text-gray-600">
                     <span>Subtotal</span>
                     <span>₹{order.subtotal}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
-                    <span>GST & Taxes</span>
-                    <span>₹{order.gst}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
-                    <span>Platform Fee</span>
-                    <span>₹{order.platform_fee}</span>
                   </div>
                   {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
                     <div className="flex justify-between text-sm font-bold text-orange-600">

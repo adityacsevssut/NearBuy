@@ -21,6 +21,14 @@ import { useEffect } from "react";
 
 // Platform fee and GST are now fetched dynamically from the backend
 
+function deg2rad(d: number) { return d * (Math.PI / 180); }
+function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lon2: number|null) {
+  if (lat1==null||lon1==null||lat2==null||lon2==null) return null;
+  const R = 6371, dLat = deg2rad(lat2-lat1), dLon = deg2rad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 function groupByRestaurant(items: ReturnType<typeof useCart>["items"]) {
   const map: Record<string, typeof items> = {};
   for (const item of items) {
@@ -40,6 +48,9 @@ function RestaurantOrderCard({
   gst,
   canPlaceOrder,
   onPlaceOrder,
+  userLat,
+  userLon,
+  userPin,
 }: {
   restId: string;
   restItems: ReturnType<typeof useCart>["items"];
@@ -49,34 +60,61 @@ function RestaurantOrderCard({
   gst: number;
   canPlaceOrder: boolean;
   onPlaceOrder: (restId: string, items: any[], subtotal: number, gst: number, platformFee: number, total: number) => void;
+  userLat: number | null;
+  userLon: number | null;
+  userPin: string | null;
 }) {
   const restName = restItems[0].restaurantName;
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal + gst + platformFee;
   const totalQty = restItems.reduce((s, i) => s + i.quantity, 0);
 
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [showBill, setShowBill] = useState(true);
   const discount = couponApplied ? Math.floor(subtotal * 0.1) : 0;
-  const grandTotal = total - discount;
+  
+  // Calculate actual fee amounts based on percentage of subtotal, capped at ₹8 each
+  const calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
+  const calculatedGst = Math.min((subtotal * gst) / 100, 8);
+  const totalFees = calculatedPlatformFee + calculatedGst;
+  
+  const mainOrderTotal = subtotal - discount;
+  const grandTotal = mainOrderTotal + totalFees;
 
   const [minOrder, setMinOrder] = useState<number>(0);
+  const [feesPaid, setFeesPaid] = useState(false);
+  const [vendorData, setVendorData] = useState<any>(null);
 
   useEffect(() => {
     const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
     fetch(`${API}/api/public/vendors/${restId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data && data.minOrder !== undefined) {
-          setMinOrder(data.minOrder);
+        if (data) {
+          if (data.minOrder !== undefined) setMinOrder(data.minOrder);
+          setVendorData(data);
         }
       })
       .catch(console.error);
   }, [restId]);
 
+  let outOfRange = false;
+  if (vendorData) {
+    if (userLat !== null && userLon !== null && vendorData.latitude && vendorData.longitude) {
+      const vLat = parseFloat(vendorData.latitude);
+      const vLon = parseFloat(vendorData.longitude);
+      const d = getDistance(userLat, userLon, vLat, vLon);
+      const limit = vendorData.deliveryRange ? parseFloat(vendorData.deliveryRange) : 5;
+      if (d != null) {
+        outOfRange = d > limit;
+      }
+    } else if (userPin && vendorData.pincode) {
+      outOfRange = userPin !== vendorData.pincode;
+    }
+  }
+
   const meetsMinOrder = subtotal >= minOrder;
-  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder;
+  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (feesPaid || totalFees === 0) && !outOfRange;
 
   return (
     <motion.div
@@ -229,7 +267,7 @@ function RestaurantOrderCard({
         >
           <span className="flex items-center gap-2">
             Bill Details
-            <span className="text-xs font-semibold text-gray-400">(incl. delivery)</span>
+            <span className="text-xs font-semibold text-gray-400">(items only)</span>
           </span>
           {showBill ? (
             <ChevronUp className="w-4 h-4 text-gray-400" />
@@ -258,19 +296,9 @@ function RestaurantOrderCard({
                     <span className="font-semibold text-green-600">− ₹{discount}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span className="flex items-center gap-1.5">
-                    GST
-                  </span>
-                  <span className="font-semibold text-gray-900">₹{gst}</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Platform fee</span>
-                  <span className="font-semibold text-gray-900">₹{platformFee}</span>
-                </div>
                 <div className="flex justify-between pt-2 border-t border-dashed border-gray-200">
-                  <span className="font-black text-gray-900">Total to pay</span>
-                  <span className="font-black text-gray-900 text-base">₹{grandTotal}</span>
+                  <span className="font-black text-gray-900">Item subtotal after discount</span>
+                  <span className="font-black text-gray-900 text-base">₹{mainOrderTotal}</span>
                 </div>
               </div>
             </motion.div>
@@ -278,21 +306,78 @@ function RestaurantOrderCard({
         </AnimatePresence>
       </div>
 
+      {/* ── Taxes & Platform Fee (Separate Section) ── */}
+      {totalFees > 0 && (
+        <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50/50">
+          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+            Taxes & Platform Fees
+          </p>
+          <div className="space-y-2">
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>GST ({gst}%)</span>
+              <span className="font-semibold text-gray-900">₹{calculatedGst.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-sm text-gray-600">
+              <span>Platform fee ({platformFee}%)</span>
+              <span className="font-semibold text-gray-900">₹{calculatedPlatformFee.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between pt-3 mt-1 border-t border-dashed border-gray-200">
+              <span className="font-black text-gray-900 text-lg">Total Fees</span>
+              <span className="font-black text-gray-900 text-lg">₹{totalFees.toFixed(2)}</span>
+            </div>
+          </div>
+          
+          {!feesPaid ? (
+            <button 
+              disabled={outOfRange}
+              onClick={() => {
+                // Simulating payment process
+                const loadingToast = toast.loading("Processing payment...");
+                setTimeout(() => {
+                  toast.success("Fees paid successfully!", { id: loadingToast });
+                  setFeesPaid(true);
+                }, 1000);
+              }}
+              className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${
+                outOfRange 
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed" 
+                  : "bg-gray-900 text-white hover:bg-black active:scale-[0.98]"
+              }`}
+            >
+              Pay Taxes & Fees (₹{totalFees.toFixed(2)})
+            </button>
+          ) : (
+            <div className="mt-4 py-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              <span className="text-sm font-black text-green-700">Fees Paid Successfully</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Place Order button for THIS restaurant ── */}
       <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30">
-        {!meetsMinOrder && minOrder > 0 && (
-          <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2">
-            <span className="text-red-500 font-black mt-0.5">!</span>
-            <p className="text-xs text-red-600 font-semibold leading-snug">
+        {outOfRange ? (
+          <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center gap-2">
+            <span className="text-red-500 font-black">!</span>
+            <p className="text-xs text-red-600 font-semibold leading-snug text-center">
+              Not deliverable at your address. This store is out of range.
+            </p>
+          </div>
+        ) : !meetsMinOrder && minOrder > 0 ? (
+          <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center justify-center gap-2">
+            <span className="text-red-500 font-black">!</span>
+            <p className="text-xs text-red-600 font-semibold leading-snug text-center">
               The Minimum Amount To order from the vendor is ₹{minOrder}. Add more items to exceed min value.
             </p>
           </div>
-        )}
+        ) : null}
+        
         <button 
           disabled={!finalCanPlaceOrder}
           onClick={() => {
             if (finalCanPlaceOrder) {
-              onPlaceOrder(restId, restItems, subtotal, gst, platformFee, grandTotal);
+              onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal);
             }
           }}
           className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${
@@ -303,11 +388,15 @@ function RestaurantOrderCard({
         >
           {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
-          {finalCanPlaceOrder 
-            ? `Place Order · ₹${grandTotal}` 
-            : !meetsMinOrder && minOrder > 0 
-              ? `Minimum Amount is ₹${minOrder}` 
-              : "Select Address & Payment"}
+          {outOfRange 
+            ? "Out of Delivery Range"
+            : finalCanPlaceOrder 
+              ? `Place Order · ₹${mainOrderTotal}` 
+              : !(feesPaid || totalFees === 0) && meetsMinOrder
+                ? "Pay Fees to Place Order"
+                : !meetsMinOrder && minOrder > 0 
+                  ? `Minimum Amount is ₹${minOrder}` 
+                  : "Select Address & Payment"}
         </button>
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
           Delivered by {restName} · Est. 15–25 min
@@ -604,6 +693,9 @@ export default function CartPage() {
                   gst={gst}
                   canPlaceOrder={canPlaceOrder || !isLoggedIn}
                   onPlaceOrder={handlePlaceOrder}
+                  userLat={latitude}
+                  userLon={longitude}
+                  userPin={pincode}
                 />
               ))}
             </AnimatePresence>

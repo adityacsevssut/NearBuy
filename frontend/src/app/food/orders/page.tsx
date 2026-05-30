@@ -294,14 +294,6 @@ function OrdersPageContent() {
                     <span>Item Total</span>
                     <span>₹{selectedOrderForItems.subtotal}</span>
                   </div>
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
-                    <span>GST & Taxes</span>
-                    <span>₹{selectedOrderForItems.gst}</span>
-                  </div>
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
-                    <span>Platform Fee</span>
-                    <span>₹{selectedOrderForItems.platform_fee}</span>
-                  </div>
                   {selectedOrderForItems.delivery_charge && parseFloat(selectedOrderForItems.delivery_charge) > 0 && (
                     <div className="flex justify-between text-sm font-bold text-orange-600">
                       <span>Delivery Charge</span>

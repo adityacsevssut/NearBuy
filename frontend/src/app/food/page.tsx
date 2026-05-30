@@ -507,14 +507,14 @@ export default function HomePage() {
             {posterLoading ? (
               <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 rounded-2xl animate-pulse"></div>
             ) : (
-              <Link href="/" className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
+              <div className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={posterUrl || "/1000242984.png"} 
                   alt="NearBuy Special Offer" 
                   className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain group-hover:scale-[1.02] transition-transform duration-500 ease-out bg-orange-50"
                 />
-              </Link>
+              </div>
             )}
           </section>
 
