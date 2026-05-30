@@ -56,23 +56,37 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  const isEssentials = pathname === "/essentials" || pathname.startsWith("/essentials/");
-  const isMedico = pathname === "/medico" || pathname.startsWith("/medico/");
+  const getDomain = () => {
+    if (pathname.startsWith('/medicine')) return 'medicine';
+    if (pathname.startsWith('/store')) return 'store';
+    if (pathname.startsWith('/hotels')) return 'hotels';
+    return 'food'; // Default fallback
+  };
+
+  const domain = getDomain();
+  const isStore = domain === 'store';
+  const isMedicine = domain === 'medicine';
+  const isHotels = domain === 'hotels';
+  const isFood = domain === 'food';
+  const baseUrl = `/${domain}`;
+  
+  
+  
 
   const theme = {
-    gradient: isEssentials ? "from-blue-500 to-blue-400" : isMedico ? "from-emerald-500 to-emerald-400" : "from-orange-500 to-orange-400",
-    textPrimary: isEssentials ? "text-blue-500" : isMedico ? "text-emerald-500" : "text-orange-500",
-    avatarBg: isEssentials ? "from-blue-100 to-blue-50" : isMedico ? "from-emerald-100 to-emerald-50" : "from-orange-100 to-orange-50",
-    selection: isEssentials ? "selection:bg-blue-200" : isMedico ? "selection:bg-emerald-200" : "selection:bg-orange-200",
-    hoverBg: isEssentials ? "group-hover:bg-blue-50" : isMedico ? "group-hover:bg-emerald-50" : "group-hover:bg-orange-50",
-    hoverText: isEssentials ? "group-hover:text-blue-500" : isMedico ? "group-hover:text-emerald-500" : "group-hover:text-orange-500",
-    dangerBorder: isEssentials ? "border-blue-50" : isMedico ? "border-emerald-50" : "border-red-50",
-    dangerText: isEssentials ? "text-blue-500" : isMedico ? "text-emerald-500" : "text-red-500",
-    dangerHoverBg: isEssentials ? "hover:bg-blue-50/50" : isMedico ? "hover:bg-emerald-50/50" : "hover:bg-red-50/50",
+    gradient: isStore ? "from-blue-500 to-blue-400" : isMedicine ? "from-emerald-500 to-emerald-400" : "from-orange-500 to-orange-400",
+    textPrimary: isStore ? "text-blue-500" : isMedicine ? "text-emerald-500" : "text-orange-500",
+    avatarBg: isStore ? "from-blue-100 to-blue-50" : isMedicine ? "from-emerald-100 to-emerald-50" : "from-orange-100 to-orange-50",
+    selection: isStore ? "selection:bg-blue-200" : isMedicine ? "selection:bg-emerald-200" : "selection:bg-orange-200",
+    hoverBg: isStore ? "group-hover:bg-blue-50" : isMedicine ? "group-hover:bg-emerald-50" : "group-hover:bg-orange-50",
+    hoverText: isStore ? "group-hover:text-blue-500" : isMedicine ? "group-hover:text-emerald-500" : "group-hover:text-orange-500",
+    dangerBorder: isStore ? "border-blue-50" : isMedicine ? "border-emerald-50" : "border-red-50",
+    dangerText: isStore ? "text-blue-500" : isMedicine ? "text-emerald-500" : "text-red-500",
+    dangerHoverBg: isStore ? "hover:bg-blue-50/50" : isMedicine ? "hover:bg-emerald-50/50" : "hover:bg-red-50/50",
   };
 
   const primaryText = theme.textPrimary;
-  const primaryBg = isEssentials ? "bg-blue-500" : isMedico ? "bg-emerald-500" : "bg-orange-500";
+  const primaryBg = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : "bg-orange-500";
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -91,15 +105,15 @@ export default function Navbar() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const navPages = [
-    { href: "/", label: "Food", icon: UtensilsCrossed, activeColor: "text-orange-600", activeBg: "bg-orange-50", isActive: !isEssentials && !isMedico },
-    { href: "/essentials", label: "Store", icon: Package, activeColor: "text-blue-600", activeBg: "bg-blue-50", isActive: isEssentials },
-    { href: "/medico", label: "Medico", icon: Pill, activeColor: "text-emerald-600", activeBg: "bg-emerald-50", isActive: isMedico },
+    { href: "/", label: "Food", icon: UtensilsCrossed, activeColor: "text-orange-600", activeBg: "bg-orange-50", isActive: isFood },
+    { href: "/store", label: "Store", icon: Package, activeColor: "text-blue-600", activeBg: "bg-blue-50", isActive: isStore },
+    { href: "/medicine", label: "Medico", icon: Pill, activeColor: "text-emerald-600", activeBg: "bg-emerald-50", isActive: isMedicine },
   ];
 
   return (
     <>
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 backdrop-blur-md shadow-sm ${
-        isEssentials ? "bg-blue-500/95" : isMedico ? "bg-emerald-500/95" : "bg-orange-500/95"
+        isStore ? "bg-blue-500/95" : isMedicine ? "bg-emerald-500/95" : "bg-orange-500/95"
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
@@ -135,7 +149,7 @@ export default function Navbar() {
           <Link
             href="/"
             className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${
-              !isEssentials && !isMedico
+              isFood
                 ? `bg-white text-orange-600 shadow-sm`
                 : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
             }`}
@@ -163,7 +177,7 @@ export default function Navbar() {
         {/* ── Desktop Quick Links ── */}
         <div className="hidden md:flex items-center gap-3 ml-6">
           <Link
-            href="/wishlist"
+            href={`${baseUrl}/wishlist`}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
           >
             <Heart className="w-4 h-4 fill-white text-white" />
@@ -175,7 +189,7 @@ export default function Navbar() {
                 e.preventDefault();
                 openLoginModal();
               } else {
-                router.push("/orders");
+                router.push(`${baseUrl}/orders`);
               }
             }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
@@ -190,7 +204,7 @@ export default function Navbar() {
 
           {/* Cart – hidden on mobile (lives in hamburger) */}
           <Link
-            href="/cart"
+            href={`${baseUrl}/cart`}
             id="cart-btn"
             className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group hidden md:flex"
           >

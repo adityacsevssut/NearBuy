@@ -44,7 +44,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }, []);
 
   // Bypass the guard for these paths
-  const bypassedPaths = ["/dev", "/manager", "/vendor", "/account", "/wishlist", "/orders", "/cart"];
+  const bypassedPaths = ["/dev", "/manager", "/vendor", "/account", "/food/wishlist", "/food/orders", "/food/cart", "/wishlist", "/orders", "/cart"];
   const isBypassed = bypassedPaths.some(path => pathname?.startsWith(path));
 
   useEffect(() => {

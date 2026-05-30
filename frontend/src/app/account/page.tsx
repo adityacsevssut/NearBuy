@@ -343,7 +343,7 @@ function AccountContent() {
           
           {/* Cart Button */}
           <button
-            onClick={() => router.push("/cart")}
+            onClick={() => router.push("/food/cart")}
             className="group bg-white rounded-2xl border border-gray-200 shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
@@ -365,7 +365,7 @@ function AccountContent() {
 
           {/* Wishlist Button */}
           <button
-            onClick={() => router.push("/wishlist")}
+            onClick={() => router.push("/food/wishlist")}
             className="group bg-white rounded-2xl border border-gray-200 shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 hover:border-rose-200/80
@@ -409,7 +409,7 @@ function AccountContent() {
 
           {/* Your Orders Button */}
           <button
-            onClick={() => router.push("/orders?history=true")}
+            onClick={() => router.push("/food/orders?history=true")}
             className="group bg-white rounded-2xl border border-gray-200 shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 hover:border-purple-200/80
@@ -435,7 +435,7 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Saved Information</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
-            <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push("/orders?history=true")} />
+            <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push("/food/orders?history=true")} />
             
             {/* ── Saved Addresses — expandable ── */}
             <div>

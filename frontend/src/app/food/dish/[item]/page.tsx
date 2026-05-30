@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send } from "lucide-react";
+import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
@@ -240,31 +241,55 @@ export default function DishPage() {
                       ) : (
                         dish.emoji || "🍽️"
                       )}
-                      <button
-                        onClick={() => {
-                          if (isOutOfRange) return;
-                          toggleFood({
-                            id: dish.id,
-                            name: dish.name,
-                            price: dish.price,
-                            actual_price: dish.actual_price,
-                            type: dish.type,
-                            badge: dish.badge || "",
-                            description: dish.desc || "",
-                            image_url: dish.image_url || "",
-                            rating: dish.rating?.toString() || "0",
-                            prep_time: dish.time || "30 min",
-                            reviews: dish.reviews?.toString() || "0",
-                            restaurantId: dish.vendor_id || "",
-                            restaurantName: dish.vendor || "Unknown",
-                            is_available: dish.is_available
-                          });
-                        }}
-                        className={`absolute top-2 right-2 p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'bg-white/80 border-gray-200 hover:scale-110'}`}
-                        disabled={isOutOfRange}
-                      >
-                        <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
-                      </button>
+                      <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                        <button
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            const url = window.location.href;
+                            try {
+                              if (navigator.share) {
+                                await navigator.share({
+                                  title: `NearBuy - ${dish.name}`,
+                                  text: `Check out ${dish.name} by ${dish.vendor} on NearBuy!`,
+                                  url: url
+                                });
+                              } else {
+                                await navigator.clipboard.writeText(`Check out ${dish.name} by ${dish.vendor} on NearBuy! ${url}`);
+                                toast.success("Link copied to clipboard!");
+                              }
+                            } catch (err) {}
+                          }}
+                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform bg-white/80 border-gray-200 hover:scale-110`}
+                          title="Share"
+                        >
+                          <Send className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (isOutOfRange) return;
+                            toggleFood({
+                              id: dish.id,
+                              name: dish.name,
+                              price: dish.price,
+                              actual_price: dish.actual_price,
+                              type: dish.type,
+                              badge: dish.badge || "",
+                              description: dish.desc || "",
+                              image_url: dish.image_url || "",
+                              rating: dish.rating?.toString() || "0",
+                              prep_time: dish.time || "30 min",
+                              reviews: dish.reviews?.toString() || "0",
+                              restaurantId: dish.vendor_id || "",
+                              restaurantName: dish.vendor || "Unknown",
+                              is_available: dish.is_available
+                            });
+                          }}
+                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'bg-white/80 border-gray-200 hover:scale-110'}`}
+                          disabled={isOutOfRange}
+                        >
+                          <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
+                        </button>
+                      </div>
                       {isOutOfRange && (
                         <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 rounded-xl z-20">
                           <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">Out of Range</span>

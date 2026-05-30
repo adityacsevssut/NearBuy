@@ -9,27 +9,39 @@ import { useCart } from "../context/CartContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
-  const isEssentials = pathname.startsWith('/essentials');
-  const isMedico = pathname.startsWith('/medico');
+  
+  const getDomain = () => {
+    if (pathname.startsWith('/medicine')) return 'medicine';
+    if (pathname.startsWith('/store')) return 'store';
+    if (pathname.startsWith('/hotels')) return 'hotels';
+    return 'food'; // Default fallback
+  };
 
-  const activeBg = isEssentials ? "bg-blue-50/70" : isMedico ? "bg-emerald-50/70" : "bg-orange-50/70";
-  const activeText = isEssentials ? "text-blue-600" : isMedico ? "text-emerald-600" : "text-orange-600";
+  const domain = getDomain();
+  const isStore = domain === 'store';
+  const isMedicine = domain === 'medicine';
+  const isHotels = domain === 'hotels';
+  const isFood = domain === 'food';
+
+  const activeBg = isStore ? "bg-blue-50/70" : isMedicine ? "bg-emerald-50/70" : isHotels ? "bg-purple-50/70" : "bg-orange-50/70";
+  const activeText = isStore ? "text-blue-600" : isMedicine ? "text-emerald-600" : isHotels ? "text-purple-600" : "text-orange-600";
+  const badgeColor = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : isHotels ? "bg-purple-500" : "bg-orange-500";
 
   const { isLoggedIn, openLoginModal } = useAuth();
   const { restaurantCount: cartCount } = useCart();
 
-  const homeHref = isEssentials ? "/essentials" : isMedico ? "/medico" : "/";
+  const baseUrl = `/${domain}`;
 
   const tabs = [
-    { id: "mobile-nav-home", label: "Home", icon: Home, href: homeHref },
-    { id: "mobile-nav-wishlist", label: "Wishlist", icon: Heart, href: "/wishlist" },
-    { id: "mobile-nav-cart", label: "Cart", icon: ShoppingCart, href: "/cart", badge: cartCount },
-    { id: "mobile-nav-orders", label: "Orders", icon: ClipboardList, href: "/orders" },
+    { id: "mobile-nav-home", label: "Home", icon: Home, href: baseUrl },
+    { id: "mobile-nav-wishlist", label: "Wishlist", icon: Heart, href: `${baseUrl}/wishlist` },
+    { id: "mobile-nav-cart", label: "Cart", icon: ShoppingCart, href: `${baseUrl}/cart`, badge: cartCount },
+    { id: "mobile-nav-orders", label: "Orders", icon: ClipboardList, href: `${baseUrl}/orders` },
     { 
       id: "mobile-nav-auth", 
       label: isLoggedIn ? "Account" : "Login", 
       icon: isLoggedIn ? User : LogIn, 
-      href: isLoggedIn ? (isEssentials ? "/account?theme=blue" : isMedico ? "/account?theme=emerald" : "/account") : "#" 
+      href: isLoggedIn ? `/account?theme=${isStore ? 'blue' : isMedicine ? 'emerald' : isHotels ? 'purple' : 'orange'}` : "#" 
     },
   ];
 
@@ -44,7 +56,7 @@ export default function MobileBottomNav() {
             const { id, label, icon: Icon, href, badge } = tab;
             const cleanHref = href.split('?')[0];
             const active = id === "mobile-nav-home"
-              ? pathname === cleanHref || (!pathname.startsWith('/search') && !pathname.startsWith('/orders') && !pathname.startsWith('/account') && !pathname.startsWith('/cart') && !pathname.startsWith('/wishlist'))
+              ? pathname === cleanHref
               : pathname.startsWith(cleanHref) && cleanHref !== "#";
             
             const handleClick = (e: React.MouseEvent) => {
@@ -75,9 +87,7 @@ export default function MobileBottomNav() {
                     className="w-[22px] h-[22px] transition-colors duration-300"
                   />
                   {badge ? (
-                    <span className={`absolute -top-1 -right-1.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow-sm ${
-                      isEssentials ? 'bg-blue-500' : isMedico ? 'bg-emerald-500' : 'bg-orange-500'
-                    }`}>
+                    <span className={`absolute -top-1 -right-1.5 w-4 h-4 rounded-full text-white text-[9px] font-black flex items-center justify-center shadow-sm ${badgeColor}`}>
                       {badge}
                     </span>
                   ) : null}

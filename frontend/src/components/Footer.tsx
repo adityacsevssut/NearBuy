@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Globe, Mail, MessageCircle, Smartphone, ArrowRight, Zap } from "lucide-react";
+import { Globe, Mail, MessageCircle, Smartphone, ArrowRight, Zap, Heart } from "lucide-react";
 import BusinessRequestModal from "./BusinessRequestModal";
 
 export default function Footer() {
@@ -81,7 +81,7 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-8 border-t border-orange-100">
             <p className="text-[13px] text-gray-500 font-medium text-center md:text-left">
-              © {new Date().getFullYear()} NearBuy Technologies. Made with <span className="text-red-500">❤️</span> for VSSUT Burla.
+              © {new Date().getFullYear()} NearBuy Technologies PVT Limited. Made with <Heart className="w-4 h-4 inline text-red-500 fill-current mx-1" /> By Students Of VSSUT Burla.
             </p>
             
             <div className="flex items-center gap-6 text-[13px] font-medium text-gray-500">
