@@ -60,7 +60,7 @@ export default function MobileBottomNav() {
               : pathname.startsWith(cleanHref) && cleanHref !== "#";
             
             const handleClick = (e: React.MouseEvent) => {
-              if (id === "mobile-nav-auth" && !isLoggedIn) {
+              if (!isLoggedIn && (id === "mobile-nav-auth" || id === "mobile-nav-wishlist" || id === "mobile-nav-cart" || id === "mobile-nav-orders")) {
                 e.preventDefault();
                 openLoginModal();
               }

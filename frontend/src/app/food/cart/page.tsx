@@ -323,6 +323,18 @@ export default function CartPage() {
   const { items, updateQty, removeItem, clearCart, restaurantCount } = useCart();
   const { locationName, landmark, pincode, latitude, longitude, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, accessToken, openLoginModal } = useAuth();
+  
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoggedIn) {
+      router.push("/");
+    }
+  }, [mounted, isLoggedIn, router]);
 
   const foodItems = items.filter((i) => i.section === "food");
   const groups = groupByRestaurant(foodItems);
@@ -409,6 +421,8 @@ export default function CartPage() {
       setIsPlacingOrder(false);
     }
   };
+
+  if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">

@@ -82,6 +82,8 @@ export default function DishPage() {
         }
       } else if (pincode && dish.pincode) {
         matchRange = pincode === dish.pincode;
+      } else if (!latitude && !longitude && !pincode) {
+        matchRange = true;
       }
       return matchRange;
     })

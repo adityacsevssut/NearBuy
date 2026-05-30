@@ -178,6 +178,12 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3 ml-6">
           <Link
             href={`${baseUrl}/wishlist`}
+            onClick={(e) => {
+              if (!isLoggedIn) {
+                e.preventDefault();
+                openLoginModal();
+              }
+            }}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
           >
             <Heart className="w-4 h-4 fill-white text-white" />
@@ -206,6 +212,12 @@ export default function Navbar() {
           <Link
             href={`${baseUrl}/cart`}
             id="cart-btn"
+            onClick={(e) => {
+              if (!isLoggedIn) {
+                e.preventDefault();
+                openLoginModal();
+              }
+            }}
             className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group hidden md:flex"
           >
             <ShoppingCart className="w-[22px] h-[22px] text-gray-700 group-hover:text-gray-900 transition-colors" />

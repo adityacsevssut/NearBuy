@@ -81,9 +81,6 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         setStatus("denied");
         return;
       }
-      setStatus("no-location");
-      
-      // Prompt for geolocation once
       if (!permissionPrompted) {
         setPermissionPrompted(true);
         if (navigator.geolocation) {
@@ -105,10 +102,13 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
             },
             (err) => {
               console.warn("Geolocation error or denied:", err);
-              // Open modal so they can manually set it
-              setIsLocationModalOpen(true);
-            }
+              // Set status to denied so it shows "Not Available" screen
+              setStatus("denied");
+            },
+            { enableHighAccuracy: true, timeout: 15000 }
           );
+        } else {
+          setStatus("denied");
         }
       }
       return;
@@ -224,42 +224,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     );
   }
 
-  if (status === "no-location") {
-    return (
-      <div className="min-h-screen bg-orange-50/40 flex flex-col pt-16">
-        <Navbar />
-        <main className="flex-1 flex items-center justify-center p-4 my-8">
-          <div className="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-xl shadow-gray-200/50 border border-gray-100">
-            <div className="w-20 h-20 bg-orange-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-orange-100">
-              <Navigation className="w-10 h-10 text-orange-500" />
-            </div>
-            <h1 className="text-2xl font-black text-gray-900 mb-3 tracking-tight">Location Required</h1>
-            <p className="text-gray-500 mb-8 leading-relaxed font-medium text-[15px]">
-              Please allow location access or select your location manually to see if we deliver to your area.
-            </p>
-            <div className="space-y-3">
-              <button 
-                onClick={handleAutoDetectLocation}
-                disabled={isDetecting}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-bold transition-colors shadow-lg disabled:opacity-70"
-              >
-                <Navigation className={`w-5 h-5 ${isDetecting ? 'animate-pulse' : ''}`} /> 
-                {isDetecting ? "Detecting..." : "Auto Detect Location"}
-              </button>
-              <button 
-                onClick={() => setIsLocationModalOpen(true)}
-                className="w-full flex items-center justify-center gap-2 py-4 bg-gray-900 hover:bg-black rounded-xl text-white font-bold transition-colors shadow-lg"
-              >
-                <Map className="w-5 h-5" /> Select Location Manually
-              </button>
-            </div>
-          </div>
-        </main>
-        <Footer />
-        <MobileBottomNav />
-      </div>
-    );
-  }
+
 
   if (status === "denied") {
     return (

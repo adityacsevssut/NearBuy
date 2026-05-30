@@ -3,7 +3,10 @@
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
+import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Star, Clock, Utensils, Heart, ArrowDown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -12,6 +15,20 @@ export default function WishlistPage() {
   const { restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood } = useWishlist();
   const { addItem, itemQty } = useCart();
   const { latitude, longitude } = useLocationContext();
+  const { isLoggedIn } = useAuth();
+  const router = useRouter();
+  
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted && !isLoggedIn) {
+      router.push("/");
+    }
+  }, [mounted, isLoggedIn, router]);
 
   const getDistance = (lat1: number | null, lon1: number | null, lat2: number | null, lon2: number | null) => {
     if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return null;
@@ -25,6 +42,8 @@ export default function WishlistPage() {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
+
+  if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-16 pb-24 md:pb-8">

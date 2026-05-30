@@ -306,16 +306,11 @@ export default function HomePage() {
       || r.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
 
     let matchCenter = true;
-    if (activeCenter && r.latitude && r.longitude) {
-      const vLat=r.latitude?parseFloat(r.latitude):null, vLon=r.longitude?parseFloat(r.longitude):null;
-      const cLat=activeCenter.latitude?parseFloat(activeCenter.latitude):null, cLon=activeCenter.longitude?parseFloat(activeCenter.longitude):null;
-      if (vLat!=null&&vLon!=null&&cLat!=null&&cLon!=null) {
-        const d = getDistance(cLat,cLon,vLat,vLon);
-        if (d!=null) matchCenter = d <= parseFloat(activeCenter.radius_km);
-      }
-    }
+    // We remove the strict matchCenter requirement for vendors.
+    // If a vendor is within the user's delivery range, they should show up, 
+    // even if the vendor's exact coordinates fall slightly outside the user's active center.
 
-    let matchRange = true;
+    let matchRange = false;
     if (latitude !== null && longitude !== null && r.latitude && r.longitude) {
       const vLat = parseFloat(r.latitude);
       const vLon = parseFloat(r.longitude);
@@ -326,6 +321,9 @@ export default function HomePage() {
       }
     } else if (pincode && r.pincode) {
       matchRange = pincode === r.pincode;
+    } else if (!latitude && !longitude && !pincode) {
+      // If user hasn't set any location, show all vendors
+      matchRange = true;
     }
 
     return matchVeg && matchSrch && matchCenter && matchRange;
