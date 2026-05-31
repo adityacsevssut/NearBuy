@@ -1,0 +1,38 @@
+name: Database Backup to GCS
+
+on:
+  schedule:
+    # Run at the top of every hour
+    - cron: '0 * * * *'
+  # Allow manual trigger from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Create Database Backup
+        run: |
+          # Create a timestamped backup filename
+          TIMESTAMP=$(date +"%Y-%m-%d-%H%M%S")
+          FILENAME="backup-$TIMESTAMP.sql"
+          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          
+          # Run pg_dump to create a standard plain-text SQL backup
+          pg_dump "${{ secrets.DATABASE_URL }}" --clean --if-exists --no-owner --no-privileges -f "$FILENAME"
+
+      - name: Upload Backup to GitHub Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: database-backup-${{ env.FILENAME }}
+          path: ${{ env.FILENAME }}
+          retention-days: 90
