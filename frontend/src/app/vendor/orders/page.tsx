@@ -231,7 +231,7 @@ export default function VendorOrdersPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-lg font-black text-gray-900">₹{order.total_amount}</p>
+                    <p className="text-lg font-black text-gray-900">₹{(parseFloat(order.subtotal || "0") + parseFloat(order.delivery_charge || "0")).toFixed(2)}</p>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                       {new Date(order.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
                     </p>
@@ -368,7 +368,7 @@ export default function VendorOrdersPage() {
                   )}
                   <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-100 mt-3">
                     <span>Grand Total</span>
-                    <span>₹{selectedOrderForItems.total_amount}</span>
+                    <span>₹{(parseFloat(selectedOrderForItems.subtotal || "0") + parseFloat(selectedOrderForItems.delivery_charge || "0")).toFixed(2)}</span>
                   </div>
                 </div>
               </div>

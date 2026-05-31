@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
   Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown
@@ -106,8 +108,26 @@ export default function OrderStatusPage() {
     }
   };
 
-  const generateReceipt = () => {
-    window.print();
+  const generateReceipt = async () => {
+    const element = document.getElementById("pdf-receipt-template-wrapper");
+    if (element) {
+      element.style.opacity = "1";
+      element.style.zIndex = "9999";
+      try {
+        const canvas = await html2canvas(element.querySelector("#pdf-receipt-template") as HTMLElement, { scale: 2 });
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Receipt_NearBuy_${id}.pdf`);
+      } catch (err) {
+        console.error("Failed to generate PDF", err);
+      } finally {
+        element.style.opacity = "0";
+        element.style.zIndex = "-50";
+      }
+    }
   };
 
   if (!mounted || (!isLoggedIn && mounted)) return null;

@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import {
   Package, MapPin, ChevronLeft, Clock,
   CheckCircle, Loader2, Store, FileText, ChevronRight,
@@ -95,9 +97,27 @@ function OrdersPageContent() {
   useEffect(() => {
     if (orderToDownload) {
       // Give React a frame to render the hidden template with orderToDownload data
-      setTimeout(() => {
-        window.print();
-        setOrderToDownload(null);
+      setTimeout(async () => {
+        const element = document.getElementById("pdf-receipt-template-wrapper");
+        if (element) {
+          element.style.opacity = "1";
+          element.style.zIndex = "9999";
+          try {
+            const canvas = await html2canvas(element.querySelector("#pdf-receipt-template") as HTMLElement, { scale: 2 });
+            const imgData = canvas.toDataURL("image/png");
+            const pdf = new jsPDF("p", "mm", "a4");
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Receipt_NearBuy_${orderToDownload.id}.pdf`);
+          } catch (err) {
+            console.error("Failed to generate PDF", err);
+          } finally {
+            element.style.opacity = "0";
+            element.style.zIndex = "-50";
+            setOrderToDownload(null);
+          }
+        }
       }, 300);
     }
   }, [orderToDownload]);

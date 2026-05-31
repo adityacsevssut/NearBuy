@@ -106,13 +106,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     const setupFCM = async () => {
       try {
+        if (!("Notification" in window)) return;
+        if (!("serviceWorker" in navigator)) return;
+
         const messaging = await getMessagingInstance();
         if (!messaging) return; // Not supported
 
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          const currentToken = await getToken(messaging);
-          
+        // Explicitly register SW for Vercel/mobile deployments
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+
+        const registerToken = async () => {
+          const currentToken = await getToken(messaging, { serviceWorkerRegistration: registration });
           if (currentToken) {
             const token = localStorage.getItem("token");
             await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {
@@ -125,6 +129,32 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             });
             console.log("FCM token registered");
           }
+        };
+
+        if (Notification.permission === 'granted') {
+          await registerToken();
+        } else if (Notification.permission === 'default') {
+          // Show toast to ask for permission via user gesture
+          toast.custom((t) => (
+            <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black/5 p-4 items-center`}>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">Enable Notifications</p>
+                <p className="text-sm text-gray-500">Get real-time updates for your orders.</p>
+              </div>
+              <button
+                onClick={async () => {
+                  toast.dismiss(t.id);
+                  const perm = await Notification.requestPermission();
+                  if (perm === 'granted') {
+                    await registerToken();
+                  }
+                }}
+                className="ml-4 px-3 py-2 bg-orange-500 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-orange-600"
+              >
+                Enable
+              </button>
+            </div>
+          ), { duration: 10000, id: 'push-permission', position: 'top-center' });
         }
       } catch (error) {
         console.error("FCM Setup failed:", error);
