@@ -106,7 +106,16 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
     const setupFCM = async () => {
       try {
-        if (!("Notification" in window)) return;
+        if (!("Notification" in window)) {
+          const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          if (isIOS) {
+            if (!sessionStorage.getItem('ios_pwa_prompt')) {
+              toast('To receive notifications on iOS, tap Share and "Add to Home Screen".', { duration: 8000, icon: '📱' });
+              sessionStorage.setItem('ios_pwa_prompt', 'true');
+            }
+          }
+          return;
+        }
         if (!("serviceWorker" in navigator)) return;
 
         const messaging = await getMessagingInstance();
@@ -142,12 +151,15 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 <p className="text-sm text-gray-500">Get real-time updates for your orders.</p>
               </div>
               <button
-                onClick={async () => {
+                onClick={() => {
                   toast.dismiss(t.id);
-                  const perm = await Notification.requestPermission();
-                  if (perm === 'granted') {
-                    await registerToken();
-                  }
+                  Notification.requestPermission().then((perm) => {
+                    if (perm === 'granted') {
+                      registerToken();
+                    } else {
+                      toast.error("Push notifications were denied.");
+                    }
+                  });
                 }}
                 className="ml-4 px-3 py-2 bg-orange-500 text-white text-xs font-bold rounded-lg shadow-sm hover:bg-orange-600"
               >

@@ -111,8 +111,6 @@ export default function OrderStatusPage() {
   const generateReceipt = async () => {
     const element = document.getElementById("pdf-receipt-template-wrapper");
     if (element) {
-      element.style.opacity = "1";
-      element.style.zIndex = "9999";
       try {
         const canvas = await html2canvas(element.querySelector("#pdf-receipt-template") as HTMLElement, { scale: 2 });
         const imgData = canvas.toDataURL("image/png");
@@ -123,9 +121,6 @@ export default function OrderStatusPage() {
         pdf.save(`Receipt_NearBuy_${id}.pdf`);
       } catch (err) {
         console.error("Failed to generate PDF", err);
-      } finally {
-        element.style.opacity = "0";
-        element.style.zIndex = "-50";
       }
     }
   };
@@ -388,6 +383,18 @@ export default function OrderStatusPage() {
                     <span>Subtotal</span>
                     <span>₹{order.subtotal}</span>
                   </div>
+                  {order.platform_fee && parseFloat(order.platform_fee) > 0 && (
+                    <div className="flex justify-between text-sm font-medium text-gray-600">
+                      <span>Platform Fee</span>
+                      <span>+ ₹{order.platform_fee}</span>
+                    </div>
+                  )}
+                  {order.gst && parseFloat(order.gst) > 0 && (
+                    <div className="flex justify-between text-sm font-medium text-gray-600">
+                      <span>GST (18%)</span>
+                      <span>+ ₹{order.gst}</span>
+                    </div>
+                  )}
                   {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
                     <div className="flex justify-between text-sm font-bold text-orange-600">
                       <span>Delivery Charge</span>
@@ -416,18 +423,18 @@ export default function OrderStatusPage() {
 
       {/* Hidden Receipt Template for PDF */}
       {order && (
-        <div id="pdf-receipt-template-wrapper" style={{ position: "fixed", top: 0, left: 0, zIndex: -50, opacity: 0, pointerEvents: "none", width: "100%" }}>
-          <div id="pdf-receipt-template" className="w-full max-w-[800px] mx-auto bg-white p-8 md:p-12 text-gray-900 border border-gray-200" style={{ fontFamily: "sans-serif" }}>
-            <div className="flex justify-between items-start border-b-2 border-gray-100 pb-8 mb-8">
+        <div id="pdf-receipt-template-wrapper" style={{ position: "absolute", top: "-10000px", left: "-10000px", width: "800px" }}>
+          <div id="pdf-receipt-template" className="mx-auto p-8 md:p-12" style={{ fontFamily: "sans-serif", backgroundColor: "#ffffff", color: "#111827", border: "1px solid #e5e7eb", width: "800px" }}>
+            <div className="flex justify-between items-start pb-8 mb-8" style={{ borderBottom: "2px solid #f3f4f6" }}>
               <div>
                 <h1 className="text-4xl font-black mb-1">
-                  <span className="text-orange-500">Near</span><span className="text-black">Buy</span>
+                  <span style={{ color: "#f97316" }}>Near</span><span style={{ color: "#000000" }}>Buy</span>
                 </h1>
-                <p className="text-gray-500 font-medium">Official Order Receipt</p>
+                <p className="font-medium" style={{ color: "#6b7280" }}>Official Order Receipt</p>
               </div>
               <div className="text-right max-w-[250px]">
                 <p className="font-bold text-xl">{order.restaurant_name}</p>
-                <p className="text-gray-500 mt-1 text-sm">
+                <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
                   {order.manual_address || order.gps_address || "Address not provided"}
                   {order.vendor_pincode ? ` - ${order.vendor_pincode}` : ''}
                 </p>
@@ -436,37 +443,37 @@ export default function OrderStatusPage() {
 
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Order ID</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Order ID</p>
                 <p className="font-black text-sm break-all">{order.id}</p>
               </div>
               <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Date</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Date</p>
                 <p className="font-black text-sm">
                   {new Date(order.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
                 </p>
               </div>
               <div>
-                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Payment Method</p>
+                <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Payment Method</p>
                 <p className="font-black text-sm uppercase">{order.payment_method}</p>
               </div>
             </div>
 
-            <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
+            <div className="rounded-xl overflow-hidden mb-8" style={{ border: "1px solid #e5e7eb" }}>
               <table className="w-full text-left">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead style={{ backgroundColor: "#f9fafb", borderBottom: "1px solid #e5e7eb" }}>
                   <tr>
-                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Item</th>
-                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Qty</th>
-                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Price</th>
-                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Total</th>
+                    <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider" style={{ color: "#6b7280" }}>Item</th>
+                    <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right" style={{ color: "#6b7280" }}>Qty</th>
+                    <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right" style={{ color: "#6b7280" }}>Price</th>
+                    <th className="py-3 px-4 text-xs font-bold uppercase tracking-wider text-right" style={{ color: "#6b7280" }}>Total</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody style={{ borderTop: "none" }}>
                   {order.items.map((item, idx) => (
-                    <tr key={idx}>
+                    <tr key={idx} style={{ borderBottom: "1px solid #f3f4f6" }}>
                       <td className="py-3 px-4 font-bold text-sm">{item.name}</td>
-                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">{item.quantity || (item as any).qty}</td>
-                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">₹{item.price}</td>
+                      <td className="py-3 px-4 font-medium text-right text-sm" style={{ color: "#4b5563" }}>{item.quantity || (item as any).qty}</td>
+                      <td className="py-3 px-4 font-medium text-right text-sm" style={{ color: "#4b5563" }}>₹{item.price}</td>
                       <td className="py-3 px-4 font-black text-right text-sm">₹{(item.price * (item.quantity || (item as any).qty)).toFixed(2)}</td>
                     </tr>
                   ))}
@@ -476,32 +483,32 @@ export default function OrderStatusPage() {
 
             <div className="flex justify-end">
               <div className="w-full max-w-[300px] space-y-2">
-                <div className="flex justify-between text-gray-600 font-medium">
+                <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>
                   <span>Subtotal</span>
                   <span>₹{order.subtotal}</span>
                 </div>
-                <div className="flex justify-between text-gray-600 font-medium">
+                <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>
                   <span>Platform Fee</span>
                   <span>₹{order.platform_fee}</span>
                 </div>
-                <div className="flex justify-between text-gray-600 font-medium">
+                <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>
                   <span>GST (18%)</span>
                   <span>₹{order.gst}</span>
                 </div>
                 {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
-                  <div className="flex justify-between text-gray-600 font-medium">
+                  <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>
                     <span>Delivery Charge</span>
                     <span>₹{order.delivery_charge}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-xl font-black pt-3 border-t border-gray-200 mt-3">
+                <div className="flex justify-between text-xl font-black pt-3 mt-3" style={{ borderTop: "1px solid #e5e7eb", color: "#111827" }}>
                   <span>Grand Total</span>
                   <span>₹{order.total_amount}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-12 text-center text-gray-400 font-medium text-xs">
+            <div className="mt-12 text-center font-medium text-xs" style={{ color: "#9ca3af" }}>
               <p>Thank you for shopping with NearBuy!</p>
               <p className="mt-1">This is a computer generated invoice and does not require a signature.</p>
             </div>
