@@ -55,11 +55,30 @@ ensureTables().catch(console.error);
 // ── GET /api/vendor-menu  →  fetch all menu items for this vendor ─────────────
 router.get("/", authenticate, async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT * FROM vendor_menu_items WHERE vendor_id = $1 ORDER BY category, sort_order, created_at`,
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM vendor_menu_items WHERE vendor_id = $1`,
       [req.user.id]
     );
-    return res.json({ items: rows });
+    const total = parseInt(countResult.rows[0].count);
+
+    const { rows } = await pool.query(
+      `SELECT * FROM vendor_menu_items WHERE vendor_id = $1 ORDER BY category, sort_order, created_at LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
+    );
+    
+    return res.json({ 
+      items: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     console.error("GET /api/vendor-menu error:", err);
     return res.status(500).json({ error: "Failed to fetch menu." });

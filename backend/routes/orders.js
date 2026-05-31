@@ -80,15 +80,35 @@ router.post(
 // Get my orders
 router.get("/me", authenticate, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM orders WHERE user_id = $1`,
+      [req.user.id]
+    );
+    const total = parseInt(countResult.rows[0].count);
+
     const { rows } = await pool.query(
       `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
        WHERE o.user_id = $1 
-       ORDER BY o.created_at DESC`,
-      [req.user.id]
+       ORDER BY o.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
     );
-    return res.json({ orders: rows });
+    
+    return res.json({ 
+      orders: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     console.error("Get my orders error:", err);
     return res.status(500).json({ error: "Failed to fetch orders." });
@@ -99,15 +119,35 @@ router.get("/me", authenticate, async (req, res) => {
 // Get orders for a specific vendor
 router.get("/vendor", authenticate, async (req, res) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const countResult = await pool.query(
+      `SELECT COUNT(*) FROM orders WHERE vendor_id = $1`,
+      [req.user.id]
+    );
+    const total = parseInt(countResult.rows[0].count);
+
     const { rows } = await pool.query(
       `SELECT o.*, u.first_name, u.last_name 
        FROM orders o
        JOIN users u ON o.user_id = u.id
        WHERE o.vendor_id = $1 
-       ORDER BY o.created_at DESC`,
-      [req.user.id]
+       ORDER BY o.created_at DESC
+       LIMIT $2 OFFSET $3`,
+      [req.user.id, limit, offset]
     );
-    return res.json({ orders: rows });
+    
+    return res.json({ 
+      orders: rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     console.error("Get vendor orders error:", err);
     return res.status(500).json({ error: "Failed to fetch vendor orders." });

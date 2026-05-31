@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import html2canvas from "html2canvas";
@@ -56,6 +56,12 @@ function OrdersPageContent() {
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<Order | null>(null);
   const [orderToDownload, setOrderToDownload] = useState<Order | null>(null);
 
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
+  const lastElementRef = React.useRef<HTMLDivElement | null>(null);
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -74,16 +80,21 @@ function OrdersPageContent() {
     }
   }, [isLoggedIn, accessToken]);
 
-  const fetchOrders = async () => {
-    setIsLoading(true);
+  const fetchOrders = async (pageNum = 1) => {
+    if (pageNum === 1) setIsLoading(true);
+    else setLoadingMore(true);
+    
     try {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-      const res = await fetch(`${API}/api/orders/me`, {
+      const query = new URLSearchParams({ page: pageNum.toString(), limit: "20" });
+      
+      const res = await fetch(`${API}/api/orders/me?${query.toString()}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
       if (res.ok) {
-        setOrders(data.orders || []);
+        setHasMore(pageNum < (data.pagination?.totalPages || 1));
+        setOrders(prev => pageNum === 1 ? (data.orders || []) : [...prev, ...(data.orders || [])]);
       } else {
         toast.error(data.error || "Failed to fetch orders");
       }
@@ -91,8 +102,30 @@ function OrdersPageContent() {
       toast.error("Network error while fetching orders");
     } finally {
       setIsLoading(false);
+      setLoadingMore(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoading || loadingMore || !hasMore) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => {
+            const next = prev + 1;
+            fetchOrders(next);
+            return next;
+          });
+        }
+      },
+      { threshold: 1.0 }
+    );
+    if (lastElementRef.current) observer.observe(lastElementRef.current);
+    observerRef.current = observer;
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
 
   useEffect(() => {
     if (orderToDownload) {
@@ -269,6 +302,12 @@ function OrdersPageContent() {
               </div>
             </motion.div>
           ))
+        )}
+        {/* Infinite Scroll Loader */}
+        {hasMore && displayedOrders.length > 0 && (
+          <div ref={lastElementRef} className="w-full h-16 flex items-center justify-center mt-6">
+            {loadingMore && <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>}
+          </div>
         )}
       </div>
 

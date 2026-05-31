@@ -19,6 +19,7 @@ interface AuthUser {
   landmark?: string;
   latitude?: number | null;
   longitude?: number | null;
+  notifications_enabled?: boolean;
 }
 
 interface AuthContextType {

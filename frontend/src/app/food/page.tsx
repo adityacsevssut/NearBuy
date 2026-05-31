@@ -263,11 +263,54 @@ export default function HomePage() {
   const { restaurantWishlist, toggleRestaurant } = useWishlist();
 
   const [restaurants, setRestaurants] = useState<any[]>([]);
-  const [isLoading,   setIsLoading]   = useState(true);
-  const [posterUrl,   setPosterUrl]   = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const lastElementRef = useRef<HTMLDivElement | null>(null);
+
+  const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(true);
 
-  useEffect(() => { fetchRestaurants(); fetchFoodPoster(); }, []);
+  // Debounce search
+  const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  useEffect(() => { fetchFoodPoster(); }, []);
+
+  // Fetch when filters change
+  useEffect(() => {
+    setPage(1);
+    setRestaurants([]);
+    setHasMore(true);
+    fetchRestaurants(1, true);
+  }, [debouncedSearch, foodPref, latitude, longitude, pincode]);
+
+  // Infinite Scroll Observer
+  useEffect(() => {
+    if (isLoading || loadingMore || !hasMore) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => {
+            const next = prev + 1;
+            fetchRestaurants(next, false);
+            return next;
+          });
+        }
+      },
+      { threshold: 1.0 }
+    );
+    if (lastElementRef.current) observer.observe(lastElementRef.current);
+    observerRef.current = observer;
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
 
   async function fetchFoodPoster() {
     try {
@@ -282,52 +325,40 @@ export default function HomePage() {
     }
   }
 
-  async function fetchRestaurants() {
+  async function fetchRestaurants(pageNum = 1, isReset = false) {
+    if (pageNum === 1) setIsLoading(true);
+    else setLoadingMore(true);
+    
     try {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-      const res = await fetch(`${API}/api/public/vendors`);
-      if (res.ok) setRestaurants(await res.json());
-    } catch { /* silent */ } finally { setIsLoading(false); }
+      const query = new URLSearchParams({
+        page: pageNum.toString(),
+        limit: "20"
+      });
+      if (debouncedSearch) query.append("search", debouncedSearch);
+      if (foodPref !== "all") query.append("foodPref", foodPref);
+      if (latitude && longitude) {
+        query.append("lat", latitude.toString());
+        query.append("lon", longitude.toString());
+      } else if (pincode) {
+        query.append("pincode", pincode);
+      }
+
+      const res = await fetch(`${API}/api/public/vendors?${query.toString()}`);
+      if (res.ok) {
+        const result = await res.json();
+        const data = result.data || [];
+        setHasMore(pageNum < (result.pagination?.totalPages || 1));
+        setRestaurants(prev => isReset ? data : [...prev, ...data]);
+      }
+    } catch { /* silent */ } finally { 
+      setIsLoading(false);
+      setLoadingMore(false);
+    }
   }
 
-  /* Use real data */
-  const sourceList = restaurants;
-
   /* filter */
-  const filtered = sourceList.filter(r => {
-    let matchVeg = true;
-    if (foodPref === "veg") matchVeg = r.veg;
-    else if (foodPref === "non-veg") matchVeg = !r.veg;
-    else if (foodPref === "avail-all") matchVeg = r.isOpen;
-    else if (foodPref === "avail-veg") matchVeg = r.isOpen && r.veg;
-    else if (foodPref === "avail-non-veg") matchVeg = r.isOpen && !r.veg;
-    const matchSrch = !searchQuery
-      || r.name.toLowerCase().includes(searchQuery.toLowerCase())
-      || r.cuisine.toLowerCase().includes(searchQuery.toLowerCase());
-
-    let matchCenter = true;
-    // We remove the strict matchCenter requirement for vendors.
-    // If a vendor is within the user's delivery range, they should show up, 
-    // even if the vendor's exact coordinates fall slightly outside the user's active center.
-
-    let matchRange = false;
-    if (latitude !== null && longitude !== null && r.latitude && r.longitude) {
-      const vLat = parseFloat(r.latitude);
-      const vLon = parseFloat(r.longitude);
-      const d = getDistance(latitude, longitude, vLat, vLon);
-      const limit = r.deliveryRange ? parseFloat(r.deliveryRange) : 5;
-      if (d != null) {
-        matchRange = d <= limit;
-      }
-    } else if (pincode && r.pincode) {
-      matchRange = pincode === r.pincode;
-    } else if (!latitude && !longitude && !pincode) {
-      // If user hasn't set any location, show all vendors
-      matchRange = true;
-    }
-
-    return matchVeg && matchSrch && matchCenter && matchRange;
-  });
+  const filtered = restaurants;
 
   const popular = filtered.slice(0, 8);
   const cp = { lat: latitude, lon: longitude, pin: pincode, wishlist: restaurantWishlist, toggle: toggleRestaurant };
@@ -600,6 +631,13 @@ export default function HomePage() {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
                 {filtered.map(r => <RestCard key={r.id} r={r} {...cp} />)}
+              </div>
+            )}
+            
+            {/* Infinite Scroll Loader */}
+            {hasMore && filtered.length > 0 && (
+              <div ref={lastElementRef} className="w-full h-16 flex items-center justify-center mt-6">
+                {loadingMore && <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>}
               </div>
             )}
           </section>

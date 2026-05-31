@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send } from "lucide-react";
@@ -40,58 +40,78 @@ export default function DishPage() {
 
   const [dishes, setDishes] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = React.useRef<IntersectionObserver | null>(null);
+  const lastElementRef = React.useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    async function fetchDishes() {
-      try {
-        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-        // We'll search for the rawItem directly to handle URL-friendly versions like 'chicken-pokoda'
-        // But the front page category could be either. We use rawItem and replace dashes with spaces.
-        const searchCategory = rawItem.replace(/-/g, " ");
-        const res = await fetch(`${API}/api/public/dishes/${encodeURIComponent(searchCategory)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setDishes(data.dishes || []);
-        }
-      } catch (err) {
-        console.error("Failed to fetch dishes", err);
-      } finally {
-        setIsLoading(false);
+    setPage(1);
+    setDishes([]);
+    setHasMore(true);
+    fetchDishes(1, true);
+  }, [rawItem, foodPref, sortOrder, latitude, longitude, pincode]);
+
+  async function fetchDishes(pageNum = 1, isReset = false) {
+    if (pageNum === 1) setIsLoading(true);
+    else setLoadingMore(true);
+    
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const searchCategory = rawItem.replace(/-/g, " ");
+      
+      const query = new URLSearchParams({
+        page: pageNum.toString(),
+        limit: "20"
+      });
+      if (foodPref !== "all") query.append("foodPref", foodPref);
+      if (sortOrder !== "relevance") query.append("sortOrder", sortOrder);
+      if (latitude && longitude) {
+        query.append("lat", latitude.toString());
+        query.append("lon", longitude.toString());
+      } else if (pincode) {
+        query.append("pincode", pincode);
       }
+
+      const res = await fetch(`${API}/api/public/dishes/${encodeURIComponent(searchCategory)}?${query.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        const newDishes = data.dishes || [];
+        setHasMore(pageNum < (data.pagination?.totalPages || 1));
+        setDishes(prev => isReset ? newDishes : [...prev, ...newDishes]);
+      }
+    } catch (err) {
+      console.error("Failed to fetch dishes", err);
+    } finally {
+      setIsLoading(false);
+      setLoadingMore(false);
     }
-    fetchDishes();
-  }, [rawItem]);
+  }
 
-  const filteredDishes = dishes
-    .filter((dish) => {
-      if (foodPref !== "all" && dish.type !== foodPref) return false;
-
-      let matchRange = true;
-      if (latitude !== null && longitude !== null && dish.latitude && dish.longitude) {
-        const vendorLat = parseFloat(dish.latitude);
-        const vendorLon = parseFloat(dish.longitude);
-        const dist = getDistance(
-          typeof latitude === "string" ? parseFloat(latitude) : latitude,
-          typeof longitude === "string" ? parseFloat(longitude) : longitude,
-          vendorLat,
-          vendorLon
-        );
-        const limit = dish.delivery_range ? parseFloat(dish.delivery_range) : 5;
-        if (dist != null) {
-          matchRange = dist <= limit;
+  // Infinite Scroll Observer
+  useEffect(() => {
+    if (isLoading || loadingMore || !hasMore) return;
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore) {
+          setPage(prev => {
+            const next = prev + 1;
+            fetchDishes(next, false);
+            return next;
+          });
         }
-      } else if (pincode && dish.pincode) {
-        matchRange = pincode === dish.pincode;
-      } else if (!latitude && !longitude && !pincode) {
-        matchRange = true;
-      }
-      return matchRange;
-    })
-    .sort((a, b) => {
-      if (sortOrder === "low-to-high") return a.price - b.price;
-      if (sortOrder === "high-to-low") return b.price - a.price;
-      return 0;
-    });
+      },
+      { threshold: 1.0 }
+    );
+    if (lastElementRef.current) observer.observe(lastElementRef.current);
+    observerRef.current = observer;
+    return () => {
+      if (observerRef.current) observerRef.current.disconnect();
+    };
+  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
+
+  const filteredDishes = dishes;
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col pt-16">
@@ -367,6 +387,12 @@ export default function DishPage() {
                 <span className="text-6xl mb-4">🍽️</span>
                 <p className="font-black text-gray-700 text-xl">No {itemName} found</p>
                 <p className="text-sm mt-2 font-medium">Try disabling the Veg Only filter or check back later.</p>
+              </div>
+            )}
+            {/* Infinite Scroll Loader */}
+            {hasMore && filteredDishes.length > 0 && (
+              <div ref={lastElementRef} className="w-full h-16 flex items-center justify-center mt-6">
+                {loadingMore && <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>}
               </div>
             )}
           </div>

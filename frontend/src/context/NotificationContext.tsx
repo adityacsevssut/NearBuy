@@ -125,7 +125,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
         const registerToken = async () => {
-          const currentToken = await getToken(messaging, { serviceWorkerRegistration: registration });
+          const currentToken = await getToken(messaging, { 
+            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+            serviceWorkerRegistration: registration 
+          });
           if (currentToken) {
             const token = localStorage.getItem("token");
             await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {

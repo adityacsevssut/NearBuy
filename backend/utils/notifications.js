@@ -12,6 +12,16 @@ async function sendNotification(userId, title, message, type) {
 
     const notification = rows[0];
 
+    // Check if the user has notifications enabled
+    const userRes = await pool.query(`SELECT notifications_enabled FROM users WHERE id = $1`, [userId]);
+    const notificationsEnabled = userRes.rows.length > 0 ? userRes.rows[0].notifications_enabled : true;
+
+    if (!notificationsEnabled) {
+      // If disabled, we still saved it to the DB so they can see it in their inbox, 
+      // but we skip the annoying real-time popup and push notification.
+      return notification;
+    }
+
     // 2. Emit real-time event via Socket.io
     try {
       const io = socketUtil.getIO();

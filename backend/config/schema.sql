@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS users (
   pincode       TEXT,
   latitude      DECIMAL(10, 7),
   longitude     DECIMAL(10, 7),
+  notifications_enabled BOOLEAN NOT NULL DEFAULT TRUE,
   created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at    TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -105,3 +106,15 @@ CREATE TABLE IF NOT EXISTS user_saved_addresses (
 CREATE INDEX IF NOT EXISTS idx_user_saved_addresses_user ON user_saved_addresses(user_id);
 CREATE POLICY "service role bypass" ON user_saved_addresses FOR ALL USING (true);
 ALTER TABLE user_saved_addresses ENABLE ROW LEVEL SECURITY;
+
+-- -----------------------------------------------------------------------------
+-- PERFORMANCE OPTIMIZATION INDEXES
+-- -----------------------------------------------------------------------------
+-- Partial indexes for active records
+CREATE INDEX IF NOT EXISTS idx_vendor_profiles_active ON vendor_profiles(is_active) WHERE is_active = TRUE;
+CREATE INDEX IF NOT EXISTS idx_vendor_menu_available ON vendor_menu_items(is_available) WHERE is_available = TRUE;
+
+-- Indexes for foreign keys to speed up JOINs and lookups
+CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
+CREATE INDEX IF NOT EXISTS idx_orders_vendor_id ON orders(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_users_active_role ON users(is_active, role);

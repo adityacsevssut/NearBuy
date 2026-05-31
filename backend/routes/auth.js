@@ -70,7 +70,8 @@ function safeUser(u) {
     pincode: u.pincode,
     landmark: u.landmark,
     latitude: u.latitude ? parseFloat(u.latitude) : null,
-    longitude: u.longitude ? parseFloat(u.longitude) : null
+    longitude: u.longitude ? parseFloat(u.longitude) : null,
+    notifications_enabled: u.notifications_enabled
   };
 }
 
@@ -801,6 +802,31 @@ router.post("/rate-app", authenticate, async (req, res) => {
   } catch (err) {
     console.error("rate-app error:", err);
     return res.status(500).json({ error: "Failed to submit rating." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════════════
+// PATCH /api/auth/me/notifications
+// Toggle notifications enabled/disabled
+// ════════════════════════════════════════════════════════════════════════════
+router.patch("/me/notifications", authenticate, async (req, res) => {
+  const { enabled } = req.body;
+  if (typeof enabled !== 'boolean') {
+    return res.status(400).json({ error: "enabled must be a boolean." });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      `UPDATE users SET notifications_enabled = $1, updated_at = NOW() WHERE id = $2 RETURNING *`,
+      [enabled, req.user.id]
+    );
+
+    if (!rows.length) return res.status(404).json({ error: "User not found." });
+
+    return res.json({ message: "Notification preferences updated.", user: safeUser(rows[0]) });
+  } catch (err) {
+    console.error("update notifications pref error:", err);
+    return res.status(500).json({ error: "Failed to update notification preferences." });
   }
 });
 

@@ -27,6 +27,8 @@ function AccountContent() {
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
   const [supportEmail, setSupportEmail] = useState("manager@nearbuy.com");
   
+  const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
+  
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [appLanguage, setAppLanguage] = useState("English");
   
@@ -185,6 +187,32 @@ function AccountContent() {
         maxWidth: "340px"
       },
     });
+  };
+
+  const handleToggleNotifications = async () => {
+    if (!user) return;
+    const newStatus = !(user.notifications_enabled ?? true);
+    setIsTogglingNotifications(true);
+    try {
+      const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${apiBase}/api/auth/me/notifications`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: JSON.stringify({ enabled: newStatus })
+      });
+      if (res.ok) {
+        updateUser({ notifications_enabled: newStatus });
+        toast.success(newStatus ? "Notifications enabled!" : "Notifications paused.");
+      } else {
+        toast.error("Failed to update notification settings.");
+      }
+    } catch (err) {
+      toast.error("Network error.");
+    }
+    setIsTogglingNotifications(false);
   };
 
   const handleRatingSubmit = async () => {
@@ -553,6 +581,32 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Preferences & More</h3>
           <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+            
+            {/* Notification Toggle Row */}
+            <div className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group border-b border-gray-50/50">
+              <div className="flex items-center gap-4">
+                <div className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+                  <Bell className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Push Notifications</span>
+                </div>
+              </div>
+              <button 
+                onClick={handleToggleNotifications}
+                disabled={isTogglingNotifications}
+                className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 focus:outline-none ${
+                  (user?.notifications_enabled ?? true) ? (isBlue ? "bg-blue-500" : "bg-orange-500") : "bg-gray-200"
+                } ${isTogglingNotifications ? "opacity-50" : ""}`}
+              >
+                <div 
+                  className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                    (user?.notifications_enabled ?? true) ? "translate-x-6" : "translate-x-0"
+                  }`} 
+                />
+              </button>
+            </div>
+
             <ModernRow icon={Users} label="Invite Friends" onClick={handleInvite} theme={theme} />
             <ModernRow icon={Star} label="Rate NearBuy" onClick={() => setShowRatingModal(true)} theme={theme} />
             <ModernRow icon={Globe} label="App Language" value={appLanguage} onClick={() => setShowLanguageModal(true)} theme={theme} />

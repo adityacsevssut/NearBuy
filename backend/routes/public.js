@@ -3,11 +3,72 @@ const router = express.Router();
 const pool = require("../config/db");
 const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
+const cache = require("../middleware/cache");
 
 // GET /api/public/vendors
-router.get("/vendors", async (req, res) => {
+router.get("/vendors", cache(300), async (req, res) => {
   try {
-    const { rows } = await pool.query(`
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+
+    const { search, foodPref, lat, lon, pincode } = req.query;
+
+    let whereClause = "WHERE v.is_active = TRUE AND u.is_active = TRUE AND u.role = 'vendor'";
+    const queryParams = [];
+    let paramIndex = 1;
+
+    // Search filter
+    if (search) {
+      whereClause += ` AND (v.restaurant_name ILIKE $${paramIndex} OR v.cuisine ILIKE $${paramIndex})`;
+      queryParams.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    // Food preference filter
+    if (foodPref === 'veg') {
+      whereClause += ` AND v.cuisine ILIKE '%veg%'`;
+    } else if (foodPref === 'non-veg') {
+      whereClause += ` AND v.cuisine NOT ILIKE '%veg%'`;
+    } else if (foodPref === 'avail-all') {
+      whereClause += ` AND v.is_open = TRUE`;
+    } else if (foodPref === 'avail-veg') {
+      whereClause += ` AND v.is_open = TRUE AND v.cuisine ILIKE '%veg%'`;
+    } else if (foodPref === 'avail-non-veg') {
+      whereClause += ` AND v.is_open = TRUE AND v.cuisine NOT ILIKE '%veg%'`;
+    }
+
+    // Distance / Pincode filter
+    if (lat && lon) {
+      whereClause += ` AND (
+        v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
+        (6371 * acos(
+          cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
+          cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
+          sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+        )) <= COALESCE(CAST(v.delivery_range AS numeric), 5)
+      )`;
+      queryParams.push(parseFloat(lat), parseFloat(lon));
+      paramIndex += 2;
+    } else if (pincode) {
+      whereClause += ` AND v.pincode = $${paramIndex}`;
+      queryParams.push(pincode);
+      paramIndex++;
+    }
+
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM vendor_profiles v
+      JOIN users u ON v.user_id = u.id
+      ${whereClause}
+    `;
+    const countResult = await pool.query(countQuery, queryParams);
+    const total = parseInt(countResult.rows[0].count);
+
+    // Add limit & offset params
+    queryParams.push(limit, offset);
+
+    const dataQuery = `
       SELECT 
         v.user_id as id,
         v.restaurant_name as name,
@@ -31,10 +92,11 @@ router.get("/vendors", async (req, res) => {
         u.last_name
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
-      WHERE v.is_active = TRUE AND u.is_active = TRUE AND u.role = 'vendor'
-    `);
+      ${whereClause}
+      LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
+    `;
+    const { rows } = await pool.query(dataQuery, queryParams);
     
-    // Default fallback mappings
     const formatted = rows.map(r => ({
       ...r,
       badgeColor: "bg-orange-100 text-orange-700",
@@ -44,7 +106,15 @@ router.get("/vendors", async (req, res) => {
       ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim()
     }));
 
-    return res.json(formatted);
+    return res.json({
+      data: formatted,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     console.error("GET /api/public/vendors error:", err);
     return res.status(500).json({ error: "Failed to load vendors" });
@@ -129,25 +199,86 @@ router.get("/service-centers", async (req, res) => {
 });
 
 // GET /api/public/dishes/:category
-router.get("/dishes/:category", async (req, res) => {
+router.get("/dishes/:category", cache(300), async (req, res) => {
   try {
-    const { rows } = await pool.query(
-      `SELECT 
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const offset = (page - 1) * limit;
+    
+    const { foodPref, lat, lon, pincode, sortOrder } = req.query;
+
+    let whereClause = "WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE";
+    const queryParams = [req.params.category];
+    let paramIndex = 2;
+
+    if (foodPref === 'veg') {
+      whereClause += ` AND m.type = 'veg'`;
+    } else if (foodPref === 'non-veg') {
+      whereClause += ` AND m.type = 'non-veg'`;
+    }
+
+    if (lat && lon) {
+      whereClause += ` AND (
+        v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
+        (6371 * acos(
+          cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
+          cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
+          sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+        )) <= COALESCE(CAST(v.delivery_range AS numeric), 5)
+      )`;
+      queryParams.push(parseFloat(lat), parseFloat(lon));
+      paramIndex += 2;
+    } else if (pincode) {
+      whereClause += ` AND v.pincode = $${paramIndex}`;
+      queryParams.push(pincode);
+      paramIndex++;
+    }
+
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM vendor_menu_items m
+      JOIN vendor_profiles v ON m.vendor_id = v.user_id
+      ${whereClause}
+    `;
+    const countResult = await pool.query(countQuery, queryParams);
+    const total = parseInt(countResult.rows[0].count);
+
+    let orderBy = "ORDER BY m.id";
+    if (sortOrder === "low-to-high") {
+      orderBy = "ORDER BY m.price ASC";
+    } else if (sortOrder === "high-to-low") {
+      orderBy = "ORDER BY m.price DESC";
+    }
+
+    queryParams.push(limit, offset);
+    const dataQuery = `
+      SELECT 
          m.id, m.category, m.name, m.description as desc, m.price, m.actual_price, m.type, m.badge, m.image_url as image_url, 
          m.is_available, m.sort_order, m.rating, m.prep_time as time, m.reviews, m.front_page_category,
          v.restaurant_name as vendor, v.user_id as vendor_id, v.latitude, v.longitude, v.delivery_range
-       FROM vendor_menu_items m
-       JOIN vendor_profiles v ON m.vendor_id = v.user_id
-       WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE`,
-      [req.params.category]
-    );
+      FROM vendor_menu_items m
+      JOIN vendor_profiles v ON m.vendor_id = v.user_id
+      ${whereClause}
+      ${orderBy}
+      LIMIT $${paramIndex} OFFSET $${paramIndex+1}
+    `;
+
+    const { rows } = await pool.query(dataQuery, queryParams);
     
     const formatted = rows.map(r => ({
       ...r,
       emoji: r.image_url ? "" : "🍽️", // Fallback emoji if no image
     }));
 
-    return res.json({ dishes: formatted });
+    return res.json({ 
+      dishes: formatted,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (err) {
     console.error("GET /api/public/dishes/:category error:", err);
     return res.status(500).json({ error: "Failed to load dishes" });
