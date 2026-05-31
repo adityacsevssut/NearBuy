@@ -352,23 +352,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     </AnimatePresence>
   );
 
-  const OtpInputs = () => (
-    <div className="flex gap-2.5 justify-center my-6">
-      {otp.map((d, i) => (
-        <input
-          key={i}
-          ref={el => { otpRefs.current[i] = el; }}
-          type="text"
-          inputMode="numeric"
-          maxLength={1}
-          value={d}
-          onChange={e => handleOtpChange(i, e.target.value)}
-          onKeyDown={e => handleOtpKey(i, e)}
-          className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black border-2 border-gray-200 rounded-xl bg-gray-50/50 text-gray-800 outline-none ${t.otpFocus} focus:bg-white focus:ring-4 focus:-translate-y-1 transition-all shadow-sm`}
-        />
-      ))}
-    </div>
-  );
+
 
   const ModalHeader = ({ title, back }: { title: string; back?: Flow }) => (
     <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white/50 backdrop-blur-md relative z-20">
@@ -622,7 +606,21 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                   <ErrorBanner />
                   
                   <form onSubmit={handleSignupVerifyOtp}>
-                    <OtpInputs />
+                    <div className="flex gap-2.5 justify-center my-6">
+                      {otp.map((d, i) => (
+                        <input
+                          key={i}
+                          ref={el => { otpRefs.current[i] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={d}
+                          onChange={e => handleOtpChange(i, e.target.value)}
+                          onKeyDown={e => handleOtpKey(i, e)}
+                          className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black border-2 border-gray-200 rounded-xl bg-gray-50/50 text-gray-800 outline-none ${t.otpFocus} focus:bg-white focus:ring-4 focus:-translate-y-1 transition-all shadow-sm`}
+                        />
+                      ))}
+                    </div>
                     <BtnPrimary disabled={otpValue.length < 6}>Verify & Create Account</BtnPrimary>
                   </form>
                   
@@ -664,7 +662,21 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                   </div>
                   <ErrorBanner />
                   <form onSubmit={handleForgotVerifyOtp}>
-                    <OtpInputs />
+                    <div className="flex gap-2.5 justify-center my-6">
+                      {otp.map((d, i) => (
+                        <input
+                          key={i}
+                          ref={el => { otpRefs.current[i] = el; }}
+                          type="text"
+                          inputMode="numeric"
+                          maxLength={1}
+                          value={d}
+                          onChange={e => handleOtpChange(i, e.target.value)}
+                          onKeyDown={e => handleOtpKey(i, e)}
+                          className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-black border-2 border-gray-200 rounded-xl bg-gray-50/50 text-gray-800 outline-none ${t.otpFocus} focus:bg-white focus:ring-4 focus:-translate-y-1 transition-all shadow-sm`}
+                        />
+                      ))}
+                    </div>
                     <BtnPrimary disabled={otpValue.length < 6}>Verify Code</BtnPrimary>
                   </form>
                   <div className="mt-6 text-center">

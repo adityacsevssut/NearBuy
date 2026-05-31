@@ -1,0 +1,191 @@
+"use client";
+
+import React, { createContext, useContext, useEffect, useState } from "react";
+import io, { Socket } from "socket.io-client";
+import { useAuth } from "./AuthContext";
+import toast from "react-hot-toast";
+import { Bell } from "lucide-react";
+import { getToken } from "firebase/messaging";
+import { getMessagingInstance } from "../config/firebase";
+
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  type: string;
+  is_read: boolean;
+  created_at: string;
+}
+
+interface NotificationContextType {
+  notifications: Notification[];
+  unreadCount: number;
+  markAsRead: (id: string) => Promise<void>;
+  markAllAsRead: () => Promise<void>;
+  deleteNotification: (id: string) => Promise<void>;
+}
+
+const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+
+export function NotificationProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Fetch initial notifications
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchNotifications = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data.notifications || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications", err);
+      }
+    };
+    
+    fetchNotifications();
+  }, [user]);
+
+  // Setup Socket.io
+  useEffect(() => {
+    if (!user) return;
+
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const newSocket = io(backendUrl, {
+      withCredentials: true,
+      transports: ["websocket", "polling"]
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected to notification server");
+      newSocket.emit("join_user_room", user.id);
+    });
+
+    newSocket.on("notification", (newNotification: Notification) => {
+      setNotifications(prev => [newNotification, ...prev]);
+      
+      // Real-time Notification Bar UI (Classic Toast)
+      toast.custom((t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-lg pointer-events-auto flex ring-1 ring-black/5 overflow-hidden transform transition-all duration-300 items-center`}>
+          <div className="flex-1 w-0 p-4">
+            <div className="flex flex-col">
+              <p className="text-sm font-semibold text-gray-900">{newNotification.title}</p>
+              <p className="mt-1 text-sm text-gray-600 leading-snug">{newNotification.message}</p>
+            </div>
+          </div>
+          <div className="flex border-l border-gray-100 h-full">
+            <button
+              onClick={() => toast.dismiss(t.id)}
+              className="w-full h-full border border-transparent rounded-none px-4 py-3 flex items-center justify-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors focus:outline-none"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      ), { duration: 5000, position: 'top-center' });
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [user]);
+
+  // Setup Firebase Cloud Messaging
+  useEffect(() => {
+    if (!user) return;
+
+    const setupFCM = async () => {
+      try {
+        const messaging = await getMessagingInstance();
+        if (!messaging) return; // Not supported
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const currentToken = await getToken(messaging);
+          
+          if (currentToken) {
+            const token = localStorage.getItem("token");
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}` 
+              },
+              body: JSON.stringify({ token: currentToken, device_type: 'web' })
+            });
+            console.log("FCM token registered");
+          }
+        }
+      } catch (error) {
+        console.error("FCM Setup failed:", error);
+      }
+    };
+
+    setupFCM();
+  }, [user]);
+
+  const markAsRead = async (id: string) => {
+    try {
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+      const token = localStorage.getItem("token");
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/read`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+      const token = localStorage.getItem("token");
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/read-all`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const deleteNotification = async (id: string) => {
+    try {
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      const token = localStorage.getItem("token");
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  return (
+    <NotificationContext.Provider value={{ notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification }}>
+      {children}
+    </NotificationContext.Provider>
+  );
+}
+
+export const useNotifications = () => {
+  const context = useContext(NotificationContext);
+  if (context === undefined) {
+    throw new Error("useNotifications must be used within a NotificationProvider");
+  }
+  return context;
+};

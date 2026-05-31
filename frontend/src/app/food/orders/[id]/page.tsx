@@ -106,106 +106,8 @@ export default function OrderStatusPage() {
     }
   };
 
-  const generateReceipt = async () => {
-    if (!order) return;
-    
-    const { jsPDF } = await import("jspdf");
-    const autoTable = (await import("jspdf-autotable")).default;
-    
-    const doc = new jsPDF();
-
-    // NearBuy Heading
-    doc.setTextColor(249, 115, 22); // Orange-500
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(26);
-    doc.text("NearBuy", 105, 20, { align: "center" });
-
-    // Header
-    doc.setTextColor(0, 0, 0); // Black
-    doc.setFontSize(14);
-    doc.text("Order Receipt", 105, 30, { align: "center" });
-    
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.text(`Order ID: ${order.id}`, 14, 45);
-    doc.text(`Date: ${new Date(order.created_at).toLocaleString()}`, 14, 51);
-    doc.text(`Restaurant: ${order.restaurant_name}`, 14, 57);
-
-    // Items table
-    const tableColumn = ["Item", "Quantity", "Price", "Total"];
-    const tableRows = order.items.map(item => [
-      item.name,
-      item.quantity || item.qty || 1,
-      `Rs ${item.price}`,
-      `Rs ${(item.price * (item.quantity || item.qty || 1)).toFixed(2)}`
-    ]);
-
-    autoTable(doc, {
-      startY: 65,
-      head: [tableColumn],
-      body: tableRows,
-      theme: "striped",
-      styles: { fontSize: 9, cellPadding: 4 },
-      headStyles: { fillColor: [249, 115, 22] },
-      columnStyles: {
-        0: { cellWidth: 80 },
-        1: { halign: 'center' },
-        2: { halign: 'right' },
-        3: { halign: 'right' }
-      }
-    });
-
-    const finalY = (doc as any).lastAutoTable.finalY || 65;
-
-    // Billing summary aligned to right
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const marginRight = 14;
-
-    doc.setFontSize(10);
-    
-    // Helper for right aligned text
-    const printRightAligned = (label: string, value: string, yPos: number, isBold: boolean = false) => {
-      if (isBold) {
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(0, 0, 0);
-      } else {
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(80, 80, 80);
-      }
-      doc.text(label, pageWidth - marginRight - 60, yPos);
-      doc.text(value, pageWidth - marginRight, yPos, { align: "right" });
-    };
-
-    let currentY = finalY + 12;
-    
-    printRightAligned("Item Total", `Rs ${order.subtotal}`, currentY);
-    currentY += 8;
-    printRightAligned("GST & Taxes", `Rs ${order.gst}`, currentY);
-    currentY += 8;
-    printRightAligned("Platform Fee", `Rs ${order.platform_fee}`, currentY);
-    currentY += 8;
-    
-    if (order.delivery_charge && parseFloat(order.delivery_charge) > 0) {
-      printRightAligned("Delivery Charge", `+ Rs ${order.delivery_charge}`, currentY);
-      currentY += 8;
-    }
-
-    // Line
-    doc.setDrawColor(200, 200, 200);
-    doc.line(pageWidth - marginRight - 60, currentY - 4, pageWidth - marginRight, currentY - 4);
-    
-    // Grand Total
-    doc.setFontSize(12);
-    printRightAligned("Grand Total", `Rs ${order.total_amount}`, currentY + 4, true);
-
-    // Footer
-    doc.setFont("helvetica", "italic");
-    doc.setFontSize(9);
-    doc.setTextColor(150, 150, 150);
-    doc.text("Thank you for ordering with NearBuy!", 105, currentY + 25, { align: "center" });
-
-    doc.save(`NearBuy-Receipt-${order.id}.pdf`);
+  const generateReceipt = () => {
+    window.print();
   };
 
   if (!mounted || (!isLoggedIn && mounted)) return null;
@@ -491,6 +393,133 @@ export default function OrderStatusPage() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Hidden Receipt Template for PDF */}
+      {order && (
+        <div id="pdf-receipt-template-wrapper" style={{ position: "fixed", top: 0, left: 0, zIndex: -50, opacity: 0, pointerEvents: "none", width: "100%" }}>
+          <div id="pdf-receipt-template" className="w-full max-w-[800px] mx-auto bg-white p-8 md:p-12 text-gray-900 border border-gray-200" style={{ fontFamily: "sans-serif" }}>
+            <div className="flex justify-between items-start border-b-2 border-gray-100 pb-8 mb-8">
+              <div>
+                <h1 className="text-4xl font-black mb-1">
+                  <span className="text-orange-500">Near</span><span className="text-black">Buy</span>
+                </h1>
+                <p className="text-gray-500 font-medium">Official Order Receipt</p>
+              </div>
+              <div className="text-right max-w-[250px]">
+                <p className="font-bold text-xl">{order.restaurant_name}</p>
+                <p className="text-gray-500 mt-1 text-sm">
+                  {order.manual_address || order.gps_address || "Address not provided"}
+                  {order.vendor_pincode ? ` - ${order.vendor_pincode}` : ''}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Order ID</p>
+                <p className="font-black text-sm break-all">{order.id}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Date</p>
+                <p className="font-black text-sm">
+                  {new Date(order.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Payment Method</p>
+                <p className="font-black text-sm uppercase">{order.payment_method}</p>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Item</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Qty</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Price</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {order.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td className="py-3 px-4 font-bold text-sm">{item.name}</td>
+                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">{item.quantity || (item as any).qty}</td>
+                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">₹{item.price}</td>
+                      <td className="py-3 px-4 font-black text-right text-sm">₹{(item.price * (item.quantity || (item as any).qty)).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end">
+              <div className="w-full max-w-[300px] space-y-2">
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Subtotal</span>
+                  <span>₹{order.subtotal}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Platform Fee</span>
+                  <span>₹{order.platform_fee}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>GST (18%)</span>
+                  <span>₹{order.gst}</span>
+                </div>
+                {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
+                  <div className="flex justify-between text-gray-600 font-medium">
+                    <span>Delivery Charge</span>
+                    <span>₹{order.delivery_charge}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-xl font-black pt-3 border-t border-gray-200 mt-3">
+                  <span>Grand Total</span>
+                  <span>₹{order.total_amount}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center text-gray-400 font-medium text-xs">
+              <p>Thank you for shopping with NearBuy!</p>
+              <p className="mt-1">This is a computer generated invoice and does not require a signature.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Styles for Native PDF Generation */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { margin: 0; }
+          body * {
+            visibility: hidden;
+          }
+          #pdf-receipt-template-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+          }
+          #pdf-receipt-template, #pdf-receipt-template * {
+            visibility: visible;
+          }
+          #pdf-receipt-template {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            margin: 0;
+            padding: 40px;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+          }
+        }
+      `}} />
     </div>
   );
 }

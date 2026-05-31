@@ -15,6 +15,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useCart } from "@/context/CartContext";
 import LocationModal from "./LocationModal";
+import { useNotifications } from "@/context/NotificationContext";
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
 
@@ -95,14 +96,8 @@ export default function Navbar() {
     "🥤 Late Night Maggi",
   ];
 
-  // Sample notifications
-  const notifications = [
-    { id: 1, title: "Order Delivered!", body: "Your Biryani order has been delivered.", time: "2m ago", read: false, icon: "🎉" },
-    { id: 2, title: "Flash Sale 🔥", body: "50% off on essentials for the next 1 hour!", time: "15m ago", read: false, icon: "⚡" },
-    { id: 3, title: "New Store Nearby", body: "QuickMart just joined NearBuy near you.", time: "1h ago", read: true, icon: "🏪" },
-    { id: 4, title: "Medico Discount", body: "Get 20% off on all medicines today.", time: "3h ago", read: true, icon: "💊" },
-  ];
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Notifications from context
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
 
   const navPages = [
     { href: "/", label: "Food", icon: UtensilsCrossed, activeColor: "text-orange-600", activeBg: "bg-orange-50", isActive: isFood },
@@ -248,54 +243,74 @@ export default function Navbar() {
             <AnimatePresence>
               {notifOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.97 }}
-                  transition={{ duration: 0.18 }}
-                  className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50"
+                  initial={{ opacity: 0, y: -8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 top-full mt-2 w-80 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-200 z-50 rounded-sm"
                 >
                   {/* Notif Header */}
-                  <div className={`bg-gradient-to-r ${theme.gradient} px-4 py-3 flex items-center justify-between`}>
+                  <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
                     <div>
-                      <p className="text-white font-black text-sm">Notifications</p>
-                      <p className="text-white/70 text-[11px] font-medium">{unreadCount} unread</p>
+                      <p className="text-gray-900 font-bold text-sm tracking-wide">Notifications</p>
                     </div>
-                    <button className="text-white/80 hover:text-white text-xs font-bold underline underline-offset-2 transition-colors">
-                      Mark all read
-                    </button>
+                    {unreadCount > 0 && (
+                      <button onClick={() => markAllAsRead()} className="text-gray-500 hover:text-gray-800 text-xs font-semibold transition-colors underline underline-offset-2">
+                        Mark all as read
+                      </button>
+                    )}
                   </div>
 
                   {/* Notif List */}
-                  <div className="max-h-[340px] overflow-y-auto divide-y divide-gray-50">
-                    {notifications.map((notif) => (
-                      <button
-                        key={notif.id}
-                        className={`w-full flex items-start gap-3 px-4 py-3.5 text-left hover:bg-gray-50 transition-colors ${!notif.read ? 'bg-orange-50/30' : ''}`}
-                      >
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0 ${!notif.read ? 'bg-orange-100' : 'bg-gray-100'}`}>
-                          {notif.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className={`text-[13px] font-bold truncate ${!notif.read ? 'text-gray-900' : 'text-gray-600'}`}>
-                              {notif.title}
-                            </p>
-                            {!notif.read && (
-                              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${primaryBg}`} />
-                            )}
+                  <div className="max-h-[340px] overflow-y-auto divide-y divide-gray-100">
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center text-gray-500 text-sm font-medium">No notifications</div>
+                    ) : (
+                      notifications.map((notif) => (
+                        <div key={notif.id} className="relative overflow-hidden w-full border-b border-gray-100 last:border-0 bg-red-50">
+                          {/* Background Delete Action (Revealed on swipe right) */}
+                          <div className="absolute inset-y-0 left-0 flex items-center px-6 text-red-500 font-bold text-xs uppercase tracking-wider">
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete
                           </div>
-                          <p className="text-[11px] text-gray-400 mt-0.5 leading-snug line-clamp-2">{notif.body}</p>
-                          <p className="text-[10px] text-gray-300 mt-1 font-semibold">{notif.time}</p>
+                          
+                          {/* Foreground Notification Card */}
+                          <motion.div
+                            drag="x"
+                            dragConstraints={{ left: 0, right: 0 }}
+                            dragElastic={{ left: 0, right: 0.8 }}
+                            onDragEnd={(event, info) => {
+                              if (info.offset.x > 80) {
+                                deleteNotification(notif.id);
+                              }
+                            }}
+                            className={`relative w-full z-10 flex items-center transition-colors ${!notif.is_read ? 'bg-gray-50/80' : 'bg-white hover:bg-gray-50'}`}
+                          >
+                            <button
+                              onClick={() => { if (!notif.is_read) markAsRead(notif.id); }}
+                              className="flex-1 min-w-0 flex items-start gap-3 px-4 py-3.5 text-left"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                  <p className={`text-[13px] truncate ${!notif.is_read ? 'font-bold text-gray-900' : 'font-semibold text-gray-600'}`}>
+                                    {notif.title}
+                                  </p>
+                                  {!notif.is_read && (
+                                    <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
+                                  )}
+                                </div>
+                                <p className={`text-[12px] mt-1 leading-snug line-clamp-2 ${!notif.is_read ? 'text-gray-700' : 'text-gray-500'}`}>
+                                  {notif.message}
+                                </p>
+                                <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
+                                  {new Date(notif.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                                </p>
+                              </div>
+                            </button>
+                          </motion.div>
                         </div>
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="px-4 py-3 border-t border-gray-100 text-center">
-                    <button className={`text-xs font-bold ${primaryText} hover:opacity-70 transition-opacity`}>
-                      View All Notifications
-                    </button>
+                      ))
+                    )}
                   </div>
                 </motion.div>
               )}

@@ -4,6 +4,7 @@ const validate = require("../middleware/validate");
 const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
+const { sendNotification } = require("../utils/notifications");
 
 // POST /api/orders
 // Create a new order
@@ -49,7 +50,25 @@ router.post(
         ]
       );
 
-      return res.status(201).json({ message: "Order placed successfully", order: rows[0] });
+      const newOrder = rows[0];
+
+      // Notify the customer
+      sendNotification(
+        req.user.id, 
+        "Order Placed !!!", 
+        "Your order has been placed successfully. Awaiting confirmation.",
+        "order_placed"
+      );
+
+      // Notify the vendor
+      sendNotification(
+        vendor_id,
+        "New Order !!!",
+        "You have received a new order.",
+        "new_order"
+      );
+
+      return res.status(201).json({ message: "Order placed successfully", order: newOrder });
     } catch (err) {
       console.error("Place order error:", err);
       return res.status(500).json({ error: "Failed to place order. " + err.message });
@@ -62,7 +81,7 @@ router.post(
 router.get("/me", authenticate, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT o.*, v.restaurant_name, v.image_url 
+      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
        WHERE o.user_id = $1 
@@ -171,7 +190,29 @@ router.patch("/:id/status", authenticate, async (req, res) => {
       return res.status(404).json({ error: "Order not found or unauthorized." });
     }
     
-    return res.json({ message: "Status updated successfully", order: rows[0] });
+    const updatedOrder = rows[0];
+
+    // Notify the user about the status update
+    let notifTitle = "Order Update";
+    let notifMessage = `Your order status has been updated to: ${status}`;
+    
+    if (status.toLowerCase() === 'confirmed') {
+      notifTitle = "Order Confirmed !!!";
+      notifMessage = "Your order has been confirmed by the restaurant.";
+    } else if (status.toLowerCase() === 'out for delivery') {
+      notifTitle = "Out for Delivery !!!";
+      notifMessage = "Your order is out for delivery.";
+    } else if (status.toLowerCase() === 'delivered') {
+      notifTitle = "Order Delivered !!!";
+      notifMessage = "Your order has been delivered successfully.";
+    } else if (status.toLowerCase() === 'cancelled') {
+      notifTitle = "Order Cancelled !!!";
+      notifMessage = "Your order has been cancelled.";
+    }
+
+    sendNotification(updatedOrder.user_id, notifTitle, notifMessage, "order_status");
+
+    return res.json({ message: "Status updated successfully", order: updatedOrder });
   } catch (err) {
     console.error("Update order status error:", err);
     return res.status(500).json({ error: "Failed to update order status." });

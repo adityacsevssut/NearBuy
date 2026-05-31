@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Package, MapPin, ChevronLeft, Clock,
   CheckCircle, Loader2, Store, FileText, ChevronRight,
-  Eye, Truck, AlertCircle
+  Eye, Truck, AlertCircle, Download
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -38,6 +38,9 @@ interface Order {
   created_at: string;
   updated_at?: string;
   delivery_charge?: string;
+  gps_address?: string;
+  manual_address?: string;
+  vendor_pincode?: string;
 }
 
 function OrdersPageContent() {
@@ -49,6 +52,7 @@ function OrdersPageContent() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<Order | null>(null);
+  const [orderToDownload, setOrderToDownload] = useState<Order | null>(null);
 
   const [mounted, setMounted] = useState(false);
 
@@ -87,6 +91,16 @@ function OrdersPageContent() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (orderToDownload) {
+      // Give React a frame to render the hidden template with orderToDownload data
+      setTimeout(() => {
+        window.print();
+        setOrderToDownload(null);
+      }, 300);
+    }
+  }, [orderToDownload]);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -198,9 +212,20 @@ function OrdersPageContent() {
 
               {/* Status Banner */}
               <div className={`px-5 py-3 border-b border-gray-50 flex items-center justify-between`}>
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
-                  {getStatusIcon(order.status)}
-                  {order.status}
+                <div className="flex items-center gap-2">
+                  <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
+                    {getStatusIcon(order.status)}
+                    {order.status}
+                  </div>
+                  {order.status.toLowerCase() === 'delivered' && (
+                    <button
+                      onClick={() => setOrderToDownload(order)}
+                      className="flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg transition-colors border border-orange-200/50 active:scale-95"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Receipt
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs font-semibold text-gray-500">
                   {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
@@ -222,7 +247,7 @@ function OrdersPageContent() {
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-xl text-sm font-bold text-orange-600 transition-all active:scale-[0.98]"
                   >
                     <Package className="w-4 h-4" />
-                    Track Status
+                    {order.status.toLowerCase() === 'delivered' || order.status.toLowerCase() === 'cancelled' ? 'Order Timeline' : 'Track Status'}
                   </Link>
                 )}
               </div>
@@ -319,6 +344,132 @@ function OrdersPageContent() {
           </div>
         )}
       </AnimatePresence>
+      {/* Hidden Receipt Template for PDF */}
+      {orderToDownload && (
+        <div id="pdf-receipt-template-wrapper" style={{ position: "fixed", top: 0, left: 0, zIndex: -50, opacity: 0, pointerEvents: "none", width: "100%" }}>
+          <div id="pdf-receipt-template" className="w-full max-w-[800px] mx-auto bg-white p-8 md:p-12 text-gray-900 border border-gray-200" style={{ fontFamily: "sans-serif" }}>
+            <div className="flex justify-between items-start border-b-2 border-gray-100 pb-8 mb-8">
+              <div>
+                <h1 className="text-4xl font-black mb-1">
+                  <span className="text-orange-500">Near</span><span className="text-black">Buy</span>
+                </h1>
+                <p className="text-gray-500 font-medium">Official Order Receipt</p>
+              </div>
+              <div className="text-right max-w-[250px]">
+                <p className="font-bold text-xl">{orderToDownload.restaurant_name}</p>
+                <p className="text-gray-500 mt-1 text-sm">
+                  {orderToDownload.manual_address || orderToDownload.gps_address || "Address not provided"}
+                  {orderToDownload.vendor_pincode ? ` - ${orderToDownload.vendor_pincode}` : ''}
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 mb-8">
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Order ID</p>
+                <p className="font-black text-sm break-all">{orderToDownload.id}</p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Date</p>
+                <p className="font-black text-sm">
+                  {new Date(orderToDownload.created_at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+                </p>
+              </div>
+              <div>
+                <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Payment Method</p>
+                <p className="font-black text-sm uppercase">{orderToDownload.payment_method}</p>
+              </div>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Item</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Qty</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Price</th>
+                    <th className="py-3 px-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {orderToDownload.items.map((item, idx) => (
+                    <tr key={idx}>
+                      <td className="py-3 px-4 font-bold text-sm">{item.name}</td>
+                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">{item.quantity || (item as any).qty}</td>
+                      <td className="py-3 px-4 font-medium text-gray-600 text-right text-sm">₹{item.price.toFixed(2)}</td>
+                      <td className="py-3 px-4 font-black text-right text-sm">₹{(item.price * (item.quantity || (item as any).qty)).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex justify-end">
+              <div className="w-full max-w-[300px] space-y-2">
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Subtotal</span>
+                  <span>₹{orderToDownload.subtotal}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>Platform Fee</span>
+                  <span>₹{orderToDownload.platform_fee}</span>
+                </div>
+                <div className="flex justify-between text-gray-600 font-medium">
+                  <span>GST (18%)</span>
+                  <span>₹{orderToDownload.gst}</span>
+                </div>
+                {orderToDownload.delivery_charge && parseFloat(orderToDownload.delivery_charge) > 0 && (
+                  <div className="flex justify-between text-gray-600 font-medium">
+                    <span>Delivery Charge</span>
+                    <span>₹{orderToDownload.delivery_charge}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-xl font-black pt-3 border-t border-gray-200 mt-3">
+                  <span>Grand Total</span>
+                  <span>₹{orderToDownload.total_amount}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-12 text-center text-gray-400 font-medium text-xs">
+              <p>Thank you for shopping with NearBuy!</p>
+              <p className="mt-1">This is a computer generated invoice and does not require a signature.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Print Styles for Native PDF Generation */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page { margin: 0; }
+          body * {
+            visibility: hidden;
+          }
+          #pdf-receipt-template-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            opacity: 1 !important;
+            z-index: 9999 !important;
+          }
+          #pdf-receipt-template, #pdf-receipt-template * {
+            visibility: visible;
+          }
+          #pdf-receipt-template {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: auto;
+            margin: 0;
+            padding: 40px;
+            box-shadow: none !important;
+            border: none !important;
+            background: white !important;
+          }
+        }
+      `}} />
     </div>
   );
 }

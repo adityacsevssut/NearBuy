@@ -75,6 +75,7 @@ app.use("/api/vendor-menu", require("./routes/vendor-menu"));
 app.use("/api/orders", require("./routes/orders"));
 app.use("/api/homepage-poster", require("./routes/homepage-poster"));
 app.use("/api/share", require("./routes/share"));
+app.use("/api/notifications", require("./routes/notifications"));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
@@ -86,9 +87,41 @@ app.use((err, req, res, next) => {
 });
 
 // ── Start Server ──────────────────────────────────────────────────────────
+const http = require("http");
+const socketUtil = require("./utils/socket");
+
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+const io = socketUtil.init(server, {
+  cors: {
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    },
+    credentials: true,
+  }
+});
+
+// Socket Connection handling
+io.on("connection", (socket) => {
+  console.log("🟢 Client connected:", socket.id);
+  
+  // User joins their specific notification room
+  socket.on("join_user_room", (userId) => {
+    socket.join(`user_${userId}`);
+    console.log(`👤 User ${userId} joined their notification room.`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Client disconnected:", socket.id);
+  });
+});
+
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
-  const server = app.listen(PORT, () => {
-    console.log(`✅ NearBuy backend running on http://localhost:${PORT}`);
+  server.listen(PORT, () => {
+    console.log(`✅ NearBuy backend (with Socket.io) running on http://localhost:${PORT}`);
   });
 }
 
@@ -100,5 +133,5 @@ process.on('exit', (code) => {
   console.trace('Trace of exit');
 });
 
-// Export the app for Vercel Serverless Functions
-module.exports = app;
+// Export the server for Vercel Serverless Functions
+module.exports = server;
