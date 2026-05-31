@@ -191,8 +191,12 @@ function AccountContent() {
 
   const handleToggleNotifications = async () => {
     if (!user) return;
-    const newStatus = !(user.notifications_enabled ?? true);
-    setIsTogglingNotifications(true);
+    const previousStatus = user.notifications_enabled ?? true;
+    const newStatus = !previousStatus;
+    
+    // Optimistic UI update for instant feedback
+    updateUser({ notifications_enabled: newStatus });
+    
     try {
       const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
       const res = await fetch(`${apiBase}/api/auth/me/notifications`, {
@@ -204,15 +208,15 @@ function AccountContent() {
         body: JSON.stringify({ enabled: newStatus })
       });
       if (res.ok) {
-        updateUser({ notifications_enabled: newStatus });
         toast.success(newStatus ? "Notifications enabled!" : "Notifications paused.");
       } else {
+        updateUser({ notifications_enabled: previousStatus });
         toast.error("Failed to update notification settings.");
       }
     } catch (err) {
+      updateUser({ notifications_enabled: previousStatus });
       toast.error("Network error.");
     }
-    setIsTogglingNotifications(false);
   };
 
   const handleRatingSubmit = async () => {
@@ -594,10 +598,9 @@ function AccountContent() {
               </div>
               <button 
                 onClick={handleToggleNotifications}
-                disabled={isTogglingNotifications}
                 className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 focus:outline-none ${
                   (user?.notifications_enabled ?? true) ? (isBlue ? "bg-blue-500" : "bg-orange-500") : "bg-gray-200"
-                } ${isTogglingNotifications ? "opacity-50" : ""}`}
+                }`}
               >
                 <div 
                   className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
