@@ -1,4 +1,4 @@
-name: Database Backup to GCS
+name: Database Backup to Artifacts
 
 on:
   schedule:
@@ -21,18 +21,21 @@ jobs:
           sudo apt-get install -y postgresql-client
 
       - name: Create Database Backup
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           # Create a timestamped backup filename
           TIMESTAMP=$(date +"%Y-%m-%d-%H%M%S")
           FILENAME="backup-$TIMESTAMP.sql"
-          echo "FILENAME=$FILENAME" >> $GITHUB_ENV
+          echo "FILENAME=$FILENAME" >> "$GITHUB_ENV"
           
           # Run pg_dump to create a standard plain-text SQL backup
-          pg_dump "${{ secrets.DATABASE_URL }}" --clean --if-exists --no-owner --no-privileges -f "$FILENAME"
+          # Ensure sslmode is used for remote cloud databases like Supabase
+          pg_dump "${DATABASE_URL}?sslmode=require" --clean --if-exists --no-owner --no-privileges -f "$FILENAME"
 
       - name: Upload Backup to GitHub Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: database-backup-${{ env.FILENAME }}
           path: ${{ env.FILENAME }}
-          retention-days: 90
+          retention-days: 7
