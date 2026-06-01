@@ -309,7 +309,6 @@ export default function LoginModal({ isOpen, onClose }: Props) {
       <GoogleLogin
         onSuccess={handleGoogleSuccess}
         onError={() => setError("Google sign-in was cancelled or failed.")}
-        useOneTap
         shape="rectangular"
         size="large"
         text="continue_with"
