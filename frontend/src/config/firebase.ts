@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAsZ7huPhBJ3JbYtwGyQz6WBktDcpu0yFo",
+  apiKey: "AIzaSyASz7huPhBJ3JbYtwGyQz6WBktDcpu0yFo",
   authDomain: "nearbuy-d7daf.firebaseapp.com",
   projectId: "nearbuy-d7daf",
   storageBucket: "nearbuy-d7daf.firebasestorage.app",

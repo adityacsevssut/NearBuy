@@ -54,11 +54,18 @@ export default function Footer() {
             
             {/* Column 1: Brand & Address */}
             <div className="md:col-span-3 lg:col-span-3">
-              <div className="flex items-center gap-2 mb-6">
-                <span className="font-black text-2xl tracking-tight uppercase">
-                  <span className={accentColor}>Near</span><span className="text-gray-900">Buy</span>
+              <div className="flex items-center flex-shrink-0 mb-6 group cursor-pointer">
+                
+                {/* Simple NB Logo */}
+                <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
+                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${accentColor} tracking-tighter drop-shadow-sm`}>N</span>
+                  <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black tracking-tighter drop-shadow-sm -ml-0.5">B</span>
+                </div>
+
+                <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
+                  <span className={`${accentColor} drop-shadow-sm`}>Near</span>
+                  <span className="text-black drop-shadow-sm">Buy</span>
                 </span>
-                <Zap className={`w-5 h-5 ${accentColor} fill-current`} />
               </div>
               <p className="text-gray-500 text-[13px] font-medium leading-relaxed mb-6 max-w-[250px]">
                 NearBuy HQ, 123 University Road<br/>
