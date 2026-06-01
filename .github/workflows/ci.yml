@@ -24,7 +24,9 @@ jobs:
           cache-dependency-path: './frontend/package-lock.json'
 
       - name: Install Dependencies
-        run: npm install --include=dev
+        run: |
+          rm -f package-lock.json
+          npm install --include=dev
 
       # - name: Run Linter
       #   run: npm run lint
