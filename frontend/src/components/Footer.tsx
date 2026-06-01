@@ -2,10 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Globe, Mail, MessageCircle, Smartphone, ArrowRight, Zap, Heart } from "lucide-react";
+import { ArrowRight, Zap, Heart } from "lucide-react";
+import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import BusinessRequestModal from "./BusinessRequestModal";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Footer() {
+  const { isLoggedIn } = useAuth();
   const pathname = usePathname() || "";
   const isEssentials = pathname.startsWith('/essentials');
   const accentColor = isEssentials ? "text-blue-600" : "text-orange-500";
@@ -15,10 +18,10 @@ export default function Footer() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType] = useState<"student" | "vendor">("vendor");
 
-  const links = {
+  const links: Record<string, { name: string, href: string, onClick?: (e: any) => void }[]> = {
     NearBuy: [
       { name: "Home", href: "/" },
-      { name: "About Us", href: "#" },
+      { name: "About Us", href: "/about" },
       { name: "Careers", href: "#" },
       { name: "Blog", href: "#" },
       { name: "Contact", href: "#" },
@@ -27,13 +30,12 @@ export default function Footer() {
       { name: "Food Cart", href: "/food/cart" },
       { name: "Wishlist", href: "/food/wishlist" },
       { name: "Your Orders", href: "/food/orders?history=true" },
-      { name: "Track Order", href: "#" },
+      isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "/signup" },
     ],
-    Restaurants: [
-      { name: "Browse Food", href: "/" },
-      { name: "Medicine", href: "/essentials" },
-      { name: "Groceries", href: "/essentials" },
-      { name: "Campus Coverage", href: "#" },
+    "Our Platforms": [
+      { name: "Food", href: "/" },
+      { name: "Essentials", href: "#", onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
+      { name: "Medico", href: "#", onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openMedicineModal')); } },
     ],
     Legal: [
       { name: "Terms & Conditions", href: "#" },
@@ -83,7 +85,11 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {items.map((item) => (
                       <li key={item.name}>
-                        <a href={item.href} className={`text-[13px] text-gray-500 font-medium ${hoverColor} transition-colors`}>
+                        <a 
+                          href={item.href} 
+                          onClick={item.onClick}
+                          className={`text-[13px] text-gray-500 font-medium ${hoverColor} transition-colors`}
+                        >
                           {item.name}
                         </a>
                       </li>
@@ -99,9 +105,9 @@ export default function Footer() {
                 Follow
               </h4>
               <div className="flex items-center flex-wrap gap-4">
-                {[Globe, Mail, MessageCircle, Smartphone].map((Icon, i) => (
-                  <a key={i} href="#" className={`w-8 h-8 flex items-center justify-center text-gray-400 transition-all ${hoverColor} hover:-translate-y-0.5`}>
-                    <Icon className="w-5 h-5" />
+                {[FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn].map((Icon, i) => (
+                  <a key={i} href="#" className={`w-10 h-10 flex items-center justify-center bg-gray-50 border border-gray-100 rounded-full text-gray-500 transition-all duration-300 ${bgHover} ${hoverColor} hover:-translate-y-1 hover:shadow-md shadow-sm`}>
+                    <Icon className="w-4 h-4 md:w-5 md:h-5" />
                   </a>
                 ))}
               </div>
