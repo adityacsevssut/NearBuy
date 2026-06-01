@@ -5,7 +5,9 @@
   "scripts": {
     "start": "node --dns-result-order=ipv4first index.js",
     "dev": "nodemon --dns-result-order=ipv4first index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint .",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -34,6 +36,9 @@
     "ws": "^8.21.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "eslint": "^10.4.1",
+    "globals": "^17.6.0",
+    "nodemon": "^3.1.0",
+    "prettier": "^3.8.3"
   }
 }
