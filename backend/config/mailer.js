@@ -97,7 +97,7 @@ async function sendOtpEmail(to, otp, purpose = "verify") {
       return;
     } catch (err) {
       console.error("SendGrid fallback failed:", err.message);
-      throw new Error("Failed to send email via both primary and fallback servers.");
+      throw new Error("Failed to send email via both primary and fallback servers.", { cause: err });
     }
   }
 
