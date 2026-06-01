@@ -63,9 +63,17 @@ function OrdersPageContent() {
   const lastElementRef = React.useRef<HTMLDivElement | null>(null);
 
   const [mounted, setMounted] = useState(false);
+  const [gstRate, setGstRate] = useState(18);
 
   useEffect(() => {
     setMounted(true);
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    fetch(`${API}/api/public/settings`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.gst !== undefined) setGstRate(data.gst);
+      })
+      .catch(console.error);
   }, []);
 
   useEffect(() => {
@@ -382,7 +390,7 @@ function OrdersPageContent() {
                   )}
                   {selectedOrderForItems.gst && parseFloat(selectedOrderForItems.gst) > 0 && (
                     <div className="flex justify-between text-sm font-medium text-gray-600">
-                      <span>GST (18%)</span>
+                      <span>GST ({gstRate}%)</span>
                       <span>+ ₹{selectedOrderForItems.gst}</span>
                     </div>
                   )}
@@ -482,7 +490,7 @@ function OrdersPageContent() {
                   <span>₹{orderToDownload.platform_fee}</span>
                 </div>
                 <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>
-                  <span>GST (18%)</span>
+                  <span>GST ({gstRate}%)</span>
                   <span>₹{orderToDownload.gst}</span>
                 </div>
                 {orderToDownload.delivery_charge && parseFloat(orderToDownload.delivery_charge) > 0 && (
