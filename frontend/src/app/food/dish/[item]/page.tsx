@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send, ChevronDown } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -32,9 +32,21 @@ export default function DishPage() {
 
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const filterDropdownRef = React.useRef<HTMLDivElement>(null);
   const { toggleFood, isFoodWished } = useWishlist();
   const { addItem, itemQty } = useCart();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(e.target as Node)) {
+        setShowFilterDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const { isLoggedIn, openLoginModal } = useAuth();
   const { latitude, longitude, pincode } = useLocationContext();
 
@@ -121,64 +133,84 @@ export default function DishPage() {
       <div className="sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 py-4">
-            <Link href="/" className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-orange-600 transition-colors bg-white/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200/50 hover:border-orange-200 flex-shrink-0">
+              <ArrowLeft className="w-4 h-4" /> Back to Home
             </Link>
-            <div>
-              <h1 className="font-black text-xl text-gray-900 tracking-tight">
-                {itemName}
-              </h1>
-              <p className="text-xs text-gray-500 mt-0.5">
-                {filteredDishes.length} dishes found near you
-              </p>
-            </div>
 
-            <div className="ml-auto flex items-center gap-2 overflow-x-auto scrollbar-hide py-1 pl-4">
-              <button
-                onClick={() => setFoodPref("all")}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
-                  foodPref === "all"
-                    ? "bg-gray-900 border-gray-900 text-white"
-                    : "bg-white border-gray-300 text-gray-600"
-                }`}
-              >
-                View All
-              </button>
-              <button
-                onClick={() => setFoodPref("veg")}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
-                  foodPref === "veg"
-                    ? "bg-orange-600 border-orange-600 text-white"
-                    : "bg-white border-gray-300 text-gray-600"
-                }`}
-              >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "veg" ? "border-white bg-white" : "border-orange-600"}`} />
-                Veg Only
-              </button>
-              <button
-                onClick={() => setFoodPref("non-veg")}
-                className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
-                  foodPref === "non-veg"
-                    ? "bg-red-600 border-red-600 text-white"
-                    : "bg-white border-gray-300 text-gray-600"
-                }`}
-              >
-                <span className={`w-3 h-3 rounded-sm border-2 ${foodPref === "non-veg" ? "border-white bg-white" : "border-red-600"}`} />
-                Non-veg Only
-              </button>
 
-              <div className="relative flex-shrink-0">
-                <select
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value as any)}
-                  className="appearance-none flex items-center gap-1.5 pl-8 pr-8 py-1.5 rounded-full text-xs font-bold border border-gray-300 bg-white text-gray-700 shadow-sm outline-none focus:border-orange-400 focus:ring-1 focus:ring-orange-400 cursor-pointer"
+            <div className="ml-auto flex items-center gap-2 relative z-40">
+              {/* Filter Picker */}
+              <div className="relative" ref={filterDropdownRef}>
+                <button
+                  onClick={() => setShowFilterDropdown(prev => !prev)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
+                    foodPref !== "all" || sortOrder !== "relevance"
+                      ? "bg-orange-500 border-orange-500 text-white"
+                      : showFilterDropdown
+                      ? "bg-orange-50 border-orange-400 text-orange-600"
+                      : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                  }`}
                 >
-                  <option value="relevance">Filter: Relevance</option>
-                  <option value="low-to-high">Price: Low to High</option>
-                  <option value="high-to-low">Price: High to Low</option>
-                </select>
-                <Filter className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400 text-[10px]">▼</div>
+                  <Filter className="w-3 h-3" />
+                  <span>Filters</span>
+                  <ChevronDown className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${showFilterDropdown ? "rotate-180" : ""}`} />
+                </button>
+
+                {showFilterDropdown && (
+                  <div className="absolute right-0 top-full mt-2 z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden min-w-[240px] max-w-[calc(100vw-32px)]">
+                    <div className="px-3 pt-2.5 pb-2 border-b border-gray-100">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">DIETARY PREFERENCE</p>
+                    </div>
+                    <div className="py-1 max-h-[40vh] overflow-y-auto">
+                      {[
+                        { id: "all", label: "View All" },
+                        { id: "veg", label: "Veg Only" },
+                        { id: "non-veg", label: "Non Veg Only" },
+                      ].map((pref) => (
+                        <button
+                          key={pref.id}
+                          onClick={() => { setFoodPref(pref.id as any); setShowFilterDropdown(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
+                            foodPref === pref.id
+                              ? "bg-orange-50 text-orange-600"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${foodPref === pref.id ? 'border-orange-500' : 'border-gray-300'}`}>
+                            {foodPref === pref.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                          </div>
+                          <span>{pref.label}</span>
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="px-3 pt-2.5 pb-2 border-y border-gray-100 bg-gray-50">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">PRICING</p>
+                    </div>
+                    <div className="py-1">
+                      {[
+                        { id: "relevance", label: "Relevance" },
+                        { id: "low-to-high", label: "Low to High" },
+                        { id: "high-to-low", label: "High to Low" },
+                      ].map((sort) => (
+                        <button
+                          key={sort.id}
+                          onClick={() => { setSortOrder(sort.id as any); setShowFilterDropdown(false); }}
+                          className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
+                            sortOrder === sort.id
+                              ? "bg-orange-50 text-orange-600"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${sortOrder === sort.id ? 'border-orange-500' : 'border-gray-300'}`}>
+                            {sortOrder === sort.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+                          </div>
+                          <span>{sort.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
