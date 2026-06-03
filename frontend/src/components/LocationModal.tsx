@@ -305,16 +305,16 @@ export default function LocationModal() {
                               <MapPin className="w-4 h-4 text-orange-500" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-black text-gray-800 leading-tight truncate group-hover:text-orange-700">
+                              <p className="text-[14px] font-black text-gray-800 leading-tight line-clamp-2 pr-2 group-hover:text-orange-700">
                                 {addr.landmark ? addr.landmark : addr.name}
                               </p>
-                              <div className="flex items-center gap-1.5 mt-0.5">
+                              <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 {addr.pincode && (
-                                  <span className="text-[10px] font-bold text-orange-600 bg-orange-50 px-1.5 py-0.5 rounded-full border border-orange-100 shrink-0">
+                                  <span className="shrink-0 whitespace-nowrap text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
                                     PIN {addr.pincode}
                                   </span>
                                 )}
-                                <p className="text-[11px] text-gray-400 truncate">
+                                <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[120px]">
                                   {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
                                 </p>
                               </div>
@@ -386,7 +386,7 @@ export default function LocationModal() {
                                     maxLength={6}
                                     value={resolvedAddress.pincode}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1"
+                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
                                     placeholder="Auto-fetched or enter PIN"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -397,7 +397,7 @@ export default function LocationModal() {
                                     type="text"
                                     value={resolvedAddress.landmark || ""}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1"
+                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
                                     placeholder="E.g. Plot Name, Hostel Name"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -467,7 +467,7 @@ export default function LocationModal() {
                                   maxLength={6}
                                   value={resolvedAddress.pincode}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1"
+                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1 min-w-0"
                                   placeholder="Auto-fetched or enter PIN"
                                   onClick={(e) => e.stopPropagation()}
                                 />
@@ -478,7 +478,7 @@ export default function LocationModal() {
                                   type="text"
                                   value={resolvedAddress.landmark || ""}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1"
+                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1 min-w-0"
                                   placeholder="E.g. Plot Name, Hostel Name"
                                   onClick={(e) => e.stopPropagation()}
                                 />

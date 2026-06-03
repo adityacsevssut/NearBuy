@@ -526,17 +526,17 @@ function AccountContent() {
                           <MapPin className={`w-4 h-4 ${theme.textPrimary}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[13px] font-black text-gray-800 leading-tight truncate">
+                          <p className="text-[14px] font-black text-gray-800 leading-tight line-clamp-2 pr-2">
                             {addr.landmark ? addr.landmark : addr.name}
                           </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
+                          <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                             {addr.pincode && (
-                              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-600 border-orange-100"}`}>
+                              <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-600 border-orange-100"}`}>
                                 PIN {addr.pincode}
                               </span>
                             )}
                             {(addr.full_address || addr.landmark) && (
-                              <p className="text-[11px] text-gray-400 truncate">
+                              <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[120px]">
                                 {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
                               </p>
                             )}
