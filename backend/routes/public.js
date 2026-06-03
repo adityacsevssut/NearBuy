@@ -43,9 +43,11 @@ router.get("/vendors", cache(300), async (req, res) => {
       whereClause += ` AND (
         v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
         (6371 * acos(
-          cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
-          cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
-          sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+          LEAST(1.0, GREATEST(-1.0,
+            cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
+            cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
+            sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+          ))
         )) <= COALESCE(CAST(v.delivery_range AS numeric), 5)
       )`;
       queryParams.push(parseFloat(lat), parseFloat(lon));
@@ -221,9 +223,11 @@ router.get("/dishes/:category", cache(300), async (req, res) => {
       whereClause += ` AND (
         v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
         (6371 * acos(
-          cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
-          cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
-          sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+          LEAST(1.0, GREATEST(-1.0,
+            cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
+            cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
+            sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+          ))
         )) <= COALESCE(CAST(v.delivery_range AS numeric), 5)
       )`;
       queryParams.push(parseFloat(lat), parseFloat(lon));

@@ -4,8 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, MapPin, Navigation, Check, Loader2, Sparkles, Sliders, Search } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
-import { useLocationContext, SavedAddress } from "@/context/LocationContext";
-import GeoapifySearch, { ResolvedGeoapifyAddress } from "@/components/GeoapifySearch";
+import { useLocationContext } from "@/context/LocationContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ManageLocationRangeModalProps {
@@ -22,8 +21,6 @@ export default function ManageLocationRangeModal({
   const { accessToken } = useAuth();
   const { savedAddresses } = useLocationContext();
   const [isSaving, setIsSaving] = useState(false);
-  const [isGpsLoading, setIsGpsLoading] = useState(false);
-  const [showSaved, setShowSaved] = useState(false);
 
   const [formData, setFormData] = useState({
     delivery_range: 5,
@@ -51,102 +48,12 @@ export default function ManageLocationRangeModal({
 
   if (!isOpen) return null;
 
-  const fetchGpsLocation = () => {
-    setIsGpsLoading(true);
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported by browser");
-      setIsGpsLoading(false);
-      return;
-    }
 
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        let resolved = false;
-
-        // 1. Try Google Maps API First
-        try {
-          const res = await fetch(`/api/geocode-reverse?lat=${latitude}&lng=${longitude}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              const result = data.results[0];
-              const addressName = result.formatted_address || `${latitude}, ${longitude}`;
-              
-              let pin = "";
-              for (const comp of result.address_components) {
-                if (comp.types.includes("postal_code")) {
-                  pin = comp.long_name;
-                  break;
-                }
-              }
-
-              setFormData((prev) => ({
-                ...prev,
-                latitude: latitude.toString(),
-                longitude: longitude.toString(),
-                gps_address: addressName,
-                pincode: pin || prev.pincode,
-              }));
-              toast.success("GPS Location detected!");
-              resolved = true;
-            }
-          }
-        } catch (err) {
-          console.warn("Google reverse geocoding failed:", err);
-        }
-
-        // 2. Fallback to Nominatim (OpenStreetMap)
-        if (!resolved) {
-          try {
-            const nomRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`);
-            if (nomRes.ok) {
-              const data = await nomRes.json();
-              if (data && data.address) {
-                const addressName = data.display_name || `${latitude}, ${longitude}`;
-                const pin = data.address.postcode || "";
-
-                setFormData((prev) => ({
-                  ...prev,
-                  latitude: latitude.toString(),
-                  longitude: longitude.toString(),
-                  gps_address: addressName,
-                  pincode: pin || prev.pincode,
-                }));
-                toast.success("GPS Location detected (Fallback)!");
-                resolved = true;
-              }
-            }
-          } catch (err) {
-            console.warn("Nominatim fallback failed:", err);
-          }
-        }
-
-        // 3. Final Fallback (Raw Coordinates)
-        if (!resolved) {
-          setFormData((prev) => ({
-            ...prev,
-            latitude: latitude.toString(),
-            longitude: longitude.toString(),
-            gps_address: `Lat: ${latitude}, Lon: ${longitude}`,
-          }));
-          toast.success("GPS coords saved (Address lookup failed).");
-        }
-
-        setIsGpsLoading(false);
-      },
-      (err) => {
-        toast.error("Could not get GPS. Grant permissions and try again.");
-        setIsGpsLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.landmark?.trim() || !formData.pincode?.trim()) {
-      toast.error("Please fill in both Landmark and Pincode");
+    if (!formData.manual_address?.trim()) {
+      toast.error("Please select a store location from your saved addresses");
       return;
     }
     setIsSaving(true);
@@ -235,163 +142,51 @@ export default function ManageLocationRangeModal({
             </p>
           </div>
 
-          {/* GPS Location Details */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Store Coordinates (GPS)</label>
-              <button
-                type="button"
-                onClick={fetchGpsLocation}
-                disabled={isGpsLoading}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white rounded-full text-xs font-bold transition-all shadow-sm disabled:opacity-50"
-              >
-                {isGpsLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Navigation className="w-3.5 h-3.5" />
-                )}
-                Auto Detect GPS
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Latitude</span>
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={formData.latitude} 
-                  placeholder="21.49xx"
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 outline-none"
-                />
-              </div>
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Longitude</span>
-                <input 
-                  type="text" 
-                  readOnly 
-                  value={formData.longitude} 
-                  placeholder="83.90xx"
-                  className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 outline-none"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Detected GPS Address</span>
-              <input 
-                type="text" 
-                readOnly 
-                value={formData.gps_address} 
-                placeholder="Auto-detected address will show here"
-                className="w-full px-3.5 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold text-gray-500 truncate outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Manual Address & Pincode using Google Search */}
-          <div className="space-y-4 pt-2 border-t border-gray-100">
+          <div className="space-y-4 pt-4 border-t border-gray-100">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Search & Auto-fill Details</label>
-              <GeoapifySearch 
-                onSelect={(addr) => {
-                  setFormData(prev => ({
-                    ...prev,
-                    latitude: addr.lat.toString(),
-                    longitude: addr.lng.toString(),
-                    gps_address: addr.name,
-                    manual_address: addr.fullAddress,
-                    pincode: addr.pincode
-                  }));
-                  toast.success("Location auto-filled!");
-                }} 
-              />
-            </div>
-            
-            {/* Show Saved Addresses */}
-            {savedAddresses.length > 0 && (
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowSaved(!showSaved)}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 hover:border-orange-300 rounded-xl transition-all"
-                >
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-bold text-gray-700">Use Saved Address</span>
-                  </div>
-                  <span className="bg-orange-100 text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-black">{savedAddresses.length}</span>
-                </button>
-                
-                <AnimatePresence>
-                  {showSaved && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden mt-2 space-y-2"
-                    >
-                      {savedAddresses.map((addr) => (
-                        <button
-                          key={addr.id}
-                          type="button"
-                          onClick={() => {
-                            setFormData(prev => ({
-                              ...prev,
-                              latitude: addr.latitude?.toString() || prev.latitude,
-                              longitude: addr.longitude?.toString() || prev.longitude,
-                              gps_address: addr.name,
-                              manual_address: addr.full_address || "",
-                              pincode: addr.pincode || ""
-                            }));
-                            toast.success(`Auto-filled from ${addr.name}`);
-                            setShowSaved(false);
-                          }}
-                          className="w-full flex flex-col text-left px-4 py-3 bg-white border border-gray-100 hover:border-orange-300 hover:bg-orange-50/50 rounded-xl transition-colors shadow-sm"
-                        >
+              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Store Location</label>
+              
+              {savedAddresses.length > 0 ? (
+                <div className="space-y-2 mt-2">
+                  {savedAddresses.map((addr) => {
+                    const isSelected = formData.pincode === addr.pincode && formData.manual_address === addr.full_address;
+                    return (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => {
+                          setFormData(prev => ({
+                            ...prev,
+                            latitude: addr.latitude?.toString() || prev.latitude,
+                            longitude: addr.longitude?.toString() || prev.longitude,
+                            gps_address: addr.name,
+                            manual_address: addr.full_address || "",
+                            pincode: addr.pincode || "",
+                            landmark: addr.landmark || ""
+                          }));
+                          toast.success(`Store location set to ${addr.name}`);
+                        }}
+                        className={`w-full flex flex-col text-left px-4 py-3 border rounded-xl transition-all shadow-sm ${
+                          isSelected 
+                            ? 'bg-orange-50 border-orange-500' 
+                            : 'bg-white border-gray-200 hover:border-orange-300'
+                        }`}
+                      >
+                        <div className="flex justify-between items-center w-full">
                           <span className="text-sm font-black text-gray-800">{addr.name}</span>
-                          <span className="text-xs text-gray-400 truncate mt-0.5">{addr.full_address}</span>
-                        </button>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Manual Address Detail</label>
-              <textarea 
-                value={formData.manual_address}
-                onChange={(e) => setFormData({ ...formData, manual_address: e.target.value })}
-                rows={2}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
-                placeholder="e.g. Near University Gate, Main Chowk"
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Landmark <span className="text-red-500">*</span></label>
-                <input 
-                  type="text"
-                  value={formData.landmark}
-                  onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
-                  placeholder="e.g. Pulaha Hall"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode <span className="text-red-500">*</span></label>
-                <input 
-                  type="text"
-                  value={formData.pincode}
-                  onChange={(e) => setFormData({ ...formData, pincode: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
-                  placeholder="768018"
-                />
-              </div>
+                          {isSelected && <Check className="w-4 h-4 text-orange-500" />}
+                        </div>
+                        <span className="text-xs text-gray-500 truncate mt-0.5">{addr.full_address}</span>
+                        {addr.landmark && <span className="text-[10px] text-gray-400 mt-1">Landmark: {addr.landmark}</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-xl text-center">
+                  <p className="text-xs text-orange-800">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
+                </div>
+              )}
             </div>
           </div>
 

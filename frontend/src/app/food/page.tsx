@@ -56,10 +56,6 @@ function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lo
 }
 
 function fmtDist(lat: number|null, lon: number|null, pin: string, v: any) {
-  if (v.osrmDistance != null) {
-    const d = v.osrmDistance; // meters
-    return d < 1000 ? `${Math.round(d)} m` : `${(d/1000).toFixed(1)} km`;
-  }
   const d = getDistance(lat, lon,
     v.latitude  ? parseFloat(v.latitude)  : null,
     v.longitude ? parseFloat(v.longitude) : null);
@@ -361,42 +357,7 @@ export default function HomePage() {
         const result = await res.json();
         let data = result.data || [];
         
-        // --- OSRM Batch Distance Fetch ---
-        if (latitude && longitude && data.length > 0) {
-          try {
-            // Coordinate string: user is index 0
-            const coords = [`${longitude},${latitude}`];
-            data.forEach((r: any) => {
-              if (r.longitude && r.latitude) {
-                coords.push(`${r.longitude},${r.latitude}`);
-              }
-            });
-            
-            // Only query if we have valid restaurant coords
-            if (coords.length > 1) {
-              const osrmUrl = `https://router.project-osrm.org/table/v1/driving/${coords.join(";")}?sources=0&annotations=distance,duration`;
-              const osrmRes = await fetch(osrmUrl);
-              if (osrmRes.ok) {
-                const osrmData = await osrmRes.json();
-                if (osrmData.code === "Ok" && osrmData.distances && osrmData.distances[0]) {
-                  let coordIndex = 1;
-                  data = data.map((r: any) => {
-                    if (r.longitude && r.latitude && coordIndex < osrmData.distances[0].length) {
-                      const distMeters = osrmData.distances[0][coordIndex];
-                      const durationSecs = osrmData.durations[0][coordIndex];
-                      coordIndex++;
-                      return { ...r, osrmDistance: distMeters, osrmDuration: durationSecs };
-                    }
-                    return r;
-                  });
-                }
-              }
-            }
-          } catch (osrmErr) {
-            console.warn("OSRM fetch failed, falling back to Haversine", osrmErr);
-          }
-        }
-        // ---------------------------------
+
 
         setHasMore(pageNum < (result.pagination?.totalPages || 1));
         setRestaurants(prev => isReset ? data : [...prev, ...data]);
@@ -408,7 +369,11 @@ export default function HomePage() {
   }
 
   /* filter */
-  const filtered = restaurants;
+  const filtered = restaurants.filter((r: any) => {
+    const raw = getDistance(latitude, longitude, r.latitude ? parseFloat(r.latitude) : null, r.longitude ? parseFloat(r.longitude) : null);
+    const isOor = raw != null && raw > (r.deliveryRange ? parseFloat(r.deliveryRange) : 5);
+    return !isOor;
+  });
 
   const popular = filtered.slice(0, 8);
   const cp = { lat: latitude, lon: longitude, pin: pincode, wishlist: restaurantWishlist, toggle: toggleRestaurant };
