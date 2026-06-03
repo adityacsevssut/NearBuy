@@ -5,7 +5,7 @@ import { X, MapPin, Navigation, Check, Loader2, Sparkles, Sliders, Search } from
 import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext, SavedAddress } from "@/context/LocationContext";
-import GooglePlacesSearch, { ResolvedGoogleAddress } from "@/components/GooglePlacesSearch";
+import GeoapifySearch, { ResolvedGeoapifyAddress } from "@/components/GeoapifySearch";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ManageLocationRangeModalProps {
@@ -293,7 +293,7 @@ export default function ManageLocationRangeModal({
           <div className="space-y-4 pt-2 border-t border-gray-100">
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Search & Auto-fill Details</label>
-              <GooglePlacesSearch 
+              <GeoapifySearch 
                 onSelect={(addr) => {
                   setFormData(prev => ({
                     ...prev,

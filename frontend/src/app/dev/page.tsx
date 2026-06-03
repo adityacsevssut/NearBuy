@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import dynamic from 'next/dynamic';
-import GooglePlacesSearch, { ResolvedGoogleAddress } from "@/components/GooglePlacesSearch";
+import GeoapifySearch, { ResolvedGeoapifyAddress } from "@/components/GeoapifySearch";
 
 
 const DevMap = dynamic(() => import('@/components/DevMap'), { 
@@ -217,7 +217,7 @@ export default function DevDashboard() {
   }
 
   // ---- Service Center Logic ----
-  const handleSelectGoogleLocation = (addr: ResolvedGoogleAddress) => {
+  const handleSelectGoogleLocation = (addr: ResolvedGeoapifyAddress) => {
     setCenterPincode(addr.pincode);
     const center = {
       name: addr.name,
@@ -890,7 +890,7 @@ export default function DevDashboard() {
                 <div className="w-full md:w-1/3 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-5 flex flex-col md:h-full md:overflow-y-auto custom-scrollbar shrink-0">
                   <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search Location</label>
                   <div className="mb-4">
-                    <GooglePlacesSearch 
+                    <GeoapifySearch 
                       onSelect={handleSelectGoogleLocation} 
                       placeholder="Search by Name or PIN Code..." 
                     />

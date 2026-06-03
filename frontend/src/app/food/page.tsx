@@ -56,11 +56,23 @@ function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lo
 }
 
 function fmtDist(lat: number|null, lon: number|null, pin: string, v: any) {
+  if (v.osrmDistance != null) {
+    const d = v.osrmDistance; // meters
+    return d < 1000 ? `${Math.round(d)} m` : `${(d/1000).toFixed(1)} km`;
+  }
   const d = getDistance(lat, lon,
     v.latitude  ? parseFloat(v.latitude)  : null,
     v.longitude ? parseFloat(v.longitude) : null);
   if (d==null) return null;
   return d < 1 ? `${Math.round(d*1000)} m` : `${d.toFixed(1)} km`;
+}
+
+function fmtTime(v: any) {
+  if (v.osrmDuration != null) {
+    const mins = Math.round(v.osrmDuration / 60);
+    return `${mins} min`;
+  }
+  return v.time || "30 min";
 }
 
 /* ─── Section header ───────────────────────────────────────────────────────── */
@@ -123,7 +135,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           </span>
           <span className="text-gray-400 text-[10px]">·</span>
           <span className="text-[10px] text-gray-500 font-semibold flex items-center gap-0.5">
-            <Clock className="w-2.5 h-2.5 text-orange-400" />{r.time||"30 min"}
+            <Clock className="w-2.5 h-2.5 text-orange-400" />{fmtTime(r)}
           </span>
         </div>
         {/* Distance */}
@@ -229,7 +241,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         {/* Stats */}
         <div className="flex items-center flex-wrap gap-1.5">
           <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
-            <Clock className="w-2.5 h-2.5 text-orange-400" />{r.time||"30 min"}
+            <Clock className="w-2.5 h-2.5 text-orange-400" />{fmtTime(r)}
           </span>
           <span className="text-[10px] font-semibold text-gray-600 bg-gray-50 border border-gray-100 px-2 py-0.5 rounded-full">
             Min ₹{r.minOrder||0}
@@ -347,7 +359,45 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/public/vendors?${query.toString()}`);
       if (res.ok) {
         const result = await res.json();
-        const data = result.data || [];
+        let data = result.data || [];
+        
+        // --- OSRM Batch Distance Fetch ---
+        if (latitude && longitude && data.length > 0) {
+          try {
+            // Coordinate string: user is index 0
+            const coords = [`${longitude},${latitude}`];
+            data.forEach((r: any) => {
+              if (r.longitude && r.latitude) {
+                coords.push(`${r.longitude},${r.latitude}`);
+              }
+            });
+            
+            // Only query if we have valid restaurant coords
+            if (coords.length > 1) {
+              const osrmUrl = `https://router.project-osrm.org/table/v1/driving/${coords.join(";")}?sources=0&annotations=distance,duration`;
+              const osrmRes = await fetch(osrmUrl);
+              if (osrmRes.ok) {
+                const osrmData = await osrmRes.json();
+                if (osrmData.code === "Ok" && osrmData.distances && osrmData.distances[0]) {
+                  let coordIndex = 1;
+                  data = data.map((r: any) => {
+                    if (r.longitude && r.latitude && coordIndex < osrmData.distances[0].length) {
+                      const distMeters = osrmData.distances[0][coordIndex];
+                      const durationSecs = osrmData.durations[0][coordIndex];
+                      coordIndex++;
+                      return { ...r, osrmDistance: distMeters, osrmDuration: durationSecs };
+                    }
+                    return r;
+                  });
+                }
+              }
+            }
+          } catch (osrmErr) {
+            console.warn("OSRM fetch failed, falling back to Haversine", osrmErr);
+          }
+        }
+        // ---------------------------------
+
         setHasMore(pageNum < (result.pagination?.totalPages || 1));
         setRestaurants(prev => isReset ? data : [...prev, ...data]);
       }

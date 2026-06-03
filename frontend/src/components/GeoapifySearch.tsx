@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Search, MapPin, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export interface ResolvedGoogleAddress {
+export interface ResolvedGeoapifyAddress {
   name: string;
   fullAddress: string;
   pincode: string;
@@ -14,17 +14,17 @@ export interface ResolvedGoogleAddress {
   isPostcode?: boolean;
 }
 
-interface GooglePlacesSearchProps {
-  onSelect: (addr: ResolvedGoogleAddress) => void;
+interface GeoapifySearchProps {
+  onSelect: (addr: ResolvedGeoapifyAddress) => void;
   placeholder?: string;
   autoFocus?: boolean;
 }
 
-export default function GooglePlacesSearch({
+export default function GeoapifySearch({
   onSelect,
   placeholder = "Search area, street or pincode…",
   autoFocus = false,
-}: GooglePlacesSearchProps) {
+}: GeoapifySearchProps) {
   const [query, setQuery] = useState("");
   const [predictions, setPredictions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -43,27 +43,26 @@ export default function GooglePlacesSearch({
         return;
       }
       setIsLoading(true);
-      let googleSuccess = false;
+      let geoapifySuccess = false;
 
-      // 1. Try Google Autocomplete
+      // 1. Try Geoapify Autocomplete
       try {
-        const res = await fetch(`/api/places-autocomplete?input=${encodeURIComponent(input)}&sessiontoken=${sessionToken}`);
+        const res = await fetch(`/api/places-autocomplete?input=${encodeURIComponent(input)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.predictions && data.predictions.length > 0) {
             setPredictions(data.predictions);
-            googleSuccess = true;
+            geoapifySuccess = true;
           } else if (data.predictions && data.predictions.length === 0 && res.status === 200) {
-             // If legitimately 0 results from Google, we could still try photon or just accept 0.
-             // But if quota exceeded, we want fallback. We'll fallback if Google returns no predictions.
+             // 0 results from Geoapify, we could still try photon or just accept 0.
           }
         }
       } catch (err) {
-        console.warn("Google autocomplete failed", err);
+        console.warn("Geoapify autocomplete failed", err);
       }
 
       // 2. Fallback to Photon (OpenStreetMap)
-      if (!googleSuccess) {
+      if (!geoapifySuccess) {
         try {
           const photonRes = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(input)}&limit=5&lang=en&bbox=68.1,6.75,97.4,37.1`);
           if (photonRes.ok) {
@@ -126,18 +125,21 @@ export default function GooglePlacesSearch({
     setPredictions([]);
     setIsLoading(true);
 
-    // If it's a Photon result, skip the Google Details API completely!
-    if (p.isPhoton) {
-       const props = p.photonData.properties;
-       const coords = p.photonData.geometry.coordinates; // [lng, lat]
-       const resolved: ResolvedGoogleAddress = {
+    // If it's a Photon result or Geoapify result, skip the Details API completely!
+    if (p.isPhoton || p.isGeoapify) {
+       const isGeo = p.isGeoapify;
+       const data = isGeo ? p.geoapifyData : p.photonData;
+       const props = data.properties;
+       const coords = data.geometry.coordinates; // [lng, lat]
+       
+       const resolved: ResolvedGeoapifyAddress = {
           name: props.name || props.city || p.structured_formatting.main_text,
           fullAddress: p.description,
           pincode: props.postcode || "",
           landmark: "",
           lat: coords[1],
           lng: coords[0],
-          isPostcode: p.isPhotonPostcode
+          isPostcode: isGeo ? (props.result_type === "postcode") : p.isPhotonPostcode
        };
        onSelect(resolved);
        setIsLoading(false);
@@ -145,7 +147,10 @@ export default function GooglePlacesSearch({
     }
 
     try {
-      const res = await fetch(`/api/places-details?place_id=${p.place_id}&sessiontoken=${sessionToken}`);
+      // If we somehow get here, we fallback to Google Places details or Geoapify Details
+      // But since we skip for Geoapify & Photon, this shouldn't run.
+      // Keeping it just in case any old cache runs.
+      const res = await fetch(`/api/places-details?place_id=${p.place_id}`);
       const data = await res.json();
       
       if (data.result) {
@@ -166,7 +171,7 @@ export default function GooglePlacesSearch({
         const types = result.types || [];
         const isPostcode = types.includes("postal_code") || types.includes("postal_code_prefix");
 
-        const resolved: ResolvedGoogleAddress = {
+        const resolved: ResolvedGeoapifyAddress = {
           name: result.name || p.description.split(",")[0],
           fullAddress: result.formatted_address || p.description,
           pincode,
@@ -175,9 +180,6 @@ export default function GooglePlacesSearch({
           lng,
           isPostcode,
         };
-        
-        // Refresh session token after a successful selection
-        setSessionToken(Math.random().toString(36).substring(2) + Date.now().toString(36));
         
         onSelect(resolved);
       }

@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
+import Map from "react-map-gl/mapbox";
+import "mapbox-gl/dist/mapbox-gl.css";
 
-function MapEventsHandler({
+function LeafletMapEventsHandler({
   onLocationChange,
 }: {
   onLocationChange?: (lat: number, lon: number) => void;
@@ -13,11 +15,9 @@ function MapEventsHandler({
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Fix Leaflet map sizing issues in modals
     const timer = setTimeout(() => {
       map.invalidateSize();
     }, 400);
-    
     return () => {
       clearTimeout(timer);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -41,13 +41,11 @@ function MapEventsHandler({
   return null;
 }
 
-function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
+function LeafletMapUpdater({ lat, lon }: { lat: number; lon: number }) {
   const map = useMap();
   useEffect(() => {
     const center = map.getCenter();
-    const dist = Math.sqrt(
-      Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lon, 2)
-    );
+    const dist = Math.sqrt(Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lon, 2));
     if (dist > 0.0005) {
       map.flyTo([lat, lon], 14, { duration: 1.0 });
     }
@@ -55,34 +53,61 @@ function MapUpdater({ lat, lon }: { lat: number; lon: number }) {
   return null;
 }
 
-export default function DevMap({ 
-  lat, 
-  lon, 
+export default function DevMap({
+  lat,
+  lon,
   title,
-  onLocationChange 
-}: { 
-  lat: number; 
-  lon: number; 
+  onLocationChange
+}: {
+  lat: number;
+  lon: number;
   title?: string;
   onLocationChange?: (lat: number, lon: number) => void;
 }) {
+  const [mapError, setMapError] = useState(false);
+  const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_API_KEY;
+
+  const handleMapboxMoveEnd = (e: any) => {
+    if (!onLocationChange) return;
+    const viewState = e.viewState;
+    onLocationChange(viewState.latitude, viewState.longitude);
+  };
+
+  const useLeafletFallback = !mapboxToken || mapError;
+
   return (
-    <div className="relative w-full h-full">
-      <MapContainer 
-        center={[lat, lon]} 
-        zoom={14} 
-        style={{ height: "100%", width: "100%", borderRadius: "0.75rem", zIndex: 10 }}
-        zoomControl={true}
-        scrollWheelZoom={true}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+    <div className="relative w-full h-full bg-gray-100 rounded-xl overflow-hidden">
+      {useLeafletFallback ? (
+        <MapContainer
+          center={[lat, lon]}
+          zoom={14}
+          style={{ height: "100%", width: "100%", zIndex: 10 }}
+          zoomControl={true}
+          scrollWheelZoom={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <LeafletMapUpdater lat={lat} lon={lon} />
+          <LeafletMapEventsHandler onLocationChange={onLocationChange} />
+        </MapContainer>
+      ) : (
+        <Map
+          mapboxAccessToken={mapboxToken || ""}
+          initialViewState={{ longitude: lon, latitude: lat, zoom: 14 }}
+          longitude={lon}
+          latitude={lat}
+          onMoveEnd={handleMapboxMoveEnd}
+          mapStyle="mapbox://styles/mapbox/light-v11"
+          onError={(e: any) => {
+            console.error("Mapbox error:", e);
+            setMapError(true);
+          }}
+          style={{ width: "100%", height: "100%" }}
         />
-        <MapUpdater lat={lat} lon={lon} />
-        <MapEventsHandler onLocationChange={onLocationChange} />
-      </MapContainer>
-      
+      )}
+
       {/* Fixed Center Pin (Blue) */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[20] pointer-events-none">
         <div style={{ position: "relative", width: "40px", height: "40px" }}>
@@ -119,7 +144,7 @@ export default function DevMap({
           {title}
         </div>
       )}
-      
+
       {onLocationChange && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[20] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-[10px] font-bold text-gray-500 pointer-events-none whitespace-nowrap">
           📍 Drag map to adjust

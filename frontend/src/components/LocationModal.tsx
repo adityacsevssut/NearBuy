@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useLocationContext, SavedAddress } from "@/context/LocationContext";
 import toast from "react-hot-toast";
-import GooglePlacesSearch, { ResolvedGoogleAddress } from "./GooglePlacesSearch";
+import GeoapifySearch, { ResolvedGeoapifyAddress } from "./GeoapifySearch";
 
 // Dynamically import map to avoid SSR issues with Leaflet
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -36,7 +36,7 @@ export default function LocationModal() {
 
   const [view, setView] = useState<View>("menu");
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
-  const [resolvedAddress, setResolvedAddress] = useState<ResolvedGoogleAddress | null>(null);
+  const [resolvedAddress, setResolvedAddress] = useState<ResolvedGeoapifyAddress | null>(null);
   const [isResolvingAddress, setIsResolvingAddress] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -350,7 +350,7 @@ export default function LocationModal() {
                     </div>
                   </div>
                   <div className="flex flex-col flex-1 overflow-y-auto p-5 space-y-4">
-                    <GooglePlacesSearch 
+                    <GeoapifySearch 
                       onSelect={(addr) => { 
                         setResolvedAddress(addr); 
                         if (addr.lat && addr.lng) {

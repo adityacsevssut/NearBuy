@@ -74,7 +74,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [landmark, setLandmark] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
-  const [isFetchingLocation] = useState(false);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
   const [activeCenter, setActiveCenter] = useState<any | null>(null);
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -295,8 +294,50 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     [isLoggedIn, accessToken, apiBase, savedAddresses]
   );
 
-  // kept for interface compat
-  const fetchExactLocation = async () => {};
+  const [isFetchingLocation, setIsFetchingLocation] = useState(false);
+
+  const fetchExactLocation = async () => {
+    if (typeof window === "undefined" || !navigator.geolocation) {
+      console.warn("Geolocation not supported by this browser.");
+      return;
+    }
+    setIsFetchingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        try {
+          const res = await fetch(`/api/geocode-reverse?lat=${lat}&lng=${lon}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+              const address = data.results[0];
+              const name = address.name || "Current Location";
+              let pin = "";
+              for (const comp of address.address_components || []) {
+                if (comp.types.includes("postal_code")) {
+                  pin = comp.long_name;
+                  break;
+                }
+              }
+              setLocation(name, pin, "", lat, lon);
+            } else {
+              setLocation("Current Location", "", "", lat, lon);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to reverse geocode", err);
+          setLocation("Current Location", "", "", lat, lon);
+        } finally {
+          setIsFetchingLocation(false);
+        }
+      },
+      (err) => {
+        console.error("Geolocation error:", err);
+        setIsFetchingLocation(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+  };
 
   return (
     <LocationContext.Provider
