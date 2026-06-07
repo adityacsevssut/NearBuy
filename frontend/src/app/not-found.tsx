@@ -8,18 +8,25 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
       <Navbar />
 
       <main className="flex-1 max-w-2xl mx-auto w-full p-4 flex flex-col items-center justify-center text-center">
         
         {/* Error Illustration */}
-        <div className="relative w-64 h-64 mb-6">
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-6">
           <Image
-            src="/error-boy.png"
+            src="/images/404_error_light.png"
             alt="Page Not Found"
             fill
-            className="object-contain drop-shadow-xl"
+            className="object-contain dark:hidden drop-shadow-xl"
+            priority
+          />
+          <Image
+            src="/images/404_error_dark.png"
+            alt="Page Not Found"
+            fill
+            className="object-contain hidden dark:block rounded-xl"
             priority
           />
         </div>

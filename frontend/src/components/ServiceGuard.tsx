@@ -234,7 +234,16 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           
           {/* Main Hero Image */}
           <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6 flex justify-center items-center">
-            <img src="/images/out_of_service_hero.png" alt="Out of Service Area" className="w-full h-auto mx-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
+            <img 
+              src="/images/out_of_service_hero.png" 
+              alt="Out of Service Area" 
+              className="w-full h-auto mx-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
+            />
+            <img 
+              src="/images/out_of_service_hero_dark.png" 
+              alt="Out of Service Area" 
+              className="w-full h-auto mx-auto object-contain hidden dark:block" 
+            />
           </div>
 
           {/* Heading */}
@@ -251,7 +260,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           {/* Dotted divider */}
           <div className="w-full max-w-md mx-auto flex items-center justify-center gap-3 mb-10 overflow-hidden opacity-30 px-4">
             {[...Array(15)].map((_, i) => (
-              <div key={i} className="w-1.5 h-1.5 rotate-45 bg-gray-50 dark:bg-[#151522]0 flex-shrink-0"></div>
+              <div key={i} className="w-1.5 h-1.5 rotate-45 bg-gray-50 dark:bg-[#151522] flex-shrink-0"></div>
             ))}
           </div>
 
@@ -264,7 +273,16 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               Your Nearest Market Place
             </p>
             <div className="w-48 mx-auto mb-10">
-              <img src="/images/delivery_boy_bottom.png" alt="Delivery Info" className="w-full h-auto object-contain mix-blend-darken contrast-[1.05] brightness-[1.05]" />
+              <img 
+                src="/images/delivery_boy_bottom.png" 
+                alt="Delivery Info" 
+                className="w-full h-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
+              />
+              <img 
+                src="/images/delivery_boy_bottom_dark.png" 
+                alt="Delivery Info" 
+                className="w-full h-auto object-contain hidden dark:block rounded-xl" 
+              />
             </div>
           </div>
 

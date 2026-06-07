@@ -473,13 +473,9 @@ export default function Navbar() {
                 />
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
-                We are Working On It
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-8 tracking-tight">
+                Coming Soon
               </h2>
-              
-              <p className="text-sm sm:text-[15px] text-gray-600 dark:text-gray-400 font-medium mb-8">
-                Available soon
-              </p>
 
               <button 
                 onClick={() => setShowEssentialsModal(false)}
@@ -529,13 +525,9 @@ export default function Navbar() {
                 />
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
-                We are Working On It
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-8 tracking-tight">
+                Coming Soon
               </h2>
-              
-              <p className="text-sm sm:text-[15px] text-gray-600 dark:text-gray-400 font-medium mb-8">
-                Available soon
-              </p>
 
               <button 
                 onClick={() => setShowMedicineModal(false)}

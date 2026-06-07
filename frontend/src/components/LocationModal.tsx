@@ -467,7 +467,7 @@ export default function LocationModal() {
                                   maxLength={6}
                                   value={resolvedAddress.pincode}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:bg-[#0D0D17] transition-colors flex-1 min-w-0"
+                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0"
                                   placeholder="Auto-fetched or enter PIN"
                                   onClick={(e) => e.stopPropagation()}
                                 />
@@ -478,7 +478,7 @@ export default function LocationModal() {
                                   type="text"
                                   value={resolvedAddress.landmark || ""}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:bg-[#0D0D17] transition-colors flex-1 min-w-0"
+                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0"
                                   placeholder="E.g. Plot Name, Hostel Name"
                                   onClick={(e) => e.stopPropagation()}
                                 />

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send, ChevronDown } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send, ChevronDown, Utensils } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -37,6 +37,7 @@ export default function DishPage() {
   const { toggleFood, isFoodWished } = useWishlist();
   const { addItem, itemQty } = useCart();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
+  const [selectedFood, setSelectedFood] = useState<any>(null);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -232,7 +233,8 @@ export default function DishPage() {
               return (
                 <div
                   key={dish.id}
-                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
+                  onClick={() => setSelectedFood(dish)}
+                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 cursor-pointer ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -299,6 +301,7 @@ export default function DishPage() {
                         <button
                           onClick={async (e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             const url = window.location.href;
                             try {
                               if (navigator.share) {
@@ -319,7 +322,9 @@ export default function DishPage() {
                           <Send className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
                         </button>
                         <button
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             if (isOutOfRange) return;
                             toggleFood({
                               id: dish.id,
@@ -357,6 +362,7 @@ export default function DishPage() {
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
                           }}
                           className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
@@ -367,6 +373,7 @@ export default function DishPage() {
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
+                            e.stopPropagation();
                             setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
                           }}
                           className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
@@ -377,6 +384,7 @@ export default function DishPage() {
                       <button 
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           if (isOutOfRange) return;
                           if (!isLoggedIn) return openLoginModal();
                           const q = quantities[dish.id] || 1;
@@ -429,6 +437,176 @@ export default function DishPage() {
             )}
           </div>
         </div>
+
+        {/* Food Details Modal */}
+        {selectedFood && (() => {
+          const vendorLat = selectedFood.latitude ? parseFloat(selectedFood.latitude) : null;
+          const vendorLon = selectedFood.longitude ? parseFloat(selectedFood.longitude) : null;
+          const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
+          const isOutOfRange = rawDistance != null && rawDistance > (selectedFood.delivery_range ? parseFloat(selectedFood.delivery_range) : 5);
+
+          return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={() => setSelectedFood(null)}
+              />
+
+              {/* Modal Content */}
+              <div className="relative w-full max-w-md bg-white dark:bg-[#151522] rounded-xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+                {/* Image Header */}
+                <div className="relative h-64 w-full bg-gray-100 dark:bg-[#1F1F2E] shrink-0">
+                  {selectedFood.image_url ? (
+                    <img src={selectedFood.image_url} alt={selectedFood.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Utensils className="w-12 h-12 text-gray-300" />
+                    </div>
+                  )}
+
+                  <div className="absolute top-4 right-4 flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFood({ ...selectedFood, restaurantId: selectedFood.vendor_id, restaurantName: selectedFood.vendor });
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors shadow-sm"
+                    >
+                      <Heart className={`w-4 h-4 ${isFoodWished(selectedFood.id) ? "fill-rose-500 text-rose-500" : ""}`} />
+                    </button>
+                    <button
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        try {
+                          const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                          const res = await fetch(`${API}/api/share`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ type: 'item', target_id: selectedFood.id, extra_data: { vendor_id: selectedFood.vendor_id } })
+                          });
+                          if (res.ok) {
+                            const { id } = await res.json();
+                            const shareUrl = `${window.location.origin}/s/${id}`;
+                            if (navigator.share) await navigator.share({ title: 'NearBuy', text: `Check out ${selectedFood.name}`, url: shareUrl });
+                            else { await navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }
+                          }
+                        } catch (err) {}
+                      }}
+                      className="w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors shadow-sm"
+                    >
+                      <Send className="w-4 h-4 fill-orange-500 text-orange-500 -ml-0.5" />
+                    </button>
+                  </div>
+
+                  {/* Badges on image */}
+                  <div className="absolute bottom-4 left-4 flex items-center gap-2">
+                    <span className={`w-5 h-5 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${selectedFood.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+                      <span className={`w-2 h-2 rounded-full ${selectedFood.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
+                    </span>
+                    {selectedFood.badge && (
+                      <span className="text-[10px] px-2 py-1 rounded-md bg-orange-500 text-white font-black uppercase tracking-wider shadow-sm">
+                        {selectedFood.badge}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Details Body */}
+                <div className="flex-1 overflow-y-auto p-5 sm:p-6">
+                  <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-2 leading-tight">{selectedFood.name}</h2>
+
+                  <div className="flex items-center gap-4 mb-5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-xl font-black text-gray-900 dark:text-gray-100">₹{selectedFood.price}</span>
+                      {Number(selectedFood.actual_price) > Number(selectedFood.price || 0) && (
+                        <span className="text-gray-400 font-semibold line-through text-sm">₹{selectedFood.actual_price}</span>
+                      )}
+                    </div>
+
+                    {selectedFood.rating && parseFloat(selectedFood.rating) > 0 && (
+                      <span className="flex items-center gap-1 bg-amber-50 dark:bg-[#1F1F2E] text-amber-600 px-2.5 py-1 rounded-lg text-sm font-bold border border-amber-100 dark:border-[#2A2A3A]">
+                        <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                        {selectedFood.rating}
+                        {selectedFood.reviews && parseInt(selectedFood.reviews) > 0 && (
+                          <span className="opacity-70 ml-0.5">({selectedFood.reviews})</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mb-6">
+                    <h3 className="text-xs font-black text-gray-400 mb-2 uppercase tracking-widest">About this item</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                      {selectedFood.desc || selectedFood.description || "No description available for this delicious item."}
+                    </p>
+                  </div>
+
+                  {selectedFood.time && (
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 font-medium bg-gray-50 dark:bg-[#0D0D17] p-3 rounded-xl border border-gray-100 dark:border-[#2A2A3A]">
+                      <Clock className="w-4 h-4 text-orange-400" />
+                      Preparation time: <span className="font-bold text-gray-700 dark:text-gray-300">{selectedFood.time}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Bottom Actions */}
+                <div className="p-4 sm:p-5 border-t border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#0D0D17] flex gap-3 shrink-0">
+                  <button
+                    onClick={() => setSelectedFood(null)}
+                    className="flex-1 py-2.5 rounded-xl font-black text-gray-700 dark:text-gray-300 bg-white dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#1F1F2E] transition-colors shadow-sm"
+                  >
+                    CLOSE
+                  </button>
+
+                  {selectedFood.is_available === false ? (
+                    <div className="flex-1 py-2.5 flex items-center justify-center font-black text-red-600 bg-red-50 border border-red-200 rounded-xl shadow-sm">
+                      OUT OF STOCK
+                    </div>
+                  ) : isOutOfRange ? (
+                    <div className="flex-1 py-2.5 flex items-center justify-center font-black text-gray-400 bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-xs sm:text-sm shadow-sm">
+                      OUT OF RANGE
+                    </div>
+                  ) : (
+                    <div className="flex-[1.5] flex gap-2">
+                      <div className="flex items-center justify-between w-[90px] bg-white dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl shadow-sm overflow-hidden shrink-0">
+                        <button
+                          onClick={() => setQuantities(q => ({ ...q, [selectedFood.id]: Math.max(1, (q[selectedFood.id] || 1) - 1) }))}
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors"
+                        >-</button>
+                        <span className="font-bold text-sm text-gray-800 dark:text-gray-200 w-6 text-center">{quantities[selectedFood.id] || 1}</span>
+                        <button
+                          onClick={() => setQuantities(q => ({ ...q, [selectedFood.id]: (q[selectedFood.id] || 1) + 1 }))}
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors"
+                        >+</button>
+                      </div>
+                      <button
+                        onClick={() => {
+                          const q = quantities[selectedFood.id] || 1;
+                          addItem({
+                            id: selectedFood.id,
+                            name: selectedFood.name,
+                            price: selectedFood.price,
+                            image: selectedFood.image_url,
+                            type: selectedFood.type as "veg" | "non-veg",
+                            restaurantId: selectedFood.vendor_id,
+                            restaurantName: selectedFood.vendor,
+                            section: "food",
+                          }, q);
+                          setQuantities(q => ({ ...q, [selectedFood.id]: 1 }));
+                          setSelectedFood(null);
+                        }}
+                        className="flex-1 py-2.5 px-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-black transition-colors shadow-lg shadow-orange-500/20 flex items-center justify-center gap-1 text-xs whitespace-nowrap"
+                      >
+                        {itemQty(selectedFood.id, selectedFood.vendor_id) > 0 ? `ADD MORE` : `ADD TO CART`}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
       </main>
 
       <MobileBottomNav />

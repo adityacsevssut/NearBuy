@@ -224,7 +224,7 @@ export default function GeoapifySearch({
                   <button
                     type="button"
                     onClick={() => handleSelectPrediction(p)}
-                    className="w-full flex items-start gap-3 px-4 py-3 hover:bg-orange-50 transition-colors text-left border-b border-gray-50 dark:border-[#1F1F2E] last:border-0"
+                    className="w-full flex items-start gap-3 px-4 py-3 hover:bg-orange-50 dark:hover:bg-orange-500/10 transition-colors text-left border-b border-gray-50 dark:border-[#1F1F2E] last:border-0"
                   >
                     <MapPin className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
                     <div className="min-w-0">

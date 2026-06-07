@@ -28,6 +28,7 @@ export const metadata: Metadata = {
 import { WishlistProvider } from "@/context/WishlistContext";
 import { NotificationProvider } from "@/context/NotificationContext";
 import ServiceGuard from "@/components/ServiceGuard";
+import NetworkGuard from "@/components/NetworkGuard";
 import { Toaster } from 'react-hot-toast';
 
 export default function RootLayout({
@@ -53,9 +54,11 @@ export default function RootLayout({
                         }
                       }}
                     />
-                    <ServiceGuard>
-                      {children}
-                    </ServiceGuard>
+                    <NetworkGuard>
+                      <ServiceGuard>
+                        {children}
+                      </ServiceGuard>
+                    </NetworkGuard>
                   </LocationProvider>
                 </WishlistProvider>
               </CartProvider>
