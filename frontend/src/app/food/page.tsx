@@ -845,7 +845,7 @@ export default function HomePage() {
             {posterLoading ? (
               <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
             ) : (
-              <div className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
+              <div className="block relative w-full rounded-2xl overflow-hidden group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={posterObj?.image_url || "/1000242984.png"}

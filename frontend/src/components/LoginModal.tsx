@@ -312,7 +312,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
         type="button"
         onClick={() => googleLoginAction()}
         disabled={loading}
-        className="w-full py-3.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] hover:bg-gray-50 dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 font-bold text-[14px] shadow-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full py-3.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-black/20 hover:bg-gray-50 dark:hover:bg-black/40 text-gray-700 dark:text-gray-300 font-bold text-[14px] shadow-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
       >
         <svg viewBox="0 0 24 24" className="w-5 h-5">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -391,8 +391,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             transition={{ type: "spring", bounce: 0.3, duration: 0.6 }}
             className="relative bg-white dark:bg-[#0D0D17] rounded-xl shadow-2xl w-full max-w-[440px] overflow-hidden border border-white/20 flex flex-col max-h-[90vh]"
           >
-            {/* Subtle background gradient glow */}
-            <div className={`absolute top-0 left-0 w-full h-32 bg-gradient-to-b ${t.headerGlow} to-transparent pointer-events-none`} />
+            {/* Subtle background gradient glow removed as requested */}
 
             {/* ── CHOOSE: 3 panels ── */}
             {flow === "choose" && (
@@ -404,24 +403,24 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                   {/* User Login */}
                   <button
                     onClick={() => reset("pick-user")}
-                    className={`w-full p-4 flex items-center gap-4 rounded-lg border border-orange-200/60 bg-orange-50/40 ${t.panelHover} transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5`}
+                    className={`w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5`}
                   >
                     <div className={`w-12 h-12 ${t.panelIcon} rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
                       <User className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col items-start flex-1 text-left">
-                      <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] group-hover:text-gray-900 dark:text-gray-100 transition-colors">User Login</span>
+                      <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">User Login</span>
                       <span className="text-[12px] text-gray-400 font-medium mt-0.5">Order food & essentials</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-[#151522] flex items-center justify-center group-hover:bg-white dark:hover:bg-[#0D0D17] border border-transparent group-hover:border-gray-200 dark:border-[#2A2A3A] transition-all">
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:text-gray-400 transition-colors" />
+                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
+                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
                     </div>
                   </button>
 
                   {/* Vendor Login */}
                   <button
                     onClick={() => reset("vendor-login")}
-                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-emerald-200/60 bg-emerald-50/40 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
+                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
                   >
                     <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                       <Phone className="w-6 h-6" />
@@ -430,7 +429,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                       <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">Vendor Login</span>
                       <span className="text-[12px] text-emerald-600/70 font-medium mt-0.5">Manage your store</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-emerald-50/50 flex items-center justify-center group-hover:bg-white dark:hover:bg-[#0D0D17] border border-transparent group-hover:border-emerald-200 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
                       <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 transition-colors" />
                     </div>
                   </button>
@@ -438,7 +437,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                   {/* Manager Login */}
                   <button
                     onClick={() => reset("manager-login")}
-                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-violet-200/60 bg-violet-50/40 hover:border-violet-300 hover:bg-violet-50 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
+                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
                   >
                     <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
                       <Lock className="w-6 h-6" />
@@ -447,7 +446,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                       <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">Manager Login</span>
                       <span className="text-[12px] text-violet-600/70 font-medium mt-0.5">Admin dashboard</span>
                     </div>
-                    <div className="w-8 h-8 rounded-full bg-violet-50/50 flex items-center justify-center group-hover:bg-white dark:hover:bg-[#0D0D17] border border-transparent group-hover:border-violet-200 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
                       <ChevronRight className="w-4 h-4 text-violet-400 group-hover:text-violet-600 transition-colors" />
                     </div>
                   </button>
@@ -467,7 +466,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                     <GoogleBtn />
                   </div>
                   <Divider />
-                  <div className={`text-center bg-gray-50 dark:bg-[#151522]/50 rounded-2xl p-4 border ${t.cardBorder}`}>
+                  <div className={`text-center bg-gray-50 dark:bg-black/20 rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A3A]`}>
                     <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                       New here?{" "}
                       <button onClick={() => reset("signup-info")} className={`${t.linkText} font-black hover:underline underline-offset-2 transition-colors`}>
