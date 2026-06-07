@@ -41,10 +41,12 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
     }
   };
 
-  if (isOffline) {
-    return (
-      <div className="fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col items-center justify-center p-4 text-center font-sans">
-        
+  return (
+    <>
+      {/* Offline Overlay - always in DOM so images preload, but hidden when online */}
+      <div 
+        className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col items-center justify-center p-4 text-center font-sans ${isOffline ? 'flex' : 'hidden'}`}
+      >
         {/* Error Illustration */}
         <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-6">
           <Image
@@ -86,8 +88,9 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
           </button>
         </div>
       </div>
-    );
-  }
 
-  return <>{children}</>;
+      {/* Render children only when online, maintaining original unmount behavior */}
+      {!isOffline && children}
+    </>
+  );
 }

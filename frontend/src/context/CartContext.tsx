@@ -16,7 +16,7 @@ export interface CartItem {
   quantity: number;
   restaurantId: string;
   restaurantName: string;
-  section: "food" | "essentials";
+  section: string;
 }
 
 interface CartContextType {
@@ -30,6 +30,7 @@ interface CartContextType {
   totalItems: number;        // total quantity across all items
   totalPrice: number;
   itemQty: (id: number, restaurantId: string) => number;
+  getCartCount: (domain: string) => number;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -101,6 +102,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + i.price * i.quantity, 0);
 
+  const getCartCount = useCallback((domain: string) => {
+    const domainItems = items.filter(i => i.section === domain || (domain === 'store' && i.section === 'essentials'));
+    return new Set(domainItems.map(i => i.restaurantId)).size;
+  }, [items]);
+
   const itemQty = useCallback(
     (id: number, restaurantId: string) => {
       const uid = `${restaurantId}__${id}`;
@@ -113,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     <CartContext.Provider
       value={{
         items, addItem, removeItem, updateQty, clearCart, clearVendorCart,
-        restaurantCount, totalItems, totalPrice, itemQty,
+        restaurantCount, totalItems, totalPrice, itemQty, getCartCount,
       }}
     >
       {children}

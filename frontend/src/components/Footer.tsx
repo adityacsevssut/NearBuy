@@ -119,7 +119,7 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
             {/* Copyright */}
             <div className="text-[12px] text-gray-400 font-medium text-center">
-              Copyright {new Date().getFullYear()} © NearBuy Interactive<br/>
+              Copyright {new Date().getFullYear()} © <span className={accentColor}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br/>
               Platform by Students Of VSSUT Burla
             </div>
           </div>

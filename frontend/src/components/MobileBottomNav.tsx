@@ -28,7 +28,8 @@ export default function MobileBottomNav() {
   const badgeColor = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : isHotels ? "bg-purple-500" : "bg-orange-500";
 
   const { isLoggedIn, openLoginModal } = useAuth();
-  const { restaurantCount: cartCount } = useCart();
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount(domain);
 
   const baseUrl = `/${domain}`;
 

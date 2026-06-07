@@ -17,7 +17,7 @@ export default function AboutUsPage() {
         
         {/* Header Section */}
         <div className="flex items-center gap-4 mb-8 md:mb-10">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#0f172a] tracking-widest uppercase shrink-0">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#0f172a] dark:text-white tracking-widest uppercase shrink-0">
             ABOUT US
           </h1>
           <div className="h-[1px] flex-1 bg-gradient-to-r from-[#f97316] to-transparent opacity-80"></div>
@@ -30,7 +30,7 @@ export default function AboutUsPage() {
 
         {/* Subheading */}
         <div className="flex items-center gap-4 mb-8 md:mb-10">
-          <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[#0f172a] tracking-widest uppercase shrink-0">
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-black text-[#0f172a] dark:text-white tracking-widest uppercase shrink-0">
             WHAT WE DO!
           </h2>
           <div className="h-[1px] flex-1 bg-gradient-to-r from-[#f97316] to-transparent opacity-80"></div>
@@ -40,7 +40,7 @@ export default function AboutUsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-12">
           
           {/* Box 1: Food */}
-          <div className="bg-orange-50 rounded-[2rem] p-8 md:p-10 transition-transform hover:-translate-y-1 hover:shadow-xl duration-300">
+          <div className="bg-orange-50 dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
               <div className="text-orange-500">
                 <Utensils className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
@@ -53,7 +53,7 @@ export default function AboutUsPage() {
           </div>
 
           {/* Box 2: Essentials */}
-          <div className="bg-white dark:bg-[#0D0D17] border-2 border-orange-50 shadow-sm rounded-[2rem] p-8 md:p-10 transition-transform hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 duration-300">
+          <div className="bg-white dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] shadow-sm rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
               <div className="text-orange-500">
                 <ShoppingBag className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
@@ -66,7 +66,7 @@ export default function AboutUsPage() {
           </div>
 
           {/* Box 3: Medico */}
-          <div className="bg-orange-50 rounded-[2rem] p-8 md:p-10 transition-transform hover:-translate-y-1 hover:shadow-xl duration-300">
+          <div className="bg-orange-50 dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
               <div className="text-orange-500">
                 <HeartPulse className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />

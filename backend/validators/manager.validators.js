@@ -58,7 +58,10 @@ const updateSettingsSchema = Joi.object({
   instagram_link: Joi.string().uri().allow("", null).optional(),
   food_email: email.allow("", null).optional(),
   medicine_email: email.allow("", null).optional(),
-  store_email: email.allow("", null).optional()
+  store_email: email.allow("", null).optional(),
+  enable_food: Joi.boolean().optional(),
+  enable_medicine: Joi.boolean().optional(),
+  enable_store: Joi.boolean().optional()
 });
 
 module.exports = {

@@ -38,6 +38,29 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  // App Modules state
+  const [enableFood, setEnableFood] = useState(true);
+  const [enableStore, setEnableStore] = useState(false);
+  const [enableMedicine, setEnableMedicine] = useState(false);
+
+  useEffect(() => {
+    async function fetchSettings() {
+      try {
+        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+        const res = await fetch(`${API}/api/public/settings`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.enable_food !== undefined) setEnableFood(data.enable_food);
+          if (data.enable_store !== undefined) setEnableStore(data.enable_store);
+          if (data.enable_medicine !== undefined) setEnableMedicine(data.enable_medicine);
+        }
+      } catch (e) {
+        // Silent catch
+      }
+    }
+    fetchSettings();
+  }, []);
+
   // Close menus on outside click
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -159,37 +182,37 @@ export default function Navbar() {
 
           {/* ── App Mode Toggle (Desktop only) ── */}
           <div className="hidden md:flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl flex-shrink-0 border border-gray-200 dark:border-[#2A2A3A]/50">
-            <Link
-              href="/"
+            <button
+              onClick={() => enableFood ? router.push("/") : setShowEssentialsModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
                 ? `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Food Delivery</span>
+              <span className="hidden sm:block">Food Delivery{!enableFood && " (Soon)"}</span>
               <span className="sm:hidden">Food</span>
-            </Link>
+            </button>
             <button
-              onClick={() => setShowEssentialsModal(true)}
+              onClick={() => enableStore ? router.push("/store") : setShowEssentialsModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
                 ? `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Essentials (Soon)</span>
+              <span className="hidden sm:block">Essentials{!enableStore && " (Soon)"}</span>
               <span className="sm:hidden">Store</span>
             </button>
             <button
-              onClick={() => setShowMedicineModal(true)}
+              onClick={() => enableMedicine ? router.push("/medicine") : setShowMedicineModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isMedicine
                 ? `bg-white dark:bg-[#0D0D17] text-emerald-600 shadow-sm`
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Medico (Soon)</span>
+              <span className="hidden sm:block">Medico{!enableMedicine && " (Soon)"}</span>
               <span className="sm:hidden">Medico</span>
             </button>
           </div>
@@ -390,14 +413,18 @@ export default function Navbar() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: 0.05, ease: [0.25, 1, 0.5, 1] }}
-                className="w-[calc(50%-8px)] aspect-square bg-orange-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end"
-                onClick={() => { router.push("/"); setMobileMenuOpen(false); }}
+                className="w-[calc(50%-8px)] aspect-square bg-orange-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end cursor-pointer"
+                onClick={() => {
+                  if (enableFood) router.push("/");
+                  else setShowEssentialsModal(true); // Can use a generic coming soon
+                  setMobileMenuOpen(false);
+                }}
               >
                 <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
                   <UtensilsCrossed className="w-16 h-16 text-white" />
                 </div>
                 <h2 className="text-xl font-black text-white relative z-10 leading-tight">Food</h2>
-                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Order Now</p>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableFood ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
               {/* Store Card */}
@@ -407,13 +434,17 @@ export default function Navbar() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: 0.15, ease: [0.25, 1, 0.5, 1] }}
                 className="w-[calc(50%-8px)] aspect-square bg-blue-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end cursor-pointer"
-                onClick={() => { setShowEssentialsModal(true); setMobileMenuOpen(false); }}
+                onClick={() => {
+                  if (enableStore) router.push("/store");
+                  else setShowEssentialsModal(true);
+                  setMobileMenuOpen(false);
+                }}
               >
                 <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
                   <Package className="w-16 h-16 text-white" />
                 </div>
                 <h2 className="text-xl font-black text-white relative z-10 leading-tight">Essentials</h2>
-                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Coming Soon</p>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
               {/* Medico Card */}
@@ -423,13 +454,17 @@ export default function Navbar() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ delay: 0.25, ease: [0.25, 1, 0.5, 1] }}
                 className="w-[calc(50%-8px)] aspect-square bg-emerald-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end cursor-pointer"
-                onClick={() => { setShowMedicineModal(true); setMobileMenuOpen(false); }}
+                onClick={() => {
+                  if (enableMedicine) router.push("/medicine");
+                  else setShowMedicineModal(true);
+                  setMobileMenuOpen(false);
+                }}
               >
                 <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
                   <Pill className="w-16 h-16 text-white" />
                 </div>
                 <h2 className="text-xl font-black text-white relative z-10 leading-tight">Medico</h2>
-                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">Coming Soon</p>
+                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableMedicine ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
             </div>
           </motion.div>
@@ -464,10 +499,10 @@ export default function Navbar() {
               </div>
 
               <div className="relative w-full max-w-[240px] aspect-square mb-6">
-                <Image 
-                  src="/essentials-soon.png" 
-                  alt="Essentials Coming Soon" 
-                  fill 
+                <Image
+                  src="/essentials-soon.png"
+                  alt="Essentials Coming Soon"
+                  fill
                   className="object-contain drop-shadow-md"
                   priority
                 />
@@ -477,7 +512,7 @@ export default function Navbar() {
                 Coming Soon
               </h2>
 
-              <button 
+              <button
                 onClick={() => setShowEssentialsModal(false)}
                 className="flex items-center justify-center px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-105 hover:shadow-lg active:scale-95 shadow-blue-500/25"
               >
@@ -516,10 +551,10 @@ export default function Navbar() {
               </div>
 
               <div className="relative w-full max-w-[240px] aspect-square mb-6">
-                <Image 
-                  src="/medicine-soon.png" 
-                  alt="Medicine Coming Soon" 
-                  fill 
+                <Image
+                  src="/medicine-soon.png"
+                  alt="Medicine Coming Soon"
+                  fill
                   className="object-contain drop-shadow-md"
                   priority
                 />
@@ -529,7 +564,7 @@ export default function Navbar() {
                 Coming Soon
               </h2>
 
-              <button 
+              <button
                 onClick={() => setShowMedicineModal(false)}
                 className="flex items-center justify-center px-8 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-105 hover:shadow-lg active:scale-95 shadow-emerald-500/25"
               >

@@ -72,6 +72,9 @@ export default function DevDashboard() {
   const [foodEmail, setFoodEmail] = useState("manager@nearbuy.com");
   const [medicineEmail, setMedicineEmail] = useState("manager@nearbuy.com");
   const [storeEmail, setStoreEmail] = useState("manager@nearbuy.com");
+  const [enableFood, setEnableFood] = useState(true);
+  const [enableMedicine, setEnableMedicine] = useState(false);
+  const [enableStore, setEnableStore] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   
   // Panels
@@ -134,6 +137,9 @@ export default function DevDashboard() {
         if (dataS.food_email !== undefined) setFoodEmail(dataS.food_email);
         if (dataS.medicine_email !== undefined) setMedicineEmail(dataS.medicine_email);
         if (dataS.store_email !== undefined) setStoreEmail(dataS.store_email);
+        if (dataS.enable_food !== undefined) setEnableFood(dataS.enable_food);
+        if (dataS.enable_medicine !== undefined) setEnableMedicine(dataS.enable_medicine);
+        if (dataS.enable_store !== undefined) setEnableStore(dataS.enable_store);
       }
     } catch {
       toast.error("Network error. Check your connection.");
@@ -343,7 +349,10 @@ export default function DevDashboard() {
           instagram_link: instagramLink,
           food_email: foodEmail,
           medicine_email: medicineEmail,
-          store_email: storeEmail
+          store_email: storeEmail,
+          enable_food: enableFood,
+          enable_medicine: enableMedicine,
+          enable_store: enableStore
         })
       });
       if (res.ok) {
@@ -373,8 +382,8 @@ export default function DevDashboard() {
       <nav className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 to-purple-700 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
-              <Shield className="w-4.5 h-4.5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-white/20 dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
+              <Shield className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
               <span className="font-black text-[15px] text-white tracking-tight leading-tight">NearBuy Dev</span>
@@ -382,13 +391,13 @@ export default function DevDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white dark:bg-[#0D0D17]/10 backdrop-blur-sm text-white">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 dark:bg-[#0D0D17]/10 backdrop-blur-sm text-white">
               <UserCircle className="w-4 h-4 opacity-80" />
               <span className="text-xs font-bold max-w-[150px] truncate">{user?.email}</span>
             </div>
             <button
               onClick={() => { logout(); router.push("/"); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-white/20 bg-white dark:bg-[#0D0D17]/10 hover:bg-white dark:hover:bg-[#0D0D17]/20 text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-white/20 bg-white/10 dark:bg-[#0D0D17]/10 hover:bg-white/20 dark:hover:bg-[#0D0D17]/20 text-white transition-all"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -751,6 +760,42 @@ export default function DevDashboard() {
                     onChange={(e) => setStoreEmail(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
+                </div>
+              </div>
+
+              {/* APP MODULES TOGGLES */}
+              <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mt-6 pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-[#151522] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A3A]">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Food Module</span>
+                    <span className="text-[10px] text-gray-400 font-medium">Enable Food Delivery</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={enableFood} onChange={(e) => setEnableFood(e.target.checked)} />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
+                  </label>
+                </div>
+                
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-[#151522] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A3A]">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Store Module</span>
+                    <span className="text-[10px] text-gray-400 font-medium">Enable Essentials Store</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={enableStore} onChange={(e) => setEnableStore(e.target.checked)} />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500"></div>
+                  </label>
+                </div>
+
+                <div className="flex items-center justify-between bg-gray-50 dark:bg-[#151522] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A3A]">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Medico Module</span>
+                    <span className="text-[10px] text-gray-400 font-medium">Enable Medicine Store</span>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" className="sr-only peer" checked={enableMedicine} onChange={(e) => setEnableMedicine(e.target.checked)} />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500"></div>
+                  </label>
                 </div>
               </div>
 
