@@ -19,7 +19,8 @@ export default function FallbackImage({ className, fallbackIconSize = 24, alt, .
   }
 
   return (
-    <FallbackImage
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
       {...props}
       alt={alt || "Image"}
       className={className}
