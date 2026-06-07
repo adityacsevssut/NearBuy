@@ -12,7 +12,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
-import FallbackImage from "@/components/FallbackImage";
 
 interface Order {
   id: string;
@@ -271,7 +270,7 @@ export default function OrderStatusPage() {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] overflow-hidden shrink-0">
                 {order.image_url ? (
-                  <FallbackImage src={order.image_url} alt="" className="w-full h-full object-cover" />
+                  <img src={order.image_url} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <Store className="w-full h-full p-3 text-gray-300" />
                 )}

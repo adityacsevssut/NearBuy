@@ -24,7 +24,6 @@ import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
-import FallbackImage from "@/components/FallbackImage";
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
@@ -178,7 +177,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       {/* Image */}
       <div className="relative h-[100px] bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
         {r.image ? (
-          <FallbackImage
+          <img
             src={r.image}
             alt={r.name}
             className={`w-full h-full object-cover ${dim ? "grayscale" : ""}`}
@@ -275,7 +274,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       {/* Image */}
       <div className="relative h-40 bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
         {r.image ? (
-          <FallbackImage
+          <img
             src={r.image}
             alt={r.name}
             className={`w-full h-full object-cover transition-transform duration-500 ${dim ? "grayscale" : ""}`}
@@ -824,13 +823,13 @@ export default function HomePage() {
                 >
                   <div className="w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-200 isolate">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <FallbackImage
+                    <img
                       src={image}
                       alt={label}
                       className="w-full h-full object-cover transition-transform duration-200 dark:hidden"
                     />
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <FallbackImage
+                    <img
                       src={image.replace('.png', '_dark.png')}
                       alt={label}
                       className="w-full h-full object-cover transition-transform duration-200 hidden dark:block"
@@ -851,13 +850,13 @@ export default function HomePage() {
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <FallbackImage
+                <img
                   src={posterObj?.image_url || "/1000242984.png"}
                   alt="NearBuy Special Offer"
                   className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden"
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <FallbackImage
+                <img
                   src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"}
                   alt="NearBuy Special Offer"
                   className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-[#151522] hidden dark:block"
@@ -909,7 +908,7 @@ export default function HomePage() {
                 >
                   <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 transition-transform duration-300 ">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <FallbackImage
+                    <img
                       src={image}
                       alt={label}
                       className="w-full h-full object-cover"

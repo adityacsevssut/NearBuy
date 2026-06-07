@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
-import FallbackImage from "@/components/FallbackImage";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -149,7 +148,7 @@ function FoodItemPreviewCard({
       <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
         <div className="w-32 h-32 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shadow-sm relative flex items-center justify-center">
           {item.imagePreview ? (
-            <FallbackImage src={item.imagePreview} alt="preview" className="w-full h-full object-cover" />
+            <img src={item.imagePreview} alt="preview" className="w-full h-full object-cover" />
           ) : (
             <ImageIcon className="w-10 h-10 text-gray-300" />
           )}
@@ -764,7 +763,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                 <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Item Photo</label>
                                 <div className="relative w-full h-36 rounded-xl border-2 border-dashed border-gray-300 bg-white dark:bg-[#0D0D17] overflow-hidden hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors group cursor-pointer">
                                   {form.imagePreview ? (
-                                    <FallbackImage src={form.imagePreview} alt="preview" className="w-full h-full object-cover" />
+                                    <img src={form.imagePreview} alt="preview" className="w-full h-full object-cover" />
                                   ) : (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-1.5">
                                       <ImageIcon className="w-8 h-8" />

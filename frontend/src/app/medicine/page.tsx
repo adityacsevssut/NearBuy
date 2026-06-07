@@ -11,7 +11,6 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import { useLocationContext } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
-import FallbackImage from "@/components/FallbackImage";
 
 const categories = [
   { id: "all", label: "All", emoji: "🛒" },
@@ -130,7 +129,7 @@ export default function MedicoPage() {
               {posterLoading ? (
                 <div className="w-full h-full bg-emerald-100/50 animate-pulse"></div>
               ) : posterUrl ? (
-                <FallbackImage src={posterUrl} alt="NearBuy Medico Banner" className="w-full h-full object-cover object-center" />
+                <img src={posterUrl} alt="NearBuy Medico Banner" className="w-full h-full object-cover object-center" />
               ) : (
                 <Image
                   src="/medico_hero_v4.png"

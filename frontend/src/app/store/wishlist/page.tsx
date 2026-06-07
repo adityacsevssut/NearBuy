@@ -10,7 +10,6 @@ import { useState, useEffect } from "react";
 import { ArrowLeft, Star, Clock, Utensils, Heart, ArrowDown } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import FallbackImage from "@/components/FallbackImage";
 
 export default function WishlistPage() {
   const { restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood } = useWishlist();
@@ -86,7 +85,7 @@ export default function WishlistPage() {
                 >
                   <div className="relative w-full h-40 bg-gray-100 dark:bg-[#1F1F2E] flex items-center justify-center border-b border-gray-100 dark:border-[#2A2A3A] overflow-hidden">
                     {r.image_url ? (
-                      <FallbackImage src={r.image_url} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${r.isClosed ? 'grayscale' : ''}`} />
+                      <img src={r.image_url} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${r.isClosed ? 'grayscale' : ''}`} />
                     ) : (
                       <div className="w-full h-full bg-blue-50 flex items-center justify-center">
                         <Utensils className="w-10 h-10 text-blue-200" />
@@ -213,7 +212,7 @@ export default function WishlistPage() {
                   <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
                     <div className="w-32 h-32 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shadow-sm relative flex items-center justify-center">
                       {dish.image_url ? (
-                        <FallbackImage src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                        <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
                       ) : (
                         <Utensils className="w-8 h-8 text-gray-300" />
                       )}

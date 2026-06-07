@@ -9,7 +9,6 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
-import FallbackImage from "@/components/FallbackImage";
 
 export default function VendorPage() {
   const params = useParams();
@@ -174,7 +173,7 @@ export default function VendorPage() {
             {/* Blurred Background Image */}
             {vendor.image && (
               <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-                <FallbackImage src={vendor.image} alt="Background" className="w-full h-full object-cover opacity-15 blur-3xl scale-110" />
+                <img src={vendor.image} alt="Background" className="w-full h-full object-cover opacity-15 blur-3xl scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#0D0D17] via-white/90 dark:via-[#0D0D17]/90 to-white/20 dark:to-[#0D0D17]/20" />
               </div>
             )}
@@ -432,7 +431,7 @@ export default function VendorPage() {
                             <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
                               <div className="w-32 h-32 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shadow-sm relative flex items-center justify-center">
                                 {dish.image_url ? (
-                                  <FallbackImage src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                                  <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
                                 ) : (
                                   <Utensils className="w-8 h-8 text-gray-300" />
                                 )}
@@ -596,7 +595,7 @@ export default function VendorPage() {
             {/* Image Header */}
             <div className="relative h-64 w-full bg-gray-100 dark:bg-[#1F1F2E] shrink-0">
               {selectedFood.image_url ? (
-                <FallbackImage src={selectedFood.image_url} alt={selectedFood.name} className="w-full h-full object-cover" />
+                <img src={selectedFood.image_url} alt={selectedFood.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
                   <Utensils className="w-12 h-12 text-gray-300" />

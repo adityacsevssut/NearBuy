@@ -8,7 +8,6 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import FallbackImage from "@/components/FallbackImage";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -235,12 +234,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           
           {/* Main Hero Image */}
           <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6 flex justify-center items-center">
-            <FallbackImage 
+            <img 
               src="/images/out_of_service_hero.png" 
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
             />
-            <FallbackImage 
+            <img 
               src="/images/out_of_service_hero_dark.png" 
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain hidden dark:block" 
@@ -274,12 +273,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               Your Nearest Market Place
             </p>
             <div className="w-48 mx-auto mb-10">
-              <FallbackImage 
+              <img 
                 src="/images/delivery_boy_bottom.png" 
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
               />
-              <FallbackImage 
+              <img 
                 src="/images/delivery_boy_bottom_dark.png" 
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain hidden dark:block rounded-xl" 
