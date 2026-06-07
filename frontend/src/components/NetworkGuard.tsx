@@ -1,8 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
-import { RefreshCcw } from "lucide-react";
+import { RefreshCcw, WifiOff } from "lucide-react";
 
 export default function NetworkGuard({ children }: { children: React.ReactNode }) {
   const [isOffline, setIsOffline] = useState(false);
@@ -47,22 +46,9 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
       <div 
         className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col items-center justify-center p-4 text-center font-sans ${isOffline ? 'flex' : 'hidden'}`}
       >
-        {/* Error Illustration */}
-        <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-6">
-          <Image
-            src="/images/network_error_light.png"
-            alt="No Internet Connection"
-            fill
-            className="object-contain dark:hidden drop-shadow-xl"
-            priority
-          />
-          <Image
-            src="/images/network_error_dark.png"
-            alt="No Internet Connection"
-            fill
-            className="object-contain hidden dark:block rounded-xl"
-            priority
-          />
+        {/* Error Icon */}
+        <div className="w-32 h-32 mb-8 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center shadow-inner ring-8 ring-red-50/50 dark:ring-red-500/5">
+          <WifiOff className="w-16 h-16 text-red-500 dark:text-red-400" />
         </div>
 
         {/* Error Text Content */}
@@ -70,7 +56,7 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
           Oops!
         </h1>
         <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
-          No Internet Connection
+          Poor Internet Connection
         </h2>
         <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
           It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using NearBuy.
