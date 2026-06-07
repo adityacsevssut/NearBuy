@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import FallbackImage from "@/components/FallbackImage";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -815,7 +816,7 @@ export default function PartnerDashboard() {
                 ) : currentPoster[posterTheme] ? (
                   <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={currentPoster[posterTheme] as string} alt="Current poster" className="w-full object-cover max-h-64" />
+                    <FallbackImage src={currentPoster[posterTheme] as string} alt="Current poster" className="w-full object-cover max-h-64" />
                     <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full ${theme.bg} border ${theme.border} text-[10px] font-black ${theme.textDark} uppercase tracking-widest shadow-sm`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                       Live
@@ -846,7 +847,7 @@ export default function PartnerDashboard() {
                   {posterPreview[posterTheme] && posterPreview[posterTheme] !== currentPoster[posterTheme] ? (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={posterPreview[posterTheme] as string} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
+                      <FallbackImage src={posterPreview[posterTheme] as string} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
                         <span className="text-white font-black text-sm bg-black/50 px-4 py-2 rounded-full">Change Image</span>
                       </div>

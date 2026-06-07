@@ -19,6 +19,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
 import { useEffect } from "react";
+import FallbackImage from "@/components/FallbackImage";
 
 // Platform fee and GST are now fetched dynamically from the backend
 
@@ -179,7 +180,7 @@ function RestaurantOrderCard({
               {/* Thumbnail */}
               <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shrink-0 relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                <FallbackImage src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 <div className="absolute top-1 left-1">
                   <div
                     className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#151522] dark:bg-[#151522] flex items-center justify-center ${
@@ -590,7 +591,7 @@ export default function CartPage() {
     }
   }, [mounted, isLoggedIn, router]);
 
-  const foodItems = items.filter((i) => i.(section === "store" || section === "essentials"));
+  const foodItems = items.filter((i) => i.section === "store" || i.section === "essentials");
   const groups = groupByRestaurant(foodItems);
   const restaurantIds = Object.keys(groups);
   const totalQty = foodItems.reduce((s, i) => s + i.quantity, 0);

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import FallbackImage from "@/components/FallbackImage";
 
 interface ManageFrontPageModalProps {
   isOpen: boolean;
@@ -230,8 +231,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                     {/* Image Banner */}
                     <div className="relative w-full h-40 bg-gray-100 dark:bg-[#1F1F2E]">
                       {imagePreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                        <FallbackImage src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">
                           <ImageIcon className="w-8 h-8 opacity-50" />
@@ -290,8 +290,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Display Banner Image</label>
                   <div className="relative w-full h-48 sm:h-56 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 dark:bg-[#151522] overflow-hidden hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group">
                     {imagePreview ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                      <FallbackImage src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     ) : (
                       <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400 gap-2">
                         <ImageIcon className="w-10 h-10" />

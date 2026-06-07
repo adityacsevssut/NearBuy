@@ -11,6 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
+import FallbackImage from "@/components/FallbackImage";
 
 function deg2rad(d: number) { return d * (Math.PI / 180); }
 
@@ -293,7 +294,7 @@ export default function DishPage() {
                   <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
                     <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 dark:border-[#2A2A3A] flex items-center justify-center text-6xl shadow-inner relative overflow-hidden">
                       {dish.image_url ? (
-                        <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
+                        <FallbackImage src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
                       ) : (
                         dish.emoji || "🍽️"
                       )}
@@ -458,7 +459,7 @@ export default function DishPage() {
                 {/* Image Header */}
                 <div className="relative h-64 w-full bg-gray-100 dark:bg-[#1F1F2E] shrink-0">
                   {selectedFood.image_url ? (
-                    <img src={selectedFood.image_url} alt={selectedFood.name} className="w-full h-full object-cover" />
+                    <FallbackImage src={selectedFood.image_url} alt={selectedFood.name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Utensils className="w-12 h-12 text-gray-300" />

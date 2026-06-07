@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
+import FallbackImage from "@/components/FallbackImage";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -189,7 +190,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       return <>{children}</>;
     }
     return (
-      <div className="min-h-screen bg-orange-50/20 flex flex-col items-center justify-center p-4 select-none">
+      <div className="min-h-screen bg-orange-50/20 dark:bg-black flex flex-col items-center justify-center p-4 select-none">
         {/* Simple card container */}
         <div className="max-w-md w-full bg-white dark:bg-[#0D0D17] rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col items-center">
           {/* Logo */}
@@ -234,12 +235,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           
           {/* Main Hero Image */}
           <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6 flex justify-center items-center">
-            <img 
+            <FallbackImage 
               src="/images/out_of_service_hero.png" 
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
             />
-            <img 
+            <FallbackImage 
               src="/images/out_of_service_hero_dark.png" 
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain hidden dark:block" 
@@ -273,12 +274,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               Your Nearest Market Place
             </p>
             <div className="w-48 mx-auto mb-10">
-              <img 
+              <FallbackImage 
                 src="/images/delivery_boy_bottom.png" 
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
               />
-              <img 
+              <FallbackImage 
                 src="/images/delivery_boy_bottom_dark.png" 
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain hidden dark:block rounded-xl" 

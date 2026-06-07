@@ -15,6 +15,7 @@ import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import FallbackImage from "@/components/FallbackImage";
 
 interface OrderItem {
   id: number;
@@ -242,8 +243,7 @@ function OrdersPageContent() {
               <div className="p-5 border-b border-gray-50 dark:border-[#1F1F2E] flex items-start gap-4">
                 <div className="w-14 h-14 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl overflow-hidden shrink-0 border border-gray-100 dark:border-[#2A2A3A] shadow-sm">
                   {order.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={order.image_url} alt={order.restaurant_name} className="w-full h-full object-cover" />
+                    <FallbackImage src={order.image_url} alt={order.restaurant_name} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Store className="w-6 h-6 text-gray-400" />
