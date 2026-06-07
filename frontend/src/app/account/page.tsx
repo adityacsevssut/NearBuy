@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, Suspense, useState } from "react";
 import Link from "next/link";
@@ -10,7 +11,7 @@ import {
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, ShoppingCart, Utensils,
   MapPin, Calendar, Clock, Mail, MessageCircle, Phone,
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus, X, Check
+  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus, X, Check, Moon
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
@@ -20,6 +21,7 @@ const DEV_EMAIL = "nahakaditya344@gmail.com";
 function AccountContent() {
   const { user, accessToken, logout, isLoggedIn, updateUser } = useAuth();
   const { savedAddresses, removeSavedAddress, setIsLocationModalOpen, setLocation } = useLocationContext();
+  const { theme: appTheme, toggleTheme } = useTheme();
   const router = useRouter();
   const searchParams = useSearchParams();
   const isBlue = searchParams.get('theme') === 'blue';
@@ -133,8 +135,8 @@ function AccountContent() {
             <AlertTriangle className="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 className="font-black text-gray-900 text-[15px]">Delete Account?</h3>
-            <p className="text-sm text-gray-500 font-medium leading-tight mt-0.5">
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Delete Account?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
               This action is permanent. All your data, orders, and saved items will be deleted immediately.
             </p>
           </div>
@@ -142,7 +144,7 @@ function AccountContent() {
         <div className="flex gap-2 justify-end mt-1">
           <button 
             onClick={() => toast.dismiss(t.id)}
-            className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition-colors"
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
           >
             Cancel
           </button>
@@ -276,7 +278,7 @@ function AccountContent() {
   if (!isLoggedIn) return null;
 
   return (
-    <div className={`min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8F9FA] pb-24 font-sans ${theme.selection}`}>
+    <div className={`min-h-screen w-full max-w-full overflow-x-hidden bg-[#F8F9FA] dark:bg-[#0D0D17] pb-24 font-sans ${theme.selection}`}>
       
       <div className="hidden md:block mb-8">
         <Navbar />
@@ -285,7 +287,7 @@ function AccountContent() {
       {/* Dynamic Brand Header */}
       <div className={`bg-gradient-to-br ${theme.gradient} pt-6 pb-20 px-4 rounded-b-[40px] relative shadow-lg md:hidden`}>
         <div className="flex items-center justify-between text-white relative z-10 mb-2">
-          <button onClick={() => router.back()} className="p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors">
+          <button onClick={() => router.back()} className="p-2 bg-white dark:bg-[#0D0D17]/20 dark:bg-black/20 hover:bg-white dark:bg-[#0D0D17]/30 dark:hover:bg-black/30 rounded-full backdrop-blur-md transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="text-xl font-extrabold tracking-wide">My Profile</h1>
@@ -300,7 +302,7 @@ function AccountContent() {
       <div className="px-5 space-y-6 max-w-lg mx-auto md:pt-28 md:mt-0 -mt-14 relative z-20">
         
         {/* Floating Profile Card */}
-        <div className="bg-white rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50/50">
+        <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50 dark:border-[#1F1F2E]/50">
           <div className="relative shrink-0">
             <div className={`w-16 h-16 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white shadow-sm rotate-3`}>
               <span className={`text-2xl font-black ${theme.textPrimary} -rotate-3`}>
@@ -330,14 +332,14 @@ function AccountContent() {
                     value={editFirstName} 
                     onChange={e => setEditFirstName(e.target.value)} 
                     placeholder="First Name" 
-                    className="w-full text-sm font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
+                    className="w-full text-sm font-bold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
                   />
                   <input 
                     type="text" 
                     value={editLastName} 
                     onChange={e => setEditLastName(e.target.value)} 
                     placeholder="Last Name" 
-                    className="w-full text-sm font-bold text-gray-800 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
+                    className="w-full text-sm font-bold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20" 
                   />
                 </div>
                 <div className="flex gap-2">
@@ -351,7 +353,7 @@ function AccountContent() {
                   <button 
                     onClick={() => setIsEditingProfile(false)} 
                     disabled={savingProfile}
-                    className="text-xs font-bold text-gray-500 hover:text-gray-700 px-2 py-1.5"
+                    className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 px-2 py-1.5"
                   >
                     Cancel
                   </button>
@@ -359,7 +361,7 @@ function AccountContent() {
               </div>
             ) : (
               <>
-                <h2 className="text-[19px] font-black text-gray-800 tracking-tight leading-tight truncate">
+                <h2 className="text-[19px] font-black text-gray-800 dark:text-gray-200 tracking-tight leading-tight truncate">
                   {user?.firstName || "NearBuy"} {user?.lastName || "User"}
                 </h2>
                 <p className="text-[13px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
@@ -376,7 +378,7 @@ function AccountContent() {
           {/* Cart Button */}
           <button
             onClick={() => router.push("/food/cart")}
-            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
               transition-all duration-200 active:scale-[0.98]"
@@ -386,19 +388,19 @@ function AccountContent() {
                 <ShoppingCart className="w-5 h-5 text-orange-500" />
               </div>
               <div className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
-                group-hover:bg-orange-100 group-hover:border-orange-300 transition-colors shrink-0">
+                group-hover:bg-orange-100 group-hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-colors shrink-0">
                 <ChevronRight className="w-3.5 h-3.5 text-orange-400 group-hover:text-orange-600 transition-colors" />
               </div>
             </div>
             <div className="w-full">
-              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Food Cart</p>
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">Food Cart</p>
             </div>
           </button>
 
           {/* Wishlist Button */}
           <button
             onClick={() => router.push("/food/wishlist")}
-            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 hover:border-rose-200/80
               transition-all duration-200 active:scale-[0.98]"
@@ -413,14 +415,14 @@ function AccountContent() {
               </div>
             </div>
             <div className="w-full">
-              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Wishlist</p>
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">Wishlist</p>
             </div>
           </button>
 
           {/* Browse Restaurant Button */}
           <button
             onClick={() => router.push("/")}
-            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-50 hover:border-blue-200/80
               transition-all duration-200 active:scale-[0.98]"
@@ -435,14 +437,14 @@ function AccountContent() {
               </div>
             </div>
             <div className="w-full">
-              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Browse Restaurants</p>
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">Browse Restaurants</p>
             </div>
           </button>
 
           {/* Your Orders Button */}
           <button
             onClick={() => router.push("/food/orders?history=true")}
-            className="group bg-white rounded-2xl border border-gray-200 shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 hover:border-purple-200/80
               transition-all duration-200 active:scale-[0.98]"
@@ -457,7 +459,7 @@ function AccountContent() {
               </div>
             </div>
             <div className="w-full">
-              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 leading-tight">Your Orders</p>
+              <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">Your Orders</p>
             </div>
           </button>
 
@@ -466,21 +468,21 @@ function AccountContent() {
         {/* Section: Activity */}
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Saved Information</h3>
-          <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
             <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push("/food/orders?history=true")} />
             
             {/* ── Saved Addresses — expandable ── */}
             <div>
               <button
                 onClick={() => setShowAddresses((v) => !v)}
-                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group"
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#151522]/80 transition-colors group"
               >
                 <div className="flex items-center gap-4">
-                  <div className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
-                    <MapPin className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+                  <div className={`w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+                    <MapPin className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
                   </div>
                   <div className="text-left">
-                    <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Saved Addresses</span>
+                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Saved Addresses</span>
                     {savedAddresses.length > 0 && (
                       <span className={`ml-2 text-[11px] font-black px-1.5 py-0.5 rounded-full ${isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>
                         {savedAddresses.length}
@@ -520,13 +522,13 @@ function AccountContent() {
                           toast.success(`📍 Switched to ${addr.landmark ? addr.landmark : addr.name}`);
                           router.push("/");
                         }}
-                        className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-orange-50/50 cursor-pointer rounded-2xl border border-gray-100 hover:border-orange-200 transition-all group"
+                        className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] hover:bg-orange-50/50 cursor-pointer rounded-2xl border border-gray-100 dark:border-[#2A2A3A] hover:border-orange-200 transition-all group"
                       >
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${isBlue ? "bg-blue-50" : "bg-orange-50"}`}>
                           <MapPin className={`w-4 h-4 ${theme.textPrimary}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[14px] font-black text-gray-800 leading-tight line-clamp-2 pr-2">
+                          <p className="text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2">
                             {addr.landmark ? addr.landmark : addr.name}
                           </p>
                           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
@@ -559,7 +561,7 @@ function AccountContent() {
                   {savedAddresses.length > 0 && (
                     <button
                       onClick={() => setIsLocationModalOpen(true)}
-                      className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 text-gray-500 hover:text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-colors mt-2`}
+                      className={`w-full py-3 flex items-center justify-center gap-2 rounded-xl border border-dashed border-gray-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#151522] hover:border-gray-400 transition-colors mt-2`}
                     >
                       <Plus className="w-4 h-4" />
                       <span className="text-xs font-bold">Add New Address</span>
@@ -575,7 +577,7 @@ function AccountContent() {
         {/* Section: Help Center */}
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Help Center</h3>
-          <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
             <ModernRow icon={Globe} label="Contact Us here" onClick={() => window.open(instagramLink, '_blank')} theme={theme} />
             <ModernRow icon={Mail} label="Need Help ? Facing Issues ?" onClick={() => window.location.href = `mailto:${supportEmail}?subject=Facing%20Issue`} theme={theme} />
           </div>
@@ -584,16 +586,16 @@ function AccountContent() {
         {/* Section: Settings */}
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Preferences & More</h3>
-          <div className="bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100/50 overflow-hidden py-1">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
             
             {/* Notification Toggle Row */}
-            <div className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group border-b border-gray-50/50">
+            <div className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#151522]/80 transition-colors group border-b border-gray-50 dark:border-[#1F1F2E]/50">
               <div className="flex items-center gap-4">
-                <div className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
-                  <Bell className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+                <div className={`w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+                  <Bell className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Push Notifications</span>
+                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Push Notifications</span>
                 </div>
               </div>
               <button 
@@ -603,8 +605,32 @@ function AccountContent() {
                 }`}
               >
                 <div 
-                  className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
+                  className={`w-4 h-4 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-full shadow-md transform transition-transform duration-300 ${
                     (user?.notifications_enabled ?? true) ? "translate-x-6" : "translate-x-0"
+                  }`} 
+                />
+              </button>
+            </div>
+
+            {/* Theme Toggle Row */}
+            <div className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#151522]/80 transition-colors group border-b border-gray-50 dark:border-[#1F1F2E]/50">
+              <div className="flex items-center gap-4">
+                <div className={`w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+                  <Moon className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Dark Mode</span>
+                </div>
+              </div>
+              <button 
+                onClick={toggleTheme}
+                className={`relative w-12 h-6 rounded-full transition-colors duration-300 flex items-center px-1 focus:outline-none ${
+                  appTheme === "dark" ? (isBlue ? "bg-blue-500" : "bg-orange-500") : "bg-gray-200"
+                }`}
+              >
+                <div 
+                  className={`w-4 h-4 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-full shadow-md transform transition-transform duration-300 ${
+                    appTheme === "dark" ? "translate-x-6" : "translate-x-0"
                   }`} 
                 />
               </button>
@@ -630,7 +656,7 @@ function AccountContent() {
                     <Code2 className="w-4 h-4 text-violet-600" />
                   </div>
                   <div>
-                    <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">Dev Dashboard</span>
+                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Dev Dashboard</span>
                     <p className="text-[11px] text-violet-400 font-medium">Manage managers & platform</p>
                   </div>
                 </div>
@@ -641,7 +667,7 @@ function AccountContent() {
         )}
 
         {/* Danger Zone */}
-        <div className={`bg-white rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden mt-6`}>
+        <div className={`bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border ${theme.dangerBorder} overflow-hidden mt-6`}>
           <button 
             onClick={() => { logout(); router.push("/"); }}
             className={`w-full flex items-center justify-center gap-2 px-4 py-4 ${theme.dangerText} font-bold ${theme.dangerHoverBg} transition-colors`}
@@ -668,10 +694,10 @@ function AccountContent() {
       {showRatingModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowRatingModal(false)} />
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-2xl w-full max-w-sm p-6 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <button 
               onClick={() => setShowRatingModal(false)}
-              className="absolute top-4 right-4 p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+              className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 rounded-full text-gray-600 dark:text-gray-400 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -679,8 +705,8 @@ function AccountContent() {
               <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 bg-gradient-to-tr ${theme.avatarBg}`}>
                 <Star className={`w-8 h-8 ${theme.textPrimary}`} />
               </div>
-              <h3 className="text-xl font-black text-gray-900">Rate NearBuy</h3>
-              <p className="text-sm font-medium text-gray-500 mt-1">How much do you love using our app?</p>
+              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Rate NearBuy</h3>
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">How much do you love using our app?</p>
             </div>
             
             <div className="flex justify-center gap-2 mb-8">
@@ -710,10 +736,10 @@ function AccountContent() {
       {showLanguageModal && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowLanguageModal(false)} />
-          <div className="bg-white rounded-3xl w-full max-w-sm p-6 relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl w-full max-w-sm p-6 relative z-10 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <button 
               onClick={() => setShowLanguageModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-100 transition-colors"
+              className="absolute top-4 right-4 w-8 h-8 bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] rounded-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -721,8 +747,8 @@ function AccountContent() {
               <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3">
                 <Globe className="w-8 h-8 text-blue-500" />
               </div>
-              <h3 className="text-xl font-black text-gray-900">Select Language</h3>
-              <p className="text-sm text-gray-500 mt-1 font-medium">Choose your preferred app language</p>
+              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Select Language</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium">Choose your preferred app language</p>
             </div>
             
             <div className="space-y-3">
@@ -735,10 +761,10 @@ function AccountContent() {
                 className={`w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all ${
                   appLanguage === "English" 
                     ? `border-blue-500 bg-blue-50` 
-                    : "border-gray-100 hover:border-gray-200"
+                    : "border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A]"
                 }`}
               >
-                <span className={`font-bold ${appLanguage === "English" ? "text-blue-700" : "text-gray-700"}`}>English</span>
+                <span className={`font-bold ${appLanguage === "English" ? "text-blue-700" : "text-gray-700 dark:text-gray-300"}`}>English</span>
                 {appLanguage === "English" && <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center"><Check className="w-3 h-3 text-white" /></div>}
               </button>
             </div>
@@ -752,7 +778,7 @@ function AccountContent() {
 
 export default function AccountPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] pb-24"></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] pb-24"></div>}>
       <AccountContent />
     </Suspense>
   );
@@ -762,23 +788,23 @@ export default function AccountPage() {
 
 function ActionPill({ icon: Icon, label, color, bg }: { icon: any, label: string, color: string, bg: string }) {
   return (
-    <button className="flex-1 bg-white py-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 transition-transform active:scale-95">
+    <button className="flex-1 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] py-3.5 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 dark:border-[#1F1F2E] transition-transform active:scale-95">
       <div className={`p-2 rounded-xl ${bg}`}>
         <Icon className={`w-5 h-5 ${color}`} />
       </div>
-      <span className="text-[11px] font-bold text-gray-600">{label}</span>
+      <span className="text-[11px] font-bold text-gray-600 dark:text-gray-400">{label}</span>
     </button>
   );
 }
 
 function ModernRow({ icon: Icon, label, value, onClick, theme }: { icon: any, label: string, value?: string, onClick?: () => void, theme: any }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50/80 transition-colors group">
+    <button onClick={onClick} className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#151522]/80 transition-colors group">
       <div className="flex items-center gap-4">
-        <div className={`w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
-          <Icon className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+        <div className={`w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+          <Icon className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
         </div>
-        <span className="text-[14.5px] font-bold text-gray-700 group-hover:text-gray-900">{label}</span>
+        <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">{label}</span>
       </div>
       <div className="flex items-center gap-2">
         {value && <span className="text-[13px] font-bold text-gray-400">{value}</span>}

@@ -260,7 +260,7 @@ export default function PartnerDashboard() {
   }, [isLoggedIn, user, router]);
 
   if (!isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
-    return <div className="min-h-screen bg-gray-50" />;
+    return <div className="min-h-screen bg-gray-50 dark:bg-[#151522]" />;
   }
 
   // Determine dynamic theme colors based on manager type
@@ -297,7 +297,7 @@ export default function PartnerDashboard() {
     bg: "bg-orange-50",
     bgHover: "hover:bg-orange-100",
     border: "border-orange-100",
-    borderHover: "hover:border-orange-300",
+    borderHover: "hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]",
     shadowHover: "hover:shadow-orange-500/10",
     from: "from-orange-500",
     to: "to-orange-600",
@@ -308,13 +308,13 @@ export default function PartnerDashboard() {
   };
 
   const ManagerNavbar = () => (
-    <nav className="border-b border-gray-200 bg-white sticky top-0 z-50 shadow-sm">
+    <nav className="border-b border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] sticky top-0 z-50 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${theme.from} ${theme.to} flex items-center justify-center shadow-lg ${theme.shadow}`}>
             <Building2 className="w-4 h-4 text-white" />
           </div>
-          <span className="font-black text-gray-900 text-lg tracking-tight">
+          <span className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight">
             NB <span className={theme.text}>Partner</span>
           </span>
           <span className={`ml-2 text-[10px] font-bold ${theme.textDark} ${theme.bg} px-2 py-0.5 rounded-full uppercase tracking-widest border ${theme.border}`}>
@@ -323,9 +323,9 @@ export default function PartnerDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-full">
             <UserCircle className="w-4 h-4 text-gray-400" />
-            <span className="text-xs font-bold text-gray-600">{user?.email}</span>
+            <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{user?.email}</span>
           </div>
           <button 
             onClick={() => { logout(); router.push("/"); }}
@@ -340,15 +340,15 @@ export default function PartnerDashboard() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] text-gray-900 font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col">
       <ManagerNavbar />
 
       <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
         
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Partner Dashboard</h1>
-            <p className="text-sm text-gray-500 mt-1">Welcome back. Manage your division from here.</p>
+            <h1 className="text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Partner Dashboard</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Welcome back. Manage your division from here.</p>
           </div>
           
           {view !== "dashboard" && (
@@ -371,15 +371,15 @@ export default function PartnerDashboard() {
               {/* Button 1: Manage Frontend */}
               <button
                 onClick={() => setView("frontend")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
+                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
                   <LayoutTemplate className="w-24 h-24" />
                 </div>
                 <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border}`}>
                   <LayoutTemplate className={`w-5 h-5 ${theme.text}`} />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 mb-2">Manage Frontend</h3>
-                <p className="text-sm text-gray-500 leading-relaxed relative z-10">
+                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Manage Frontend</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
                   Upload and publish the promotional banner/poster shown on your category home page.
                 </p>
               </button>
@@ -387,7 +387,7 @@ export default function PartnerDashboard() {
               {/* Button 2: Manage Vendor Requests */}
               <button 
                 onClick={() => setView("requests")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
+                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
               >
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
                   <ClipboardList className="w-24 h-24" />
@@ -395,8 +395,8 @@ export default function PartnerDashboard() {
                 <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border}`}>
                   <ClipboardList className={`w-5 h-5 ${theme.text}`} />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 mb-2">Vendor Requests</h3>
-                <p className="text-sm text-gray-500 leading-relaxed relative z-10">
+                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Vendor Requests</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
                   Review and approve new vendor owner registration requests for your category.
                 </p>
               </button>
@@ -404,7 +404,7 @@ export default function PartnerDashboard() {
               {/* Button 3: Manage Vendors */}
               <button 
                 onClick={() => setView("vendors")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white border border-gray-200 ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
+                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
               >
                 <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
                   <StoreIcon className="w-24 h-24" />
@@ -412,8 +412,8 @@ export default function PartnerDashboard() {
                 <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border} shadow-inner`}>
                   <StoreIcon className={`w-5 h-5 ${theme.text}`} />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 mb-2">Manage Vendors</h3>
-                <p className="text-sm text-gray-500 leading-relaxed relative z-10">
+                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Manage Vendors</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
                   Add new vendors manually, manage their credentials, and view their performance.
                 </p>
               </button>
@@ -425,11 +425,11 @@ export default function PartnerDashboard() {
               className="space-y-6"
             >
               {/* Create Vendor Form */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-3xl p-6">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Create Vendor Account</h2>
-                    <p className="text-xs text-gray-500 mt-1">Vendor will log in using these credentials via the <span className={`font-bold ${theme.textDark}`}>{user?.manager_type} Vendor Login</span></p>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Create Vendor Account</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Vendor will log in using these credentials via the <span className={`font-bold ${theme.textDark}`}>{user?.manager_type} Vendor Login</span></p>
                   </div>
                   <div className={`w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border}`}>
                     <Plus className={`w-5 h-5 ${theme.text}`} />
@@ -444,10 +444,10 @@ export default function PartnerDashboard() {
                       <div className="flex-1">
                         <p className="font-black text-green-800 text-sm">Vendor Created Successfully!</p>
                         <p className="text-xs text-green-700 mt-1">Share these credentials with the vendor:</p>
-                        <div className="mt-2 bg-white rounded-xl border border-green-200 p-3 space-y-1">
-                          <p className="text-xs font-mono"><span className="text-gray-500">Email:</span> <span className="font-bold text-gray-900">{vendorCreated.email}</span></p>
-                          <p className="text-xs font-mono"><span className="text-gray-500">Password:</span> <span className="font-bold text-gray-900">{vendorCreated.password}</span></p>
-                          <p className="text-xs font-mono"><span className="text-gray-500">Type:</span> <span className={`font-bold ${theme.textDark} capitalize`}>{vendorCreated.manager_type}</span></p>
+                        <div className="mt-2 bg-white dark:bg-[#0D0D17] rounded-xl border border-green-200 p-3 space-y-1">
+                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Email:</span> <span className="font-bold text-gray-900 dark:text-gray-100">{vendorCreated.email}</span></p>
+                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Password:</span> <span className="font-bold text-gray-900 dark:text-gray-100">{vendorCreated.password}</span></p>
+                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Type:</span> <span className={`font-bold ${theme.textDark} capitalize`}>{vendorCreated.manager_type}</span></p>
                         </div>
                       </div>
                       <button onClick={() => setVendorCreated(null)} className="text-green-400 hover:text-green-600 text-lg leading-none">&times;</button>
@@ -458,56 +458,56 @@ export default function PartnerDashboard() {
                 <form onSubmit={handleCreateVendor} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Business Name */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Business / Shop Name *</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Business / Shop Name *</label>
                     <input
                       required
                       placeholder="e.g. Sharma Dhaba"
                       value={vendorForm.businessName}
                       onChange={e => setVendorForm(f => ({ ...f, businessName: e.target.value }))}
-                      className={`w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 focus:ring-2 focus:ring-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-100 transition-all`}
+                      className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 focus:ring-2 focus:ring-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-100 transition-all`}
                     />
                   </div>
 
                   {/* Owner Name */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Owner / Contact Name *</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Owner / Contact Name *</label>
                     <input
                       required
                       placeholder="e.g. Ramesh Sharma"
                       value={vendorForm.ownerName}
                       onChange={e => setVendorForm(f => ({ ...f, ownerName: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                     />
                   </div>
 
                   {/* Email */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Login Email *</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Login Email *</label>
                     <input
                       required
                       type="email"
                       placeholder="vendor@example.com"
                       value={vendorForm.email}
                       onChange={e => setVendorForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                     />
                   </div>
 
                   {/* Mobile */}
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Mobile (Optional)</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Mobile (Optional)</label>
                     <input
                       type="tel"
                       placeholder="10-digit mobile number"
                       value={vendorForm.mobile}
                       onChange={e => setVendorForm(f => ({ ...f, mobile: e.target.value }))}
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                     />
                   </div>
 
                   {/* Password */}
                   <div className="md:col-span-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Login Password *</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Login Password *</label>
                     <div className="relative">
                       <input
                         required
@@ -515,9 +515,9 @@ export default function PartnerDashboard() {
                         placeholder="Min. 6 characters"
                         value={vendorForm.password}
                         onChange={e => setVendorForm(f => ({ ...f, password: e.target.value }))}
-                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-11 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
+                        className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 pr-11 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
                       />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </button>
                     </div>
@@ -525,7 +525,7 @@ export default function PartnerDashboard() {
 
                   {/* Business Type (locked) */}
                   <div className="md:col-span-2">
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5 block">Business Type (Auto-assigned)</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Business Type (Auto-assigned)</label>
                     <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border ${theme.border} ${theme.bg}`}>
                       <StoreIcon className={`w-4 h-4 ${theme.text}`} />
                       <span className={`text-sm font-black ${theme.textDark} capitalize`}>{user?.manager_type || "food"}</span>
@@ -547,32 +547,32 @@ export default function PartnerDashboard() {
               </div>
 
               {/* Existing Vendors List */}
-              <div className="bg-white border border-gray-200 shadow-sm rounded-3xl p-6">
+              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-3xl p-6">
                 <div className="flex items-center justify-between mb-5">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900">Active Vendors</h2>
-                    <p className="text-xs text-gray-500 mt-1 capitalize">{user?.manager_type} division — {vendors.length} vendor{vendors.length !== 1 ? "s" : ""}</p>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Active Vendors</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{user?.manager_type} division — {vendors.length} vendor{vendors.length !== 1 ? "s" : ""}</p>
                   </div>
-                  <button onClick={fetchVendors} className={`px-4 py-2 text-sm font-bold bg-white border border-gray-200 rounded-xl hover:bg-gray-50 shadow-sm ${loadingVendors ? "opacity-50 pointer-events-none" : ""}`}>
+                  <button onClick={fetchVendors} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingVendors ? "opacity-50 pointer-events-none" : ""}`}>
                     {loadingVendors ? "Loading..." : "Refresh"}
                   </button>
                 </div>
 
                 {vendors.length === 0 && !loadingVendors ? (
-                  <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                  <div className="text-center py-12 bg-gray-50 dark:bg-[#151522] rounded-2xl border border-dashed border-gray-200 dark:border-[#2A2A3A]">
                     <StoreIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-500">No vendors yet. Create one above!</p>
+                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No vendors yet. Create one above!</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {vendors.map(v => (
-                      <div key={v.id} className={`flex items-center gap-4 p-4 rounded-2xl border border-gray-100 hover:border-gray-200 bg-gray-50/50 hover:${theme.bg} transition-all group`}>
+                      <div key={v.id} className={`flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/50 hover:${theme.bg} transition-all group`}>
                         <div className={`w-10 h-10 rounded-xl ${theme.bg} border ${theme.border} flex items-center justify-center shrink-0`}>
                           <span className={`font-black text-sm ${theme.textDark}`}>{v.first_name?.[0]?.toUpperCase()}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-bold text-gray-900 text-sm truncate">{v.first_name} {v.last_name}</p>
-                          <p className="text-xs text-gray-500 truncate">{v.email}</p>
+                          <p className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">{v.first_name} {v.last_name}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{v.email}</p>
                           {v.mobile && <p className="text-xs text-gray-400">{v.mobile}</p>}
                         </div>
                         <div className="flex items-center gap-2 shrink-0">
@@ -606,23 +606,23 @@ export default function PartnerDashboard() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Vendor Requests</h2>
-                  <p className="text-xs text-gray-500 mt-1">Pending and processed partnership requests for {user?.manager_type} category</p>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Vendor Requests</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Pending and processed partnership requests for {user?.manager_type} category</p>
                 </div>
-                <button onClick={fetchRequests} className={`px-4 py-2 text-sm font-bold bg-white border border-gray-200 rounded-xl hover:bg-gray-50 shadow-sm ${loadingReqs ? "opacity-50 pointer-events-none" : ""}`}>
+                <button onClick={fetchRequests} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingReqs ? "opacity-50 pointer-events-none" : ""}`}>
                   {loadingReqs ? "Refreshing..." : "Refresh"}
                 </button>
               </div>
 
               {requests.length === 0 && !loadingReqs ? (
-                <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center">
                   <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-500 font-medium">No vendor requests found.</p>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No vendor requests found.</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {requests.map(req => (
-                    <div key={req.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-gray-300 transition-colors shadow-sm relative overflow-hidden">
+                    <div key={req.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 hover:border-gray-300 transition-colors shadow-sm relative overflow-hidden">
                       {/* Status indicator line */}
                       <div className={`absolute top-0 left-0 w-full h-1 ${
                         req.status === 'approved' ? 'bg-green-500' : 
@@ -633,14 +633,14 @@ export default function PartnerDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-gray-900">{req.owner_name}</h3>
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100">{req.owner_name}</h3>
                             {req.status === 'approved' && (
                               <span className="flex items-center gap-1 text-[9px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">
                                 <ShieldCheck className="w-2.5 h-2.5" /> Verified
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5 capitalize">{req.vendor_type} Partner</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 capitalize">{req.vendor_type} Partner</p>
                         </div>
                         <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${
                           req.status === 'approved' ? 'bg-green-100 text-green-700' : 
@@ -652,10 +652,10 @@ export default function PartnerDashboard() {
                       </div>
                       
                       <div className="space-y-2 mb-5">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] px-3 py-2 rounded-lg">
                           <UserCircle className="w-4 h-4 text-gray-400" /> {req.owner_email}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] px-3 py-2 rounded-lg">
                           <ShieldCheck className="w-4 h-4 text-gray-400" /> {req.owner_mobile}
                         </div>
                         {req.status === 'approved' && req.password && (
@@ -670,7 +670,7 @@ export default function PartnerDashboard() {
                           <button onClick={() => handleAction(req.id, "approve")} className="flex-1 py-2 bg-gray-900 hover:bg-gray-800 text-white text-sm font-bold rounded-xl transition-colors">
                             Approve
                           </button>
-                          <button onClick={() => handleAction(req.id, "reject")} className="flex-1 py-2 bg-white border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 text-sm font-bold rounded-xl transition-colors">
+                          <button onClick={() => handleAction(req.id, "reject")} className="flex-1 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 dark:text-gray-400 text-sm font-bold rounded-xl transition-colors">
                             Reject
                           </button>
                         </div>
@@ -680,13 +680,13 @@ export default function PartnerDashboard() {
                         <div className="flex gap-2 mt-2">
                           <button
                             onClick={() => setEditingReq(req)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-gray-200 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-600 text-sm font-bold rounded-xl transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-600 dark:text-gray-400 text-sm font-bold rounded-xl transition-colors"
                           >
                             <Pencil className="w-3.5 h-3.5" /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(req.id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white border border-gray-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 text-sm font-bold rounded-xl transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 dark:text-gray-400 text-sm font-bold rounded-xl transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
@@ -700,29 +700,29 @@ export default function PartnerDashboard() {
               {/* Edit Modal */}
               {editingReq && (
                 <div className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                  <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-md">
-                    <h3 className="font-black text-lg text-gray-900 mb-5">Edit Vendor Details</h3>
+                  <div className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6 w-full max-w-md">
+                    <h3 className="font-black text-lg text-gray-900 dark:text-gray-100 mb-5">Edit Vendor Details</h3>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Owner Name</label>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Owner Name</label>
                         <input
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                           defaultValue={editingReq.owner_name}
                           id="edit-owner-name"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Email</label>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email</label>
                         <input
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                           defaultValue={editingReq.owner_email}
                           id="edit-owner-email"
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Mobile</label>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Mobile</label>
                         <input
-                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
                           defaultValue={editingReq.owner_mobile}
                           id="edit-owner-mobile"
                         />
@@ -731,7 +731,7 @@ export default function PartnerDashboard() {
                     <div className="flex gap-3 mt-6">
                       <button
                         onClick={() => setEditingReq(null)}
-                        className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                        className="flex-1 py-2.5 border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"
                       >
                         Cancel
                       </button>
@@ -759,8 +759,8 @@ export default function PartnerDashboard() {
               {/* Header */}
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Manage Frontend Poster</h2>
-                  <p className="text-xs text-gray-500 mt-1 capitalize">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Manage Frontend Poster</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
                     This image is shown as the promotional banner on the{" "}
                     <span className={`font-bold ${theme.textDark}`}>
                       {type === "food" ? "Home (Food)" : type === "medicine" ? "Medico" : "Store (Essentials)"}
@@ -777,12 +777,12 @@ export default function PartnerDashboard() {
               </div>
 
               {/* Current live poster */}
-              <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Current Live Poster</p>
+              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Current Live Poster</p>
                 {loadingPoster ? (
-                  <div className="h-48 bg-gray-100 rounded-2xl animate-pulse" />
+                  <div className="h-48 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse" />
                 ) : currentPoster ? (
-                  <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
+                  <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={currentPoster} alt="Current poster" className="w-full object-cover max-h-64" />
                     <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full ${theme.bg} border ${theme.border} text-[10px] font-black ${theme.textDark} uppercase tracking-widest shadow-sm`}>
@@ -800,8 +800,8 @@ export default function PartnerDashboard() {
               </div>
 
               {/* Upload new poster */}
-              <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4">Upload New Poster</p>
+              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Upload New Poster</p>
 
                 {/* Drop zone */}
                 <label
@@ -819,7 +819,7 @@ export default function PartnerDashboard() {
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
                         <span className="text-white font-black text-sm bg-black/50 px-4 py-2 rounded-full">Change Image</span>
                       </div>
-                      <div className="absolute top-3 right-3 bg-white/90 text-xs font-bold text-gray-700 px-2.5 py-1 rounded-full shadow">
+                      <div className="absolute top-3 right-3 bg-white dark:bg-[#0D0D17]/90 text-xs font-bold text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-full shadow">
                         Preview
                       </div>
                     </>
@@ -829,7 +829,7 @@ export default function PartnerDashboard() {
                         <Upload className={`w-6 h-6 ${theme.text}`} />
                       </div>
                       <div>
-                        <p className="font-bold text-gray-700 text-sm">Drag & drop or click to upload</p>
+                        <p className="font-bold text-gray-700 dark:text-gray-300 text-sm">Drag & drop or click to upload</p>
                         <p className="text-xs text-gray-400 mt-1">PNG, JPG, WEBP — max 8 MB</p>
                         <p className="text-xs text-gray-400">Recommended: 1200 × 400 px (landscape)</p>
                       </div>
@@ -872,7 +872,7 @@ export default function PartnerDashboard() {
                 </button>
 
                 {/* Tip */}
-                <div className="mt-4 flex items-start gap-2 text-xs text-gray-400 bg-gray-50 rounded-xl px-4 py-3 border border-gray-100">
+                <div className="mt-4 flex items-start gap-2 text-xs text-gray-400 bg-gray-50 dark:bg-[#151522] rounded-xl px-4 py-3 border border-gray-100 dark:border-[#2A2A3A]">
                   <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                   <p>The poster goes live instantly after publishing. Previous posters are overwritten. Use high-resolution landscape images for the best result.</p>
                 </div>
@@ -886,65 +886,65 @@ export default function PartnerDashboard() {
       {/* Edit Vendor Modal — outside AnimatePresence so it overlays correctly */}
       {editingVendor && (
         <div className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl p-6 w-full max-w-md">
+          <div className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="font-black text-lg text-gray-900">Edit Vendor</h3>
+                <h3 className="font-black text-lg text-gray-900 dark:text-gray-100">Edit Vendor</h3>
                 <p className="text-xs text-gray-400 mt-0.5">{editingVendor.email}</p>
               </div>
-              <button onClick={() => setEditingVendor(null)} className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-500 transition-colors">&times;</button>
+              <button onClick={() => setEditingVendor(null)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 flex items-center justify-center text-gray-500 dark:text-gray-400 transition-colors">&times;</button>
             </div>
             <form onSubmit={handleEditVendor} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">First Name</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">First Name</label>
                   <input
                     required
                     value={editVendorForm.firstName}
                     onChange={e => setEditVendorForm(f => ({ ...f, firstName: e.target.value }))}
-                    className={`w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 transition-all`}
+                    className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 transition-all`}
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Last Name</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Last Name</label>
                   <input
                     value={editVendorForm.lastName}
                     onChange={e => setEditVendorForm(f => ({ ...f, lastName: e.target.value }))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
+                    className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
                   />
                 </div>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Email</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email</label>
                 <input
                   required
                   type="email"
                   value={editVendorForm.email}
                   onChange={e => setEditVendorForm(f => ({ ...f, email: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
+                  className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">Mobile</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Mobile</label>
                 <input
                   type="tel"
                   value={editVendorForm.mobile}
                   onChange={e => setEditVendorForm(f => ({ ...f, mobile: e.target.value }))}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
+                  className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
                   placeholder="Leave blank to keep current"
                 />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 block">New Password <span className="text-gray-300 font-normal normal-case">(leave blank to keep current)</span></label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">New Password <span className="text-gray-300 font-normal normal-case">(leave blank to keep current)</span></label>
                 <div className="relative">
                   <input
                     type={showEditPassword ? "text" : "password"}
                     value={editVendorForm.newPassword}
                     onChange={e => setEditVendorForm(f => ({ ...f, newPassword: e.target.value }))}
                     placeholder="Min. 6 characters"
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2.5 pr-10 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
+                    className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 pr-10 text-sm font-semibold outline-none focus:border-gray-400 transition-all"
                   />
-                  <button type="button" onClick={() => setShowEditPassword(!showEditPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <button type="button" onClick={() => setShowEditPassword(!showEditPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400">
                     {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -953,7 +953,7 @@ export default function PartnerDashboard() {
                 <button
                   type="button"
                   onClick={() => setEditingVendor(null)}
-                  className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="flex-1 py-2.5 border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"
                 >
                   Cancel
                 </button>
@@ -971,9 +971,9 @@ export default function PartnerDashboard() {
       )}
 
       {/* Simple Footer */}
-      <footer className="mt-auto py-5 border-t border-gray-200 bg-white">
+      <footer className="mt-auto py-5 border-t border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-center sm:justify-between">
-          <p className="text-[11px] font-medium text-gray-500">
+          <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
             © 2026 NearBuy Technologies · Partner Console
           </p>
           <div className="hidden sm:flex items-center gap-4">

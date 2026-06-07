@@ -25,13 +25,13 @@ export default function NotFound() {
         </div>
 
         {/* Error Text Content */}
-        <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">
+        <h1 className="text-4xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
           Whoops!
         </h1>
-        <h2 className="text-xl font-bold text-gray-700 mb-4">
+        <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
           Error 404 - The page does not exist.
         </h2>
-        <p className="text-gray-500 font-medium mb-8 max-w-md px-4">
+        <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
           It looks like you took a wrong turn! The page or route you are looking for is completely missing from our servers. 
         </p>
 
@@ -39,7 +39,7 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-md">
           <button 
             onClick={() => window.history.back()}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white border-2 border-gray-200 hover:border-gray-300 rounded-xl font-bold text-gray-700 transition-all active:scale-95 shadow-sm"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-white dark:bg-[#0D0D17] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 rounded-xl font-bold text-gray-700 dark:text-gray-300 transition-all active:scale-95 shadow-sm"
           >
             <ArrowLeft className="w-5 h-5" />
             Go Back

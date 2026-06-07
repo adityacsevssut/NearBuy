@@ -76,17 +76,17 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       
       // Real-time Notification Bar UI (Classic Toast)
       toast.custom((t) => (
-        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-lg pointer-events-auto flex ring-1 ring-black/5 overflow-hidden transform transition-all duration-300 items-center`}>
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white dark:bg-[#0D0D17] shadow-[0_8px_30px_rgb(0,0,0,0.12)] rounded-lg pointer-events-auto flex ring-1 ring-black/5 overflow-hidden transform transition-all duration-300 items-center`}>
           <div className="flex-1 w-0 p-4">
             <div className="flex flex-col">
-              <p className="text-sm font-semibold text-gray-900">{newNotification.title}</p>
-              <p className="mt-1 text-sm text-gray-600 leading-snug">{newNotification.message}</p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{newNotification.title}</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 leading-snug">{newNotification.message}</p>
             </div>
           </div>
-          <div className="flex border-l border-gray-100 h-full">
+          <div className="flex border-l border-gray-100 dark:border-[#2A2A3A] h-full">
             <button
               onClick={() => toast.dismiss(t.id)}
-              className="w-full h-full border border-transparent rounded-none px-4 py-3 flex items-center justify-center text-xs font-semibold text-gray-500 hover:text-gray-800 transition-colors focus:outline-none"
+              className="w-full h-full border border-transparent rounded-none px-4 py-3 flex items-center justify-center text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 transition-colors focus:outline-none"
             >
               Dismiss
             </button>
@@ -148,10 +148,10 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         } else if (Notification.permission === 'default') {
           // Show toast to ask for permission via user gesture
           toast.custom((t) => (
-            <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black/5 p-4 items-center`}>
+            <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white dark:bg-[#0D0D17] shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black/5 p-4 items-center`}>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-gray-900">Enable Notifications</p>
-                <p className="text-sm text-gray-500">Get real-time updates for your orders.</p>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Enable Notifications</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Get real-time updates for your orders.</p>
               </div>
               <button
                 onClick={() => {

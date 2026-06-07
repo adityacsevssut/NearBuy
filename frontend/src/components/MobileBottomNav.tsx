@@ -23,7 +23,7 @@ export default function MobileBottomNav() {
   const isHotels = domain === 'hotels';
   const isFood = domain === 'food';
 
-  const activeBg = isStore ? "bg-blue-50/70" : isMedicine ? "bg-emerald-50/70" : isHotels ? "bg-purple-50/70" : "bg-orange-50/70";
+  const activeBg = isStore ? "bg-blue-50/70 dark:bg-transparent" : isMedicine ? "bg-emerald-50/70 dark:bg-transparent" : isHotels ? "bg-purple-50/70 dark:bg-transparent" : "bg-orange-50/70 dark:bg-transparent";
   const activeText = isStore ? "text-blue-600" : isMedicine ? "text-emerald-600" : isHotels ? "text-purple-600" : "text-orange-600";
   const badgeColor = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : isHotels ? "bg-purple-500" : "bg-orange-500";
 
@@ -49,7 +49,7 @@ export default function MobileBottomNav() {
     <>
       <nav
         id="mobile-bottom-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white/95 backdrop-blur-md border-t border-gray-100 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe transition-colors duration-300"
+        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-[#05050A]/95 backdrop-blur-md border-t border-gray-100 dark:border-[#2A2A3A] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe transition-colors duration-300"
       >
         <div className="flex items-center justify-around px-3 py-2">
           {tabs.map((tab) => {
@@ -75,7 +75,7 @@ export default function MobileBottomNav() {
                 className={`flex flex-col items-center gap-1 flex-1 py-1.5 rounded-2xl transition-all duration-300 group cursor-pointer relative ${
                   active 
                     ? `${activeBg} ${activeText} scale-105` 
-                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-50/50"
+                    : "text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]/50"
                 }`}
               >
                 <div

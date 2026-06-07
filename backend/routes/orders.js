@@ -1,10 +1,31 @@
 const express = require("express");
+const Razorpay = require("razorpay");
+const crypto = require("crypto");
 const router = express.Router();
 const validate = require("../middleware/validate");
 const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 const { sendNotification } = require("../utils/notifications");
+
+// POST /api/orders/create-razorpay-order
+router.post("/create-razorpay-order", authenticate, async (req, res) => {
+  try {
+    const { amount } = req.body;
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({ error: "Razorpay keys not configured" });
+    }
+    const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+    const order = await instance.orders.create({
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: "receipt_order_" + Date.now(),
+    });
+    res.json(order);
+  } catch (error) {
+    res.status(500).send("Error creating Razorpay order");
+  }
+});
 
 // POST /api/orders
 // Create a new order

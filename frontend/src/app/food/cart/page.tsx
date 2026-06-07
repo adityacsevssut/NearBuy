@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useRouter } from "next/navigation";
 import {
   MapPin, ChevronRight, ChevronLeft, Plus, Minus, Trash2,
@@ -51,6 +52,7 @@ function RestaurantOrderCard({
   userLat,
   userLon,
   userPin,
+  accessToken,
 }: {
   restId: string;
   restItems: ReturnType<typeof useCart>["items"];
@@ -63,6 +65,7 @@ function RestaurantOrderCard({
   userLat: number | null;
   userLon: number | null;
   userPin: string | null;
+  accessToken: string | null;
 }) {
   const restName = restItems[0].restaurantName;
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -83,6 +86,8 @@ function RestaurantOrderCard({
 
   const [minOrder, setMinOrder] = useState<number>(0);
   const [feesPaid, setFeesPaid] = useState(false);
+  const [isPayingTaxes, setIsPayingTaxes] = useState(false);
+  const [razorpayData, setRazorpayData] = useState<any>(null);
   const [vendorData, setVendorData] = useState<any>(null);
 
   useEffect(() => {
@@ -122,7 +127,7 @@ function RestaurantOrderCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white rounded-3xl overflow-hidden shadow-xl shadow-orange-500/5 border border-orange-100/50"
+      className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl overflow-hidden shadow-xl shadow-orange-500/5 border border-orange-100/50"
     >
       {/* ── Restaurant header ── */}
       <div className="flex items-center gap-4 px-5 py-4 border-b border-orange-100/50 bg-gradient-to-r from-orange-50/50 to-transparent">
@@ -131,7 +136,7 @@ function RestaurantOrderCard({
           <Utensils className="w-4 h-4 text-orange-500" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="font-black text-gray-900 text-xl tracking-tight truncate">{restName}</p>
+          <p className="font-black text-gray-900 dark:text-gray-100 text-xl tracking-tight truncate">{restName}</p>
           <p className="text-[11px] text-gray-400 font-medium mt-0.5">
             {totalQty} {totalQty === 1 ? "item" : "items"} · Delivers independently
           </p>
@@ -157,12 +162,12 @@ function RestaurantOrderCard({
               className="flex items-center gap-4 px-5 py-4 hover:bg-orange-50/30 transition-colors"
             >
               {/* Thumbnail */}
-              <div className="w-16 h-16 rounded-xl bg-gray-100 border border-gray-200 overflow-hidden shrink-0 relative">
+              <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shrink-0 relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 <div className="absolute top-1 left-1">
                   <div
-                    className={`w-3 h-3 rounded-sm border bg-white flex items-center justify-center ${
+                    className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] flex items-center justify-center ${
                       item.type === "veg" ? "border-green-600" : "border-red-600"
                     }`}
                   >
@@ -180,13 +185,13 @@ function RestaurantOrderCard({
                 <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">
                   {item.type === "veg" ? "Veg" : "Non-veg"}
                 </p>
-                <p className="text-sm font-black text-gray-900 truncate">{item.name}</p>
-                <p className="text-xs text-gray-500 font-medium">₹{item.price} / pc</p>
+                <p className="text-sm font-black text-gray-900 dark:text-gray-100 truncate">{item.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">₹{item.price} / pc</p>
               </div>
 
               {/* Price + Controls */}
               <div className="flex flex-col items-end gap-1.5 shrink-0">
-                <p className="font-black text-gray-900 text-sm">
+                <p className="font-black text-gray-900 dark:text-gray-100 text-sm">
                   ₹{item.price * item.quantity}
                 </p>
                 <div className="flex items-center gap-1">
@@ -196,7 +201,7 @@ function RestaurantOrderCard({
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="w-6 text-center font-black text-gray-900 text-sm">
+                  <span className="w-6 text-center font-black text-gray-900 dark:text-gray-100 text-sm">
                     {item.quantity}
                   </span>
                   <button
@@ -220,14 +225,14 @@ function RestaurantOrderCard({
 
       {/* ── Subtotal row ── */}
       <div className="flex items-center justify-between px-5 py-3.5 bg-orange-50/30 border-t border-orange-100/50">
-        <span className="text-sm text-gray-600 font-semibold">Items subtotal</span>
-        <span className="text-sm font-black text-gray-900">₹{subtotal}</span>
+        <span className="text-sm text-gray-600 dark:text-gray-400 font-semibold">Items subtotal</span>
+        <span className="text-sm font-black text-gray-900 dark:text-gray-100">₹{subtotal}</span>
       </div>
 
       {/* ── Coupon ── */}
       <div className="px-5 py-4 border-t border-dashed border-orange-200">
         <div className="flex gap-2">
-          <div className="flex items-center gap-2 flex-1 border border-gray-200 rounded-xl px-3 py-2">
+          <div className="flex items-center gap-2 flex-1 border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2">
             <Tag className="w-3.5 h-3.5 text-orange-400 shrink-0" />
             <input
               type="text"
@@ -263,7 +268,7 @@ function RestaurantOrderCard({
       <div className="border-t border-orange-100/50">
         <button
           onClick={() => setShowBill(!showBill)}
-          className="w-full flex items-center justify-between px-5 py-4 text-sm font-black text-gray-900 hover:bg-orange-50/30 transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 text-sm font-black text-gray-900 dark:text-gray-100 hover:bg-orange-50/30 transition-colors"
         >
           <span className="flex items-center gap-2">
             Bill Details
@@ -286,9 +291,9 @@ function RestaurantOrderCard({
               className="overflow-hidden"
             >
               <div className="px-4 pb-3 space-y-2">
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
                   <span>Item total</span>
-                  <span className="font-semibold text-gray-900">₹{subtotal}</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">₹{subtotal}</span>
                 </div>
                 {discount > 0 && (
                   <div className="flex justify-between text-sm">
@@ -296,9 +301,9 @@ function RestaurantOrderCard({
                     <span className="font-semibold text-green-600">− ₹{discount}</span>
                   </div>
                 )}
-                <div className="flex justify-between pt-2 border-t border-dashed border-gray-200">
-                  <span className="font-black text-gray-900">Item subtotal after discount</span>
-                  <span className="font-black text-gray-900 text-base">₹{mainOrderTotal}</span>
+                <div className="flex justify-between pt-2 border-t border-dashed border-gray-200 dark:border-[#2A2A3A]">
+                  <span className="font-black text-gray-900 dark:text-gray-100">Item subtotal after discount</span>
+                  <span className="font-black text-gray-900 dark:text-gray-100 text-base">₹{mainOrderTotal}</span>
                 </div>
               </div>
             </motion.div>
@@ -308,35 +313,67 @@ function RestaurantOrderCard({
 
       {/* ── Taxes & Platform Fee (Separate Section) ── */}
       {totalFees > 0 && (
-        <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50/50">
-          <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-3">
+        <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522]/50">
+          <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             Taxes & Platform Fees
           </p>
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>GST ({gst}%)</span>
-              <span className="font-semibold text-gray-900">₹{calculatedGst.toFixed(2)}</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100">₹{calculatedGst.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>Platform fee ({platformFee}%)</span>
-              <span className="font-semibold text-gray-900">₹{calculatedPlatformFee.toFixed(2)}</span>
+              <span className="font-semibold text-gray-900 dark:text-gray-100">₹{calculatedPlatformFee.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between pt-3 mt-1 border-t border-dashed border-gray-200">
-              <span className="font-black text-gray-900 text-lg">Total Fees</span>
-              <span className="font-black text-gray-900 text-lg">₹{totalFees.toFixed(2)}</span>
+            <div className="flex justify-between pt-3 mt-1 border-t border-dashed border-gray-200 dark:border-[#2A2A3A]">
+              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">Total Fees</span>
+              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">₹{totalFees.toFixed(2)}</span>
             </div>
           </div>
           
           {!feesPaid ? (
             <button 
               disabled={outOfRange}
-              onClick={() => {
-                // Simulating payment process
-                const loadingToast = toast.loading("Processing payment...");
-                setTimeout(() => {
-                  toast.success("Fees paid successfully!", { id: loadingToast });
-                  setFeesPaid(true);
-                }, 1000);
+              onClick={async () => {
+                if (outOfRange) return;
+                setIsPayingTaxes(true);
+                const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                try {
+                  const res = await fetch(`${API}/api/orders/create-razorpay-order`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+                    body: JSON.stringify({ amount: totalFees }),
+                  });
+                  const rzpOrder = await res.json();
+                  if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate tax payment");
+
+                  const options = {
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SyPFlFXJf4zf14",
+                    amount: rzpOrder.amount,
+                    currency: rzpOrder.currency,
+                    name: "NearBuy Platform Fees",
+                    description: "Tax and Platform Fees",
+                    order_id: rzpOrder.id,
+                    handler: function (response: any) {
+                      setRazorpayData({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                      });
+                      toast.success("Fees paid successfully!");
+                      setFeesPaid(true);
+                      setIsPayingTaxes(false);
+                    },
+                    theme: { color: "#f97316" },
+                    modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled"); } }
+                  };
+                  const rzp = new (window as any).Razorpay(options);
+                  rzp.open();
+                } catch (err: any) {
+                  toast.error(err.message || "Error initiating Razorpay");
+                  setIsPayingTaxes(false);
+                }
               }}
               className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${
                 outOfRange 
@@ -386,7 +423,7 @@ function RestaurantOrderCard({
               : "bg-gray-200 text-gray-400 cursor-not-allowed"
           }`}
         >
-          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
+          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
           {outOfRange 
             ? "Out of Delivery Range"
@@ -456,7 +493,7 @@ export default function CartPage() {
       .catch(console.error);
   }, []);
 
-  const handlePlaceOrder = async (restId: string, orderItems: any[], subtotal: number, gstAmount: number, platformFeeAmount: number, totalAmount: number) => {
+  const handlePlaceOrder = async (restId: string, orderItems: any[], subtotal: number, gstAmount: number, platformFeeAmount: number, totalAmount: number, razorpayData: any = null) => {
     if (!isLoggedIn) {
       openLoginModal();
       return;
@@ -495,6 +532,7 @@ export default function CartPage() {
           customer_mobile: customerMobile,
           alternate_mobile: alternateMobile,
           cooking_instructions: cookingInstructions,
+          ...(razorpayData || {})
         }),
       });
 
@@ -514,14 +552,15 @@ export default function CartPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-16 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <Navbar />
 
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-16 z-20">
+      <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-16 z-20">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Back button */}
-          <Link href="/" className="flex items-center gap-1.5 px-3 py-2 -ml-2 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold text-sm transition-all active:scale-95 shadow-sm">
+          <Link href="/" className="flex items-center gap-1.5 px-3 py-2 -ml-2 rounded-xl bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:bg-[#151522] dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 font-bold text-sm transition-all active:scale-95 shadow-sm">
             <ChevronLeft className="w-4 h-4" />
             Back to Home
           </Link>
@@ -551,7 +590,7 @@ export default function CartPage() {
             <div className="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mb-5">
               <ShoppingBag className="w-12 h-12 text-orange-300" />
             </div>
-            <h2 className="font-black text-xl text-gray-800 mb-1">Your cart is empty</h2>
+            <h2 className="font-black text-xl text-gray-800 dark:text-gray-200 mb-1">Your cart is empty</h2>
             <p className="text-sm text-gray-400 font-medium max-w-xs mb-7">
               Add items from a restaurant to get started.
             </p>
@@ -567,7 +606,7 @@ export default function CartPage() {
             {/* Delivery address bar */}
             <div 
               onClick={() => setIsLocationModalOpen(true)}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100 cursor-pointer active:scale-[0.98] transition-transform"
+              className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl overflow-hidden shadow-sm border border-gray-100 dark:border-[#2A2A3A] cursor-pointer active:scale-[0.98] transition-transform"
             >
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <div className="w-9 h-9 rounded-full bg-orange-50 flex items-center justify-center shrink-0">
@@ -575,7 +614,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Delivery Address <span className="text-red-500 text-xs">*</span></p>
-                  <p className="text-sm font-black text-gray-900 truncate">
+                  <p className="text-sm font-black text-gray-900 dark:text-gray-100 truncate">
                     {landmark ? `${landmark}, ${locationName}` : locationName}
                   </p>
                 </div>
@@ -584,11 +623,11 @@ export default function CartPage() {
             </div>
 
             {/* Additional Details Section */}
-            <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm shadow-orange-500/5 mt-4">
-              <h3 className="font-black text-gray-900 mb-4 text-lg">Contact & Instructions</h3>
+            <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 border border-gray-100 dark:border-[#2A2A3A] shadow-sm shadow-orange-500/5 mt-4">
+              <h3 className="font-black text-gray-900 dark:text-gray-100 mb-4 text-lg">Contact & Instructions</h3>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                     <Phone className="w-3.5 h-3.5" /> Mobile Number <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -597,8 +636,8 @@ export default function CartPage() {
                     placeholder="Enter 10-digit mobile number"
                     value={customerMobile}
                     onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ''))}
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:outline-none transition-all ${
-                      customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] focus:bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] focus:outline-none transition-all ${
+                      customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
                     }`}
                   />
                   {customerMobile && !isMobileValid && (
@@ -607,7 +646,7 @@ export default function CartPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                     <Phone className="w-3.5 h-3.5" /> Alternate Mobile (Optional)
                   </label>
                   <input
@@ -616,8 +655,8 @@ export default function CartPage() {
                     placeholder="Enter alternate 10-digit number"
                     value={alternateMobile}
                     onChange={(e) => setAlternateMobile(e.target.value.replace(/\D/g, ''))}
-                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:outline-none transition-all ${
-                      alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+                    className={`w-full px-4 py-3 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] focus:bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] focus:outline-none transition-all ${
+                      alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
                     }`}
                   />
                   {alternateMobile && !isAltMobileValid && (
@@ -626,7 +665,7 @@ export default function CartPage() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5 mb-1.5">
                     <FileText className="w-3.5 h-3.5" /> Cooking Instructions (Optional)
                   </label>
                   <textarea
@@ -634,16 +673,16 @@ export default function CartPage() {
                     placeholder="e.g. Make it spicy, no onions, etc."
                     value={cookingInstructions}
                     onChange={(e) => setCookingInstructions(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm font-semibold text-gray-900 bg-gray-50 focus:bg-white focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all custom-scrollbar resize-none"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] text-sm font-semibold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] focus:bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all custom-scrollbar resize-none"
                   />
                 </div>
               </div>
             </div>
             {/* Payment Method Section */}
-            <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm shadow-orange-500/5 mt-4 mb-4">
-              <h3 className="font-black text-gray-900 mb-3 text-lg">Payment Method <span className="text-red-500">*</span></h3>
+            <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 border border-gray-100 dark:border-[#2A2A3A] shadow-sm shadow-orange-500/5 mt-4 mb-4">
+              <h3 className="font-black text-gray-900 dark:text-gray-100 mb-3 text-lg">Payment Method <span className="text-red-500">*</span></h3>
               <div className="space-y-3">
-                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50/30' : 'border-gray-100 bg-white hover:border-gray-200'}`}>
+                <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-orange-500 bg-orange-50/30' : 'border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] hover:border-gray-200 dark:border-[#2A2A3A]'}`}>
                   <input 
                     type="radio" 
                     name="payment" 
@@ -651,13 +690,13 @@ export default function CartPage() {
                     onChange={() => setPaymentMethod('cod')}
                     className="w-4 h-4 text-orange-500 accent-orange-500"
                   />
-                  <Wallet className="w-5 h-5 text-gray-700" />
-                  <span className="font-bold text-gray-900 text-sm flex-1">Cash on Delivery</span>
+                  <Wallet className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Cash on Delivery</span>
                 </label>
                 
                 <div 
                   onClick={() => toast("This feature will be available soon", { icon: "ℹ️" })}
-                  className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 bg-gray-50 cursor-not-allowed opacity-60"
+                  className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] cursor-not-allowed opacity-60"
                 >
                   <input 
                     type="radio" 
@@ -665,8 +704,8 @@ export default function CartPage() {
                     disabled
                     className="w-4 h-4 text-gray-300"
                   />
-                  <Smartphone className="w-5 h-5 text-gray-500" />
-                  <span className="font-bold text-gray-500 text-sm flex-1">Online Payment</span>
+                  <Smartphone className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                  <span className="font-bold text-gray-500 dark:text-gray-400 text-sm flex-1">Online Payment</span>
                   <span className="text-[10px] font-black uppercase text-gray-400 bg-gray-200 px-2 py-0.5 rounded">Soon</span>
                 </div>
               </div>
@@ -696,6 +735,7 @@ export default function CartPage() {
                   userLat={latitude}
                   userLon={longitude}
                   userPin={pincode}
+                  accessToken={accessToken}
                 />
               ))}
             </AnimatePresence>

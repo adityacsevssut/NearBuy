@@ -69,7 +69,7 @@ function FoodItemPreviewCard({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className={`bg-white p-4 rounded-2xl border border-gray-200 shadow-sm flex gap-4 select-none relative ${item.is_available === false ? 'opacity-75' : ''}`}>
+    <div className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm flex gap-4 select-none relative ${item.is_available === false ? 'opacity-75' : ''}`}>
       {actions && (
         <div className="absolute top-2 right-2 z-20">
           {actions}
@@ -80,7 +80,7 @@ function FoodItemPreviewCard({
         <div>
           {/* Veg/Non-veg dot + badge */}
           <div className="flex items-center gap-2 mb-1.5">
-            <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white flex-shrink-0 ${item.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+            <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] flex-shrink-0 ${item.type === "veg" ? "border-green-600" : "border-red-600"}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${item.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
             </span>
             {item.badge && (
@@ -91,7 +91,7 @@ function FoodItemPreviewCard({
           </div>
 
           {/* Name */}
-          <h3 className="font-black text-gray-900 text-lg tracking-tight leading-tight mb-0.5">
+          <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight leading-tight mb-0.5">
             {item.name || <span className="text-gray-300">Item Name</span>}
           </h3>
 
@@ -113,11 +113,11 @@ function FoodItemPreviewCard({
                 <span className="text-gray-400 font-semibold line-through text-sm">₹{item.actual_price}</span>
               </>
             )}
-            <span className="text-base font-black text-gray-900">₹{item.price || "0"}</span>
+            <span className="text-base font-black text-gray-900 dark:text-gray-100">₹{item.price || "0"}</span>
           </div>
 
           {/* Rating + reviews + time */}
-          <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mb-2">
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
             {item.rating && parseFloat(item.rating) > 0 && (
               <span className="flex items-center gap-0.5 text-amber-500 font-bold">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -146,7 +146,7 @@ function FoodItemPreviewCard({
 
       {/* ── Right: image + controls ── */}
       <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
-        <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative flex items-center justify-center">
+        <div className="w-32 h-32 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shadow-sm relative flex items-center justify-center">
           {item.imagePreview ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.imagePreview} alt="preview" className="w-full h-full object-cover" />
@@ -154,25 +154,25 @@ function FoodItemPreviewCard({
             <ImageIcon className="w-10 h-10 text-gray-300" />
           )}
           {/* Heart button (decorative in preview) */}
-          <div className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm">
+          <div className="absolute top-2 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm">
             <Heart className="w-3.5 h-3.5 text-gray-300" />
           </div>
         </div>
         
         {item.is_available === false && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
+          <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/60 backdrop-blur-[1px] flex items-center justify-center z-10 rounded-xl">
              <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br/>Stock</span>
           </div>
         )}
 
         {/* Qty + ADD button (decorative) */}
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-          <div className="flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6">
-            <span className="flex-1 h-full flex items-center justify-center text-gray-500 font-bold text-xs select-none">−</span>
-            <span className="font-bold text-xs text-gray-800 w-6 text-center">1</span>
-            <span className="flex-1 h-full flex items-center justify-center text-gray-500 font-bold text-xs select-none">+</span>
+          <div className="flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6">
+            <span className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-xs select-none">−</span>
+            <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">1</span>
+            <span className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-xs select-none">+</span>
           </div>
-          <div className="w-full py-1 border border-gray-200 font-black text-xs rounded-lg shadow-sm bg-white text-orange-600 text-center uppercase tracking-wide">
+          <div className="w-full py-1 border border-gray-200 dark:border-[#2A2A3A] font-black text-xs rounded-lg shadow-sm bg-white dark:bg-[#0D0D17] text-orange-600 text-center uppercase tracking-wide">
             ADD
           </div>
         </div>
@@ -447,21 +447,21 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 24 }}
           transition={{ type: "spring", bounce: 0.25 }}
-          className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92dvh] flex flex-col overflow-hidden"
+          className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl w-full max-w-3xl max-h-[92dvh] flex flex-col overflow-hidden"
         >
 
           {/* ═══════ HEADER ═══════ */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0 bg-white">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] shrink-0 bg-white dark:bg-[#0D0D17]">
             <div className="flex items-center gap-3">
               <div className={`w-10 h-10 rounded-2xl bg-${tColor}-100 flex items-center justify-center`}>
                 <Utensils className={`w-5 h-5 text-${tColor}-600`} />
               </div>
               <div>
-                <h2 className="text-xl font-black text-gray-900 leading-tight">Manage Foods</h2>
+                <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 leading-tight">Manage Foods</h2>
                 <p className="text-xs text-gray-400 font-medium mt-0.5">{headerSubtitle}</p>
               </div>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 dark:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 hover:bg-gray-200 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -473,7 +473,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
             {step === "checking" && (
               <div className="flex flex-col items-center justify-center min-h-[300px] gap-4">
                 <Loader2 className={`w-10 h-10 animate-spin text-${tColor}-500`} />
-                <p className="text-sm font-bold text-gray-500">Loading your store info…</p>
+                <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Loading your store info…</p>
               </div>
             )}
 
@@ -490,10 +490,10 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                   </div>
                 </div>
 
-                <h3 className="text-xl font-black text-gray-900 mb-2">Home Page Not Set Up</h3>
-                <p className="text-sm text-gray-500 font-medium max-w-sm mb-2 leading-relaxed">
+                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2">Home Page Not Set Up</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-sm mb-2 leading-relaxed">
                   Before you can add food items, you must first design your{" "}
-                  <span className="font-black text-gray-800">Vendor Home Page</span>.
+                  <span className="font-black text-gray-800 dark:text-gray-200">Vendor Home Page</span>.
                 </p>
                 <p className="text-xs text-gray-400 font-medium max-w-xs mb-8 leading-relaxed">
                   This sets your shop name, banner image, ratings, and address — which customers see before browsing your menu.
@@ -506,7 +506,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                     <span className="text-xs font-black text-amber-700">Design Home Page</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-gray-300 shrink-0" />
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 border border-gray-200">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]">
                     <div className="w-5 h-5 rounded-full bg-gray-300 text-white text-[10px] font-black flex items-center justify-center">2</div>
                     <span className="text-xs font-black text-gray-400">Add Foods</span>
                   </div>
@@ -526,7 +526,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                   </button>
                   <button
                     onClick={onClose}
-                    className="w-full py-3 rounded-2xl font-bold text-gray-500 hover:bg-gray-100 transition-colors text-sm"
+                    className="w-full py-3 rounded-2xl font-bold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors text-sm"
                   >
                     Maybe Later
                   </button>
@@ -540,14 +540,14 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                 <div className={`w-16 h-16 rounded-2xl bg-${tColor}-50 border-2 border-${tColor}-200 flex items-center justify-center mb-5 shadow-sm`}>
                   <Package className={`w-8 h-8 text-${tColor}-500`} />
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-1">How many categories?</h3>
-                <p className="text-sm text-gray-500 text-center mb-6 max-w-xs font-medium">
+                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-1">How many categories?</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6 max-w-xs font-medium">
                   Tell us how many food categories your menu has (e.g. Biryani, Starters, Desserts…)
                 </p>
                 <div className="flex items-center gap-3 mb-6">
                   <button
                     onClick={() => setCatCount((c) => Math.max(1, (Number(c) || 1) - 1))}
-                    className="w-12 h-12 rounded-2xl border-2 border-gray-200 bg-gray-50 text-2xl font-black text-gray-600 hover:border-gray-400 hover:bg-gray-100 transition-all active:scale-95"
+                    className="w-12 h-12 rounded-2xl border-2 border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] text-2xl font-black text-gray-600 dark:text-gray-400 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-all active:scale-95"
                   >−</button>
                   <input
                     type="number"
@@ -555,7 +555,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                     max={20}
                     value={catCount}
                     onChange={(e) => setCatCount(e.target.value === "" ? "" : Math.min(20, Math.max(1, parseInt(e.target.value) || 1)))}
-                    className={`w-24 h-14 text-center text-3xl font-black border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-900 outline-none ${ringCls} transition-all`}
+                    className={`w-24 h-14 text-center text-3xl font-black border-2 border-gray-200 dark:border-[#2A2A3A] rounded-2xl bg-gray-50 dark:bg-[#151522] text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all`}
                   />
                   <button
                     onClick={() => setCatCount((c) => Math.min(20, (Number(c) || 0) + 1))}
@@ -576,13 +576,13 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
             {step === "category-names" && (
               <div className="px-6 py-6 space-y-4">
                 <div className="flex items-center gap-2 mb-2">
-                  <button onClick={() => setStep("category-count")} className="p-1.5 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                  <button onClick={() => setStep("category-count")} className="p-1.5 rounded-full bg-gray-100 dark:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 hover:bg-gray-200 transition-colors">
                     <ArrowLeft className="w-4 h-4" />
                   </button>
-                  <h3 className="text-lg font-black text-gray-900">Name your {catNames.length} categories</h3>
+                  <h3 className="text-lg font-black text-gray-900 dark:text-gray-100">Name your {catNames.length} categories</h3>
                 </div>
-                <p className="text-sm text-gray-500 font-medium">
-                  e.g. <span className="font-bold text-gray-700">Biryani</span>, <span className="font-bold text-gray-700">Starters</span>, <span className="font-bold text-gray-700">Desserts</span>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                  e.g. <span className="font-bold text-gray-700 dark:text-gray-300">Biryani</span>, <span className="font-bold text-gray-700 dark:text-gray-300">Starters</span>, <span className="font-bold text-gray-700 dark:text-gray-300">Desserts</span>
                 </p>
                 <div className="space-y-3">
                   {catNames.map((name, i) => (
@@ -599,7 +599,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                           setCatNames(n);
                         }}
                         placeholder={`Category ${i + 1} name…`}
-                        className={`flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
+                        className={`flex-1 px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all`}
                       />
                     </div>
                   ))}
@@ -619,7 +619,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
             {step === "manage" && (
               <div className="flex flex-col h-full">
                 {/* Category tabs */}
-                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+                <div className="px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/60">
                   <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
                     {allCats.map((cat) => (
                       <button
@@ -628,7 +628,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                         className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wide transition-all border
                           ${activeCat === cat
                             ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-sm`
-                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-400"
+                            : "bg-white dark:bg-[#0D0D17] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-400"
                           }`}
                       >
                         {cat}
@@ -640,7 +640,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                     {/* Add more categories */}
                     <button
                       onClick={() => { setCatCount(""); setStep("category-count"); }}
-                      className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-black text-gray-400 border border-dashed border-gray-300 hover:border-gray-500 hover:text-gray-600 transition-all flex items-center gap-1"
+                      className="flex-shrink-0 px-3 py-2 rounded-xl text-xs font-black text-gray-400 border border-dashed border-gray-300 hover:border-gray-50 dark:border-[#1F1F2E]0 hover:text-gray-600 dark:text-gray-400 transition-all flex items-center gap-1"
                     >
                       <Plus className="w-3.5 h-3.5" /> Add
                     </button>
@@ -673,7 +673,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                   front_page_category: item.front_page_category || "",
                                 }}
                               actions={
-                                <div className="flex items-center gap-1.5 bg-white/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-100">
+                                <div className="flex items-center gap-1.5 bg-white dark:bg-[#0D0D17]/90 backdrop-blur-sm p-1 rounded-xl shadow-sm border border-gray-100 dark:border-[#2A2A3A]">
                                   <button
                                     onClick={() => handleToggleAvailability(item.id, item.is_available)}
                                     className={`px-2 h-7 rounded-lg text-[10px] font-black uppercase tracking-wider transition-colors ${
@@ -724,7 +724,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                       {itemsInCat.length === 0 && !showForm && (
                         <div className="flex flex-col items-center justify-center py-12 text-gray-400">
                           <Utensils className="w-10 h-10 mb-3 opacity-30" />
-                          <p className="font-bold text-gray-500">No items in <span className="text-gray-700">{activeCat}</span> yet</p>
+                          <p className="font-bold text-gray-500 dark:text-gray-400">No items in <span className="text-gray-700 dark:text-gray-300">{activeCat}</span> yet</p>
                           <p className="text-sm mt-1">Click "Add Item" below to start building this category.</p>
                         </div>
                       )}
@@ -736,15 +736,15 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className={`bg-gray-50/80 border-2 border-${tColor}-200 rounded-2xl p-5 shadow-sm`}
+                            className={`bg-gray-50 dark:bg-[#151522]/80 border-2 border-${tColor}-200 rounded-2xl p-5 shadow-sm`}
                           >
                             <div className="flex items-center justify-between mb-4">
-                              <h4 className="font-black text-gray-900 text-base">
+                              <h4 className="font-black text-gray-900 dark:text-gray-100 text-base">
                                 {editingItem ? "Edit Item" : `Add to "${activeCat}"`}
                               </h4>
                               <button
                                 onClick={() => { setShowForm(false); setEditingItem(null); }}
-                                className="p-1.5 rounded-full bg-gray-200 text-gray-500 hover:bg-gray-300 transition-colors"
+                                className="p-1.5 rounded-full bg-gray-200 text-gray-500 dark:text-gray-400 hover:bg-gray-300 transition-colors"
                               >
                                 <X className="w-4 h-4" />
                               </button>
@@ -761,8 +761,8 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                             <form id="itemForm" onSubmit={handleSaveItem} className="space-y-4">
                               {/* Image */}
                               <div>
-                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5 block">Item Photo</label>
-                                <div className="relative w-full h-36 rounded-xl border-2 border-dashed border-gray-300 bg-white overflow-hidden hover:bg-gray-50 transition-colors group cursor-pointer">
+                                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Item Photo</label>
+                                <div className="relative w-full h-36 rounded-xl border-2 border-dashed border-gray-300 bg-white dark:bg-[#0D0D17] overflow-hidden hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors group cursor-pointer">
                                   {form.imagePreview ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={form.imagePreview} alt="preview" className="w-full h-full object-cover" />
@@ -783,69 +783,69 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
 
                               {/* Name */}
                               <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Item Name *</label>
+                                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Item Name *</label>
                                 <input
                                   value={form.name}
                                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
                                   placeholder="e.g. Chicken Biryani"
-                                  className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
+                                  className={`w-full px-4 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all`}
                                 />
                               </div>
 
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* Actual Price */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Actual Price / MRP (₹)</label>
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Actual Price / MRP (₹)</label>
                                   <input
                                     type="number"
                                     min={0}
                                     value={form.actual_price}
                                     onChange={(e) => setForm((f) => ({ ...f, actual_price: e.target.value }))}
                                     placeholder="e.g. 200"
-                                    className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
+                                    className={`w-full px-4 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all`}
                                   />
                                 </div>
                                 {/* Price */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Selling Price (₹) *</label>
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Selling Price (₹) *</label>
                                   <input
                                     type="number"
                                     min={1}
                                     value={form.price}
                                     onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                                     placeholder="e.g. 180"
-                                    className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all`}
+                                    className={`w-full px-4 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all`}
                                   />
                                 </div>
                               </div>
 
                               {/* Description */}
                               <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Description</label>
+                                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Description</label>
                                 <textarea
                                   value={form.description}
                                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
                                   placeholder="e.g. Fragrant basmati rice cooked with tender chicken and aromatic spices"
-                                  className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all resize-none h-20 text-sm`}
+                                  className={`w-full px-4 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all resize-none h-20 text-sm`}
                                 />
                               </div>
 
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {/* Type toggle */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Type *</label>
-                                  <div className="flex rounded-xl border border-gray-200 overflow-hidden bg-white">
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Type *</label>
+                                  <div className="flex rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden bg-white dark:bg-[#0D0D17]">
                                     <button
                                       type="button"
                                       onClick={() => setForm((f) => ({ ...f, type: "veg" }))}
-                                      className={`flex-1 py-2.5 text-xs font-black flex items-center justify-center gap-1.5 transition-all ${form.type === "veg" ? "bg-green-500 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+                                      className={`flex-1 py-2.5 text-xs font-black flex items-center justify-center gap-1.5 transition-all ${form.type === "veg" ? "bg-green-500 text-white" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"}`}
                                     >
                                       <Leaf className="w-3.5 h-3.5" /> Veg
                                     </button>
                                     <button
                                       type="button"
                                       onClick={() => setForm((f) => ({ ...f, type: "non-veg" }))}
-                                      className={`flex-1 py-2.5 text-xs font-black flex items-center justify-center gap-1.5 transition-all ${form.type === "non-veg" ? "bg-red-500 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+                                      className={`flex-1 py-2.5 text-xs font-black flex items-center justify-center gap-1.5 transition-all ${form.type === "non-veg" ? "bg-red-500 text-white" : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"}`}
                                     >
                                       <Drumstick className="w-3.5 h-3.5" /> Non-Veg
                                     </button>
@@ -854,14 +854,14 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
 
                                 {/* Badge chips */}
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Badge (optional)</label>
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Badge (optional)</label>
                                   <div className="flex gap-1.5 flex-wrap">
                                     {["Bestseller", "Must Try", "New", "Spicy"].map((b) => (
                                       <button
                                         key={b}
                                         type="button"
                                         onClick={() => setForm((f) => ({ ...f, badge: f.badge === b ? "" : b }))}
-                                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all ${form.badge === b ? "bg-orange-500 text-white border-orange-500" : "bg-white border-gray-200 text-gray-600 hover:border-orange-300"}`}
+                                        className={`px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all ${form.badge === b ? "bg-orange-500 text-white border-orange-500" : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-600 dark:text-gray-400 hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]"}`}
                                       >
                                         {b}
                                       </button>
@@ -872,11 +872,11 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
 
                               {/* Front Page Category Select */}
                               <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Quick Bite Category (Optional)</label>
+                                <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Quick Bite Category (Optional)</label>
                                 <select
                                   value={form.front_page_category}
                                   onChange={(e) => setForm((f) => ({ ...f, front_page_category: e.target.value }))}
-                                  className={`w-full px-4 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all appearance-none cursor-pointer`}
+                                  className={`w-full px-4 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all appearance-none cursor-pointer`}
                                 >
                                   <option value="">None</option>
                                   <option value="Biryani">Biryani</option>
@@ -899,7 +899,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                               {/* Rating · Prep Time · Reviews */}
                               <div className="grid grid-cols-3 gap-3">
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
                                     <Star className="w-3 h-3 text-amber-400" /> Rating
                                   </label>
                                   <input
@@ -910,29 +910,29 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                     value={form.rating}
                                     onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))}
                                     placeholder="4.5"
-                                    className={`w-full px-3 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all text-sm`}
+                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm`}
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider flex items-center gap-1">
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1">
                                     <Clock className="w-3 h-3 text-gray-400" /> Prep Time
                                   </label>
                                   <input
                                     value={form.prep_time}
                                     onChange={(e) => setForm((f) => ({ ...f, prep_time: e.target.value }))}
                                     placeholder="15 min"
-                                    className={`w-full px-3 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all text-sm`}
+                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm`}
                                   />
                                 </div>
                                 <div className="space-y-1">
-                                  <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Reviews</label>
+                                  <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Reviews</label>
                                   <input
                                     type="number"
                                     min={0}
                                     value={form.reviews}
                                     onChange={(e) => setForm((f) => ({ ...f, reviews: e.target.value }))}
                                     placeholder="0"
-                                    className={`w-full px-3 py-3 bg-white border border-gray-200 rounded-xl font-bold text-gray-900 outline-none ${ringCls} transition-all text-sm`}
+                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm`}
                                   />
                                 </div>
                               </div>
@@ -962,12 +962,12 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
 
           {/* ═══════ FOOTER (only on manage step, when form is hidden) ═══════ */}
           {step === "manage" && !showForm && (
-            <div className="px-6 py-4 border-t border-gray-100 bg-white shrink-0 flex items-center justify-between">
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] shrink-0 flex items-center justify-between">
               <p className={`text-xs font-bold text-${tColor}-600`}>
                 {activeCat && `${itemsInCat.length} item${itemsInCat.length !== 1 ? "s" : ""} in "${activeCat}"`}
               </p>
               <div className="flex gap-3">
-                <button onClick={onClose} className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-100 transition-colors">
+                <button onClick={onClose} className="px-5 py-2.5 rounded-xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors">
                   Close
                 </button>
                 <button

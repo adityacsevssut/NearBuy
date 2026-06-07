@@ -121,8 +121,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 backdrop-blur-md shadow-sm ${isStore ? "bg-blue-500/95" : isMedicine ? "bg-emerald-500/95" : "bg-orange-500/95"
-        }`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 backdrop-blur-md bg-white dark:bg-[#0D0D17]`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -131,11 +130,11 @@ export default function Navbar() {
               id="hamburger-btn"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-white/10 border border-white/15 backdrop-blur-md shadow-sm transition-all duration-300 active:scale-95 group"
+              className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A]/60 shadow-sm transition-all duration-300 active:scale-95 group"
             >
               {mobileMenuOpen
-                ? <X className="w-6 h-6 text-white group-hover:rotate-90 transition-transform duration-300" />
-                : <Menu className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-300" />
+                ? <X className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:rotate-90 transition-transform duration-300" />
+                : <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform duration-300" />
               }
             </button>
           </div>
@@ -146,25 +145,25 @@ export default function Navbar() {
 
               {/* Simple NB Logo */}
               <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                <span className="relative z-10 font-black text-3xl sm:text-4xl md:text-5xl text-white tracking-tighter drop-shadow-sm">N</span>
-                <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black tracking-tighter drop-shadow-sm -ml-0.5">B</span>
+                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${primaryText} tracking-tighter drop-shadow-sm`}>N</span>
+                <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-gray-900 dark:text-gray-100 tracking-tighter drop-shadow-sm -ml-0.5">B</span>
               </div>
 
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
-                <span className="text-white drop-shadow-sm">Near</span>
-                <span className="text-black drop-shadow-sm">Buy</span>
+                <span className={`${primaryText} drop-shadow-sm`}>Near</span>
+                <span className="text-gray-900 dark:text-gray-100 drop-shadow-sm">Buy</span>
               </span>
             </Link>
           </div>
 
           {/* ── App Mode Toggle (Desktop only) ── */}
-          <div className="hidden md:flex bg-gray-100 p-1 rounded-xl flex-shrink-0 border border-gray-200/50">
+          <div className="hidden md:flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl flex-shrink-0 border border-gray-200 dark:border-[#2A2A3A]/50">
             <Link
               href="/"
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
-                ? `bg-white text-orange-600 shadow-sm`
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
+                ? `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -174,8 +173,8 @@ export default function Navbar() {
             <button
               onClick={() => setShowEssentialsModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
-                ? `bg-white text-blue-600 shadow-sm`
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
+                ? `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -185,8 +184,8 @@ export default function Navbar() {
             <button
               onClick={() => setShowMedicineModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isMedicine
-                ? `bg-white text-emerald-600 shadow-sm`
-                : "text-gray-500 hover:text-gray-800 hover:bg-gray-200/50"
+                ? `bg-white dark:bg-[#0D0D17] text-emerald-600 shadow-sm`
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                 }`}
             >
               <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -205,9 +204,9 @@ export default function Navbar() {
                   openLoginModal();
                 }
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
             >
-              <Heart className="w-4 h-4 fill-white text-white" />
+              <Heart className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               <span>Wishlist</span>
             </Link>
             <button
@@ -219,9 +218,9 @@ export default function Navbar() {
                   router.push(`${baseUrl}/orders`);
                 }
               }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all text-sm font-bold backdrop-blur-md hover:-translate-y-0.5 shadow-sm active:scale-95 duration-200"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
             >
-              <ShoppingBag className="w-4 h-4 text-white" />
+              <ShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
               <span>My Orders</span>
             </button>
           </div>
@@ -239,9 +238,9 @@ export default function Navbar() {
                   openLoginModal();
                 }
               }}
-              className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group hidden md:flex"
+              className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group hidden md:flex"
             >
-              <ShoppingCart className="w-[22px] h-[22px] text-gray-700 group-hover:text-gray-900 transition-colors" />
+              <ShoppingCart className="w-[22px] h-[22px] text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 transition-colors" />
               {cartCount > 0 && (
                 <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full
                 ${primaryBg} text-white text-[10px] font-black flex items-center justify-center shadow-sm`}>
@@ -256,9 +255,9 @@ export default function Navbar() {
                 id="notification-btn"
                 onClick={() => setNotifOpen(prev => !prev)}
                 aria-label="Notifications"
-                className="relative p-2 rounded-xl hover:bg-gray-100 transition-colors group"
+                className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group"
               >
-                <Bell className="w-[22px] h-[22px] text-gray-800 group-hover:text-black transition-colors fill-current" />
+                <Bell className="w-[22px] h-[22px] text-gray-800 dark:text-gray-200 group-hover:text-black dark:text-white transition-colors fill-current" />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-sm">
                     {unreadCount}
@@ -273,15 +272,15 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-full mt-2 w-80 bg-white shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-200 z-50 rounded-sm"
+                    className="absolute right-0 top-full mt-2 w-80 bg-white dark:bg-[#0D0D17] shadow-[0_4px_20px_rgb(0,0,0,0.08)] border border-gray-200 dark:border-[#2A2A3A] z-50 rounded-sm"
                   >
                     {/* Notif Header */}
-                    <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100 bg-gray-50/50">
+                    <div className="px-4 py-3 flex items-center justify-between border-b border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/50">
                       <div>
-                        <p className="text-gray-900 font-bold text-sm tracking-wide">Notifications</p>
+                        <p className="text-gray-900 dark:text-gray-100 font-bold text-sm tracking-wide">Notifications</p>
                       </div>
                       {unreadCount > 0 && (
-                        <button onClick={() => markAllAsRead()} className="text-gray-500 hover:text-gray-800 text-xs font-semibold transition-colors underline underline-offset-2">
+                        <button onClick={() => markAllAsRead()} className="text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 text-xs font-semibold transition-colors underline underline-offset-2">
                           Mark all as read
                         </button>
                       )}
@@ -290,10 +289,10 @@ export default function Navbar() {
                     {/* Notif List */}
                     <div className="max-h-[340px] overflow-y-auto divide-y divide-gray-100">
                       {notifications.length === 0 ? (
-                        <div className="py-8 text-center text-gray-500 text-sm font-medium">No notifications</div>
+                        <div className="py-8 text-center text-gray-500 dark:text-gray-400 text-sm font-medium">No notifications</div>
                       ) : (
                         notifications.map((notif) => (
-                          <div key={notif.id} className="relative overflow-hidden w-full border-b border-gray-100 last:border-0 bg-red-50">
+                          <div key={notif.id} className="relative overflow-hidden w-full border-b border-gray-100 dark:border-[#2A2A3A] last:border-0 bg-red-50">
                             {/* Background Delete Action (Revealed on swipe right) */}
                             <div className="absolute inset-y-0 left-0 flex items-center px-6 text-red-500 font-bold text-xs uppercase tracking-wider">
                               <Trash2 className="w-4 h-4 mr-2" />
@@ -310,7 +309,7 @@ export default function Navbar() {
                                   deleteNotification(notif.id);
                                 }
                               }}
-                              className={`relative w-full z-10 flex items-center transition-colors ${!notif.is_read ? 'bg-gray-50/80' : 'bg-white hover:bg-gray-50'}`}
+                              className={`relative w-full z-10 flex items-center transition-colors ${!notif.is_read ? 'bg-gray-50 dark:bg-[#151522]/80' : 'bg-white dark:bg-[#0D0D17] hover:bg-gray-50 dark:hover:bg-[#151522]'}`}
                             >
                               <button
                                 onClick={() => { if (!notif.is_read) markAsRead(notif.id); }}
@@ -318,14 +317,14 @@ export default function Navbar() {
                               >
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between gap-2">
-                                    <p className={`text-[13px] truncate ${!notif.is_read ? 'font-bold text-gray-900' : 'font-semibold text-gray-600'}`}>
+                                    <p className={`text-[13px] truncate ${!notif.is_read ? 'font-bold text-gray-900 dark:text-gray-100' : 'font-semibold text-gray-600 dark:text-gray-400'}`}>
                                       {notif.title}
                                     </p>
                                     {!notif.is_read && (
                                       <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
                                     )}
                                   </div>
-                                  <p className={`text-[12px] mt-1 leading-snug line-clamp-2 ${!notif.is_read ? 'text-gray-700' : 'text-gray-500'}`}>
+                                  <p className={`text-[12px] mt-1 leading-snug line-clamp-2 ${!notif.is_read ? 'text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'}`}>
                                     {notif.message}
                                   </p>
                                   <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
@@ -353,12 +352,12 @@ export default function Navbar() {
                     router.push('/account');
                   }
                 }}
-                className="hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 group"
+                className="hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522] transition-all duration-200 group"
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gray-100 group-hover:bg-gray-200 transition-colors`}>
-                  <UserIcon className="w-4 h-4 text-gray-600" />
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gray-100 dark:bg-[#1F1F2E] group-hover:bg-gray-200 transition-colors`}>
+                  <UserIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
                 </div>
-                <span className="text-sm font-bold text-gray-700">Account</span>
+                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Account</span>
               </button>
             ) : (
               <button
@@ -382,7 +381,7 @@ export default function Navbar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-16 left-0 right-0 bottom-0 w-full bg-[#F8F9FA] z-[99] pt-10 px-5 pb-6 overflow-y-auto"
+            className="fixed top-16 left-0 right-0 bottom-0 w-full bg-[#F8F9FA] dark:bg-[#0D0D17] z-[99] pt-10 px-5 pb-6 overflow-y-auto"
           >
             <div className="flex flex-wrap gap-4 max-w-sm mx-auto w-full pb-10 justify-center">
               {/* Food Card */}
@@ -451,16 +450,16 @@ export default function Navbar() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[90vw] sm:max-w-md bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
+              className="relative w-full max-w-[90vw] sm:max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
             >
               <div className="flex items-center justify-center mb-4 font-black text-2xl sm:text-3xl tracking-tight">
                 <div className="flex items-baseline -skew-x-12 mr-2">
                   <span className="text-blue-600 drop-shadow-sm">N</span>
-                  <span className="text-black drop-shadow-sm -ml-0.5">B</span>
+                  <span className="text-black dark:text-white drop-shadow-sm -ml-0.5">B</span>
                 </div>
                 <div className="flex items-baseline">
                   <span className="text-blue-600 drop-shadow-sm">Near</span>
-                  <span className="text-black drop-shadow-sm">Buy</span>
+                  <span className="text-black dark:text-white drop-shadow-sm">Buy</span>
                 </div>
               </div>
 
@@ -474,11 +473,11 @@ export default function Navbar() {
                 />
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-3 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
                 We are Working On It
               </h2>
               
-              <p className="text-sm sm:text-[15px] text-gray-600 font-medium mb-8">
+              <p className="text-sm sm:text-[15px] text-gray-600 dark:text-gray-400 font-medium mb-8">
                 Available soon
               </p>
 
@@ -507,16 +506,16 @@ export default function Navbar() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[90vw] sm:max-w-md bg-white rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
+              className="relative w-full max-w-[90vw] sm:max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
             >
               <div className="flex items-center justify-center mb-4 font-black text-2xl sm:text-3xl tracking-tight">
                 <div className="flex items-baseline -skew-x-12 mr-2">
                   <span className="text-emerald-600 drop-shadow-sm">N</span>
-                  <span className="text-black drop-shadow-sm -ml-0.5">B</span>
+                  <span className="text-black dark:text-white drop-shadow-sm -ml-0.5">B</span>
                 </div>
                 <div className="flex items-baseline">
                   <span className="text-emerald-600 drop-shadow-sm">Near</span>
-                  <span className="text-black drop-shadow-sm">Buy</span>
+                  <span className="text-black dark:text-white drop-shadow-sm">Buy</span>
                 </div>
               </div>
 
@@ -530,11 +529,11 @@ export default function Navbar() {
                 />
               </div>
 
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-3 tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-3 tracking-tight">
                 We are Working On It
               </h2>
               
-              <p className="text-sm sm:text-[15px] text-gray-600 font-medium mb-8">
+              <p className="text-sm sm:text-[15px] text-gray-600 dark:text-gray-400 font-medium mb-8">
                 Available soon
               </p>
 
@@ -557,23 +556,23 @@ export default function Navbar() {
 // Subcomponents matching the mobile Account Page style
 function ActionPill({ icon: Icon, label, color, bg, onClick }: { icon: any, label: string, color: string, bg: string, onClick?: () => void }) {
   return (
-    <button onClick={onClick} className="flex-1 bg-white py-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 transition-transform active:scale-95">
+    <button onClick={onClick} className="flex-1 bg-white dark:bg-[#0D0D17] py-3 rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-gray-50 dark:border-[#1F1F2E] transition-transform active:scale-95">
       <div className={`p-2 rounded-xl ${bg}`}>
         <Icon className={`w-4 h-4 ${color}`} />
       </div>
-      <span className="text-[10px] font-bold text-gray-600">{label}</span>
+      <span className="text-[10px] font-bold text-gray-600 dark:text-gray-400">{label}</span>
     </button>
   );
 }
 
 function ModernRow({ icon: Icon, label, onClick, theme }: { icon: any, label: string, onClick?: () => void, theme: any }) {
   return (
-    <button onClick={onClick} className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50/80 transition-colors group">
+    <button onClick={onClick} className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-[#151522]/80 transition-colors group">
       <div className="flex items-center gap-3">
-        <div className={`w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
-          <Icon className={`w-4 h-4 text-gray-500 ${theme.hoverText} transition-colors`} />
+        <div className={`w-8 h-8 rounded-xl bg-gray-50 dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
+          <Icon className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
         </div>
-        <span className="text-[13.5px] font-bold text-gray-700 group-hover:text-gray-900">{label}</span>
+        <span className="text-[13.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">{label}</span>
       </div>
       <ChevronRight className={`w-3.5 h-3.5 text-gray-300 ${theme.hoverText} group-hover:translate-x-0.5 transition-all`} />
     </button>

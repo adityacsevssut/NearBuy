@@ -16,7 +16,7 @@ import GeoapifySearch, { ResolvedGeoapifyAddress } from "@/components/GeoapifySe
 
 const DevMap = dynamic(() => import('@/components/DevMap'), { 
   ssr: false, 
-  loading: () => <div className="w-full h-full min-h-[300px] bg-gray-100 animate-pulse rounded-xl flex items-center justify-center text-gray-400 font-bold text-sm">Loading Map...</div> 
+  loading: () => <div className="w-full h-full min-h-[300px] bg-gray-100 dark:bg-[#1F1F2E] animate-pulse rounded-xl flex items-center justify-center text-gray-400 font-bold text-sm">Loading Map...</div> 
 });
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
@@ -368,12 +368,12 @@ export default function DevDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans flex flex-col">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] font-sans flex flex-col">
       {/* ══════════════════ NAVBAR ══════════════════ */}
       <nav className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 to-purple-700 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
               <Shield className="w-4.5 h-4.5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
@@ -382,13 +382,13 @@ export default function DevDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2.5">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm text-white">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/20 bg-white dark:bg-[#0D0D17]/10 backdrop-blur-sm text-white">
               <UserCircle className="w-4 h-4 opacity-80" />
               <span className="text-xs font-bold max-w-[150px] truncate">{user?.email}</span>
             </div>
             <button
               onClick={() => { logout(); router.push("/"); }}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-white/20 bg-white/10 hover:bg-white/20 text-white transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full border border-white/20 bg-white dark:bg-[#0D0D17]/10 hover:bg-white dark:hover:bg-[#0D0D17]/20 text-white transition-all"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Logout</span>
@@ -398,7 +398,7 @@ export default function DevDashboard() {
       </nav>
 
       {/* ══════════════════ HERO HEADER ══════════════════ */}
-      <div className="bg-white border-b border-gray-200 relative">
+      <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] relative">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-violet-500 to-purple-600" />
         <div className="max-w-6xl mx-auto px-4 pt-8 pb-6">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
@@ -406,38 +406,38 @@ export default function DevDashboard() {
               <div className="flex items-center gap-2 mb-2">
                 <span className="bg-violet-100 text-violet-700 border border-violet-200 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-widest">Root Access</span>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight mb-2">
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-gray-100 tracking-tight mb-2">
                 Platform Administration
               </h1>
-              <p className="text-gray-500 text-sm font-medium">
+              <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
                 Welcome back, <span className="text-violet-600 font-bold">{user?.firstName}</span>. Manage administrative access and service locations.
               </p>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-2 md:pb-0 hide-scrollbar">
               <button
                 onClick={() => { setShowPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(false); setShowCentersPanel(!showCentersPanel); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showCentersPanel ? 'bg-pink-50 border-pink-200 text-pink-700' : 'bg-white border-gray-200 text-gray-700 hover:border-pink-300'}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showCentersPanel ? 'bg-pink-50 border-pink-200 text-pink-700' : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-pink-300'}`}
               >
                 <MapPin className="w-4 h-4" />
                 Start Business Here
               </button>
               <button
                 onClick={() => { setShowCentersPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(false); setShowPanel(!showPanel); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showPanel ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white border-gray-200 text-gray-700 hover:border-violet-300'}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showPanel ? 'bg-violet-50 border-violet-200 text-violet-700' : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-violet-300'}`}
               >
                 <Users className="w-4 h-4" />
                 Manage Managers
               </button>
               <button
                 onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowAnalyticsPanel(false); setShowSettingsPanel(!showSettingsPanel); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showSettingsPanel ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white border-gray-200 text-gray-700 hover:border-amber-300'}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showSettingsPanel ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-amber-300'}`}
               >
                 <Tag className="w-4 h-4" />
                 Platform Fees
               </button>
               <button
                 onClick={() => { setShowPanel(false); setShowCentersPanel(false); setShowSettingsPanel(false); setShowAnalyticsPanel(!showAnalyticsPanel); }}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showAnalyticsPanel ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'}`}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold shadow-sm transition-all text-sm shrink-0 border ${showAnalyticsPanel ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-blue-300'}`}
               >
                 <Activity className="w-4 h-4" />
                 Platform Analytics
@@ -455,14 +455,14 @@ export default function DevDashboard() {
               key={s.label}
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white border border-gray-200 hover:border-violet-300 rounded-2xl p-5 shadow-sm hover:shadow-violet-500/10 transition-all group relative overflow-hidden"
+              className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:border-violet-300 rounded-2xl p-5 shadow-sm hover:shadow-violet-500/10 transition-all group relative overflow-hidden"
             >
               <div className={`absolute -right-4 -top-4 w-24 h-24 bg-gradient-to-br ${s.color} opacity-[0.08] rounded-full group-hover:scale-110 transition-transform`} />
               <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${s.color} flex items-center justify-center mb-3 shadow-sm`}>
                 <s.icon className="w-5 h-5 text-white" />
               </div>
-              <p className="text-3xl font-black text-gray-900">{loadingData ? "—" : s.value}</p>
-              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mt-1">{s.label}</p>
+              <p className="text-3xl font-black text-gray-900 dark:text-gray-100">{loadingData ? "—" : s.value}</p>
+              <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">{s.label}</p>
             </motion.div>
           ))}
         </div>
@@ -477,15 +477,15 @@ export default function DevDashboard() {
             exit={{ opacity: 0, height: 0 }}
             className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
           >
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100">
+            <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100 dark:border-[#2A2A3A]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-pink-100 rounded-xl flex items-center justify-center">
                     <MapPin className="w-5 h-5 text-pink-600" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-gray-900">Service Centers</h2>
-                    <p className="text-xs text-gray-500 font-medium">{centers.length} operational zones active</p>
+                    <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Service Centers</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{centers.length} operational zones active</p>
                   </div>
                 </div>
                 <button
@@ -500,47 +500,47 @@ export default function DevDashboard() {
               {loadingData ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                   <RefreshCw className="w-8 h-8 text-pink-400 animate-spin" />
-                  <p className="text-gray-500 font-medium">Loading centers...</p>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading centers...</p>
                 </div>
               ) : centers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
-                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-200">
+                  <div className="w-16 h-16 bg-gray-50 dark:bg-[#151522] rounded-2xl flex items-center justify-center border border-gray-200 dark:border-[#2A2A3A]">
                     <MapPin className="w-8 h-8 text-gray-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-gray-900 font-bold text-lg">No service centers</p>
-                    <p className="text-gray-500 text-sm mt-1">Click "Start Business Here" to expand.</p>
+                    <p className="text-gray-900 dark:text-gray-100 font-bold text-lg">No service centers</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Click "Start Business Here" to expand.</p>
                   </div>
                 </div>
               ) : (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {centers.map((c) => (
-                    <div key={c.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-pink-300 transition-all shadow-sm relative overflow-hidden group">
+                    <div key={c.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 hover:border-pink-300 transition-all shadow-sm relative overflow-hidden group">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className="w-8 h-8 bg-pink-50 rounded-lg flex items-center justify-center border border-pink-100">
                             <Navigation className="w-4 h-4 text-pink-500" />
                           </div>
                           <div>
-                            <h3 className="font-bold text-gray-900 leading-tight">{c.name}</h3>
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100 leading-tight">{c.name}</h3>
                             {c.landmark && <p className="text-xs font-bold text-pink-600 mt-0.5">{c.landmark}</p>}
-                            <p className="text-xs text-gray-500 font-medium">PIN: {c.pincode}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">PIN: {c.pincode}</p>
                           </div>
                         </div>
-                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${c.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                        <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${c.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 dark:bg-[#1F1F2E] text-gray-600 dark:text-gray-400'}`}>
                           {c.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </div>
                       
-                      <div className="mt-4 bg-gray-50 rounded-xl p-3 border border-gray-100 flex justify-between items-center relative z-10">
+                      <div className="mt-4 bg-gray-50 dark:bg-[#151522] rounded-xl p-3 border border-gray-100 dark:border-[#2A2A3A] flex justify-between items-center relative z-10">
                         <div>
                           <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-0.5">Service Radius</p>
-                          <p className="font-black text-gray-900">{parseFloat(c.radius_km).toFixed(1)} km</p>
+                          <p className="font-black text-gray-900 dark:text-gray-100">{parseFloat(c.radius_km).toFixed(1)} km</p>
                         </div>
                         <div className="flex gap-1.5">
                           <button 
                             onClick={() => handleToggleCenter(c.id, c.is_active)}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${c.is_active ? 'bg-white border-gray-200 text-gray-600 hover:bg-gray-100' : 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'}`}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${c.is_active ? 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E]' : 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100'}`}
                           >
                             {c.is_active ? 'Deactivate' : 'Activate'}
                           </button>
@@ -576,16 +576,16 @@ export default function DevDashboard() {
             exit={{ opacity: 0, height: 0 }}
             className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
           >
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
+            <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
               {/* Panel header */}
-              <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100">
+              <div className="flex items-center justify-between mb-6 pb-6 border-b border-gray-100 dark:border-[#2A2A3A]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-violet-100 rounded-xl flex items-center justify-center">
                     <Users className="w-5 h-5 text-violet-600" />
                   </div>
                   <div>
-                    <h2 className="text-lg font-black text-gray-900">Manager Accounts</h2>
-                    <p className="text-xs text-gray-500 font-medium">{managers.length} total managers on the platform</p>
+                    <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Manager Accounts</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{managers.length} total managers on the platform</p>
                   </div>
                 </div>
                 <button
@@ -601,16 +601,16 @@ export default function DevDashboard() {
               {loadingData ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                   <RefreshCw className="w-8 h-8 text-violet-400 animate-spin" />
-                  <p className="text-gray-500 font-medium">Loading managers...</p>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading managers...</p>
                 </div>
               ) : managers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
-                  <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center border border-gray-200">
+                  <div className="w-16 h-16 bg-gray-50 dark:bg-[#151522] rounded-2xl flex items-center justify-center border border-gray-200 dark:border-[#2A2A3A]">
                     <Users className="w-8 h-8 text-gray-400" />
                   </div>
                   <div className="text-center">
-                    <p className="text-gray-900 font-bold text-lg">No managers yet</p>
-                    <p className="text-gray-500 text-sm mt-1">Click "Add Manager" to get started</p>
+                    <p className="text-gray-900 dark:text-gray-100 font-bold text-lg">No managers yet</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">Click "Add Manager" to get started</p>
                   </div>
                 </div>
               ) : (
@@ -625,7 +625,7 @@ export default function DevDashboard() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10 transition-all group"
+                        className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 hover:border-violet-300 hover:shadow-lg hover:shadow-violet-500/10 transition-all group"
                       >
                         <div className="flex items-start justify-between mb-4">
                           <div className={`w-11 h-11 ${meta.bg} rounded-xl flex items-center justify-center border border-current border-opacity-20`}>
@@ -637,10 +637,10 @@ export default function DevDashboard() {
                         </div>
 
                         <div className="mb-4">
-                          <p className="font-bold text-gray-900 text-[15px] truncate">
+                          <p className="font-bold text-gray-900 dark:text-gray-100 text-[15px] truncate">
                             {m.first_name} {m.last_name}
                           </p>
-                          <p className="text-xs text-gray-500 truncate mt-0.5 font-medium">{m.email}</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5 font-medium">{m.email}</p>
                           <p className="text-[10px] text-gray-400 mt-1.5 font-semibold tracking-wide uppercase">
                             Added {new Date(m.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
                           </p>
@@ -649,13 +649,13 @@ export default function DevDashboard() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => openEdit(m)}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-violet-50 border border-gray-200 hover:border-violet-200 rounded-xl text-xs font-bold text-gray-600 hover:text-violet-600 transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-[#151522] hover:bg-violet-50 border border-gray-200 dark:border-[#2A2A3A] hover:border-violet-200 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:text-violet-600 transition-colors"
                           >
                             <Pencil className="w-3.5 h-3.5" /> Edit
                           </button>
                           <button
                             onClick={() => setDeleteConfirm(m.id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-red-50 border border-gray-200 hover:border-red-200 rounded-xl text-xs font-bold text-gray-600 hover:text-red-600 transition-colors"
+                            className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-gray-50 dark:bg-[#151522] hover:bg-red-50 border border-gray-200 dark:border-[#2A2A3A] hover:border-red-200 rounded-xl text-xs font-bold text-gray-600 dark:text-gray-400 hover:text-red-600 transition-colors"
                           >
                             <Trash2 className="w-3.5 h-3.5" /> Delete
                           </button>
@@ -679,77 +679,77 @@ export default function DevDashboard() {
             exit={{ opacity: 0, height: 0 }}
             className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
           >
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+            <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100 dark:border-[#2A2A3A]">
                 <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
                   <Tag className="w-5 h-5 text-amber-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-gray-900">Platform Pricing Configuration</h2>
-                  <p className="text-xs text-gray-500 font-medium">Manage global Platform Fee and GST for all carts</p>
+                  <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Platform Pricing Configuration</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Manage global Platform Fee and GST for all carts</p>
                 </div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Platform Fee (₹)</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Platform Fee (₹)</label>
                   <input
                     type="number"
                     value={platformFee}
                     onChange={(e) => setPlatformFee(parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                   <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed amount charged per order</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">GST (₹)</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">GST (₹)</label>
                   <input
                     type="number"
                     value={gst}
                     onChange={(e) => setGst(parseFloat(e.target.value) || 0)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                   <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed GST applied to all orders instead of Delivery Fee</p>
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6 pt-6 border-t border-gray-100">
+              <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6 pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Instagram Link</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Instagram Link</label>
                   <input
                     type="url"
                     value={instagramLink}
                     onChange={(e) => setInstagramLink(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                     placeholder="https://instagram.com/your_handle"
                   />
                   <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Full URL for 'Contact Us here' button</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Food Support Email</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Food Support Email</label>
                   <input
                     type="email"
                     value={foodEmail}
                     onChange={(e) => setFoodEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Medicine Support Email</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Medicine Support Email</label>
                   <input
                     type="email"
                     value={medicineEmail}
                     onChange={(e) => setMedicineEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Store Support Email</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Store Support Email</label>
                   <input
                     type="email"
                     value={storeEmail}
                     onChange={(e) => setStoreEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 outline-none transition-all"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                 </div>
               </div>
@@ -778,51 +778,51 @@ export default function DevDashboard() {
             exit={{ opacity: 0, height: 0 }}
             className="max-w-6xl mx-auto px-4 mb-12 overflow-hidden w-full"
           >
-            <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
+            <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100 dark:border-[#2A2A3A]">
                 <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                   <Activity className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-gray-900">Platform Analytics</h2>
-                  <p className="text-xs text-gray-500 font-medium">View key metrics and user engagement data</p>
+                  <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">Platform Analytics</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">View key metrics and user engagement data</p>
                 </div>
               </div>
 
               {dashboardStats ? (
                 <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {/* Total Users */}
-                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                  <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A3A] flex flex-col justify-between h-full">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center">
                         <Users className="w-4 h-4" />
                       </div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Total Users</span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Total Users</span>
                     </div>
-                    <div className="text-3xl font-black text-gray-900">{dashboardStats.totalUsers}</div>
+                    <div className="text-3xl font-black text-gray-900 dark:text-gray-100">{dashboardStats.totalUsers}</div>
                   </div>
 
                   {/* Users Today */}
-                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                  <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A3A] flex flex-col justify-between h-full">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center">
                         <Plus className="w-4 h-4" />
                       </div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">New Today</span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">New Today</span>
                     </div>
-                    <div className="text-3xl font-black text-gray-900">{dashboardStats.usersToday}</div>
+                    <div className="text-3xl font-black text-gray-900 dark:text-gray-100">{dashboardStats.usersToday}</div>
                     <div className="mt-2 text-xs font-bold text-gray-400">
                       vs {dashboardStats.usersYesterday} yesterday
                     </div>
                   </div>
 
                   {/* Growth Rate */}
-                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                  <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A3A] flex flex-col justify-between h-full">
                     <div className="flex items-center gap-2 mb-3">
                       <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${dashboardStats.growthRate >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
                         {dashboardStats.growthRate >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                       </div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Growth Rate</span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Growth Rate</span>
                     </div>
                     <div className={`text-3xl font-black ${dashboardStats.growthRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {dashboardStats.growthRate > 0 ? '+' : ''}{dashboardStats.growthRate}%
@@ -831,14 +831,14 @@ export default function DevDashboard() {
                   </div>
 
                   {/* Average Rating */}
-                  <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100 flex flex-col justify-between h-full">
+                  <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-5 border border-gray-100 dark:border-[#2A2A3A] flex flex-col justify-between h-full">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="w-8 h-8 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center">
                         <Star className="w-4 h-4" />
                       </div>
-                      <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Avg Rating</span>
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Avg Rating</span>
                     </div>
-                    <div className="text-3xl font-black text-gray-900 flex items-baseline gap-1">
+                    <div className="text-3xl font-black text-gray-900 dark:text-gray-100 flex items-baseline gap-1">
                       {dashboardStats.avgRating} <span className="text-sm font-bold text-amber-500">★</span>
                     </div>
                     <div className="mt-2 text-xs font-bold text-gray-400">
@@ -849,7 +849,7 @@ export default function DevDashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
                   <RefreshCw className="w-8 h-8 text-blue-400 animate-spin" />
-                  <p className="text-gray-500 font-medium">Loading analytics...</p>
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">Loading analytics...</p>
                 </div>
               )}
             </div>
@@ -868,27 +868,27 @@ export default function DevDashboard() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative bg-white border border-gray-100 rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[85vh]"
+              className="relative bg-white dark:bg-[#0D0D17] border border-gray-100 dark:border-[#2A2A3A] rounded-3xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[85vh]"
             >
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50 flex-shrink-0">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] flex-shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-pink-100 shadow-sm border border-pink-200">
                     <MapPin className="w-5 h-5 text-pink-600" />
                   </div>
                   <div>
-                    <h3 className="font-black text-gray-900 text-lg">Start Business Here</h3>
-                    <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mt-0.5">Plot Your Next Center</p>
+                    <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg">Start Business Here</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-widest mt-0.5">Plot Your Next Center</p>
                   </div>
                 </div>
-                <button onClick={() => setCenterModalOpen(false)} className="p-2.5 rounded-xl bg-white border border-gray-200 hover:bg-gray-50 text-gray-600 hover:text-gray-900 transition-colors shadow-sm">
+                <button onClick={() => setCenterModalOpen(false)} className="p-2.5 rounded-xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:text-gray-100 transition-colors shadow-sm">
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="flex flex-col md:flex-row flex-1 overflow-y-auto md:overflow-hidden custom-scrollbar">
                 {/* Left Panel: Search and List */}
-                <div className="w-full md:w-1/3 bg-white border-b md:border-b-0 md:border-r border-gray-100 p-5 flex flex-col md:h-full md:overflow-y-auto custom-scrollbar shrink-0">
-                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Search Location</label>
+                <div className="w-full md:w-1/3 bg-white dark:bg-[#0D0D17] border-b md:border-b-0 md:border-r border-gray-100 dark:border-[#2A2A3A] p-5 flex flex-col md:h-full md:overflow-y-auto custom-scrollbar shrink-0">
+                  <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Search Location</label>
                   <div className="mb-4">
                     <GeoapifySearch 
                       onSelect={handleSelectGoogleLocation} 
@@ -911,10 +911,10 @@ export default function DevDashboard() {
                             <div className="flex items-start justify-between">
                               <div>
                                  <p className="text-lg font-black text-pink-700 mb-1 leading-tight">{selectedCenter.name}</p>
-                                 <span className="inline-block bg-white text-pink-600 px-2 py-0.5 rounded text-xs font-bold border border-pink-100 shadow-sm mb-2">
+                                 <span className="inline-block bg-white dark:bg-[#0D0D17] text-pink-600 px-2 py-0.5 rounded text-xs font-bold border border-pink-100 shadow-sm mb-2">
                                    PIN: {centerPincode || "Not found"}
                                  </span>
-                                <p className="text-xs text-gray-600 font-medium leading-relaxed">{selectedCenter.fullName}</p>
+                                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium leading-relaxed">{selectedCenter.fullName}</p>
                                 <p className="text-[10px] text-pink-500/80 font-bold mt-2 uppercase tracking-widest">
                                   {selectedCenter.lat.toFixed(5)}, {selectedCenter.lon.toFixed(5)}
                                 </p>
@@ -928,19 +928,19 @@ export default function DevDashboard() {
                   ) : (
                     <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 px-4">
                       <MapPin className="w-10 h-10 text-gray-300 mb-3" />
-                      <p className="text-sm font-bold text-gray-500">Search an area name or PIN code to create an operational zone</p>
+                      <p className="text-sm font-bold text-gray-500 dark:text-gray-400">Search an area name or PIN code to create an operational zone</p>
                     </div>
                   )}
 
                 </div>
 
                 {/* Right Panel: Map + Config */}
-                <div className="w-full md:w-2/3 bg-gray-50 flex flex-col md:h-full md:overflow-hidden shrink-0">
+                <div className="w-full md:w-2/3 bg-gray-50 dark:bg-[#151522] flex flex-col md:h-full md:overflow-hidden shrink-0">
 
                   {/* Map */}
-                  <div className="relative bg-gray-100 w-full" style={{ height: "300px", minHeight: "300px", flexShrink: 0 }}>
+                  <div className="relative bg-gray-100 dark:bg-[#1F1F2E] w-full" style={{ height: "300px", minHeight: "300px", flexShrink: 0 }}>
                     {fallbackMapCenter ? (
-                      <div className="absolute inset-2 bg-white rounded-xl shadow-inner border border-gray-200 overflow-hidden">
+                      <div className="absolute inset-2 bg-white dark:bg-[#0D0D17] rounded-xl shadow-inner border border-gray-200 dark:border-[#2A2A3A] overflow-hidden">
                         <DevMap 
                           lat={fallbackMapCenter.lat} 
                           lon={fallbackMapCenter.lon} 
@@ -964,9 +964,9 @@ export default function DevDashboard() {
 
                   {/* Bottom configuration bar */}
                   {selectedCenter && (
-                    <div className="bg-white border-t border-gray-200 p-5 flex flex-col sm:flex-row flex-wrap gap-4 items-end shadow-lg relative z-20 md:shrink-0">
+                    <div className="bg-white dark:bg-[#0D0D17] border-t border-gray-200 dark:border-[#2A2A3A] p-5 flex flex-col sm:flex-row flex-wrap gap-4 items-end shadow-lg relative z-20 md:shrink-0">
                       <div className="flex-1 w-full min-w-[160px]">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Center Landmark / Name <span className="text-red-500">*</span></label>
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Center Landmark / Name <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
                           <input 
@@ -974,13 +974,13 @@ export default function DevDashboard() {
                             value={centerLandmark}
                             onChange={(e) => setCenterLandmark(e.target.value)}
                             placeholder="E.g. Pulaha Hall, VSSUT Campus"
-                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-medium text-gray-900 transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-medium text-gray-900 dark:text-gray-100 transition-all"
                           />
                         </div>
                       </div>
 
                       <div className="flex-1 w-full min-w-[140px]">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pincode <span className="text-red-500">*</span></label>
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Pincode <span className="text-red-500">*</span></label>
                         <div className="relative">
                           <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
                           <input 
@@ -988,13 +988,13 @@ export default function DevDashboard() {
                             value={centerPincode}
                             onChange={(e) => setCenterPincode(e.target.value)}
                             placeholder="Enter Pincode"
-                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-black text-gray-900 transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-black text-gray-900 dark:text-gray-100 transition-all"
                           />
                         </div>
                       </div>
 
                       <div className="flex-1 w-full min-w-[140px]">
-                        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Delivery Radius (km)</label>
+                        <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Delivery Radius (km)</label>
                         <div className="relative">
                           <Navigation className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-pink-500" />
                           <input 
@@ -1003,7 +1003,7 @@ export default function DevDashboard() {
                             step="0.5"
                             value={centerRadius}
                             onChange={(e) => setCenterRadius(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-black text-gray-900 transition-all"
+                            className="w-full pl-10 pr-4 py-3 bg-pink-50/50 border border-pink-200 focus:border-pink-500 focus:ring-4 focus:ring-pink-500/10 rounded-xl outline-none font-black text-gray-900 dark:text-gray-100 transition-all"
                           />
                         </div>
                       </div>
@@ -1034,20 +1034,20 @@ export default function DevDashboard() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ type: "spring", bounce: 0.3 }}
-              className="relative bg-white border border-gray-100 rounded-3xl w-full max-w-[420px] shadow-2xl overflow-hidden"
+              className="relative bg-white dark:bg-[#0D0D17] border border-gray-100 dark:border-[#2A2A3A] rounded-3xl w-full max-w-[420px] shadow-2xl overflow-hidden"
             >
               {/* Modal header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-100 bg-gray-50/50">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/50">
                 <div className="flex items-center gap-3">
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${modalMode === "add" ? "bg-emerald-100" : "bg-violet-100"}`}>
                     {modalMode === "add" ? <Plus className="w-5 h-5 text-emerald-600" /> : <Pencil className="w-5 h-5 text-violet-600" />}
                   </div>
                   <div>
-                    <h3 className="font-black text-gray-900 text-[16px]">{modalMode === "add" ? "Add New Manager" : "Edit Manager"}</h3>
-                    <p className="text-xs text-gray-500 font-medium">{modalMode === "add" ? "Create a new manager account" : `Editing ${editTarget?.email}`}</p>
+                    <h3 className="font-black text-gray-900 dark:text-gray-100 text-[16px]">{modalMode === "add" ? "Add New Manager" : "Edit Manager"}</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">{modalMode === "add" ? "Create a new manager account" : `Editing ${editTarget?.email}`}</p>
                   </div>
                 </div>
-                <button onClick={closeModal} className="p-2 rounded-xl hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                <button onClick={closeModal} className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
@@ -1062,7 +1062,7 @@ export default function DevDashboard() {
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     required
                     placeholder="Email address"
-                    className="w-full bg-white border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                    className="w-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all"
                   />
                 </div>
 
@@ -1076,9 +1076,9 @@ export default function DevDashboard() {
                     required={modalMode === "add"}
                     placeholder={modalMode === "edit" ? "New password (leave blank to keep)" : "Password (min 8 chars)"}
                     minLength={modalMode === "add" ? 8 : undefined}
-                    className="w-full bg-white border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 pr-11 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all"
+                    className="w-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 pr-11 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 outline-none transition-all"
                   />
-                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
+                  <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
                     {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
@@ -1090,7 +1090,7 @@ export default function DevDashboard() {
                     value={form.managerType}
                     onChange={(e) => setForm({ ...form, managerType: e.target.value as any })}
                     required
-                    className="w-full bg-white border border-gray-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 text-sm text-gray-900 outline-none transition-all appearance-none cursor-pointer"
+                    className="w-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all appearance-none cursor-pointer"
                   >
                     <option value="" disabled>Select manager type…</option>
                     <option value="food">🍽️  Food</option>
@@ -1125,19 +1125,19 @@ export default function DevDashboard() {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative bg-white border border-red-100 rounded-3xl p-6 w-full max-w-[360px] shadow-2xl"
+              className="relative bg-white dark:bg-[#0D0D17] border border-red-100 rounded-3xl p-6 w-full max-w-[360px] shadow-2xl"
             >
               <div className="flex items-start gap-4 mb-5">
                 <div className="w-11 h-11 bg-red-50 rounded-xl flex items-center justify-center shrink-0 border border-red-100">
                   <AlertTriangle className="w-6 h-6 text-red-500" />
                 </div>
                 <div>
-                  <h3 className="font-black text-gray-900 text-[16px]">Delete Manager?</h3>
-                  <p className="text-sm text-gray-500 mt-1 leading-relaxed">This will permanently delete this manager account and all associated data.</p>
+                  <h3 className="font-black text-gray-900 dark:text-gray-100 text-[16px]">Delete Manager?</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">This will permanently delete this manager account and all associated data.</p>
                 </div>
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 transition-colors">Cancel</button>
+                <button onClick={() => setDeleteConfirm(null)} className="flex-1 py-2.5 bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-colors">Cancel</button>
                 <button onClick={() => handleDelete(deleteConfirm)} className="flex-1 py-2.5 bg-red-600 hover:bg-red-500 rounded-xl text-sm font-bold text-white shadow-lg shadow-red-500/20 transition-all">Delete</button>
               </div>
             </motion.div>
@@ -1146,7 +1146,7 @@ export default function DevDashboard() {
       </AnimatePresence>
 
       {/* Footer */}
-      <footer className="mt-auto py-5 border-t border-gray-200 bg-white">
+      <footer className="mt-auto py-5 border-t border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <p className="text-[11px] font-medium text-gray-400">
             © 2026 NearBuy Technologies · Developer Console

@@ -175,7 +175,7 @@ export default function VendorOrdersPage() {
       case "out for delivery": return "text-violet-600 bg-violet-100 border-violet-200";
       case "delivered": return "text-green-600 bg-green-100 border-green-200";
       case "cancelled": return "text-red-600 bg-red-100 border-red-200";
-      default: return "text-gray-600 bg-gray-100 border-gray-200";
+      default: return "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]";
     }
   };
 
@@ -200,12 +200,12 @@ export default function VendorOrdersPage() {
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-4 pb-20">
 
       {/* Page Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-20 shadow-sm">
+      <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-0 z-20 shadow-sm">
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center gap-3">
-          <Link href="/vendor" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 text-gray-700 transition-colors">
+          <Link href="/vendor" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </Link>
-          <h1 className="font-black text-gray-900 text-xl tracking-tight">Customer Orders</h1>
+          <h1 className="font-black text-gray-900 dark:text-gray-100 text-xl tracking-tight">Customer Orders</h1>
         </div>
       </div>
 
@@ -213,15 +213,15 @@ export default function VendorOrdersPage() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className={`w-8 h-8 animate-spin text-${tColor}-500`} />
-            <p className="text-gray-500 font-medium">Fetching orders...</p>
+            <p className="text-gray-500 dark:text-gray-400 font-medium">Fetching orders...</p>
           </div>
         ) : orders.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className={`w-20 h-20 bg-${tColor}-50 rounded-full flex items-center justify-center mb-4`}>
               <Package className={`w-10 h-10 text-${tColor}-400`} />
             </div>
-            <h2 className="text-xl font-black text-gray-900 mb-2">No orders yet</h2>
-            <p className="text-gray-500 mb-6 text-sm">Customers haven&apos;t placed any orders yet.</p>
+            <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2">No orders yet</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">Customers haven&apos;t placed any orders yet.</p>
           </div>
         ) : (
           orders.map((order) => {
@@ -231,19 +231,19 @@ export default function VendorOrdersPage() {
                 key={order.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden"
+                className="bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-100 dark:border-[#2A2A3A] shadow-sm overflow-hidden"
               >
                 {/* Card Header (Customer Info) */}
-                <div className="p-5 border-b border-gray-50 flex items-start gap-4">
+                <div className="p-5 border-b border-gray-50 dark:border-[#1F1F2E] flex items-start gap-4">
                   <div className={`w-14 h-14 bg-${tColor}-50 rounded-2xl overflow-hidden shrink-0 border border-${tColor}-100 shadow-sm flex items-center justify-center text-${tColor}-600`}>
                     <User className="w-7 h-7" />
                   </div>
                   <div className="flex-1 min-w-0 pt-0.5">
-                    <h3 className="font-black text-gray-900 text-lg truncate leading-tight mb-1">
+                    <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg truncate leading-tight mb-1">
                       {customerName}
                     </h3>
                     <div className="space-y-1">
-                      <div className="flex items-start gap-1.5 text-xs text-gray-500 font-medium">
+                      <div className="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                         <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
                           {order.delivery_address?.locationName || "Unknown Location"}
@@ -257,7 +257,7 @@ export default function VendorOrdersPage() {
                           <span>Call: {order.customer_mobile}</span>
                         </a>
                       ) : (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                           <Phone className="w-3.5 h-3.5 shrink-0" />
                           <span>No mobile provided</span>
                         </div>
@@ -265,7 +265,7 @@ export default function VendorOrdersPage() {
                     </div>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-lg font-black text-gray-900">₹{(parseFloat(order.subtotal || "0") + parseFloat(order.delivery_charge || "0")).toFixed(2)}</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-gray-100">₹{(parseFloat(order.subtotal || "0") + parseFloat(order.delivery_charge || "0")).toFixed(2)}</p>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
                       {new Date(order.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
                     </p>
@@ -273,21 +273,21 @@ export default function VendorOrdersPage() {
                 </div>
 
                 {/* Status Banner */}
-                <div className={`px-5 py-3 border-b border-gray-50 flex items-center justify-between`}>
+                <div className={`px-5 py-3 border-b border-gray-50 dark:border-[#1F1F2E] flex items-center justify-between`}>
                   <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
                     {getStatusIcon(order.status)}
                     {order.status}
                   </div>
-                  <p className="text-xs font-semibold text-gray-500">
+                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                     {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
                   </p>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="p-4 bg-gray-50/50 flex gap-3">
+                <div className="p-4 bg-gray-50 dark:bg-[#151522]/50 flex gap-3">
                   <button
                     onClick={() => setSelectedOrderForItems(order)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white border-2 border-gray-200 hover:border-gray-300 rounded-xl text-sm font-bold text-gray-700 transition-all active:scale-[0.98]"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-[#0D0D17] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all active:scale-[0.98]"
                   >
                     <Eye className="w-4 h-4" />
                     See Items
@@ -308,7 +308,7 @@ export default function VendorOrdersPage() {
         {/* Infinite Scroll Loader */}
         {hasMore && orders.length > 0 && (
           <div ref={lastElementRef} className="w-full h-16 flex items-center justify-center mt-6">
-            {loadingMore && <div className="w-8 h-8 border-4 border-gray-500 border-t-transparent rounded-full animate-spin"></div>}
+            {loadingMore && <div className="w-8 h-8 border-4 border-gray-50 dark:border-[#1F1F2E]0 border-t-transparent rounded-full animate-spin"></div>}
           </div>
         )}
       </div>
@@ -329,37 +329,37 @@ export default function VendorOrdersPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: "100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-md bg-white rounded-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+              className="relative w-full max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
             >
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] flex items-center justify-between sticky top-0 bg-white dark:bg-[#0D0D17] z-10">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 bg-${tColor}-100 rounded-xl flex items-center justify-center text-${tColor}-600`}>
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Order Items</h2>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{selectedOrderForItems.first_name} {selectedOrderForItems.last_name}</p>
+                    <h2 className="font-black text-gray-900 dark:text-gray-100 text-lg">Order Items</h2>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{selectedOrderForItems.first_name} {selectedOrderForItems.last_name}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setSelectedOrderForItems(null)}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+                  className="p-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 rounded-full text-gray-600 dark:text-gray-400 transition-colors"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
 
               <div className="p-6 overflow-y-auto custom-scrollbar">
-                <div className="mb-6 p-5 bg-white rounded-2xl border-2 border-gray-100 shadow-sm relative overflow-hidden">
+                <div className="mb-6 p-5 bg-white dark:bg-[#0D0D17] rounded-2xl border-2 border-gray-100 dark:border-[#2A2A3A] shadow-sm relative overflow-hidden">
                   <div className={`absolute top-0 left-0 w-1.5 h-full bg-${tColor}-500`}></div>
-                  <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <MapPin className={`w-4 h-4 text-${tColor}-500`} />
                     Delivery Information
                   </h4>
                   <div className="space-y-4">
                     <div>
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Full Address</p>
-                      <p className="text-sm font-black text-gray-800 leading-snug">
+                      <p className="text-sm font-black text-gray-800 dark:text-gray-200 leading-snug">
                         {selectedOrderForItems.delivery_address?.locationName || "Unknown Location"}
                         {selectedOrderForItems.delivery_address?.landmark ? `, ${selectedOrderForItems.delivery_address.landmark}` : ""}
                         {selectedOrderForItems.delivery_address?.pincode ? ` - ${selectedOrderForItems.delivery_address.pincode}` : ""}
@@ -385,19 +385,19 @@ export default function VendorOrdersPage() {
                           <div className={`w-2 h-2 rounded-full ${item.type === 'veg' ? 'bg-green-500' : 'bg-red-500'}`} />
                         </div>
                         <div>
-                          <p className="font-bold text-gray-900 leading-tight">{item.name}</p>
-                          <p className="text-xs font-medium text-gray-500 mt-0.5">₹{item.price} × {item.quantity || item.qty}</p>
+                          <p className="font-bold text-gray-900 dark:text-gray-100 leading-tight">{item.name}</p>
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-0.5">₹{item.price} × {item.quantity || item.qty}</p>
                         </div>
                       </div>
-                      <div className="font-black text-gray-900">
+                      <div className="font-black text-gray-900 dark:text-gray-100">
                         ₹{(item.price * (item.quantity || item.qty || 1)).toFixed(2)}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="mt-6 pt-5 border-t border-gray-100 border-dashed space-y-2">
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                <div className="mt-6 pt-5 border-t border-gray-100 dark:border-[#2A2A3A] border-dashed space-y-2">
+                  <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-400">
                     <span>Item Total</span>
                     <span>₹{selectedOrderForItems.subtotal}</span>
                   </div>
@@ -407,14 +407,14 @@ export default function VendorOrdersPage() {
                       <span>+ ₹{selectedOrderForItems.delivery_charge}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-lg font-black text-gray-900 pt-3 border-t border-gray-100 mt-3">
+                  <div className="flex justify-between text-lg font-black text-gray-900 dark:text-gray-100 pt-3 border-t border-gray-100 dark:border-[#2A2A3A] mt-3">
                     <span>Grand Total</span>
                     <span>₹{(parseFloat(selectedOrderForItems.subtotal || "0") + parseFloat(selectedOrderForItems.delivery_charge || "0")).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="p-5 bg-gray-50 border-t border-gray-100">
+              <div className="p-5 bg-gray-50 dark:bg-[#151522] border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setSelectedOrderForItems(null)}
                   className="w-full py-3.5 bg-gray-900 hover:bg-black text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]"
@@ -445,28 +445,28 @@ export default function VendorOrdersPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6"
+              className="relative w-full max-w-sm bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6"
             >
               <div className="flex items-center justify-between mb-5">
-                <h3 className="text-lg font-black text-gray-900">Update Status</h3>
+                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100">Update Status</h3>
                 <button onClick={() => {
                   setStatusModalOrder(null);
                   setPendingStatusUpdate(null);
-                }} className="p-1.5 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500 transition-colors">
+                }} className="p-1.5 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 rounded-full text-gray-500 dark:text-gray-400 transition-colors">
                   <X className="w-4 h-4" />
                 </button>
               </div>
 
-              <div className="mb-5 p-5 bg-white rounded-2xl border-2 border-gray-100 shadow-sm relative overflow-hidden">
+              <div className="mb-5 p-5 bg-white dark:bg-[#0D0D17] rounded-2xl border-2 border-gray-100 dark:border-[#2A2A3A] shadow-sm relative overflow-hidden">
                 <div className={`absolute top-0 left-0 w-1.5 h-full bg-${tColor}-500`}></div>
-                <h4 className="text-sm font-black text-gray-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <MapPin className={`w-4 h-4 text-${tColor}-500`} />
                   Delivery Information
                 </h4>
                 <div className="space-y-4">
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Full Address</p>
-                    <p className="text-sm font-black text-gray-800 leading-snug">
+                    <p className="text-sm font-black text-gray-800 dark:text-gray-200 leading-snug">
                       {statusModalOrder.delivery_address?.locationName || "Unknown Location"}
                       {statusModalOrder.delivery_address?.landmark ? `, ${statusModalOrder.delivery_address.landmark}` : ""}
                       {statusModalOrder.delivery_address?.pincode ? ` - ${statusModalOrder.delivery_address.pincode}` : ""}
@@ -499,7 +499,7 @@ export default function VendorOrdersPage() {
                     className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-bold ${
                       (statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status
                         ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700`
-                        : "border-gray-100 bg-white text-gray-700 hover:border-gray-200 hover:bg-gray-50"
+                        : "border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522]"
                     }`}
                   >
                     {status}
@@ -511,8 +511,8 @@ export default function VendorOrdersPage() {
               </div>
 
               {pendingStatusUpdate === "Confirmed" && (
-                <div className="mt-4 p-4 bg-gray-50 rounded-2xl border border-gray-200 animate-in slide-in-from-top-2">
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                <div className="mt-4 p-4 bg-gray-50 dark:bg-[#151522] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] animate-in slide-in-from-top-2">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
                     Delivery Charge (₹)
                   </label>
                   <input
@@ -533,7 +533,7 @@ export default function VendorOrdersPage() {
               )}
               
               {statusLoading && (
-                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center rounded-3xl z-10">
+                <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/70 backdrop-blur-sm flex items-center justify-center rounded-3xl z-10">
                   <Loader2 className={`w-8 h-8 animate-spin text-${tColor}-500`} />
                 </div>
               )}

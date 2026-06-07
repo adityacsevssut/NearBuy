@@ -15,7 +15,7 @@ import GeoapifySearch, { ResolvedGeoapifyAddress } from "./GeoapifySearch";
 const MapPicker = dynamic(() => import("./MapPicker"), {
   ssr: false,
   loading: () => (
-    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+    <div className="w-full h-full bg-gray-100 dark:bg-[#1F1F2E] flex items-center justify-center">
       <div className="flex flex-col items-center gap-3 text-gray-400">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
         <span className="text-sm font-medium">Loading map…</span>
@@ -221,7 +221,7 @@ export default function LocationModal() {
               exit={{ opacity: 0, scale: 0.92, y: 20 }}
               transition={{ type: "spring", damping: 28, stiffness: 320 }}
               className={[
-                "pointer-events-auto w-full max-w-md bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden",
+                "pointer-events-auto w-full max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl flex flex-col overflow-hidden",
                 view === "map" ? "h-[85dvh]" : "max-h-[88dvh]",
               ].join(" ")}
             >
@@ -230,12 +230,12 @@ export default function LocationModal() {
               {view === "menu" && (
                 <div className="flex flex-col overflow-y-auto">
                   {/* Header */}
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+                  <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-[#2A2A3A] shrink-0">
                     <div>
-                      <h2 className="text-xl font-black text-gray-900 tracking-tight">Set Delivery Location</h2>
-                      <p className="text-sm text-gray-500 mt-0.5">How would you like to set your location?</p>
+                      <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Set Delivery Location</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">How would you like to set your location?</p>
                     </div>
-                    <button onClick={handleClose} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    <button onClick={handleClose} className="p-2 rounded-full bg-gray-100 dark:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 hover:bg-gray-200 transition-colors">
                       <X className="w-5 h-5" />
                     </button>
                   </div>
@@ -245,36 +245,36 @@ export default function LocationModal() {
                     <button
                       onClick={handleDetectAndOpenMap}
                       disabled={isDetecting}
-                      className="w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-200 hover:border-orange-400 hover:shadow-md rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]"
+                      className="w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-orange-50 dark:from-orange-900/20 to-amber-50 dark:to-amber-900/20 border-2 border-orange-200 dark:border-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]"
                     >
                       <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30">
                         {isDetecting ? <Loader2 className="w-6 h-6 text-white animate-spin" /> : <Crosshair className="w-6 h-6 text-white" />}
                       </div>
                       <div className="text-left">
-                        <p className="font-black text-gray-800 text-[15px] group-hover:text-orange-700">
+                        <p className="font-black text-gray-800 dark:text-gray-200 text-[15px] group-hover:text-orange-700 dark:group-hover:text-orange-400">
                           {isDetecting ? "Detecting your location…" : "Use GPS / Current Location"}
                         </p>
-                        <p className="text-xs text-gray-500 mt-0.5">Automatically detect where you are</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Automatically detect where you are</p>
                       </div>
                       {!isDetecting && <Navigation className="w-5 h-5 text-orange-400 ml-auto shrink-0" />}
                     </button>
 
                     <div className="flex items-center gap-3 px-2">
-                      <div className="flex-1 h-px bg-gray-100" />
+                      <div className="flex-1 h-px bg-gray-100 dark:bg-[#1F1F2E]" />
                       <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest">OR</span>
-                      <div className="flex-1 h-px bg-gray-100" />
+                      <div className="flex-1 h-px bg-gray-100 dark:bg-[#1F1F2E]" />
                     </div>
 
                     <button
                       onClick={() => setView("search")}
-                      className="w-full flex items-center gap-4 px-5 py-4 bg-gray-50 border-2 border-gray-200 hover:border-gray-400 hover:shadow-md rounded-2xl transition-all group active:scale-[0.98]"
+                      className="w-full flex items-center gap-4 px-5 py-4 bg-gray-50 dark:bg-[#151522] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-400 dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group active:scale-[0.98]"
                     >
                       <div className="w-11 h-11 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
                         <Search className="w-6 h-6 text-white" />
                       </div>
                       <div className="text-left">
-                        <p className="font-black text-gray-800 text-[15px] group-hover:text-gray-900">Search by Name or Pincode</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Type an area, street or PIN code</p>
+                        <p className="font-black text-gray-800 dark:text-gray-200 text-[15px] group-hover:text-gray-900 dark:group-hover:text-white">Search by Name or Pincode</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Type an area, street or PIN code</p>
                       </div>
                       <Building2 className="w-5 h-5 text-gray-400 ml-auto shrink-0" />
                     </button>
@@ -299,13 +299,13 @@ export default function LocationModal() {
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => e.key === "Enter" && handlePickSaved(addr)}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 bg-white border border-gray-200 hover:border-orange-300 hover:bg-orange-50/60 rounded-2xl transition-all group text-left shadow-sm cursor-pointer"
+                            className="w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 dark:hover:border-orange-500/50 hover:bg-orange-50/60 dark:hover:bg-orange-500/10 rounded-2xl transition-all group text-left shadow-sm cursor-pointer"
                           >
-                            <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-200 transition-colors">
+                            <div className="w-9 h-9 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-200 dark:group-hover:bg-orange-500/30 transition-colors">
                               <MapPin className="w-4 h-4 text-orange-500" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[14px] font-black text-gray-800 leading-tight line-clamp-2 pr-2 group-hover:text-orange-700">
+                              <p className="text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2 group-hover:text-orange-700 dark:group-hover:text-orange-400">
                                 {addr.landmark ? addr.landmark : addr.name}
                               </p>
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
@@ -337,16 +337,16 @@ export default function LocationModal() {
               {/* ════════════ SEARCH VIEW ════════════ */}
               {view === "search" && (
                 <div className="flex flex-col overflow-hidden" style={{ maxHeight: "88dvh" }}>
-                  <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 shrink-0">
+                  <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-[#2A2A3A] shrink-0">
                     <button
                       onClick={() => { setView("menu"); setResolvedAddress(null); setMapCoords(null); }}
-                      className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                      className="p-2 rounded-full bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 text-gray-600 dark:text-gray-400 transition-colors"
                     >
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <div>
-                      <h2 className="text-xl font-black text-gray-900 tracking-tight">Search Location</h2>
-                      <p className="text-sm text-gray-500 mt-0.5">Enter area name, street or pincode</p>
+                      <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Search Location</h2>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">Enter area name, street or pincode</p>
                     </div>
                   </div>
                   <div className="flex flex-col flex-1 overflow-y-auto p-5 space-y-4">
@@ -367,7 +367,7 @@ export default function LocationModal() {
                     />
                     {mapCoords && resolvedAddress && (
                       <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-3">
-                        <div className="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 shadow-sm">
+                        <div className="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 dark:border-[#2A2A3A] shadow-sm">
                           <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={(lat, lng) => { setMapCoords({ lat, lng }); resolveAddress(lat, lng); }} />
                         </div>
                         <div className="flex flex-col gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
@@ -376,8 +376,8 @@ export default function LocationModal() {
                               <MapPin className="w-4 h-4 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-black text-gray-900 text-[15px] leading-tight">{resolvedAddress.name}</p>
-                              <p className="text-[11px] text-gray-500 font-medium mt-1 mb-3 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
+                              <p className="font-black text-gray-900 dark:text-gray-100 text-[15px] leading-tight">{resolvedAddress.name}</p>
+                              <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1 mb-3 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs text-orange-700 font-bold w-16">PIN:</span>
@@ -386,7 +386,7 @@ export default function LocationModal() {
                                     maxLength={6}
                                     value={resolvedAddress.pincode}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
+                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
                                     placeholder="Auto-fetched or enter PIN"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -397,7 +397,7 @@ export default function LocationModal() {
                                     type="text"
                                     value={resolvedAddress.landmark || ""}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-white border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
+                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
                                     placeholder="E.g. Plot Name, Hostel Name"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -429,26 +429,26 @@ export default function LocationModal() {
               {/* ════════════ MAP VIEW (GPS) ════════════ */}
               {view === "map" && (
                 <div className="flex flex-col flex-1 min-h-0">
-                  <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 shrink-0 bg-white">
-                    <button onClick={() => setView("menu")} className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
+                  <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A] shrink-0 bg-white dark:bg-[#0D0D17]">
+                    <button onClick={() => setView("menu")} className="p-2 rounded-full bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 text-gray-600 dark:text-gray-400 transition-colors">
                       <ChevronLeft className="w-5 h-5" />
                     </button>
                     <div>
-                      <h2 className="text-[17px] font-black text-gray-900 tracking-tight">Confirm Your Location</h2>
-                      <p className="text-xs text-gray-500 font-medium">Drag the map to adjust your location</p>
+                      <h2 className="text-[17px] font-black text-gray-900 dark:text-gray-100 tracking-tight">Confirm Your Location</h2>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Drag the map to adjust your location</p>
                     </div>
                   </div>
                   <div className="flex-1 relative min-h-0">
                     {mapCoords && <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={handleMapMove} />}
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-bold text-gray-600 pointer-events-none whitespace-nowrap">
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white dark:bg-[#0D0D17]/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-[#2A2A3A] text-xs font-bold text-gray-600 dark:text-gray-400 pointer-events-none whitespace-nowrap">
                       📍 Drag the map to place the pin
                     </div>
                   </div>
-                  <div className="shrink-0 bg-white border-t border-gray-100 p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
+                  <div className="shrink-0 bg-white dark:bg-[#0D0D17] border-t border-gray-100 dark:border-[#2A2A3A] p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
                     {isResolvingAddress ? (
                       <div className="flex items-center gap-3 py-2">
                         <Loader2 className="w-5 h-5 animate-spin text-orange-500 shrink-0" />
-                        <span className="text-sm font-medium text-gray-500">Resolving address…</span>
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Resolving address…</span>
                       </div>
                     ) : resolvedAddress ? (
                       <>
@@ -457,7 +457,7 @@ export default function LocationModal() {
                             <MapPin className="w-5 h-5 text-orange-500" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-black text-gray-900 text-[16px] leading-tight">{resolvedAddress.name}</p>
+                            <p className="font-black text-gray-900 dark:text-gray-100 text-[16px] leading-tight">{resolvedAddress.name}</p>
                             <p className="text-[11px] text-gray-400 font-medium mt-1 mb-2 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
@@ -467,7 +467,7 @@ export default function LocationModal() {
                                   maxLength={6}
                                   value={resolvedAddress.pincode}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1 min-w-0"
+                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:bg-[#0D0D17] transition-colors flex-1 min-w-0"
                                   placeholder="Auto-fetched or enter PIN"
                                   onClick={(e) => e.stopPropagation()}
                                 />
@@ -478,7 +478,7 @@ export default function LocationModal() {
                                   type="text"
                                   value={resolvedAddress.landmark || ""}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 bg-gray-50 border border-gray-200 rounded outline-none focus:border-orange-400 focus:bg-white transition-colors flex-1 min-w-0"
+                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:bg-[#0D0D17] transition-colors flex-1 min-w-0"
                                   placeholder="E.g. Plot Name, Hostel Name"
                                   onClick={(e) => e.stopPropagation()}
                                 />

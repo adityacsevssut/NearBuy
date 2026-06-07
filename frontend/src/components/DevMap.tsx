@@ -76,7 +76,7 @@ export default function DevMap({
   const useLeafletFallback = !mapboxToken || mapError;
 
   return (
-    <div className="relative w-full h-full bg-gray-100 rounded-xl overflow-hidden">
+    <div className="relative w-full h-full bg-gray-100 dark:bg-[#1F1F2E] rounded-xl overflow-hidden">
       {useLeafletFallback ? (
         <MapContainer
           center={[lat, lon]}
@@ -140,13 +140,13 @@ export default function DevMap({
       </div>
 
       {title && (
-        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[20] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-xs font-bold text-gray-700 pointer-events-none whitespace-nowrap max-w-[90%] truncate">
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[20] bg-white dark:bg-[#0D0D17]/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-[#2A2A3A] text-xs font-bold text-gray-700 dark:text-gray-300 pointer-events-none whitespace-nowrap max-w-[90%] truncate">
           {title}
         </div>
       )}
 
       {onLocationChange && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[20] bg-white/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 text-[10px] font-bold text-gray-500 pointer-events-none whitespace-nowrap">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-[20] bg-white dark:bg-[#0D0D17]/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-[#2A2A3A] text-[10px] font-bold text-gray-500 dark:text-gray-400 pointer-events-none whitespace-nowrap">
           📍 Drag map to adjust
         </div>
       )}

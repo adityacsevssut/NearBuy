@@ -48,12 +48,12 @@ export default function ShareRedirectPage() {
   }, [id, router]);
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col items-center justify-center p-4">
       <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
         <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
       </div>
-      <h2 className="text-xl font-black text-gray-800">Opening link...</h2>
-      <p className="text-sm text-gray-500 font-medium mt-1">Taking you to NearBuy.</p>
+      <h2 className="text-xl font-black text-gray-800 dark:text-gray-200">Opening link...</h2>
+      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">Taking you to NearBuy.</p>
     </div>
   );
 }

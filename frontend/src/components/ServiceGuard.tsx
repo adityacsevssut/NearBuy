@@ -191,25 +191,25 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     return (
       <div className="min-h-screen bg-orange-50/20 flex flex-col items-center justify-center p-4 select-none">
         {/* Simple card container */}
-        <div className="max-w-md w-full bg-white rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 flex flex-col items-center">
+        <div className="max-w-md w-full bg-white dark:bg-[#0D0D17] rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col items-center">
           {/* Logo */}
           <div className="flex items-center -skew-x-6 pr-1 mb-6">
             <span className="font-black text-4xl tracking-tighter drop-shadow-sm text-orange-500">
               N
             </span>
-            <span className="text-black font-black text-4xl tracking-tighter drop-shadow-sm">
+            <span className="text-black dark:text-white font-black text-4xl tracking-tighter drop-shadow-sm">
               B
             </span>
-            <span className="font-black text-2xl tracking-tight text-gray-800 ml-1.5 skew-x-6">
+            <span className="font-black text-2xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
               <span className="text-orange-500">Near</span>Buy
             </span>
           </div>
 
           {/* Texts */}
-          <h2 className="text-2xl font-black text-gray-900 mb-1 tracking-tight leading-tight">
+          <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight leading-tight">
             Welcome to <span className="text-orange-500">Near</span>Buy
           </h2>
-          <p className="text-gray-500 font-bold text-sm tracking-tight mb-8">
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-tight mb-8">
             Explore Your Nearest Market
           </p>
 
@@ -228,7 +228,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
   if (status === "denied") {
     return (
-      <div className="min-h-screen bg-white flex flex-col pt-16 font-sans">
+      <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16 font-sans">
         <Navbar />
         <main className="flex-1 flex flex-col items-center p-6 mt-4 text-center">
           
@@ -251,7 +251,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           {/* Dotted divider */}
           <div className="w-full max-w-md mx-auto flex items-center justify-center gap-3 mb-10 overflow-hidden opacity-30 px-4">
             {[...Array(15)].map((_, i) => (
-              <div key={i} className="w-1.5 h-1.5 rotate-45 bg-gray-500 flex-shrink-0"></div>
+              <div key={i} className="w-1.5 h-1.5 rotate-45 bg-gray-50 dark:bg-[#151522]0 flex-shrink-0"></div>
             ))}
           </div>
 
@@ -278,7 +278,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               </button>
               <button 
                 onClick={() => toast.success("We'll notify you when we expand to your area!")}
-                className="w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 rounded-xl text-gray-700 font-bold transition-all active:scale-[0.98]"
+                className="w-full py-4 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] rounded-xl text-gray-700 dark:text-gray-300 font-bold transition-all active:scale-[0.98]"
               >
                 Notify Me
               </button>

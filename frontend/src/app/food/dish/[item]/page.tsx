@@ -126,14 +126,14 @@ export default function DishPage() {
   const filteredDishes = dishes;
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pt-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] flex flex-col pt-16">
       <Navbar />
 
       {/* Sticky Header */}
-      <div className="sticky top-16 z-40 bg-white border-b border-gray-200 shadow-sm">
+      <div className="sticky top-16 z-40 bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center gap-3 py-4">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-orange-600 transition-colors bg-white/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200/50 hover:border-orange-200 flex-shrink-0">
+            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200 flex-shrink-0">
               <ArrowLeft className="w-4 h-4" /> Back to Home
             </Link>
 
@@ -148,7 +148,7 @@ export default function DishPage() {
                       ? "bg-orange-500 border-orange-500 text-white"
                       : showFilterDropdown
                       ? "bg-orange-50 border-orange-400 text-orange-600"
-                      : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                      : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
                   }`}
                 >
                   <Filter className="w-3 h-3" />
@@ -157,8 +157,8 @@ export default function DishPage() {
                 </button>
 
                 {showFilterDropdown && (
-                  <div className="absolute right-0 top-full mt-2 z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden min-w-[240px] max-w-[calc(100vw-32px)]">
-                    <div className="px-3 pt-2.5 pb-2 border-b border-gray-100">
+                  <div className="absolute right-0 top-full mt-2 z-50 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden min-w-[240px] max-w-[calc(100vw-32px)]">
+                    <div className="px-3 pt-2.5 pb-2 border-b border-gray-100 dark:border-[#2A2A3A]">
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">DIETARY PREFERENCE</p>
                     </div>
                     <div className="py-1 max-h-[40vh] overflow-y-auto">
@@ -173,7 +173,7 @@ export default function DishPage() {
                           className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
                             foodPref === pref.id
                               ? "bg-orange-50 text-orange-600"
-                              : "text-gray-700 hover:bg-gray-50"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
                           }`}
                         >
                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${foodPref === pref.id ? 'border-orange-500' : 'border-gray-300'}`}>
@@ -184,7 +184,7 @@ export default function DishPage() {
                       ))}
                     </div>
 
-                    <div className="px-3 pt-2.5 pb-2 border-y border-gray-100 bg-gray-50">
+                    <div className="px-3 pt-2.5 pb-2 border-y border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]">
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">PRICING</p>
                     </div>
                     <div className="py-1">
@@ -199,7 +199,7 @@ export default function DishPage() {
                           className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
                             sortOrder === sort.id
                               ? "bg-orange-50 text-orange-600"
-                              : "text-gray-700 hover:bg-gray-50"
+                              : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
                           }`}
                         >
                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${sortOrder === sort.id ? 'border-orange-500' : 'border-gray-300'}`}>
@@ -232,14 +232,14 @@ export default function DishPage() {
               return (
                 <div
                   key={dish.id}
-                  className={`bg-white p-4 rounded-2xl border border-gray-200 shadow-sm transition-all duration-300 flex gap-4 ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
+                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
                       {/* Veg/Non-veg icon & Badge */}
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
+                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-orange-600" : "bg-red-600"}`} />
                         </span>
                         {dish.badge && (
@@ -249,12 +249,12 @@ export default function DishPage() {
                         )}
                       </div>
 
-                      <h3 className="font-black text-gray-900 text-lg tracking-tight mb-0.5">
+                      <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight mb-0.5">
                         {dish.name}
                       </h3>
                       
                       {/* Vendor name with location pin styling */}
-                      <p className="text-sm font-semibold text-gray-600 mb-2">
+                      <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
                         by <span className="text-orange-700">{dish.vendor}</span>
                       </p>
 
@@ -268,11 +268,11 @@ export default function DishPage() {
                             <span className="text-gray-400 font-semibold line-through text-sm">₹{dish.actual_price}</span>
                           </>
                         )}
-                        <span className="text-base font-black text-gray-900">₹{dish.price}</span>
+                        <span className="text-base font-black text-gray-900 dark:text-gray-100">₹{dish.price}</span>
                       </div>
 
-                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                        <span className="flex items-center gap-1 font-bold text-gray-700">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400 mb-3">
+                        <span className="flex items-center gap-1 font-bold text-gray-700 dark:text-gray-300">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                           {dish.rating} <span className="font-normal text-gray-400">({dish.reviews})</span>
                         </span>
@@ -289,7 +289,7 @@ export default function DishPage() {
 
                   {/* Image & Action Section */}
                   <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
-                    <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 flex items-center justify-center text-6xl shadow-inner relative overflow-hidden">
+                    <div className="w-32 h-32 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-100 dark:border-[#2A2A3A] flex items-center justify-center text-6xl shadow-inner relative overflow-hidden">
                       {dish.image_url ? (
                         <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
                       ) : (
@@ -313,7 +313,7 @@ export default function DishPage() {
                               }
                             } catch (err) {}
                           }}
-                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform bg-white/80 border-gray-200 hover:scale-110`}
+                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform bg-white dark:bg-[#0D0D17]/80 border-gray-200 dark:border-[#2A2A3A] hover:scale-110`}
                           title="Share"
                         >
                           <Send className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
@@ -338,7 +338,7 @@ export default function DishPage() {
                               is_available: dish.is_available
                             });
                           }}
-                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 border-gray-300 cursor-not-allowed' : 'bg-white/80 border-gray-200 hover:scale-110'}`}
+                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 dark:bg-[#1F1F2E] border-gray-300 cursor-not-allowed' : 'bg-white dark:bg-[#0D0D17]/80 border-gray-200 dark:border-[#2A2A3A] hover:scale-110'}`}
                           disabled={isOutOfRange}
                         >
                           <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
@@ -353,23 +353,23 @@ export default function DishPage() {
 
                     {/* Quantity Selector and ADD Button */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                      <div className={`flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <div className={`flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange ? 'opacity-50 pointer-events-none' : ''}`}>
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
                             setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
                           }}
-                          className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
                         >
                           -
                         </button>
-                        <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                        <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">{quantities[dish.id] || 1}</span>
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
                             setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
                           }}
-                          className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
                         >
                           +
                         </button>
@@ -395,10 +395,10 @@ export default function DishPage() {
                         disabled={isOutOfRange}
                         className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
                           isOutOfRange 
-                            ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                            ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
                             : inCartCount > 0
                               ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                              : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                              : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
                         }`}
                       >
                         {inCartCount > 0 ? `ADDED (${inCartCount})` : "ADD"}
@@ -410,14 +410,14 @@ export default function DishPage() {
             })}
 
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
                 <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="font-black text-gray-700 text-xl">Loading dishes...</p>
+                <p className="font-black text-gray-700 dark:text-gray-300 text-xl">Loading dishes...</p>
               </div>
             ) : filteredDishes.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
+              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
                 <span className="text-6xl mb-4">🍽️</span>
-                <p className="font-black text-gray-700 text-xl">No {itemName} found</p>
+                <p className="font-black text-gray-700 dark:text-gray-300 text-xl">No {itemName} found</p>
                 <p className="text-sm mt-2 font-medium">Try disabling the Veg Only filter or check back later.</p>
               </div>
             )}

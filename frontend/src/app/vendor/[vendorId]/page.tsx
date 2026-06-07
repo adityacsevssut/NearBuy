@@ -146,7 +146,7 @@ export default function VendorPage() {
     .filter((cat) => selectedCategory === null || cat === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col pt-16">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] flex flex-col pt-16">
       <Navbar />
 
       {/* Warning Banner */}
@@ -164,22 +164,22 @@ export default function VendorPage() {
         </div>
       ) : !vendor ? (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-gray-500 font-bold">Restaurant not found.</p>
+          <p className="text-gray-500 dark:text-gray-400 font-bold">Restaurant not found.</p>
         </div>
       ) : (
         <>
-          <div className="bg-white border-b border-gray-100 relative overflow-visible">
+          <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] relative overflow-visible">
             {/* Blurred Background Image */}
             {vendor.image && (
               <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
                 <img src={vendor.image} alt="Background" className="w-full h-full object-cover opacity-15 blur-3xl scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-white via-white/90 to-white/20" />
+                <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#0D0D17] via-white/90 dark:via-[#0D0D17]/90 to-white/20 dark:to-[#0D0D17]/20" />
               </div>
             )}
             
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative z-30 overflow-visible">
               <div className="flex items-center gap-2 mb-6">
-                <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 hover:text-orange-600 transition-colors bg-white/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200/50 hover:border-orange-200">
+                <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200">
                   <ArrowLeft className="w-4 h-4" /> Back to Home
                 </Link>
               </div>
@@ -187,14 +187,14 @@ export default function VendorPage() {
               <div className="flex gap-4 md:gap-6 items-start mb-2">
                 <div className="flex-1 min-w-0 pt-1 md:pt-2">
                   <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    <h1 className="font-black text-3xl md:text-4xl text-gray-900 tracking-tight">
+                    <h1 className="font-black text-3xl md:text-4xl text-gray-900 dark:text-gray-100 tracking-tight">
                       {vendor.name}
                     </h1>
                     <span className={`text-[10px] md:text-xs px-2.5 py-1 rounded-full font-black shadow-sm uppercase tracking-wider ${vendor.badgeColor || 'bg-orange-100 text-orange-700'}`}>
                       {vendor.badge || 'Bestseller'}
                     </span>
                   </div>
-                  <p className="text-sm md:text-base font-semibold text-gray-500 mb-3">{vendor.cuisine}</p>
+                  <p className="text-sm md:text-base font-semibold text-gray-500 dark:text-gray-400 mb-3">{vendor.cuisine}</p>
                   
                   {(vendor.landmark || vendor.manualAddress || vendor.gpsAddress) && (
                     <p className="text-xs md:text-sm font-medium text-gray-400 mb-4 flex items-center gap-1.5 line-clamp-1">
@@ -228,7 +228,7 @@ export default function VendorPage() {
                             ? "bg-orange-500 border-orange-500 text-white"
                             : showCatDropdown
                             ? "bg-orange-50 border-orange-400 text-orange-600"
-                            : "bg-white/80 backdrop-blur-md border-gray-200 text-gray-700 hover:border-gray-300"
+                            : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
                         }`}
                       >
                         <LayoutList className="w-3 h-3" />
@@ -238,8 +238,8 @@ export default function VendorPage() {
 
                       {/* Dropdown */}
                       {showCatDropdown && (
-                        <div className="absolute left-0 top-full mt-2 z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden min-w-[220px]">
-                          <div className="px-3 pt-2.5 pb-2 border-b border-gray-100">
+                        <div className="absolute left-0 top-full mt-2 z-50 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden min-w-[220px]">
+                          <div className="px-3 pt-2.5 pb-2 border-b border-gray-100 dark:border-[#2A2A3A]">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">CATEGORIES</p>
                           </div>
                           <div className="py-1 max-h-64 overflow-y-auto">
@@ -249,7 +249,7 @@ export default function VendorPage() {
                               className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${
                                 selectedCategory === null
                                   ? "bg-orange-50 text-orange-600"
-                                  : "text-gray-600 hover:bg-gray-50"
+                                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
                               }`}
                             >
                               <span>All Categories</span>
@@ -266,7 +266,7 @@ export default function VendorPage() {
                                   className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${
                                     selectedCategory === cat
                                       ? "bg-orange-50 text-orange-600"
-                                      : "text-gray-700 hover:bg-gray-50"
+                                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
                                   }`}
                                 >
                                   <span className="truncate pr-2">{cat}</span>
@@ -288,7 +288,7 @@ export default function VendorPage() {
                             ? "bg-orange-500 border-orange-500 text-white"
                             : showFilterDropdown
                             ? "bg-orange-50 border-orange-400 text-orange-600"
-                            : "bg-white/80 backdrop-blur-md border-gray-200 text-gray-700 hover:border-gray-300"
+                            : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
                         }`}
                       >
                         <Filter className="w-3 h-3" />
@@ -297,8 +297,8 @@ export default function VendorPage() {
                       </button>
 
                       {showFilterDropdown && (
-                        <div className="absolute left-0 min-[400px]:right-0 min-[400px]:left-auto top-full mt-2 z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl overflow-hidden min-w-[240px] max-w-[calc(100vw-32px)]">
-                          <div className="px-3 pt-2.5 pb-2 border-b border-gray-100">
+                        <div className="absolute left-0 min-[400px]:right-0 min-[400px]:left-auto top-full mt-2 z-50 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden min-w-[240px] max-w-[calc(100vw-32px)]">
+                          <div className="px-3 pt-2.5 pb-2 border-b border-gray-100 dark:border-[#2A2A3A]">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">DIETARY PREFERENCE</p>
                           </div>
                           <div className="py-1 max-h-[40vh] overflow-y-auto">
@@ -316,7 +316,7 @@ export default function VendorPage() {
                                 className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
                                   foodPref === pref.id
                                     ? "bg-orange-50 text-orange-600"
-                                    : "text-gray-700 hover:bg-gray-50"
+                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
                                 }`}
                               >
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${foodPref === pref.id ? 'border-orange-500' : 'border-gray-300'}`}>
@@ -327,7 +327,7 @@ export default function VendorPage() {
                             ))}
                           </div>
 
-                          <div className="px-3 pt-2.5 pb-2 border-y border-gray-100 bg-gray-50">
+                          <div className="px-3 pt-2.5 pb-2 border-y border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]">
                             <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">PRICING</p>
                           </div>
                           <div className="py-1">
@@ -342,7 +342,7 @@ export default function VendorPage() {
                                 className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
                                   sortOrder === sort.id
                                     ? "bg-orange-50 text-orange-600"
-                                    : "text-gray-700 hover:bg-gray-50"
+                                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
                                 }`}
                               >
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${sortOrder === sort.id ? 'border-orange-500' : 'border-gray-300'}`}>
@@ -366,21 +366,21 @@ export default function VendorPage() {
               <div className="space-y-10">
                 {categoryNames.map(category => (
                   <div key={category} className="space-y-4">
-                    <h2 className="font-black text-2xl text-gray-900 tracking-tight">{category}</h2>
+                    <h2 className="font-black text-2xl text-gray-900 dark:text-gray-100 tracking-tight">{category}</h2>
                     <div className="space-y-4">
                       {groupedDishes[category].map((dish: any) => {
                         const wished = isFoodWished(dish.id);
                         return (
                           <div
                             key={dish.id}
-                            className={`bg-white p-4 rounded-2xl border border-gray-200 shadow-sm transition-all duration-300 flex gap-4 ${(dish.is_available === false || isOutOfRange || isClosed) ? "opacity-60 grayscale" : "hover:border-orange-300 hover:shadow-md"}`}
+                            className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${(dish.is_available === false || isOutOfRange || isClosed) ? "opacity-60 grayscale" : "hover:border-orange-300 hover:shadow-md"}`}
                           >
                             {/* Info Section */}
                             <div className="flex-1 min-w-0 flex flex-col justify-between">
                               <div>
                                 {/* Veg/Non-veg icon & Badge */}
                                 <div className="flex items-center gap-2 mb-1.5">
-                                  <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+                                  <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
                                     <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
                                   </span>
                                   {dish.badge && (
@@ -390,7 +390,7 @@ export default function VendorPage() {
                                   )}
                                 </div>
 
-                                <h3 className="font-black text-gray-900 text-lg tracking-tight mb-0.5">
+                                <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight mb-0.5">
                                   {dish.name}
                                 </h3>
 
@@ -404,10 +404,10 @@ export default function VendorPage() {
                                       <span className="text-gray-400 font-semibold line-through text-sm">₹{dish.actual_price}</span>
                                     </>
                                   )}
-                                  <span className="text-base font-black text-gray-900">₹{dish.price}</span>
+                                  <span className="text-base font-black text-gray-900 dark:text-gray-100">₹{dish.price}</span>
                                 </div>
 
-                                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium mb-2">
+                                <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium mb-2">
                                   {dish.rating && parseFloat(dish.rating) > 0 && (
                                     <span className="flex items-center gap-0.5 text-amber-500 font-bold">
                                       <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
@@ -433,7 +433,7 @@ export default function VendorPage() {
 
                             {/* Image & Action Section */}
                             <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-10">
-                              <div className="w-32 h-32 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-sm relative flex items-center justify-center">
+                              <div className="w-32 h-32 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shadow-sm relative flex items-center justify-center">
                                 {dish.image_url ? (
                                   // eslint-disable-next-line @next/next/no-img-element
                                   <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover" />
@@ -442,7 +442,7 @@ export default function VendorPage() {
                                 )}
 
                                 {dish.is_available === false ? (
-                                  <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                  <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/60 backdrop-blur-[1px] flex items-center justify-center z-10">
                                     <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br />Stock</span>
                                   </div>
                                 ) : (isOutOfRange || isClosed) ? (
@@ -453,7 +453,7 @@ export default function VendorPage() {
 
                                 <button
                                   onClick={() => toggleFood({ ...dish, restaurantId: vendor.id, restaurantName: vendor.name })}
-                                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                                  className="absolute top-2 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm hover:scale-110 transition-transform"
                                 >
                                   <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                                 </button>
@@ -490,7 +490,7 @@ export default function VendorPage() {
                                       console.error("Error sharing:", err);
                                     }
                                   }}
-                                  className="absolute top-10 right-2 p-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-gray-200 shadow-sm hover:scale-110 transition-transform"
+                                  className="absolute top-10 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm hover:scale-110 transition-transform"
                                 >
                                   <Send className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
                                 </button>
@@ -504,23 +504,23 @@ export default function VendorPage() {
                                   </div>
                                 ) : (
                                   <>
-                                    <div className={`flex items-center justify-between w-20 bg-white border border-gray-200 rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange || isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
+                                    <div className={`flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange || isClosed ? 'opacity-50 pointer-events-none' : ''}`}>
                                       <button
                                         onClick={(e) => {
                                           e.preventDefault();
                                           setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
                                         }}
-                                        className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                        className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
                                       >
                                         -
                                       </button>
-                                      <span className="font-bold text-xs text-gray-800 w-6 text-center">{quantities[dish.id] || 1}</span>
+                                      <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">{quantities[dish.id] || 1}</span>
                                       <button
                                         onClick={(e) => {
                                           e.preventDefault();
                                           setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
                                         }}
-                                        className="flex-1 h-full flex items-center justify-center text-gray-500 hover:bg-gray-100 font-bold transition-colors text-xs"
+                                        className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
                                       >
                                         +
                                       </button>
@@ -543,10 +543,10 @@ export default function VendorPage() {
                                         setQuantities(q => ({ ...q, [dish.id]: 1 }));
                                       }}
                                       className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${isClosed || isOutOfRange
-                                          ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                                          ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
                                           : itemQty(dish.id, vendor.id) > 0
                                             ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                                            : "bg-white text-orange-600 border-gray-200 hover:bg-orange-50"
+                                            : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
                                         }`}
                                     >
                                       {isClosed || isOutOfRange
@@ -567,9 +567,9 @@ export default function VendorPage() {
                 ))}
 
                 {filteredDishes.length === 0 && (
-                  <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white rounded-3xl border border-gray-200">
+                  <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
                     <span className="text-6xl mb-4">🍽️</span>
-                    <p className="font-black text-gray-700 text-xl">No food available</p>
+                    <p className="font-black text-gray-700 dark:text-gray-300 text-xl">No food available</p>
                     <p className="text-sm mt-2 font-medium">It will be available soon.</p>
                   </div>
                 )}

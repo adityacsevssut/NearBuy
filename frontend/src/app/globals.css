@@ -6,6 +6,31 @@
   --font-sans: var(--font-inter);
 }
 
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+.dark {
+  --background: #0D0D17;
+  --foreground: #F9FAFB;
+
+  --nb-surface: #151522;
+  --nb-elevated: #1F1F2E;
+  --nb-border: #2A2A3A;
+  --nb-border-dark: #3F3F5A;
+
+  --nb-text: #F9FAFB;
+  --nb-text-secondary: #D1D5DB;
+  --nb-muted: #9CA3AF;
+  --nb-subtle: #6B7280;
+  --nb-placeholder: #4B5563;
+}
+
+/* Dim images slightly in dark mode for better contrast */
+.dark img {
+  filter: brightness(0.85);
+  transition: filter 0.3s ease;
+}
+
 :root {
   --background: #FFFFFF;
   --foreground: #111827;

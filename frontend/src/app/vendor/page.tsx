@@ -21,13 +21,13 @@ import LocationModal from "@/components/LocationModal";
 // ─────────────────────────────────────────────────────────────────────────────
 const THEMES = {
   food: {
-    pageBg:       "bg-gray-50",
+    pageBg:       "bg-gray-50 dark:bg-[#151522]",
     navBg:        "bg-gradient-to-r from-orange-500 to-orange-600",
     navText:      "text-white",
     navSubtext:   "text-orange-100",
-    navBadge:     "bg-white/20 text-white border-white/30",
-    navEmail:     "bg-white/15 border-white/20 text-white",
-    navLogout:    "bg-white/15 hover:bg-white/25 text-white border-white/20",
+    navBadge:     "bg-white dark:bg-[#0D0D17]/20 text-white border-white/30",
+    navEmail:     "bg-white dark:bg-[#0D0D17]/15 border-white/20 text-white",
+    navLogout:    "bg-white dark:bg-[#0D0D17]/15 hover:bg-white dark:hover:bg-[#0D0D17]/25 text-white border-white/20",
     cardBorder:   "border-orange-200 hover:border-orange-400",
     cardShadow:   "hover:shadow-orange-500/15",
     iconBg:       "bg-orange-100",
@@ -42,13 +42,13 @@ const THEMES = {
     gradTo:       "to-orange-600",
   },
   store: {
-    pageBg:       "bg-gray-50",
+    pageBg:       "bg-gray-50 dark:bg-[#151522]",
     navBg:        "bg-gradient-to-r from-blue-500 to-blue-700",
     navText:      "text-white",
     navSubtext:   "text-blue-100",
-    navBadge:     "bg-white/20 text-white border-white/30",
-    navEmail:     "bg-white/15 border-white/20 text-white",
-    navLogout:    "bg-white/15 hover:bg-white/25 text-white border-white/20",
+    navBadge:     "bg-white dark:bg-[#0D0D17]/20 text-white border-white/30",
+    navEmail:     "bg-white dark:bg-[#0D0D17]/15 border-white/20 text-white",
+    navLogout:    "bg-white dark:bg-[#0D0D17]/15 hover:bg-white dark:hover:bg-[#0D0D17]/25 text-white border-white/20",
     cardBorder:   "border-blue-200 hover:border-blue-400",
     cardShadow:   "hover:shadow-blue-500/15",
     iconBg:       "bg-blue-100",
@@ -63,13 +63,13 @@ const THEMES = {
     gradTo:       "to-blue-700",
   },
   medicine: {
-    pageBg:       "bg-gray-50",
+    pageBg:       "bg-gray-50 dark:bg-[#151522]",
     navBg:        "bg-gradient-to-r from-emerald-500 to-emerald-700",
     navText:      "text-white",
     navSubtext:   "text-emerald-100",
-    navBadge:     "bg-white/20 text-white border-white/30",
-    navEmail:     "bg-white/15 border-white/20 text-white",
-    navLogout:    "bg-white/15 hover:bg-white/25 text-white border-white/20",
+    navBadge:     "bg-white dark:bg-[#0D0D17]/20 text-white border-white/30",
+    navEmail:     "bg-white dark:bg-[#0D0D17]/15 border-white/20 text-white",
+    navLogout:    "bg-white dark:bg-[#0D0D17]/15 hover:bg-white dark:hover:bg-[#0D0D17]/25 text-white border-white/20",
     cardBorder:   "border-emerald-200 hover:border-emerald-400",
     cardShadow:   "hover:shadow-emerald-500/15",
     iconBg:       "bg-emerald-100",
@@ -163,7 +163,7 @@ export default function VendorDashboard() {
   }, [isLoggedIn, user, router, mounted]);
 
   if (!mounted || !isLoggedIn || (user?.role !== "vendor" && user?.role !== "admin")) {
-    return <div className="min-h-screen bg-white" />;
+    return <div className="min-h-screen bg-white dark:bg-[#0D0D17]" />;
   }
 
   // Resolve theme
@@ -260,7 +260,7 @@ export default function VendorDashboard() {
 
           {/* Left: Icon + Restaurant name */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
               <Store className="w-4.5 h-4.5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
@@ -294,23 +294,23 @@ export default function VendorDashboard() {
       </nav>
 
       {/* ══════════════════ LOCATION TRACKING BAR ══════════════════ */}
-      <div className="bg-white border-b border-gray-100 shadow-sm z-40 relative">
+      <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] shadow-sm z-40 relative">
         <div className="max-w-6xl mx-auto px-4 py-3">
           <button
             suppressHydrationWarning
             onClick={() => setIsLocationModalOpen(true)}
-            className="flex items-center justify-between w-full sm:max-w-md px-4 py-2.5 rounded-xl border border-gray-200 bg-gray-50 hover:bg-gray-100 transition-colors hover:border-gray-400 group"
+            className="flex items-center justify-between w-full sm:max-w-md px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors hover:border-gray-400 group"
           >
             <div className="flex items-center gap-3 overflow-hidden">
               <MapPin className={`w-5 h-5 ${t.iconColor} shrink-0 group-hover:scale-110 transition-transform`} />
               <div className="flex flex-col text-left overflow-hidden">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-black text-gray-900 text-[15px] tracking-tight leading-none truncate">
+                  <span className="font-black text-gray-900 dark:text-gray-100 text-[15px] tracking-tight leading-none truncate">
                     Vendor Location Tracing
                   </span>
-                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0 group-hover:text-gray-600 transition-colors" />
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0 group-hover:text-gray-600 dark:text-gray-400 transition-colors" />
                 </div>
-                <span className="text-xs text-gray-500 font-medium leading-tight truncate mt-0.5">
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-tight truncate mt-0.5">
                   {locationName}{pincode ? ` · ${pincode}` : ''}
                 </span>
               </div>
@@ -320,7 +320,7 @@ export default function VendorDashboard() {
       </div>
 
       {/* ══════════════════ HERO — clean white with colored accent ══════════════════ */}
-      <div className="bg-white border-b border-gray-100 relative">
+      <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] relative">
         {/* Thin colored top accent stripe */}
         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${t.gradFrom} ${t.gradTo}`} />
 
@@ -336,10 +336,10 @@ export default function VendorDashboard() {
                 <TypeIcon className={`w-4.5 h-4.5 ${t.iconColor}`} />
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-tight">
+                <h1 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight leading-tight">
                   Welcome back! 👋
                 </h1>
-                <p className="text-xs text-gray-500 font-medium">
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">
                   Managing <span className={`font-black ${t.accent}`}>{restaurantName}</span>
                 </p>
               </div>
@@ -350,7 +350,7 @@ export default function VendorDashboard() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.05 }}
-              className="flex items-center gap-3 bg-gray-50 border border-gray-100 px-4 py-2.5 rounded-2xl shadow-sm self-start md:self-center"
+              className="flex items-center gap-3 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] px-4 py-2.5 rounded-2xl shadow-sm self-start md:self-center"
             >
               <div className="flex flex-col text-left">
                 <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Shop Status</span>
@@ -365,7 +365,7 @@ export default function VendorDashboard() {
                 }`}
               >
                 <div
-                  className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ${
+                  className={`w-5 h-5 rounded-full bg-white dark:bg-[#0D0D17] shadow-md transform transition-transform duration-300 ${
                     isOpenToggle ? "translate-x-5" : "translate-x-0"
                   }`}
                 />
@@ -383,12 +383,12 @@ export default function VendorDashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className={`rounded-2xl border border-gray-100 bg-gray-50 px-3 py-3 flex flex-col items-center text-center gap-1 shadow-sm`}
+                className={`rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] px-3 py-3 flex flex-col items-center text-center gap-1 shadow-sm`}
               >
                 <div className={`w-8 h-8 rounded-xl ${t.iconBg} flex items-center justify-center mb-0.5`}>
                   <s.icon className={`w-4 h-4 ${t.iconColor}`} />
                 </div>
-                <p className="text-xl font-black text-gray-900 leading-none">{s.value}</p>
+                <p className="text-xl font-black text-gray-900 dark:text-gray-100 leading-none">{s.value}</p>
                 <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide leading-tight">{s.label}</p>
               </div>
             ))}
@@ -429,11 +429,11 @@ export default function VendorDashboard() {
                     router.push("/vendor/orders");
                   }
                 }}
-                className={`group text-left flex flex-col p-6 bg-white rounded-3xl border ${t.cardBorder} hover:shadow-xl ${t.cardShadow} transition-all duration-300 relative overflow-hidden cursor-pointer`}
+                className={`group text-left flex flex-col p-6 bg-white dark:bg-[#0D0D17] rounded-3xl border ${t.cardBorder} hover:shadow-xl ${t.cardShadow} transition-all duration-300 relative overflow-hidden cursor-pointer`}
               >
                 {/* Watermark icon */}
                 <div className="absolute top-0 right-0 p-5 opacity-[0.04] group-hover:opacity-[0.07] transition-opacity pointer-events-none select-none">
-                  <Icon className="w-24 h-24 text-gray-900" />
+                  <Icon className="w-24 h-24 text-gray-900 dark:text-gray-100" />
                 </div>
 
                 {/* Icon + badge */}
@@ -448,10 +448,10 @@ export default function VendorDashboard() {
 
                 {/* Content */}
                 <div className="relative z-10 flex-1">
-                  <h3 className="text-[17px] font-black text-gray-900 mb-1.5 tracking-tight">
+                  <h3 className="text-[17px] font-black text-gray-900 dark:text-gray-100 mb-1.5 tracking-tight">
                     {card.title}
                   </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
                     {card.description}
                   </p>
                 </div>
@@ -473,7 +473,7 @@ export default function VendorDashboard() {
       </main>
 
       {/* ══════════════════ FOOTER ══════════════════ */}
-      <footer className="mt-auto py-5 border-t border-gray-200 bg-white">
+      <footer className="mt-auto py-5 border-t border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <p className="text-[11px] font-medium text-gray-400">
             © 2026 NearBuy Technologies · Vendor Console

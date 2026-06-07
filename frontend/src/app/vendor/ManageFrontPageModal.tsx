@@ -202,15 +202,15 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90dvh] flex flex-col overflow-hidden"
+          className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90dvh] flex flex-col overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 shrink-0">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] shrink-0">
             <div>
-              <h2 className="text-xl font-black text-gray-900">Manage Front Page</h2>
-              <p className="text-sm text-gray-500 font-medium mt-0.5">Customise how your shop appears to customers</p>
+              <h2 className="text-xl font-black text-gray-900 dark:text-gray-100">Manage Front Page</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-0.5">Customise how your shop appears to customers</p>
             </div>
-            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200">
+            <button onClick={onClose} className="p-2 rounded-full bg-gray-100 dark:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 hover:bg-gray-200">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -225,10 +225,10 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
               <div className="space-y-8">
                 {/* ════════ Live Preview Card ════════ */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-3">Live Customer Preview</label>
-                  <div className="max-w-[340px] mx-auto sm:mx-0 bg-white rounded-2xl border border-gray-100 shadow-md overflow-hidden relative">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Live Customer Preview</label>
+                  <div className="max-w-[340px] mx-auto sm:mx-0 bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-100 dark:border-[#2A2A3A] shadow-md overflow-hidden relative">
                     {/* Image Banner */}
-                    <div className="relative w-full h-40 bg-gray-100">
+                    <div className="relative w-full h-40 bg-gray-100 dark:bg-[#1F1F2E]">
                       {imagePreview ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -238,7 +238,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                         </div>
                       )}
                       {formData.badge && (
-                        <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-white text-orange-600 text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm">
+                        <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-white dark:bg-[#0D0D17] text-orange-600 text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm">
                           {formData.badge}
                         </div>
                       )}
@@ -247,7 +247,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                     {/* Card Content */}
                     <div className="p-4">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="font-black text-gray-900 text-lg leading-tight truncate">
+                        <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg leading-tight truncate">
                           {formData.restaurant_name || "Your Shop Name"}
                         </h3>
                         <div className="flex items-center gap-1 bg-orange-500 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0">
@@ -256,22 +256,22 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                         </div>
                       </div>
                       
-                      <p className="text-sm text-gray-500 font-medium truncate mb-3">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium truncate mb-3">
                         {formData.cuisine || "Category · Tags"}
                       </p>
                       
                       <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-100 rounded-lg">
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] rounded-lg">
                           <Clock className="w-3.5 h-3.5 text-orange-500" />
-                          <span className="text-xs font-semibold text-gray-600">{formData.delivery_time || "Time"}</span>
+                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{formData.delivery_time || "Time"}</span>
                         </div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 border border-gray-100 rounded-lg">
-                          <span className="text-xs font-semibold text-gray-600">Min ₹{formData.min_order || "0"}</span>
+                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] rounded-lg">
+                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Min ₹{formData.min_order || "0"}</span>
                         </div>
                       </div>
                       
                       {formData.offer && (
-                        <div className="pt-3 border-t border-gray-100 border-dashed flex items-center gap-2 text-orange-600">
+                        <div className="pt-3 border-t border-gray-100 dark:border-[#2A2A3A] border-dashed flex items-center gap-2 text-orange-600">
                           <Tag className="w-4 h-4 shrink-0" />
                           <span className="text-xs font-bold truncate">{formData.offer}</span>
                         </div>
@@ -287,8 +287,8 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                 
                 {/* Image Upload Banner */}
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Display Banner Image</label>
-                  <div className="relative w-full h-48 sm:h-56 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 overflow-hidden hover:bg-gray-100 transition-colors group">
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Display Banner Image</label>
+                  <div className="relative w-full h-48 sm:h-56 rounded-2xl border-2 border-dashed border-gray-300 bg-gray-50 dark:bg-[#151522] overflow-hidden hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group">
                     {imagePreview ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
@@ -315,74 +315,74 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {/* Name */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Shop Name</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Shop Name</label>
                     <input 
                       value={formData.restaurant_name}
                       onChange={e => setFormData({...formData, restaurant_name: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. Sharma Dhaba"
                     />
                   </div>
 
                   {/* Cuisine */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Tags / Categories</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Tags / Categories</label>
                     <input 
                       value={formData.cuisine}
                       onChange={e => setFormData({...formData, cuisine: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. North Indian, Biryani"
                     />
                   </div>
 
                   {/* Delivery Time */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Avg. Delivery Time</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Avg. Delivery Time</label>
                     <input 
                       value={formData.delivery_time}
                       onChange={e => setFormData({...formData, delivery_time: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. 30-45 min"
                     />
                   </div>
 
                   {/* Min Order */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Min Order (₹)</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Min Order (₹)</label>
                     <input 
                       type="number"
                       value={formData.min_order}
                       onChange={e => setFormData({...formData, min_order: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. 80"
                     />
                   </div>
 
                   {/* Offer */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Active Offer</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Active Offer</label>
                     <input 
                       value={formData.offer}
                       onChange={e => setFormData({...formData, offer: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-orange-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-orange-600 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. 50% off up to ₹80"
                     />
                   </div>
 
                   {/* Badge */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Highlight Badge</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Highlight Badge</label>
                     <input 
                       value={formData.badge}
                       onChange={e => setFormData({...formData, badge: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. Bestseller"
                     />
                   </div>
 
                   {/* Rating */}
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Rating (0.0 - 5.0)</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Rating (0.0 - 5.0)</label>
                     <input 
                       type="number"
                       step="0.1"
@@ -390,26 +390,26 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                       max="5"
                       value={formData.rating}
                       onChange={e => setFormData({...formData, rating: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                       placeholder="e.g. 4.5"
                     />
                   </div>
                 </div>
 
                 {/* Location Section */}
-                <div className="mt-8 pt-6 border-t border-gray-100 space-y-5">
+                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-[#2A2A3A] space-y-5">
                   <div>
-                    <h3 className="text-lg font-black text-gray-900">Shop Location</h3>
-                    <p className="text-xs text-gray-500">Auto-fetch your GPS coords and provide manual details</p>
+                    <h3 className="text-lg font-black text-gray-900 dark:text-gray-100">Shop Location</h3>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Auto-fetch your GPS coords and provide manual details</p>
                   </div>
 
                   <div className="space-y-3">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">GPS Auto-Fetch Address</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">GPS Auto-Fetch Address</label>
                     <div className="flex gap-2">
                       <input 
                         readOnly
                         value={formData.gps_address}
-                        className="flex-1 px-4 py-3 bg-gray-100 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 outline-none"
+                        className="flex-1 px-4 py-3 bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 outline-none"
                         placeholder="Click button to auto-fetch GPS..."
                       />
                       <button 
@@ -426,35 +426,35 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Landmark <span className="text-red-500">*</span></label>
+                      <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Landmark <span className="text-red-500">*</span></label>
                       <input 
                         type="text"
                         value={formData.landmark}
                         onChange={e => setFormData({...formData, landmark: e.target.value})}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                         placeholder="e.g. Pulaha Hall"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Pincode <span className="text-red-500">*</span></label>
+                      <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Pincode <span className="text-red-500">*</span></label>
                       <input 
                         type="text"
                         maxLength={6}
                         value={formData.pincode}
                         onChange={e => setFormData({...formData, pincode: e.target.value.replace(/\D/g, "")})}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                        className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
                         placeholder="e.g. 768018"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Manual Address Detail</label>
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Manual Address Detail</label>
                     <textarea 
                       value={formData.manual_address}
                       onChange={e => setFormData({...formData, manual_address: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none resize-none h-24"
+                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none resize-none h-24"
                       placeholder="e.g. Shop No 4, Kirba Chowk, Near Main Gate, Burla"
                     />
                   </div>
@@ -465,11 +465,11 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-100 shrink-0 flex justify-end gap-3 bg-gray-50">
+          <div className="px-6 py-4 border-t border-gray-100 dark:border-[#2A2A3A] shrink-0 flex justify-end gap-3 bg-gray-50 dark:bg-[#151522]">
             <button 
               type="button" 
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl font-bold text-gray-600 hover:bg-gray-200 transition-colors"
+              className="px-5 py-2.5 rounded-xl font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>

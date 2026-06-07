@@ -89,20 +89,20 @@ export default function ManageLocationRangeModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#0D0D17] rounded-3xl w-full max-w-lg shadow-2xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col max-h-[90vh] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-[#2A2A3A]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
               <Sliders className="w-4 h-4 text-orange-500" />
             </div>
             <div>
-              <h2 className="font-black text-gray-900 tracking-tight">Delivery Zone & Location</h2>
+              <h2 className="font-black text-gray-900 dark:text-gray-100 tracking-tight">Delivery Zone & Location</h2>
               <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Set delivery range limits</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 rounded-full transition-colors text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="p-1.5 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] rounded-full transition-colors text-gray-400 hover:text-gray-600 dark:text-gray-400">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -116,7 +116,7 @@ export default function ManageLocationRangeModal({
               <label className="text-xs font-bold text-orange-950 uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-orange-500 animate-pulse" /> Max Delivery Range
               </label>
-              <span className="text-sm font-black text-orange-600 bg-white border border-orange-100 px-2.5 py-0.5 rounded-full shadow-sm">
+              <span className="text-sm font-black text-orange-600 bg-white dark:bg-[#0D0D17] border border-orange-100 px-2.5 py-0.5 rounded-full shadow-sm">
                 {formData.delivery_range} km
               </span>
             </div>
@@ -142,9 +142,9 @@ export default function ManageLocationRangeModal({
             </p>
           </div>
 
-          <div className="space-y-4 pt-4 border-t border-gray-100">
+          <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 uppercase tracking-wider">Select Store Location</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Select Store Location</label>
               
               {savedAddresses.length > 0 ? (
                 <div className="space-y-2 mt-2">
@@ -169,14 +169,14 @@ export default function ManageLocationRangeModal({
                         className={`w-full flex flex-col text-left px-4 py-3 border rounded-xl transition-all shadow-sm ${
                           isSelected 
                             ? 'bg-orange-50 border-orange-500' 
-                            : 'bg-white border-gray-200 hover:border-orange-300'
+                            : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]'
                         }`}
                       >
                         <div className="flex justify-between items-center w-full">
-                          <span className="text-sm font-black text-gray-800">{addr.name}</span>
+                          <span className="text-sm font-black text-gray-800 dark:text-gray-200">{addr.name}</span>
                           {isSelected && <Check className="w-4 h-4 text-orange-500" />}
                         </div>
-                        <span className="text-xs text-gray-500 truncate mt-0.5">{addr.full_address}</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{addr.full_address}</span>
                         {addr.landmark && <span className="text-[10px] text-gray-400 mt-1">Landmark: {addr.landmark}</span>}
                       </button>
                     );
@@ -193,11 +193,11 @@ export default function ManageLocationRangeModal({
         </form>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-2.5">
+        <div className="px-6 py-4 border-t border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/50 flex justify-end gap-2.5">
           <button 
             type="button" 
             onClick={onClose} 
-            className="px-4 py-2.5 border border-gray-200 hover:bg-gray-100 text-gray-700 font-bold rounded-xl text-xs transition-colors"
+            className="px-4 py-2.5 border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 font-bold rounded-xl text-xs transition-colors"
           >
             Cancel
           </button>

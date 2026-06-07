@@ -82,7 +82,7 @@ export default function MapPicker({ lat, lng, onLocationChange }: MapPickerProps
   const useLeafletFallback = !mapboxToken || mapError;
 
   return (
-    <div className="relative w-full h-full bg-gray-100">
+    <div className="relative w-full h-full bg-gray-100 dark:bg-[#1F1F2E]">
       {useLeafletFallback ? (
         // ── Fallback: Leaflet + OpenStreetMap ────────────────────────────────
         <MapContainer

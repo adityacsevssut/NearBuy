@@ -137,7 +137,7 @@ export default function OrderStatusPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
       </div>
     );
@@ -149,7 +149,7 @@ export default function OrderStatusPage() {
   const isCancelled = order.status.toLowerCase() === "cancelled";
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pb-20">
       {/* Dynamic Header based on status */}
       <div className={`${isCancelled ? 'bg-red-500' : 'bg-gradient-to-r from-orange-500 to-amber-500'} pt-8 pb-12 px-4 rounded-b-[40px] shadow-sm relative overflow-hidden`}>
         {/* Decorative elements */}
@@ -159,7 +159,7 @@ export default function OrderStatusPage() {
         
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <Link href="/food/orders" className="p-2 -ml-2 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors backdrop-blur-sm">
+            <Link href="/food/orders" className="p-2 -ml-2 rounded-xl bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 hover:bg-white dark:bg-[#0D0D17] dark:hover:bg-[#0D0D17]/30 text-white transition-colors backdrop-blur-sm">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
@@ -184,7 +184,7 @@ export default function OrderStatusPage() {
             </div>
             
             {!isCancelled && currentStepIndex < 3 && (
-              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+              <div className="flex items-center gap-2 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
                 <Clock className="w-4 h-4 text-white animate-pulse" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider">In Progress</span>
               </div>
@@ -196,19 +196,19 @@ export default function OrderStatusPage() {
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 -mt-6 space-y-4">
         
         {/* Status Tracker */}
-        <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm relative z-20">
+        <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-6 border border-gray-100 dark:border-[#2A2A3A] shadow-sm relative z-20">
           {isCancelled ? (
             <div className="flex flex-col items-center justify-center py-4 text-center">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-3">
                 <Info className="w-8 h-8 text-red-500" />
               </div>
-              <p className="text-gray-900 font-black text-lg mb-1">This order was cancelled</p>
-              <p className="text-sm text-gray-500 font-medium">If you have already paid, your refund will be processed within 3-5 business days.</p>
+              <p className="text-gray-900 dark:text-gray-100 font-black text-lg mb-1">This order was cancelled</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">If you have already paid, your refund will be processed within 3-5 business days.</p>
             </div>
           ) : (
             <div className="relative">
               {/* Vertical line connecting steps */}
-              <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-100" />
+              <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-100 dark:bg-[#1F1F2E]" />
               
               <div className="space-y-6 relative">
                 {STATUS_STEPS.map((step, index) => {
@@ -219,7 +219,7 @@ export default function OrderStatusPage() {
                     <div key={step} className="flex gap-4">
                       <div className="relative z-10 shrink-0">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm transition-all duration-500 ${
-                          isCompleted ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-400'
+                          isCompleted ? 'bg-orange-500 text-white' : 'bg-gray-100 dark:bg-[#1F1F2E] text-gray-400'
                         } ${isCurrent ? 'ring-4 ring-orange-500/20 scale-110' : ''}`}>
                           {index === 0 ? <Clock className="w-4 h-4" /> :
                            index === 1 ? <CheckCircle className="w-4 h-4" /> :
@@ -229,11 +229,11 @@ export default function OrderStatusPage() {
                         </div>
                       </div>
                       <div className={`pt-2 transition-opacity duration-500 ${isCompleted ? 'opacity-100' : 'opacity-40'}`}>
-                        <p className={`font-black uppercase tracking-wider text-sm ${isCurrent ? 'text-orange-600' : 'text-gray-900'}`}>
+                        <p className={`font-black uppercase tracking-wider text-sm ${isCurrent ? 'text-orange-600' : 'text-gray-900 dark:text-gray-100'}`}>
                           {step}
                         </p>
                         {isCurrent && (
-                          <p className="text-xs text-gray-500 font-medium mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">
                             {index === 0 ? "Vendor is reviewing your order" :
                              index === 1 ? "Your items are being packed" :
                              index === 2 ? "Order has been shipped" :
@@ -261,14 +261,14 @@ export default function OrderStatusPage() {
         {/* Store & Delivery Info Grid */}
         <div className="grid sm:grid-cols-2 gap-4">
           {/* Vendor Details */}
-          <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex flex-col">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <Store className="w-4 h-4 text-gray-400" />
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Ordered From</h3>
             </div>
             
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 overflow-hidden shrink-0">
+              <div className="w-12 h-12 rounded-xl bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] overflow-hidden shrink-0">
                 {order.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={order.image_url} alt="" className="w-full h-full object-cover" />
@@ -277,14 +277,14 @@ export default function OrderStatusPage() {
                 )}
               </div>
               <div>
-                <p className="font-black text-gray-900 text-lg leading-tight">{order.restaurant_name}</p>
-                <p className="text-xs text-gray-500 font-medium mt-0.5 line-clamp-1">{order.manual_address || order.gps_address}</p>
+                <p className="font-black text-gray-900 dark:text-gray-100 text-lg leading-tight">{order.restaurant_name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{order.manual_address || order.gps_address}</p>
               </div>
             </div>
           </div>
 
           {/* Delivery Details */}
-          <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm flex flex-col">
+          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex flex-col">
             <div className="flex items-center gap-2 mb-4">
               <Navigation className="w-4 h-4 text-gray-400" />
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Delivering To</h3>
@@ -295,11 +295,11 @@ export default function OrderStatusPage() {
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-black text-gray-900 leading-tight">
+                <p className="font-black text-gray-900 dark:text-gray-100 leading-tight">
                   {order.delivery_address?.landmark ? `${order.delivery_address.landmark}, ` : ''}{order.delivery_address?.locationName || 'Saved Location'}
                 </p>
-                <p className="text-xs text-gray-500 font-medium mt-1">PIN: {order.delivery_address?.pincode || 'N/A'}</p>
-                <div className="mt-2 inline-block px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded">
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">PIN: {order.delivery_address?.pincode || 'N/A'}</p>
+                <div className="mt-2 inline-block px-2 py-0.5 bg-gray-100 dark:bg-[#1F1F2E] text-gray-600 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded">
                   {order.delivery_address?.latitude?.toFixed(4)}, {order.delivery_address?.longitude?.toFixed(4)}
                 </div>
               </div>
@@ -330,7 +330,7 @@ export default function OrderStatusPage() {
           
           <a 
             href={order.owner_number ? `tel:${order.owner_number}` : "#"}
-            className={`w-full py-4 bg-white border border-gray-200 hover:bg-gray-50 rounded-2xl flex items-center justify-center gap-2 text-gray-600 font-bold text-sm transition-colors shadow-sm ${currentStepIndex > 1 || isCancelled ? 'col-span-2 sm:col-span-1' : 'col-span-2'}`}
+            className={`w-full py-4 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:bg-[#151522] dark:hover:bg-[#151522] rounded-2xl flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 font-bold text-sm transition-colors shadow-sm ${currentStepIndex > 1 || isCancelled ? 'col-span-2 sm:col-span-1' : 'col-span-2'}`}
           >
             <Phone className="w-4 h-4" />
             Need help?
@@ -365,21 +365,21 @@ export default function OrderStatusPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+              className="relative w-full max-w-md bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
             >
-              <div className="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+              <div className="px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] flex items-center justify-between bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] z-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-800">
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-[#1F1F2E] rounded-xl flex items-center justify-center text-gray-800 dark:text-gray-200">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
-                    <h2 className="font-black text-gray-900 text-lg">Final Billing</h2>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Order Breakdown</p>
+                    <h2 className="font-black text-gray-900 dark:text-gray-100 text-lg">Final Billing</h2>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Order Breakdown</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowBilling(false)}
-                  className="p-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-600 transition-colors"
+                  className="p-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 rounded-full text-gray-600 dark:text-gray-400 transition-colors"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -387,18 +387,18 @@ export default function OrderStatusPage() {
 
               <div className="p-6">
                 <div className="space-y-4 pt-2">
-                  <div className="flex justify-between text-sm font-medium text-gray-600">
+                  <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-400">
                     <span>Subtotal</span>
                     <span>₹{order.subtotal}</span>
                   </div>
                   {order.platform_fee && parseFloat(order.platform_fee) > 0 && (
-                    <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-400">
                       <span>Platform Fee</span>
                       <span>+ ₹{order.platform_fee}</span>
                     </div>
                   )}
                   {order.gst && parseFloat(order.gst) > 0 && (
-                    <div className="flex justify-between text-sm font-medium text-gray-600">
+                    <div className="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-400">
                       <span>GST ({gstRate}%)</span>
                       <span>+ ₹{order.gst}</span>
                     </div>
@@ -409,14 +409,14 @@ export default function OrderStatusPage() {
                       <span>+ ₹{order.delivery_charge}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-xl font-black text-gray-900 pt-4 border-t border-gray-100 mt-4">
+                  <div className="flex justify-between text-xl font-black text-gray-900 dark:text-gray-100 pt-4 border-t border-gray-100 dark:border-[#2A2A3A] mt-4">
                     <span>Grand Total</span>
                     <span>₹{order.total_amount}</span>
                   </div>
                 </div>
               </div>
               
-              <div className="p-5 bg-gray-50 border-t border-gray-100">
+              <div className="p-5 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setShowBilling(false)}
                   className="w-full py-4 bg-gray-900 hover:bg-black text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]"

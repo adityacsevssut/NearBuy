@@ -200,7 +200,7 @@ export default function GeoapifySearch({
           onChange={handleInputChange}
           placeholder={placeholder}
           autoFocus={autoFocus}
-          className="w-full pl-12 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-medium text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
+          className="w-full pl-12 pr-10 py-3.5 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-medium text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all shadow-sm"
         />
         {isLoading && (
           <Loader2 className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-orange-400 animate-spin" />
@@ -213,7 +213,7 @@ export default function GeoapifySearch({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-[9999] overflow-hidden max-h-60 overflow-y-auto"
+            className="absolute left-0 right-0 mt-1.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl shadow-xl z-[9999] overflow-hidden max-h-60 overflow-y-auto"
           >
             {predictions.map((p, i) => {
               const mainText = p.structured_formatting?.main_text || p.description;
@@ -224,11 +224,11 @@ export default function GeoapifySearch({
                   <button
                     type="button"
                     onClick={() => handleSelectPrediction(p)}
-                    className="w-full flex items-start gap-3 px-4 py-3 hover:bg-orange-50 transition-colors text-left border-b border-gray-50 last:border-0"
+                    className="w-full flex items-start gap-3 px-4 py-3 hover:bg-orange-50 transition-colors text-left border-b border-gray-50 dark:border-[#1F1F2E] last:border-0"
                   >
                     <MapPin className="w-4 h-4 text-orange-400 mt-0.5 shrink-0" />
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-gray-800 leading-tight truncate">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 leading-tight truncate">
                         {mainText}
                       </p>
                       {secText && (

@@ -74,7 +74,7 @@ function FormInput({
       <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${iconClass} transition-colors pointer-events-none`} />
       <input
         type={type} id={id} value={value} onChange={onChange}
-        className={`peer w-full bg-gray-50 border-2 border-gray-100 rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 outline-none focus:bg-white ${focusBorderClass} transition-all placeholder-transparent`}
+        className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:bg-[#0D0D17] ${focusBorderClass} transition-all placeholder-transparent`}
         placeholder={label} {...props}
       />
       <label
@@ -167,12 +167,12 @@ export default function BusinessRequestModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-[440px] overflow-hidden flex flex-col max-h-[90vh]"
+            className="relative bg-white dark:bg-[#0D0D17] rounded-[2rem] shadow-2xl w-full max-w-[440px] overflow-hidden flex flex-col max-h-[90vh]"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white relative z-20">
+            <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] relative z-20">
               <div className="w-9" />
-              <h2 className="font-black text-xl text-gray-900 text-center">{title}</h2>
+              <h2 className="font-black text-xl text-gray-900 dark:text-gray-100 text-center">{title}</h2>
               <button onClick={handleClose} className="p-2 rounded-full hover:bg-red-50 hover:text-red-500 text-gray-400 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -187,7 +187,7 @@ export default function BusinessRequestModal({
                   >
                     <CheckCircle className="w-10 h-10 text-green-500" />
                   </motion.div>
-                  <h3 className="text-2xl font-black text-gray-900 mb-2">Request Sent!</h3>
+                  <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-2">Request Sent!</h3>
                   
                   {/* Routing confirmation */}
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-4 ${theme.border} ${theme.bg}`}>
@@ -199,7 +199,7 @@ export default function BusinessRequestModal({
                     </span>
                   </div>
 
-                  <p className="text-gray-500 font-medium text-sm leading-relaxed max-w-xs mx-auto">
+                  <p className="text-gray-500 dark:text-gray-400 font-medium text-sm leading-relaxed max-w-xs mx-auto">
                     Your request has been routed to the <span className={`font-black ${theme.text} capitalize`}>{vendorType} Division Manager</span>. They will review your details and contact you soon.
                   </p>
                   <button
@@ -228,7 +228,7 @@ export default function BusinessRequestModal({
                             className={`flex flex-col items-center justify-center p-3 rounded-xl border-2 transition-all ${
                               isActive
                                 ? catTheme.active
-                                : `border-gray-100 bg-gray-50 text-gray-500 ${catTheme.hoverBorder} ${catTheme.hoverBg}`
+                                : `border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] text-gray-500 dark:text-gray-400 ${catTheme.hoverBorder} ${catTheme.hoverBg}`
                             }`}
                           >
                             <cat.icon className="w-5 h-5 mb-1" />
@@ -280,7 +280,7 @@ export default function BusinessRequestModal({
                     {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text} shrink-0`} />}
                     {vendorType === "medicine" && <Pill className={`w-4 h-4 ${theme.text} shrink-0`} />}
                     {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text} shrink-0`} />}
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       This request will be sent to the{" "}
                       <span className={`font-black ${theme.text} capitalize`}>{vendorType} Manager</span>{" "}
                       for review and approval.

@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
 import { CartProvider } from "@/context/CartContext";
+import { ThemeProvider } from "@/context/ThemeContext";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const inter = Inter({
@@ -35,7 +36,8 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="antialiased" suppressHydrationWarning>
-        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
+        <ThemeProvider>
+          <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
             <NotificationProvider>
               <CartProvider>
@@ -60,6 +62,7 @@ export default function RootLayout({
             </NotificationProvider>
           </AuthProvider>
         </GoogleOAuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

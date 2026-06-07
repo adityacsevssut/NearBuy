@@ -35,7 +35,11 @@ const createOrderSchema = Joi.object({
   delivery_address:     Joi.alternatives().try(Joi.object(), Joi.string()).required().messages({ "any.required": "Delivery address is required" }),
   customer_mobile:      indianMobile.required().messages({ "any.required": "Customer mobile is required" }),
   alternate_mobile:     indianMobile.optional().allow("", null),
-  cooking_instructions: Joi.string().trim().max(500).optional().allow("", null)
+  cooking_instructions: Joi.string().trim().max(500).optional().allow("", null),
+  razorpay_order_id:    Joi.string().optional().allow("", null),
+  razorpay_payment_id:  Joi.string().optional().allow("", null),
+  razorpay_signature:   Joi.string().optional().allow("", null),
+  payment_status:       Joi.string().optional().allow("", null)
 });
 
 module.exports = { createOrderSchema };
