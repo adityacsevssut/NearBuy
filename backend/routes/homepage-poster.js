@@ -47,9 +47,11 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
       throw new Error("SUPABASE_ANON_KEY is missing from backend/.env!");
     }
 
+    const theme = req.body.theme === "dark" ? "dark" : "light";
+
     // Upload image to the 'homepage-posters' Supabase Storage bucket
     const fileExt = req.file.mimetype.split("/")[1] || "jpeg";
-    const fileName = `poster_${managerType}_${Date.now()}.${fileExt}`;
+    const fileName = `poster_${managerType}_${theme}_${Date.now()}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
       .from("homepage-posters")
@@ -69,16 +71,29 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
 
     const imageUrl = publicUrlData.publicUrl;
 
-    // Upsert poster record
-    const { rows } = await pool.query(
-      `INSERT INTO homepage_posters (type, image_url, updated_at)
-       VALUES ($1, $2, NOW())
-       ON CONFLICT (type) DO UPDATE SET
-         image_url = EXCLUDED.image_url,
-         updated_at = NOW()
-       RETURNING *`,
-      [managerType, imageUrl]
-    );
+    // Upsert poster record based on theme
+    let query, params;
+    if (theme === "dark") {
+      query = `
+        INSERT INTO homepage_posters (type, dark_image_url, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (type) DO UPDATE SET
+          dark_image_url = EXCLUDED.dark_image_url,
+          updated_at = NOW()
+        RETURNING *`;
+      params = [managerType, imageUrl];
+    } else {
+      query = `
+        INSERT INTO homepage_posters (type, image_url, updated_at)
+        VALUES ($1, $2, NOW())
+        ON CONFLICT (type) DO UPDATE SET
+          image_url = EXCLUDED.image_url,
+          updated_at = NOW()
+        RETURNING *`;
+      params = [managerType, imageUrl];
+    }
+
+    const { rows } = await pool.query(query, params);
 
     return res.json({
       message: "Poster updated successfully!",

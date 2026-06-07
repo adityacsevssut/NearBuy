@@ -436,7 +436,7 @@ export default function HomePage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
+  const [posterObj, setPosterObj] = useState<{ image_url?: string; dark_image_url?: string } | null>(null);
   const [posterLoading, setPosterLoading] = useState(true);
 
   // Debounce search
@@ -488,7 +488,7 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/homepage-poster?type=food`);
       if (res.ok) {
         const data = await res.json();
-        if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
+        if (data.poster) setPosterObj(data.poster);
       }
     } catch {
       /* silent — fallback to static image */
@@ -848,13 +848,13 @@ export default function HomePage() {
               <div className="block relative w-full rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(249,115,22,0.15)] group">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={posterUrl || "/1000242984.png"}
+                  src={posterObj?.image_url || "/1000242984.png"}
                   alt="NearBuy Special Offer"
                   className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden"
                 />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={posterUrl || "/1000242984_dark.png"}
+                  src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"}
                   alt="NearBuy Special Offer"
                   className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-[#151522] hidden dark:block"
                 />
@@ -940,7 +940,7 @@ export default function HomePage() {
                 }
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 shrink-0 transition-all duration-200 ${
                   foodPref === "veg"
-                    ? "bg-green-600 border-green-600 text-white shadow-md shadow-green-200"
+                    ? "bg-green-600 border-green-600 text-white shadow-md shadow-green-200 dark:shadow-green-900/30"
                     : "bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
                 }`}
               >
@@ -1029,14 +1029,14 @@ export default function HomePage() {
                     background: "linear-gradient(135deg, #f97316, #ea580c)",
                   }}
                 >
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D0D17]" />
                 </div>
                 {/* Arrow */}
                 <div
-                  className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
- group-hover:bg-orange-100 group-hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-colors shrink-0"
+                  className="w-7 h-7 rounded-full border border-gray-200 dark:border-[#2A2A3A] flex items-center justify-center
+ group-hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] shrink-0"
                 >
-                  <ChevronDown className="w-3.5 h-3.5 text-orange-400 -rotate-90 group-hover:text-orange-600 transition-colors" />
+                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 group-hover:text-orange-600 transition-colors" />
                 </div>
               </div>
               <div className="w-full">
@@ -1065,14 +1065,14 @@ export default function HomePage() {
                     background: "linear-gradient(135deg, #f97316, #ea580c)",
                   }}
                 >
-                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D0D17]" />
                 </div>
                 {/* Arrow */}
                 <div
-                  className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
- group-hover:bg-orange-100 group-hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-colors shrink-0"
+                  className="w-7 h-7 rounded-full border border-gray-200 dark:border-[#2A2A3A] flex items-center justify-center
+ group-hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] shrink-0"
                 >
-                  <ChevronDown className="w-3.5 h-3.5 text-orange-400 -rotate-90 group-hover:text-orange-600 transition-colors" />
+                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 group-hover:text-orange-600 transition-colors" />
                 </div>
               </div>
               <div className="w-full">

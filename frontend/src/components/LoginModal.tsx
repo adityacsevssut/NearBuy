@@ -301,7 +301,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
       disabled={disabled || loading}
       className={`w-full relative overflow-hidden py-3.5 rounded-xl bg-gradient-to-r ${t.btnGrad} text-white font-bold text-[15px] shadow-lg ${t.btnShadow} hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0 flex items-center justify-center gap-2 group`}
     >
-      <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+      <div className="absolute inset-0 bg-white/20 dark:bg-[#0D0D17]/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
       {loading ? <RefreshCw className="w-5 h-5 animate-spin relative z-10" /> : <span className="relative z-10 flex items-center gap-2 w-full justify-center">{children}</span>}
     </button>
   );

@@ -94,7 +94,7 @@ function AccountContent() {
   const theme = {
     gradient: isBlue ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
     textPrimary: isBlue ? "text-blue-500" : "text-orange-500",
-    avatarBg: isBlue ? "from-blue-100 to-blue-50" : "from-orange-100 to-orange-50",
+    avatarBg: isBlue ? "from-blue-100 to-blue-50 dark:from-blue-500/20 dark:to-blue-500/10" : "from-orange-100 to-orange-50 dark:from-orange-500/20 dark:to-orange-500/10",
     selection: isBlue ? "selection:bg-blue-200" : "selection:bg-orange-200",
     hoverBg: isBlue ? "group-hover:bg-blue-50" : "group-hover:bg-orange-50",
     hoverText: isBlue ? "group-hover:text-blue-500" : "group-hover:text-orange-500",
@@ -287,7 +287,7 @@ function AccountContent() {
       {/* Dynamic Brand Header */}
       <div className={`bg-gradient-to-br ${theme.gradient} pt-6 pb-20 px-4 rounded-b-[40px] relative shadow-lg md:hidden`}>
         <div className="flex items-center justify-between text-white relative z-10 mb-2">
-          <button onClick={() => router.back()} className="p-2 bg-white dark:bg-[#0D0D17]/20 dark:bg-black/20 hover:bg-white dark:bg-[#0D0D17]/30 dark:hover:bg-black/30 rounded-full backdrop-blur-md transition-colors">
+          <button onClick={() => router.back()} className="p-2 bg-white/20 dark:bg-black/20 hover:bg-white/30 dark:hover:bg-black/30 rounded-full backdrop-blur-md transition-colors">
             <ArrowLeft className="w-5 h-5 text-white" />
           </button>
           <h1 className="text-xl font-extrabold tracking-wide">My Profile</h1>
@@ -304,7 +304,7 @@ function AccountContent() {
         {/* Floating Profile Card */}
         <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50 dark:border-[#1F1F2E]/50">
           <div className="relative shrink-0">
-            <div className={`w-16 h-16 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white shadow-sm rotate-3`}>
+            <div className={`w-16 h-16 bg-gradient-to-tr ${theme.avatarBg} rounded-2xl flex items-center justify-center border-2 border-white dark:border-[#2A2A3A] shadow-sm rotate-3`}>
               <span className={`text-2xl font-black ${theme.textPrimary} -rotate-3`}>
                 {user?.firstName ? user.firstName[0].toUpperCase() : user?.email?.[0].toUpperCase()}
               </span>
@@ -316,7 +316,7 @@ function AccountContent() {
                   setEditLastName(user?.lastName || "");
                   setIsEditingProfile(true);
                 }} 
-                className="absolute -bottom-2 -right-2 bg-gray-800 p-1.5 rounded-full border-2 border-white text-white hover:bg-black transition-colors"
+                className="absolute -bottom-2 -right-2 bg-gray-800 dark:bg-[#1F1F2E] p-1.5 rounded-full border-2 border-white dark:border-[#2A2A3A] text-white hover:bg-black transition-colors"
               >
                 <Pencil className="w-3 h-3" />
               </button>
@@ -378,17 +378,17 @@ function AccountContent() {
           {/* Cart Button */}
           <button
             onClick={() => router.push("/food/cart")}
-            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
-              hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 hover:border-orange-200/80
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 dark:hover:bg-orange-500/5 hover:border-orange-200/80 dark:hover:border-orange-500/20
               transition-all duration-200 active:scale-[0.98]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-orange-50 border-2 border-orange-500 group-hover:bg-orange-100 transition-colors">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-orange-50 dark:bg-orange-500/10 border-2 border-orange-500 group-hover:bg-orange-100 dark:group-hover:bg-orange-500/20 transition-colors">
                 <ShoppingCart className="w-5 h-5 text-orange-500" />
               </div>
-              <div className="w-7 h-7 rounded-full bg-orange-50 border border-orange-100 flex items-center justify-center
-                group-hover:bg-orange-100 group-hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 flex items-center justify-center
+                group-hover:bg-orange-100 dark:group-hover:bg-orange-500/20 group-hover:border-orange-300 dark:group-hover:border-orange-500/40 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] shrink-0">
                 <ChevronRight className="w-3.5 h-3.5 text-orange-400 group-hover:text-orange-600 transition-colors" />
               </div>
             </div>
@@ -400,17 +400,17 @@ function AccountContent() {
           {/* Wishlist Button */}
           <button
             onClick={() => router.push("/food/wishlist")}
-            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
-              hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 hover:border-rose-200/80
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 dark:hover:bg-rose-500/5 hover:border-rose-200/80 dark:hover:border-rose-500/20
               transition-all duration-200 active:scale-[0.98]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-rose-50 border-2 border-rose-500 group-hover:bg-rose-100 transition-colors">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-rose-50 dark:bg-rose-500/10 border-2 border-rose-500 group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 transition-colors">
                 <Heart className="w-5 h-5 text-rose-500" />
               </div>
-              <div className="w-7 h-7 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center
-                group-hover:bg-rose-100 group-hover:border-rose-300 transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-full bg-rose-50 dark:bg-rose-500/10 border border-rose-100 dark:border-rose-500/20 flex items-center justify-center
+                group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 group-hover:border-rose-300 dark:group-hover:border-rose-500/40 transition-colors shrink-0">
                 <ChevronRight className="w-3.5 h-3.5 text-rose-400 group-hover:text-rose-600 transition-colors" />
               </div>
             </div>
@@ -422,17 +422,17 @@ function AccountContent() {
           {/* Browse Restaurant Button */}
           <button
             onClick={() => router.push("/")}
-            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
-              hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-50 hover:border-blue-200/80
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-50 dark:hover:bg-blue-500/5 hover:border-blue-200/80 dark:hover:border-blue-500/20
               transition-all duration-200 active:scale-[0.98]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-blue-50 border-2 border-blue-500 group-hover:bg-blue-100 transition-colors">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-blue-50 dark:bg-blue-500/10 border-2 border-blue-500 group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 transition-colors">
                 <Utensils className="w-5 h-5 text-blue-500" />
               </div>
-              <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center
-                group-hover:bg-blue-100 group-hover:border-blue-300 transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center
+                group-hover:bg-blue-100 dark:group-hover:bg-blue-500/20 group-hover:border-blue-300 dark:group-hover:border-blue-500/40 transition-colors shrink-0">
                 <ChevronRight className="w-3.5 h-3.5 text-blue-400 group-hover:text-blue-600 transition-colors" />
               </div>
             </div>
@@ -444,17 +444,17 @@ function AccountContent() {
           {/* Your Orders Button */}
           <button
             onClick={() => router.push("/food/orders?history=true")}
-            className="group bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
+            className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
-              hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 hover:border-purple-200/80
+              hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 dark:hover:bg-purple-500/5 hover:border-purple-200/80 dark:hover:border-purple-500/20
               transition-all duration-200 active:scale-[0.98]"
           >
             <div className="flex items-start justify-between w-full">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-purple-50 border-2 border-purple-500 group-hover:bg-purple-100 transition-colors">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0 bg-purple-50 dark:bg-purple-500/10 border-2 border-purple-500 group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
                 <ShoppingBag className="w-5 h-5 text-purple-500" />
               </div>
-              <div className="w-7 h-7 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center
-                group-hover:bg-purple-100 group-hover:border-purple-300 transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-full bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 flex items-center justify-center
+                group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 group-hover:border-purple-300 dark:group-hover:border-purple-500/40 transition-colors shrink-0">
                 <ChevronRight className="w-3.5 h-3.5 text-purple-400 group-hover:text-purple-600 transition-colors" />
               </div>
             </div>
@@ -482,7 +482,7 @@ function AccountContent() {
                     <MapPin className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
                   </div>
                   <div className="text-left">
-                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Saved Addresses</span>
+                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">Saved Addresses</span>
                     {savedAddresses.length > 0 && (
                       <span className={`ml-2 text-[11px] font-black px-1.5 py-0.5 rounded-full ${isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>
                         {savedAddresses.length}
@@ -595,7 +595,7 @@ function AccountContent() {
                   <Bell className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Push Notifications</span>
+                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">Push Notifications</span>
                 </div>
               </div>
               <button 
@@ -619,7 +619,7 @@ function AccountContent() {
                   <Moon className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
                 </div>
                 <div className="flex flex-col text-left">
-                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Dark Mode</span>
+                  <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">Dark Mode</span>
                 </div>
               </div>
               <button 
@@ -646,21 +646,21 @@ function AccountContent() {
         {user?.email === DEV_EMAIL && (
           <div className="space-y-3">
             <h3 className="text-xs font-black text-violet-400 uppercase tracking-widest px-2">⚡ Developer</h3>
-            <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-violet-100 overflow-hidden py-1">
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-500/10 dark:to-purple-500/10 rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-violet-100 dark:border-violet-500/20 overflow-hidden py-1">
               <Link
                 href="/dev"
-                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-violet-100/50 transition-colors group"
+                className="w-full flex items-center justify-between px-5 py-3.5 hover:bg-violet-100/50 dark:hover:bg-violet-500/5 transition-colors group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-9 h-9 rounded-xl bg-violet-100 flex items-center justify-center group-hover:bg-violet-200 transition-colors">
-                    <Code2 className="w-4 h-4 text-violet-600" />
+                  <div className="w-9 h-9 rounded-xl bg-violet-100 dark:bg-violet-500/20 flex items-center justify-center group-hover:bg-violet-200 dark:group-hover:bg-violet-500/30 transition-colors">
+                    <Code2 className="w-4 h-4 text-violet-600 dark:text-violet-400" />
                   </div>
                   <div>
-                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">Dev Dashboard</span>
+                    <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">Dev Dashboard</span>
                     <p className="text-[11px] text-violet-400 font-medium">Manage managers & platform</p>
                   </div>
                 </div>
-                <ChevronRight className="w-4 h-4 text-violet-300 group-hover:translate-x-0.5 transition-all" />
+                <ChevronRight className="w-4 h-4 text-violet-300 dark:text-violet-500/50 group-hover:translate-x-0.5 transition-all" />
               </Link>
             </div>
           </div>
@@ -804,7 +804,7 @@ function ModernRow({ icon: Icon, label, value, onClick, theme }: { icon: any, la
         <div className={`w-9 h-9 rounded-xl bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#151522] flex items-center justify-center ${theme.hoverBg} ${theme.hoverText} transition-colors`}>
           <Icon className={`w-4 h-4 text-gray-500 dark:text-gray-400 ${theme.hoverText} transition-colors`} />
         </div>
-        <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100">{label}</span>
+        <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">{label}</span>
       </div>
       <div className="flex items-center gap-2">
         {value && <span className="text-[13px] font-bold text-gray-400">{value}</span>}

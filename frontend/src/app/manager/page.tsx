@@ -30,9 +30,10 @@ export default function PartnerDashboard() {
   const [submittingEdit, setSubmittingEdit] = useState(false);
 
   // Manage Frontend state
-  const [currentPoster, setCurrentPoster] = useState<string | null>(null);
-  const [posterPreview, setPosterPreview] = useState<string | null>(null);
-  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterTheme, setPosterTheme] = useState<"light" | "dark">("light");
+  const [currentPoster, setCurrentPoster] = useState<{ light: string | null; dark: string | null }>({ light: null, dark: null });
+  const [posterPreview, setPosterPreview] = useState<{ light: string | null; dark: string | null }>({ light: null, dark: null });
+  const [posterFile, setPosterFile] = useState<{ light: File | null; dark: File | null }>({ light: null, dark: null });
   const [loadingPoster, setLoadingPoster] = useState(false);
   const [savingPoster, setSavingPoster] = useState(false);
   const [posterSaved, setPosterSaved] = useState(false);
@@ -43,12 +44,18 @@ export default function PartnerDashboard() {
       const mType = (user?.manager_type || "food").toLowerCase();
       const res = await fetch(`${API}/api/homepage-poster?type=${mType}`);
       const data = await res.json();
-      if (data.poster?.image_url) {
-        setCurrentPoster(data.poster.image_url);
-        setPosterPreview(data.poster.image_url);
+      if (data.poster) {
+        setCurrentPoster({
+          light: data.poster.image_url || null,
+          dark: data.poster.dark_image_url || null
+        });
+        setPosterPreview({
+          light: data.poster.image_url || null,
+          dark: data.poster.dark_image_url || null
+        });
       } else {
-        setCurrentPoster(null);
-        setPosterPreview(null);
+        setCurrentPoster({ light: null, dark: null });
+        setPosterPreview({ light: null, dark: null });
       }
     } catch (err) {
       console.error(err);
@@ -63,20 +70,22 @@ export default function PartnerDashboard() {
         toast.error("Image must be under 8 MB");
         return;
       }
-      setPosterFile(file);
+      setPosterFile(prev => ({ ...prev, [posterTheme]: file }));
       const reader = new FileReader();
-      reader.onload = () => setPosterPreview(reader.result as string);
+      reader.onload = () => setPosterPreview(prev => ({ ...prev, [posterTheme]: reader.result as string }));
       reader.readAsDataURL(file);
       setPosterSaved(false);
     }
   };
 
   const handlePosterSave = async () => {
-    if (!posterFile) { toast.error("Please select an image first"); return; }
+    const fileToSave = posterFile[posterTheme];
+    if (!fileToSave) { toast.error("Please select an image first"); return; }
     setSavingPoster(true);
     try {
       const form = new FormData();
-      form.append("image", posterFile);
+      form.append("image", fileToSave);
+      form.append("theme", posterTheme);
       const res = await fetch(`${API}/api/homepage-poster`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -84,9 +93,11 @@ export default function PartnerDashboard() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to save poster");
-      toast.success("Poster published successfully!");
-      setCurrentPoster(data.poster.image_url);
-      setPosterFile(null);
+      toast.success(`${posterTheme === 'dark' ? 'Dark' : 'Light'} poster published successfully!`);
+      
+      const newUrl = posterTheme === 'dark' ? data.poster.dark_image_url : data.poster.image_url;
+      setCurrentPoster(prev => ({ ...prev, [posterTheme]: newUrl }));
+      setPosterFile(prev => ({ ...prev, [posterTheme]: null }));
       setPosterSaved(true);
     } catch (err: any) {
       toast.error(err.message);
@@ -776,15 +787,35 @@ export default function PartnerDashboard() {
                 </button>
               </div>
 
+              {/* Theme Selector */}
+              <div className="flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl w-fit shadow-inner">
+                <button
+                  onClick={() => setPosterTheme("light")}
+                  className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                    posterTheme === "light" ? "bg-white dark:bg-[#2A2A3A] text-gray-900 dark:text-white shadow" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  }`}
+                >
+                  Light Poster
+                </button>
+                <button
+                  onClick={() => setPosterTheme("dark")}
+                  className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+                    posterTheme === "dark" ? "bg-white dark:bg-[#2A2A3A] text-gray-900 dark:text-white shadow" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  }`}
+                >
+                  Dark Poster
+                </button>
+              </div>
+
               {/* Current live poster */}
               <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Current Live Poster</p>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Current {posterTheme === 'dark' ? 'Dark' : 'Light'} Poster</p>
                 {loadingPoster ? (
                   <div className="h-48 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse" />
-                ) : currentPoster ? (
+                ) : currentPoster[posterTheme] ? (
                   <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] shadow-sm">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={currentPoster} alt="Current poster" className="w-full object-cover max-h-64" />
+                    <img src={currentPoster[posterTheme] as string} alt="Current poster" className="w-full object-cover max-h-64" />
                     <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full ${theme.bg} border ${theme.border} text-[10px] font-black ${theme.textDark} uppercase tracking-widest shadow-sm`}>
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                       Live
@@ -793,7 +824,7 @@ export default function PartnerDashboard() {
                 ) : (
                   <div className={`h-48 ${theme.bg} rounded-2xl border-2 border-dashed ${theme.border} flex flex-col items-center justify-center gap-3`}>
                     <ImageIcon className={`w-10 h-10 ${theme.text} opacity-40`} />
-                    <p className="text-sm font-semibold text-gray-400">No poster uploaded yet</p>
+                    <p className="text-sm font-semibold text-gray-400">No {posterTheme} poster uploaded yet</p>
                     <p className="text-xs text-gray-400">Upload one below to make it live</p>
                   </div>
                 )}
@@ -801,21 +832,21 @@ export default function PartnerDashboard() {
 
               {/* Upload new poster */}
               <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Upload New Poster</p>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Upload New {posterTheme === 'dark' ? 'Dark' : 'Light'} Poster</p>
 
                 {/* Drop zone */}
                 <label
                   htmlFor="poster-upload"
                   className={`relative flex flex-col items-center justify-center w-full min-h-56 rounded-2xl border-2 border-dashed transition-all cursor-pointer group ${
-                    posterPreview && posterPreview !== currentPoster
+                    posterPreview[posterTheme] && posterPreview[posterTheme] !== currentPoster[posterTheme]
                       ? `border-transparent`
                       : `${theme.border} hover:border-opacity-60 ${theme.bg}`
                   }`}
                 >
-                  {posterPreview && posterPreview !== currentPoster ? (
+                  {posterPreview[posterTheme] && posterPreview[posterTheme] !== currentPoster[posterTheme] ? (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={posterPreview} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
+                      <img src={posterPreview[posterTheme] as string} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl flex items-center justify-center">
                         <span className="text-white font-black text-sm bg-black/50 px-4 py-2 rounded-full">Change Image</span>
                       </div>
@@ -845,19 +876,19 @@ export default function PartnerDashboard() {
                 </label>
 
                 {/* Info / status row */}
-                {posterFile && (
+                {posterFile[posterTheme] && (
                   <div className={`mt-3 flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl ${theme.bg} ${theme.textDark}`}>
                     <ImageIcon className="w-3.5 h-3.5" />
-                    {posterFile.name} — {(posterFile.size / 1024).toFixed(0)} KB
+                    {posterFile[posterTheme]?.name} — {((posterFile[posterTheme]?.size || 0) / 1024).toFixed(0)} KB
                   </div>
                 )}
 
                 {/* Save button */}
                 <button
                   onClick={handlePosterSave}
-                  disabled={!posterFile || savingPoster}
+                  disabled={!posterFile[posterTheme] || savingPoster}
                   className={`mt-4 w-full py-3 rounded-xl font-black text-white text-sm transition-all flex items-center justify-center gap-2 ${
-                    posterFile && !savingPoster
+                    posterFile[posterTheme] && !savingPoster
                       ? `bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90 shadow-lg ${theme.shadow} active:scale-[0.99]`
                       : "bg-gray-200 text-gray-400 cursor-not-allowed"
                   }`}
@@ -867,7 +898,7 @@ export default function PartnerDashboard() {
                   ) : posterSaved ? (
                     <><CheckCircle className="w-4 h-4" /> Published!</>
                   ) : (
-                    <><Upload className="w-4 h-4" /> Publish Poster</>
+                    <><Upload className="w-4 h-4" /> Publish {posterTheme === 'dark' ? 'Dark' : 'Light'} Poster</>
                   )}
                 </button>
 

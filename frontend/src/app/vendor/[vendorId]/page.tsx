@@ -176,7 +176,7 @@ export default function VendorPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#0D0D17] via-white/90 dark:via-[#0D0D17]/90 to-white/20 dark:to-[#0D0D17]/20" />
               </div>
             )}
-            
+
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative z-30 overflow-visible">
               <div className="flex items-center gap-2 mb-6">
                 <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200">
@@ -195,13 +195,13 @@ export default function VendorPage() {
                     </span>
                   </div>
                   <p className="text-sm md:text-base font-semibold text-gray-500 dark:text-gray-400 mb-3">{vendor.cuisine}</p>
-                  
+
                   {(vendor.landmark || vendor.manualAddress || vendor.gpsAddress) && (
                     <p className="text-xs md:text-sm font-medium text-gray-400 mb-4 flex items-center gap-1.5 line-clamp-1">
                       <span className="text-sm shrink-0">📍</span> {vendor.landmark ? `${vendor.landmark}, ` : ""}{vendor.manualAddress || vendor.gpsAddress}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center gap-3 text-xs md:text-sm font-bold flex-wrap mb-6">
                     <span className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1.5 rounded-xl border border-amber-100/50 shadow-sm">
                       <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
@@ -223,13 +223,12 @@ export default function VendorPage() {
                     <div className="relative" ref={catDropdownRef}>
                       <button
                         onClick={() => setShowCatDropdown(prev => !prev)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
-                          selectedCategory
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${selectedCategory
                             ? "bg-orange-500 border-orange-500 text-white"
                             : showCatDropdown
-                            ? "bg-orange-50 border-orange-400 text-orange-600"
-                            : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
-                        }`}
+                              ? "bg-orange-50 border-orange-400 text-orange-600"
+                              : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
+                          }`}
                       >
                         <LayoutList className="w-3 h-3" />
                         <span className="max-w-[80px] truncate">{selectedCategory || "Category"}</span>
@@ -246,11 +245,10 @@ export default function VendorPage() {
                             {/* All option */}
                             <button
                               onClick={() => { setSelectedCategory(null); setShowCatDropdown(false); }}
-                              className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${
-                                selectedCategory === null
+                              className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${selectedCategory === null
                                   ? "bg-orange-50 text-orange-600"
                                   : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                              }`}
+                                }`}
                             >
                               <span>All Categories</span>
                               {selectedCategory === null && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />}
@@ -263,11 +261,10 @@ export default function VendorPage() {
                                 <button
                                   key={cat}
                                   onClick={() => { setSelectedCategory(cat); setShowCatDropdown(false); }}
-                                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${
-                                    selectedCategory === cat
+                                  className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center justify-between gap-2 ${selectedCategory === cat
                                       ? "bg-orange-50 text-orange-600"
                                       : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                                  }`}
+                                    }`}
                                 >
                                   <span className="truncate pr-2">{cat}</span>
                                   {selectedCategory === cat && <span className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />}
@@ -283,13 +280,12 @@ export default function VendorPage() {
                     <div className="relative" ref={filterDropdownRef}>
                       <button
                         onClick={() => setShowFilterDropdown(prev => !prev)}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
-                          foodPref !== "all" || sortOrder !== "relevance"
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${foodPref !== "all" || sortOrder !== "relevance"
                             ? "bg-orange-500 border-orange-500 text-white"
                             : showFilterDropdown
-                            ? "bg-orange-50 border-orange-400 text-orange-600"
-                            : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
-                        }`}
+                              ? "bg-orange-50 border-orange-400 text-orange-600"
+                              : "bg-white dark:bg-[#0D0D17]/80 backdrop-blur-md border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
+                          }`}
                       >
                         <Filter className="w-3 h-3" />
                         <span>Filters</span>
@@ -313,11 +309,10 @@ export default function VendorPage() {
                               <button
                                 key={pref.id}
                                 onClick={() => { setFoodPref(pref.id as any); setShowFilterDropdown(false); }}
-                                className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
-                                  foodPref === pref.id
+                                className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${foodPref === pref.id
                                     ? "bg-orange-50 text-orange-600"
                                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                                }`}
+                                  }`}
                               >
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${foodPref === pref.id ? 'border-orange-500' : 'border-gray-300'}`}>
                                   {foodPref === pref.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
@@ -339,11 +334,10 @@ export default function VendorPage() {
                               <button
                                 key={sort.id}
                                 onClick={() => { setSortOrder(sort.id as any); setShowFilterDropdown(false); }}
-                                className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${
-                                  sortOrder === sort.id
+                                className={`w-full text-left px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-2 ${sortOrder === sort.id
                                     ? "bg-orange-50 text-orange-600"
                                     : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                                }`}
+                                  }`}
                               >
                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${sortOrder === sort.id ? 'border-orange-500' : 'border-gray-300'}`}>
                                   {sortOrder === sort.id && <div className="w-2 h-2 rounded-full bg-orange-500" />}
@@ -543,10 +537,10 @@ export default function VendorPage() {
                                         setQuantities(q => ({ ...q, [dish.id]: 1 }));
                                       }}
                                       className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm hover:shadow transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${isClosed || isOutOfRange
-                                          ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
-                                          : itemQty(dish.id, vendor.id) > 0
-                                            ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                                            : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
+                                        ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
+                                        : itemQty(dish.id, vendor.id) > 0
+                                          ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                                          : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
                                         }`}
                                     >
                                       {isClosed || isOutOfRange

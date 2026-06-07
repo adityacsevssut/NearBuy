@@ -14,39 +14,39 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace
 const THEME = {
   food: {
     border:   "border-orange-500",
-    bg:       "bg-orange-50",
-    text:     "text-orange-600",
-    hoverBorder: "hover:border-orange-200",
-    hoverBg:  "hover:bg-orange-50/50",
+    bg:       "bg-orange-50 dark:bg-orange-500/10",
+    text:     "text-orange-600 dark:text-orange-500",
+    hoverBorder: "hover:border-orange-200 dark:hover:border-orange-400",
+    hoverBg:  "hover:bg-orange-50/50 dark:hover:bg-orange-500/10",
     focus:    "focus:border-orange-500",
     label:    "peer-focus:text-orange-500",
     icon:     "group-focus-within:text-orange-500",
     submit:   "from-orange-500 to-orange-600 shadow-orange-500/30",
-    active:   "border-orange-500 bg-orange-50 text-orange-600",
+    active:   "border-orange-500 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500",
   },
   store: {
     border:   "border-blue-500",
-    bg:       "bg-blue-50",
-    text:     "text-blue-600",
-    hoverBorder: "hover:border-blue-200",
-    hoverBg:  "hover:bg-blue-50/50",
+    bg:       "bg-blue-50 dark:bg-blue-500/10",
+    text:     "text-blue-600 dark:text-blue-500",
+    hoverBorder: "hover:border-blue-200 dark:hover:border-blue-400",
+    hoverBg:  "hover:bg-blue-50/50 dark:hover:bg-blue-500/10",
     focus:    "focus:border-blue-500",
     label:    "peer-focus:text-blue-500",
     icon:     "group-focus-within:text-blue-500",
     submit:   "from-blue-500 to-blue-600 shadow-blue-500/30",
-    active:   "border-blue-500 bg-blue-50 text-blue-600",
+    active:   "border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500",
   },
   medicine: {
     border:   "border-green-500",
-    bg:       "bg-green-50",
-    text:     "text-green-600",
-    hoverBorder: "hover:border-green-200",
-    hoverBg:  "hover:bg-green-50/50",
+    bg:       "bg-green-50 dark:bg-green-500/10",
+    text:     "text-green-600 dark:text-green-500",
+    hoverBorder: "hover:border-green-200 dark:hover:border-green-400",
+    hoverBg:  "hover:bg-green-50/50 dark:hover:bg-green-500/10",
     focus:    "focus:border-green-500",
     label:    "peer-focus:text-green-500",
     icon:     "group-focus-within:text-green-500",
     submit:   "from-green-500 to-green-600 shadow-green-500/30",
-    active:   "border-green-500 bg-green-50 text-green-600",
+    active:   "border-green-500 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500",
   },
 };
 
@@ -74,7 +74,7 @@ function FormInput({
       <Icon className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${iconClass} transition-colors pointer-events-none`} />
       <input
         type={type} id={id} value={value} onChange={onChange}
-        className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:bg-[#0D0D17] ${focusBorderClass} transition-all placeholder-transparent`}
+        className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-[#0D0D17] ${focusBorderClass} transition-all placeholder-transparent`}
         placeholder={label} {...props}
       />
       <label

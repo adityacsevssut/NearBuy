@@ -55,15 +55,15 @@ export default function WishlistPage() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight">
-            <span className="text-orange-500">Near</span>Buy Food <span className="text-rose-500">Wishlist</span>
+            Your <span className="text-rose-500">Wishlist</span>
           </h1>
         </div>
 
         {restaurantWishlist.length === 0 && foodWishlist.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm mt-8">
+          <div className="flex flex-col items-center justify-center py-32 sm:py-40 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm mt-8">
             <Heart className="w-16 h-16 mb-4 text-gray-300" />
             <p className="font-bold text-gray-600 dark:text-gray-400 text-lg">Your wishlist is empty</p>
-            <p className="text-sm mt-1">Start adding your favorite restaurants and dishes!</p>
+            <p className="text-sm mt-1 max-w-[250px] text-center">Start adding your favorite restaurants and dishes!</p>
             <Link href="/" className="mt-6 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl shadow-sm shadow-orange-500/20 hover:bg-orange-600 transition-colors">
               Explore Food
             </Link>
