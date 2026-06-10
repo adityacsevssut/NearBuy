@@ -23,11 +23,11 @@ import { useEffect } from "react";
 // Platform fee and GST are now fetched dynamically from the backend
 
 function deg2rad(d: number) { return d * (Math.PI / 180); }
-function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lon2: number|null) {
-  if (lat1==null||lon1==null||lat2==null||lon2==null) return null;
-  const R = 6371, dLat = deg2rad(lat2-lat1), dLon = deg2rad(lon2-lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+function getDistance(lat1: number | null, lon1: number | null, lat2: number | null, lon2: number | null) {
+  if (lat1 == null || lon1 == null || lat2 == null || lon2 == null) return null;
+  const R = 6371, dLat = deg2rad(lat2 - lat1), dLon = deg2rad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
 function groupByRestaurant(items: ReturnType<typeof useCart>["items"]) {
@@ -81,12 +81,12 @@ function RestaurantOrderCard({
   const [couponApplied, setCouponApplied] = useState(false);
   const [showBill, setShowBill] = useState(true);
   const discount = couponApplied ? Math.floor(subtotal * 0.1) : 0;
-  
+
   // Calculate actual fee amounts based on percentage of subtotal, capped at ₹8 each
   const calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
   const calculatedGst = Math.min((subtotal * gst) / 100, 8);
   const totalFees = calculatedPlatformFee + calculatedGst;
-  
+
   const mainOrderTotal = subtotal - discount;
   const grandTotal = mainOrderTotal + totalFees;
 
@@ -182,14 +182,12 @@ function RestaurantOrderCard({
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 <div className="absolute top-1 left-1">
                   <div
-                    className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#151522] dark:bg-[#151522] flex items-center justify-center ${
-                      item.type === "veg" ? "border-green-600" : "border-red-600"
-                    }`}
+                    className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#151522] dark:bg-[#151522] flex items-center justify-center ${item.type === "veg" ? "border-green-600" : "border-red-600"
+                      }`}
                   >
                     <div
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        item.type === "veg" ? "bg-green-600" : "bg-red-600"
-                      }`}
+                      className={`w-1.5 h-1.5 rounded-full ${item.type === "veg" ? "bg-green-600" : "bg-red-600"
+                        }`}
                     />
                   </div>
                 </div>
@@ -263,11 +261,10 @@ function RestaurantOrderCard({
               if (couponApplied) { setCouponApplied(false); setCoupon(""); }
               else if (coupon === "NEARBUY10") setCouponApplied(true);
             }}
-            className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${
-              couponApplied
+            className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${couponApplied
                 ? "bg-red-50 text-red-500"
                 : "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30"
-            }`}
+              }`}
           >
             {couponApplied ? "Remove" : "Apply"}
           </button>
@@ -327,7 +324,7 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Delivery Address ── */}
-      <div 
+      <div
         onClick={() => setIsLocationModalOpen(true)}
         className="px-5 py-4 border-t border-emerald-100/50 cursor-pointer hover:bg-emerald-50/30 dark:hover:bg-[#151522] transition-colors"
       >
@@ -359,9 +356,8 @@ function RestaurantOrderCard({
               placeholder="Enter 10-digit mobile number"
               value={customerMobile}
               onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ''))}
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${
-                customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-              }`}
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                }`}
             />
             {customerMobile && !isMobileValid && (
               <p className="text-[10px] text-red-500 font-bold mt-1.5">Must be a valid 10-digit Indian number starting with 6-9</p>
@@ -378,9 +374,8 @@ function RestaurantOrderCard({
               placeholder="Enter alternate 10-digit number"
               value={alternateMobile}
               onChange={(e) => setAlternateMobile(e.target.value.replace(/\D/g, ''))}
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${
-                alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100'
-              }`}
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100'
+                }`}
             />
             {alternateMobile && !isAltMobileValid && (
               <p className="text-[10px] text-red-500 font-bold mt-1.5">Must be a valid 10-digit Indian number</p>
@@ -407,23 +402,23 @@ function RestaurantOrderCard({
         <h3 className="font-black text-gray-900 dark:text-gray-100 mb-3 text-[15px]">Payment Method <span className="text-red-500">*</span></h3>
         <div className="space-y-2.5">
           <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-emerald-500 bg-emerald-50/30' : 'border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A]'}`}>
-            <input 
-              type="radio" 
+            <input
+              type="radio"
               name={`payment-${restId}`}
-              checked={paymentMethod === 'cod'} 
+              checked={paymentMethod === 'cod'}
               onChange={() => setPaymentMethod('cod')}
               className="w-4 h-4 text-emerald-500 accent-emerald-500"
             />
             <Wallet className="w-4 h-4 text-gray-700 dark:text-gray-300" />
             <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Cash on Delivery</span>
           </label>
-          
-          <div 
+
+          <div
             onClick={() => toast("This feature will be available soon", { icon: "ℹ️" })}
             className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-[#2A2A3A] bg-gray-50/50 dark:bg-[#151522]/50 cursor-not-allowed opacity-60"
           >
-            <input 
-              type="radio" 
+            <input
+              type="radio"
               name={`payment-${restId}`}
               disabled
               className="w-4 h-4 text-gray-300"
@@ -455,12 +450,16 @@ function RestaurantOrderCard({
               <span className="font-black text-gray-900 dark:text-gray-100 text-lg">₹{totalFees.toFixed(2)}</span>
             </div>
           </div>
-          
+
           {!feesPaid ? (
-            <button 
+            <button
               disabled={outOfRange}
               onClick={async () => {
                 if (outOfRange) return;
+                if (!meetsMinOrder && minOrder > 0) {
+                  toast.error(`Minimum order amount is ₹${minOrder}`);
+                  return;
+                }
                 setIsPayingTaxes(true);
                 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
                 try {
@@ -499,11 +498,10 @@ function RestaurantOrderCard({
                   setIsPayingTaxes(false);
                 }
               }}
-              className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${
-                outOfRange 
-                  ? "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed" 
+              className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${outOfRange
+                  ? "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 dark:bg-green-600 text-white hover:bg-black dark:hover:bg-green-700 active:scale-[0.98]"
-              }`}
+                }`}
             >
               Pay Taxes & Fees (₹{totalFees.toFixed(2)})
             </button>
@@ -537,30 +535,29 @@ function RestaurantOrderCard({
             </p>
           </div>
         ) : null}
-        
-        <button 
+
+        <button
           disabled={!finalCanPlaceOrder}
           onClick={() => {
             if (finalCanPlaceOrder) {
               onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod);
             }
           }}
-          className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${
-            finalCanPlaceOrder
+          className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${finalCanPlaceOrder
               ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/30 active:scale-[0.98]"
               : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
-          }`}
+            }`}
         >
           {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#151522] dark:bg-[#151522]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
-          {outOfRange 
+          {outOfRange
             ? "Out of Delivery Range"
-            : finalCanPlaceOrder 
-              ? `Place Order · ₹${mainOrderTotal}` 
+            : finalCanPlaceOrder
+              ? `Place Order · ₹${mainOrderTotal}`
               : !(feesPaid || totalFees === 0) && meetsMinOrder
                 ? "Pay Fees to Place Order"
-                : !meetsMinOrder && minOrder > 0 
-                  ? `Minimum Amount is ₹${minOrder}` 
+                : !meetsMinOrder && minOrder > 0
+                  ? `Minimum Amount is ₹${minOrder}`
                   : "Select Address & Payment"}
         </button>
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
@@ -577,7 +574,7 @@ export default function CartPage() {
   const { items, updateQty, removeItem, clearCart, restaurantCount } = useCart();
   const { locationName, landmark, pincode, latitude, longitude, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, accessToken, openLoginModal } = useAuth();
-  
+
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -616,7 +613,7 @@ export default function CartPage() {
       openLoginModal();
       return;
     }
-    
+
     setIsPlacingOrder(true);
     const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
     const addressDetails = { locationName, landmark, pincode, latitude, longitude };
