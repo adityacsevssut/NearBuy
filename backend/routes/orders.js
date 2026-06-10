@@ -12,6 +12,9 @@ const { sendNotification } = require("../utils/notifications");
 router.post("/create-razorpay-order", authenticate, async (req, res) => {
   try {
     const { amount } = req.body;
+    if (amount < 1) {
+      return res.status(400).json({ error: "Minimum Amount is ₹1" });
+    }
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       return res.status(500).json({ error: "Razorpay keys not configured" });
     }
@@ -23,7 +26,7 @@ router.post("/create-razorpay-order", authenticate, async (req, res) => {
     });
     res.json(order);
   } catch (error) {
-    res.status(500).send("Error creating Razorpay order");
+    res.status(500).json({ error: error.message || "Error creating Razorpay order" });
   }
 });
 
