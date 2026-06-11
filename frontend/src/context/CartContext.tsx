@@ -54,7 +54,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
           if (res.ok) {
             const data = await res.json();
             if (isMounted && data.items) {
-              setItems(data.items);
+              // Merge local items with server items when logging in
+              const localRaw = localStorage.getItem(STORAGE_KEY);
+              let localItems: CartItem[] = [];
+              if (localRaw) {
+                try { localItems = JSON.parse(localRaw); } catch { /* ignore */ }
+              }
+              
+              if (localItems.length > 0) {
+                const merged = [...data.items];
+                for (const li of localItems) {
+                  const existing = merged.find(i => i.uid === li.uid);
+                  if (existing) {
+                    existing.quantity += li.quantity; // Or just Math.max(existing.quantity, li.quantity)
+                  } else {
+                    merged.push(li);
+                  }
+                }
+                setItems(merged);
+                localStorage.removeItem(STORAGE_KEY);
+              } else {
+                setItems(data.items);
+              }
             }
           }
         } catch (err) {
@@ -98,7 +119,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity" | "uid">, qty = 1) => {
-      if (!isLoggedIn) {
+      if (!isLoggedIn && newItem.section === "food") {
         openLoginModal();
         return;
       }
