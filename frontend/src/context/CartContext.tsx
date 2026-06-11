@@ -37,25 +37,64 @@ const CartContext = createContext<CartContextType | null>(null);
 const STORAGE_KEY = "nearbuy_cart_v2";
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const { isLoggedIn, openLoginModal } = useAuth();
+  const { isLoggedIn, openLoginModal, accessToken } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
 
-  // Hydrate from localStorage once on mount
+  // Load cart on mount or when auth state changes
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw));
-    } catch { /* ignore */ }
-    setLoaded(true);
-  }, []);
+    let isMounted = true;
+    const loadCart = async () => {
+      if (isLoggedIn && accessToken) {
+        try {
+          const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+          const res = await fetch(`${API}/api/cart`, {
+            headers: { "Authorization": `Bearer ${accessToken}` },
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (isMounted && data.items) {
+              setItems(data.items);
+            }
+          }
+        } catch (err) {
+          console.error("Failed to load cart from server", err);
+        }
+      } else {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw && isMounted) setItems(JSON.parse(raw));
+        } catch { /* ignore */ }
+      }
+      if (isMounted) setLoaded(true);
+    };
 
-  // Persist to localStorage whenever items change (after first load)
+    // If we transition from logged out to logged in, we should consider it not loaded temporarily
+    // to avoid syncing the empty/local cart to the server immediately.
+    setLoaded(false); 
+    loadCart();
+
+    return () => { isMounted = false; };
+  }, [isLoggedIn, accessToken]);
+
+  // Persist to backend or localStorage whenever items change
   useEffect(() => {
-    if (loaded) {
+    if (!loaded) return;
+    
+    if (isLoggedIn && accessToken) {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      fetch(`${API}/api/cart`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ items }),
+      }).catch(console.error);
+    } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     }
-  }, [items, loaded]);
+  }, [items, loaded, isLoggedIn, accessToken]);
 
   const addItem = useCallback(
     (newItem: Omit<CartItem, "quantity" | "uid">, qty = 1) => {

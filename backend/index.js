@@ -73,6 +73,7 @@ app.use("/api/public", require("./routes/public"));
 app.use("/api/service-centers", require("./routes/service_centers"));
 app.use("/api/vendor-menu", require("./routes/vendor-menu"));
 app.use("/api/orders", require("./routes/orders"));
+app.use("/api/cart", require("./routes/cart"));
 app.use("/api/homepage-poster", require("./routes/homepage-poster"));
 app.use("/api/share", require("./routes/share"));
 app.use("/api/notifications", require("./routes/notifications"));
