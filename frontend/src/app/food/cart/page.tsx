@@ -617,8 +617,8 @@ export default function CartPage() {
   const restaurantIds = Object.keys(groups);
   const totalQty = foodItems.reduce((s, i) => s + i.quantity, 0);
 
-  const [platformFee, setPlatformFee] = useState(5);
-  const [gst, setGst] = useState(10);
+  const [platformFee, setPlatformFee] = useState(0);
+  const [gst, setGst] = useState(0);
 
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
