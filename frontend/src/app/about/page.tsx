@@ -65,7 +65,7 @@ export default function AboutUsPage() {
             </p>
           </div>
 
-          {/* Box 3: Medico */}
+          {/* Box 3: Medico - Hidden Temporarily
           <div className="bg-orange-50 dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
               <div className="text-orange-500">
@@ -77,6 +77,7 @@ export default function AboutUsPage() {
               Health comes first. We provide a reliable and fast delivery service for your essential medicines and first-aid supplies, ensuring you get exactly what you need when you're feeling under the weather.
             </p>
           </div>
+          */}
 
         </div>
 

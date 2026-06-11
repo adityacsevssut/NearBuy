@@ -204,6 +204,7 @@ export default function Navbar() {
               <span className="hidden sm:block">Essentials{!enableStore && " (Soon)"}</span>
               <span className="sm:hidden">Store</span>
             </button>
+            {/* Medico Button Hidden Temporarily
             <button
               onClick={() => enableMedicine ? router.push("/medicine") : setShowMedicineModal(true)}
               className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isMedicine
@@ -215,6 +216,7 @@ export default function Navbar() {
               <span className="hidden sm:block">Medico{!enableMedicine && " (Soon)"}</span>
               <span className="sm:hidden">Medico</span>
             </button>
+            */}
           </div>
 
           {/* ── Desktop Quick Links ── */}
@@ -447,7 +449,8 @@ export default function Navbar() {
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
-              {/* Medico Card */}
+              {/* Medico Card - Hidden Temporarily */}
+              {/* 
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -466,6 +469,7 @@ export default function Navbar() {
                 <h2 className="text-xl font-black text-white relative z-10 leading-tight">Medico</h2>
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableMedicine ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
+              */}
             </div>
           </motion.div>
         )}

@@ -50,7 +50,7 @@ function OrdersPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isHistory = searchParams.get('history') === 'true';
-  
+
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<Order | null>(null);
@@ -91,11 +91,11 @@ function OrdersPageContent() {
   const fetchOrders = async (pageNum = 1) => {
     if (pageNum === 1) setIsLoading(true);
     else setLoadingMore(true);
-    
+
     try {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
       const query = new URLSearchParams({ page: pageNum.toString(), limit: "20" });
-      
+
       const res = await fetch(`${API}/api/orders/me?${query.toString()}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
@@ -185,11 +185,11 @@ function OrdersPageContent() {
 
   const displayedOrders = orders.filter((order) => {
     const isDeliveredOrCancelled = order.status.toLowerCase() === "delivered" || order.status.toLowerCase() === "cancelled";
-    
+
     // Calculate if it has been 1 hour since update
     const lastUpdate = new Date(order.updated_at || order.created_at).getTime();
     const isOlderThanOneHour = (Date.now() - lastUpdate) > 60 * 60 * 1000;
-    
+
     const shouldBeInHistory = isDeliveredOrCancelled && isOlderThanOneHour;
 
     return isHistory ? shouldBeInHistory : !shouldBeInHistory;
@@ -405,7 +405,7 @@ function OrdersPageContent() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="p-5 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522] border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setSelectedOrderForItems(null)}
@@ -514,7 +514,8 @@ function OrdersPageContent() {
       )}
 
       {/* Print Styles for Native PDF Generation */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style dangerouslySetInnerHTML={{
+        __html: `
         @media print {
           @page { margin: 0; }
           body * {

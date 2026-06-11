@@ -262,8 +262,8 @@ function RestaurantOrderCard({
               else if (coupon === "NEARBUY10") setCouponApplied(true);
             }}
             className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${couponApplied
-                ? "bg-red-50 text-red-500"
-                : "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30"
+              ? "bg-red-50 text-red-500"
+              : "bg-emerald-500 text-white shadow-sm shadow-emerald-500/30"
               }`}
           >
             {couponApplied ? "Remove" : "Apply"}
@@ -499,8 +499,8 @@ function RestaurantOrderCard({
                 }
               }}
               className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${outOfRange
-                  ? "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                  : "bg-gray-900 dark:bg-green-600 text-white hover:bg-black dark:hover:bg-green-700 active:scale-[0.98]"
+                ? "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                : "bg-gray-900 dark:bg-green-600 text-white hover:bg-black dark:hover:bg-green-700 active:scale-[0.98]"
                 }`}
             >
               Pay Taxes & Fees (₹{totalFees.toFixed(2)})
@@ -544,8 +544,8 @@ function RestaurantOrderCard({
             }
           }}
           className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${finalCanPlaceOrder
-              ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/30 active:scale-[0.98]"
-              : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
+            ? "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white shadow-emerald-500/30 active:scale-[0.98]"
+            : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
             }`}
         >
           {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#151522] dark:bg-[#151522]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
