@@ -24,7 +24,6 @@ export default function Navbar() {
   const [searchFocused, setSearchFocused] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showEssentialsModal, setShowEssentialsModal] = useState(false);
-  const [showMedicineModal, setShowMedicineModal] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
@@ -41,7 +40,6 @@ export default function Navbar() {
   // App Modules state
   const [enableFood, setEnableFood] = useState(true);
   const [enableStore, setEnableStore] = useState(false);
-  const [enableMedicine, setEnableMedicine] = useState(false);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -52,7 +50,6 @@ export default function Navbar() {
           const data = await res.json();
           if (data.enable_food !== undefined) setEnableFood(data.enable_food);
           if (data.enable_store !== undefined) setEnableStore(data.enable_store);
-          if (data.enable_medicine !== undefined) setEnableMedicine(data.enable_medicine);
         }
       } catch (e) {
         // Silent catch
@@ -85,17 +82,13 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleOpenEssentials = () => setShowEssentialsModal(true);
-    const handleOpenMedicine = () => setShowMedicineModal(true);
     window.addEventListener('openEssentialsModal', handleOpenEssentials);
-    window.addEventListener('openMedicineModal', handleOpenMedicine);
     return () => {
       window.removeEventListener('openEssentialsModal', handleOpenEssentials);
-      window.removeEventListener('openMedicineModal', handleOpenMedicine);
     };
   }, []);
 
   const getDomain = () => {
-    if (pathname.startsWith('/medicine')) return 'medicine';
     if (pathname.startsWith('/store') || pathname.startsWith('/essentials')) return 'store';
     if (pathname.startsWith('/hotels')) return 'hotels';
     return 'food'; // Default fallback
@@ -103,7 +96,6 @@ export default function Navbar() {
 
   const domain = getDomain();
   const isStore = domain === 'store';
-  const isMedicine = domain === 'medicine';
   const isHotels = domain === 'hotels';
   const isFood = domain === 'food';
   const baseUrl = `/${domain}`;
@@ -112,19 +104,19 @@ export default function Navbar() {
 
 
   const theme = {
-    gradient: isStore ? "from-blue-500 to-blue-400" : isMedicine ? "from-emerald-500 to-emerald-400" : "from-orange-500 to-orange-400",
-    textPrimary: isStore ? "text-blue-500" : isMedicine ? "text-emerald-500" : "text-orange-500",
-    avatarBg: isStore ? "from-blue-100 to-blue-50" : isMedicine ? "from-emerald-100 to-emerald-50" : "from-orange-100 to-orange-50",
-    selection: isStore ? "selection:bg-blue-200" : isMedicine ? "selection:bg-emerald-200" : "selection:bg-orange-200",
-    hoverBg: isStore ? "group-hover:bg-blue-50" : isMedicine ? "group-hover:bg-emerald-50" : "group-hover:bg-orange-50",
-    hoverText: isStore ? "group-hover:text-blue-500" : isMedicine ? "group-hover:text-emerald-500" : "group-hover:text-orange-500",
-    dangerBorder: isStore ? "border-blue-50" : isMedicine ? "border-emerald-50" : "border-red-50",
-    dangerText: isStore ? "text-blue-500" : isMedicine ? "text-emerald-500" : "text-red-500",
-    dangerHoverBg: isStore ? "hover:bg-blue-50/50" : isMedicine ? "hover:bg-emerald-50/50" : "hover:bg-red-50/50",
+    gradient: isStore ? "from-blue-500 to-blue-400" : "from-orange-500 to-orange-400",
+    textPrimary: isStore ? "text-blue-500" : "text-orange-500",
+    avatarBg: isStore ? "from-blue-100 to-blue-50" : "from-orange-100 to-orange-50",
+    selection: isStore ? "selection:bg-blue-200" : "selection:bg-orange-200",
+    hoverBg: isStore ? "group-hover:bg-blue-50" : "group-hover:bg-orange-50",
+    hoverText: isStore ? "group-hover:text-blue-500" : "group-hover:text-orange-500",
+    dangerBorder: isStore ? "border-blue-50" : "border-red-50",
+    dangerText: isStore ? "text-blue-500" : "text-red-500",
+    dangerHoverBg: isStore ? "hover:bg-blue-50/50" : "hover:bg-red-50/50",
   };
 
   const primaryText = theme.textPrimary;
-  const primaryBg = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : "bg-orange-500";
+  const primaryBg = isStore ? "bg-blue-500" : "bg-orange-500";
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -139,7 +131,6 @@ export default function Navbar() {
   const navPages = [
     { href: "/", label: "Food", icon: UtensilsCrossed, activeColor: "text-orange-600", activeBg: "bg-orange-50", isActive: isFood },
     { href: "/store", label: "Store", icon: Package, activeColor: "text-blue-600", activeBg: "bg-blue-50", isActive: isStore },
-    { href: "/medicine", label: "Medico", icon: Pill, activeColor: "text-emerald-600", activeBg: "bg-emerald-50", isActive: isMedicine },
   ];
 
   return (
@@ -204,19 +195,7 @@ export default function Navbar() {
               <span className="hidden sm:block">Essentials{!enableStore && " (Soon)"}</span>
               <span className="sm:hidden">Store</span>
             </button>
-            {/* Medico Button Hidden Temporarily
-            <button
-              onClick={() => enableMedicine ? router.push("/medicine") : setShowMedicineModal(true)}
-              className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isMedicine
-                ? `bg-white dark:bg-[#0D0D17] text-emerald-600 shadow-sm`
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
-                }`}
-            >
-              <Heart className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Medico{!enableMedicine && " (Soon)"}</span>
-              <span className="sm:hidden">Medico</span>
-            </button>
-            */}
+
           </div>
 
           {/* ── Desktop Quick Links ── */}
@@ -449,27 +428,7 @@ export default function Navbar() {
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
-              {/* Medico Card - Hidden Temporarily */}
-              {/* 
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ delay: 0.25, ease: [0.25, 1, 0.5, 1] }}
-                className="w-[calc(50%-8px)] aspect-square bg-emerald-500 rounded-3xl p-4 shadow-xl relative overflow-hidden active:scale-95 transition-transform flex flex-col justify-end cursor-pointer"
-                onClick={() => {
-                  if (enableMedicine) router.push("/medicine");
-                  else setShowMedicineModal(true);
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <div className="absolute top-2 right-2 p-2 opacity-20 pointer-events-none">
-                  <Pill className="w-16 h-16 text-white" />
-                </div>
-                <h2 className="text-xl font-black text-white relative z-10 leading-tight">Medico</h2>
-                <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableMedicine ? "Order Now" : "Coming Soon"}</p>
-              </motion.div>
-              */}
+
             </div>
           </motion.div>
         )}
@@ -519,58 +478,6 @@ export default function Navbar() {
               <button
                 onClick={() => setShowEssentialsModal(false)}
                 className="flex items-center justify-center px-8 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-105 hover:shadow-lg active:scale-95 shadow-blue-500/25"
-              >
-                Close
-              </button>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showMedicineModal && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setShowMedicineModal(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[90vw] sm:max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
-            >
-              <div className="flex items-center justify-center mb-4 font-black text-2xl sm:text-3xl tracking-tight">
-                <div className="flex items-baseline -skew-x-12 mr-2">
-                  <span className="text-emerald-600 drop-shadow-sm">N</span>
-                  <span className="text-black dark:text-white drop-shadow-sm -ml-0.5">B</span>
-                </div>
-                <div className="flex items-baseline">
-                  <span className="text-emerald-600 drop-shadow-sm">Near</span>
-                  <span className="text-black dark:text-white drop-shadow-sm">Buy</span>
-                </div>
-              </div>
-
-              <div className="relative w-full max-w-[240px] aspect-square mb-6">
-                <Image
-                  src="/medicine-soon.png"
-                  alt="Medicine Coming Soon"
-                  fill
-                  className="object-contain drop-shadow-md"
-                  priority
-                />
-              </div>
-
-              <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-gray-100 mb-8 tracking-tight">
-                Coming Soon
-              </h2>
-
-              <button
-                onClick={() => setShowMedicineModal(false)}
-                className="flex items-center justify-center px-8 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-105 hover:shadow-lg active:scale-95 shadow-emerald-500/25"
               >
                 Close
               </button>

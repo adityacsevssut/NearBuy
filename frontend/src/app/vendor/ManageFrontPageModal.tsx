@@ -41,7 +41,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // Theme accents
-  const tColor = vendorType === "store" ? "blue" : vendorType === "medicine" ? "emerald" : "orange";
+  const tColor = vendorType === "store" ? "blue" : "orange";
 
   useEffect(() => {
     if (isOpen) {

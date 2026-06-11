@@ -194,7 +194,7 @@ export default function VendorOrdersPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   const vType = (user?.manager_type || "food").toLowerCase();
-  const tColor = vType === "store" ? "blue" : vType === "medicine" ? "emerald" : "orange";
+  const tColor = vType === "store" ? "blue" : "orange";
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-4 pb-20">

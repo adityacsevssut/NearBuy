@@ -35,7 +35,6 @@ export default function Footer() {
     "Our Platforms": [
       { name: "Food", href: "/" },
       { name: "Essentials", href: "#", onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
-      // { name: "Medico", href: "#", onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openMedicineModal')); } },
     ],
     Legal: [
       { name: "Terms & Conditions", href: "#" },

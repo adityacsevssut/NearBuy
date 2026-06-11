@@ -17,7 +17,7 @@ import ManageContactDetailsModal from "./ManageContactDetailsModal";
 import LocationModal from "@/components/LocationModal";
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Theme map: food → orange, store → blue, medicine → emerald
+// Theme map: food → orange, store → blue
 // ─────────────────────────────────────────────────────────────────────────────
 const THEMES = {
   food: {
@@ -61,27 +61,6 @@ const THEMES = {
     typeIcon:     Boxes,
     gradFrom:     "from-blue-500",
     gradTo:       "to-blue-700",
-  },
-  medicine: {
-    pageBg:       "bg-gray-50 dark:bg-[#151522]",
-    navBg:        "bg-gradient-to-r from-emerald-500 to-emerald-700",
-    navText:      "text-white",
-    navSubtext:   "text-emerald-100",
-    navBadge:     "bg-white dark:bg-[#0D0D17]/20 text-white border-white/30",
-    navEmail:     "bg-white dark:bg-[#0D0D17]/15 border-white/20 text-white",
-    navLogout:    "bg-white dark:bg-[#0D0D17]/15 hover:bg-white dark:hover:bg-[#0D0D17]/25 text-white border-white/20",
-    cardBorder:   "border-emerald-200 hover:border-emerald-400",
-    cardShadow:   "hover:shadow-emerald-500/15",
-    iconBg:       "bg-emerald-100",
-    iconColor:    "text-emerald-500",
-    accent:       "text-emerald-600",
-    accentLight:  "text-emerald-500",
-    badge:        "bg-emerald-100 text-emerald-700 border-emerald-200",
-    footerText:   "text-emerald-600",
-    label:        "Medicine",
-    typeIcon:     Pill,
-    gradFrom:     "from-emerald-500",
-    gradTo:       "to-emerald-700",
   },
 };
 

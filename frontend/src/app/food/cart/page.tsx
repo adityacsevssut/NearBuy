@@ -478,15 +478,32 @@ function RestaurantOrderCard({
                     name: "NearBuy Platform Fees",
                     description: "Tax and Platform Fees",
                     order_id: rzpOrder.id,
-                    handler: function (response: any) {
-                      setRazorpayData({
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_signature: response.razorpay_signature,
-                      });
-                      toast.success("Fees paid successfully!");
-                      setFeesPaid(true);
-                      setIsPayingTaxes(false);
+                    handler: async function (response: any) {
+                      try {
+                        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+                          body: JSON.stringify({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                          })
+                        });
+                        const verifyData = await verifyRes.json();
+                        if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
+                        
+                        setRazorpayData({
+                          razorpay_order_id: response.razorpay_order_id,
+                          razorpay_payment_id: response.razorpay_payment_id,
+                          razorpay_signature: response.razorpay_signature,
+                        });
+                        toast.success("Fees paid and verified successfully!");
+                        setFeesPaid(true);
+                      } catch (err: any) {
+                        toast.error(err.message || "Payment verification failed");
+                      } finally {
+                        setIsPayingTaxes(false);
+                      }
                     },
                     theme: { color: "#f97316" },
                     modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled"); } }

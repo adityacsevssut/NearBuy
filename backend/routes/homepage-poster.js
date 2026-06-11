@@ -15,7 +15,7 @@ const upload = multer({
   limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
 });
 
-// ── GET /api/homepage-poster?type=food|medicine|store  (public) ───────────────
+// ── GET /api/homepage-poster?type=food|store  (public) ───────────────
 router.get("/", async (req, res) => {
   try {
     const type = (req.query.type || "food").toLowerCase();

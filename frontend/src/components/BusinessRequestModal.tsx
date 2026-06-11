@@ -36,18 +36,7 @@ const THEME = {
     submit:   "from-blue-500 to-blue-600 shadow-blue-500/30",
     active:   "border-blue-500 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-500",
   },
-  medicine: {
-    border:   "border-green-500",
-    bg:       "bg-green-50 dark:bg-green-500/10",
-    text:     "text-green-600 dark:text-green-500",
-    hoverBorder: "hover:border-green-200 dark:hover:border-green-400",
-    hoverBg:  "hover:bg-green-50/50 dark:hover:bg-green-500/10",
-    focus:    "focus:border-green-500",
-    label:    "peer-focus:text-green-500",
-    icon:     "group-focus-within:text-green-500",
-    submit:   "from-green-500 to-green-600 shadow-green-500/30",
-    active:   "border-green-500 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500",
-  },
+
 };
 
 // ── Input defined OUTSIDE the modal component to avoid remount every render ──
@@ -105,7 +94,7 @@ export default function BusinessRequestModal({
   const [ownerEmail,  setOwnerEmail]  = useState("");
   const [password,    setPassword]    = useState("");
   const [collegeName, setCollegeName] = useState("");
-  const [vendorType,  setVendorType]  = useState<"food" | "medicine" | "store">("food");
+  const [vendorType,  setVendorType]  = useState<"food" | "store">("food");
 
   const theme = THEME[vendorType];
 
@@ -146,7 +135,6 @@ export default function BusinessRequestModal({
 
   const CATEGORIES = [
     { id: "food",     icon: UtensilsCrossed, label: "Food" },
-    { id: "medicine", icon: Pill,            label: "Medicine" },
     { id: "store",    icon: Store,           label: "Store" },
   ] as const;
 
@@ -192,7 +180,6 @@ export default function BusinessRequestModal({
                   {/* Routing confirmation */}
                   <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-4 ${theme.border} ${theme.bg}`}>
                     {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text}`} />}
-                    {vendorType === "medicine" && <Pill className={`w-4 h-4 ${theme.text}`} />}
                     {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text}`} />}
                     <span className={`text-sm font-black ${theme.text} capitalize`}>
                       Sent to {vendorType} Manager
@@ -278,7 +265,6 @@ export default function BusinessRequestModal({
                   {/* Routing info — shown before submit */}
                   <div className={`flex items-center gap-2.5 px-4 py-3 rounded-xl border ${theme.border} ${theme.bg}`}>
                     {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text} shrink-0`} />}
-                    {vendorType === "medicine" && <Pill className={`w-4 h-4 ${theme.text} shrink-0`} />}
                     {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text} shrink-0`} />}
                     <p className="text-xs text-gray-600 dark:text-gray-400">
                       This request will be sent to the{" "}

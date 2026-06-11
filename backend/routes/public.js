@@ -300,7 +300,6 @@ router.get("/settings", async (req, res) => {
         gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
         instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
         food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
-        medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
         store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
       );
     `);
@@ -315,22 +314,18 @@ router.get("/settings", async (req, res) => {
     // Ensure columns exist (for migration)
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_food BOOLEAN DEFAULT TRUE;`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_medicine BOOLEAN DEFAULT FALSE;`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_store BOOLEAN DEFAULT FALSE;`);
 
-    const { rows } = await pool.query("SELECT platform_fee, gst, instagram_link, food_email, medicine_email, store_email, enable_food, enable_medicine, enable_store FROM global_settings WHERE id = 1");
+    const { rows } = await pool.query("SELECT platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store FROM global_settings WHERE id = 1");
     return res.json({
       platform_fee: parseFloat(rows[0].platform_fee),
       gst: parseFloat(rows[0].gst),
       instagram_link: rows[0].instagram_link,
       food_email: rows[0].food_email,
-      medicine_email: rows[0].medicine_email,
       store_email: rows[0].store_email,
       enable_food: rows[0].enable_food,
-      enable_medicine: rows[0].enable_medicine,
       enable_store: rows[0].enable_store
     });
   } catch (err) {
@@ -342,7 +337,7 @@ router.get("/settings", async (req, res) => {
 // POST /api/public/settings
 router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
   try {
-    const { platform_fee, gst, instagram_link, food_email, medicine_email, store_email, enable_food, enable_medicine, enable_store } = req.body;
+    const { platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store } = req.body;
     
     await pool.query(`
       CREATE TABLE IF NOT EXISTS global_settings (
@@ -351,35 +346,29 @@ router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
         gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
         instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
         food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
-        medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
         store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
       );
     `);
 
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS medicine_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_food BOOLEAN DEFAULT TRUE;`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_medicine BOOLEAN DEFAULT FALSE;`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_store BOOLEAN DEFAULT FALSE;`);
     
     await pool.query(`
-      INSERT INTO global_settings (id, platform_fee, gst, instagram_link, food_email, medicine_email, store_email, enable_food, enable_medicine, enable_store)
-      VALUES (1, $1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO global_settings (id, platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store)
+      VALUES (1, $1, $2, $3, $4, $5, $6, $7)
       ON CONFLICT (id) DO UPDATE SET 
         platform_fee = EXCLUDED.platform_fee, 
         gst = EXCLUDED.gst,
         instagram_link = EXCLUDED.instagram_link,
         food_email = EXCLUDED.food_email,
-        medicine_email = EXCLUDED.medicine_email,
         store_email = EXCLUDED.store_email,
         enable_food = EXCLUDED.enable_food,
-        enable_medicine = EXCLUDED.enable_medicine,
         enable_store = EXCLUDED.enable_store;
-    `, [platform_fee, gst, instagram_link || '', food_email || '', medicine_email || '', store_email || '', 
+    `, [platform_fee, gst, instagram_link || '', food_email || '', store_email || '', 
         enable_food !== undefined ? enable_food : true, 
-        enable_medicine !== undefined ? enable_medicine : false, 
         enable_store !== undefined ? enable_store : false]);
 
     return res.json({ success: true });

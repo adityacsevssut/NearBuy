@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
   is_verified   BOOLEAN NOT NULL DEFAULT FALSE,
   is_active     BOOLEAN NOT NULL DEFAULT TRUE,
   role          TEXT NOT NULL DEFAULT 'user',  -- 'user' | 'vendor' | 'manager' | 'admin'
-  manager_type  TEXT,                          -- 'food' | 'medicine' | 'store' (only for managers)
+  manager_type  TEXT,                          -- 'food' | 'store' (only for managers)
   request_type  TEXT,                          -- 'vendor' | 'student'
   college_name  TEXT,
   location_name TEXT,
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS vendor_requests (
   owner_mobile  TEXT NOT NULL,
   owner_email   TEXT NOT NULL,
   password      TEXT NOT NULL,
-  vendor_type   TEXT NOT NULL, -- 'food', 'medicine', 'store'
+  vendor_type   TEXT NOT NULL, -- 'food', 'store'
   request_type  TEXT NOT NULL DEFAULT 'vendor', -- 'vendor', 'student'
   college_name  TEXT,
   status        TEXT NOT NULL DEFAULT 'pending',

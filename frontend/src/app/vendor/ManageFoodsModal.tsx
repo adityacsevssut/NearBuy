@@ -185,7 +185,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
   const { accessToken } = useAuth();
 
   // Theme colours
-  const tColor = vendorType === "store" ? "blue" : vendorType === "medicine" ? "emerald" : "orange";
+  const tColor = vendorType === "store" ? "blue" : "orange";
   const btnCls  = `bg-${tColor}-500 hover:bg-${tColor}-600 text-white`;
   const ringCls = `focus:ring-${tColor}-500/20 focus:border-${tColor}-500`;
 

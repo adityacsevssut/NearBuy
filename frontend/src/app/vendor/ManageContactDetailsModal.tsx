@@ -14,10 +14,6 @@ const THEMES = {
     bg: "bg-blue-500", text: "text-white",
     iconBg: "bg-blue-100", iconColor: "text-blue-600"
   },
-  medicine: {
-    bg: "bg-emerald-500", text: "text-white",
-    iconBg: "bg-emerald-100", iconColor: "text-emerald-600"
-  }
 };
 
 export default function ManageContactDetailsModal({

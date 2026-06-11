@@ -24,7 +24,6 @@ const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace
 
 const TYPE_META: Record<string, { label: string; icon: any; color: string; bg: string; ring: string }> = {
   food:     { label: "Food",     icon: Store,      color: "text-orange-600", bg: "bg-orange-100", ring: "ring-orange-400" },
-  medicine: { label: "Medicine", icon: Pill,       color: "text-blue-600",   bg: "bg-blue-100",   ring: "ring-blue-400" },
   store:    { label: "Store",    icon: ShoppingBag, color: "text-violet-600", bg: "bg-violet-100", ring: "ring-violet-400" },
 };
 
@@ -54,7 +53,7 @@ interface ServiceCenter {
 interface ManagerFormData {
   email: string;
   password: string;
-  managerType: "food" | "medicine" | "store" | "";
+  managerType: "food" | "store" | "";
 }
 
 export default function DevDashboard() {
@@ -70,10 +69,8 @@ export default function DevDashboard() {
   const [gst, setGst] = useState(10);
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
   const [foodEmail, setFoodEmail] = useState("manager@nearbuy.com");
-  const [medicineEmail, setMedicineEmail] = useState("manager@nearbuy.com");
   const [storeEmail, setStoreEmail] = useState("manager@nearbuy.com");
   const [enableFood, setEnableFood] = useState(true);
-  const [enableMedicine, setEnableMedicine] = useState(false);
   const [enableStore, setEnableStore] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
   
@@ -135,10 +132,8 @@ export default function DevDashboard() {
         if (dataS.gst !== undefined) setGst(dataS.gst);
         if (dataS.instagram_link !== undefined) setInstagramLink(dataS.instagram_link);
         if (dataS.food_email !== undefined) setFoodEmail(dataS.food_email);
-        if (dataS.medicine_email !== undefined) setMedicineEmail(dataS.medicine_email);
         if (dataS.store_email !== undefined) setStoreEmail(dataS.store_email);
         if (dataS.enable_food !== undefined) setEnableFood(dataS.enable_food);
-        if (dataS.enable_medicine !== undefined) setEnableMedicine(dataS.enable_medicine);
         if (dataS.enable_store !== undefined) setEnableStore(dataS.enable_store);
       }
     } catch {
@@ -348,10 +343,8 @@ export default function DevDashboard() {
           gst,
           instagram_link: instagramLink,
           food_email: foodEmail,
-          medicine_email: medicineEmail,
           store_email: storeEmail,
           enable_food: enableFood,
-          enable_medicine: enableMedicine,
           enable_store: enableStore
         })
       });
@@ -372,7 +365,6 @@ export default function DevDashboard() {
     { label: "Total Managers", value: managers.length, icon: Users, color: "from-violet-500 to-purple-600" },
     { label: "Service Centers", value: centers.length, icon: MapPin, color: "from-pink-500 to-rose-500" },
     { label: "Food Managers",  value: managers.filter(m => m.manager_type === "food").length,     icon: Store,      color: "from-orange-400 to-orange-500" },
-    { label: "Med Managers",   value: managers.filter(m => m.manager_type === "medicine").length, icon: Pill,       color: "from-blue-400 to-blue-500" },
     { label: "Essential Managers", value: managers.filter(m => m.manager_type === "store").length, icon: ShoppingBag, color: "from-emerald-400 to-emerald-500" },
   ];
 
@@ -743,15 +735,7 @@ export default function DevDashboard() {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Medicine Support Email</label>
-                  <input
-                    type="email"
-                    value={medicineEmail}
-                    onChange={(e) => setMedicineEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
-                  />
-                </div>
+
                 <div className="sm:col-span-2">
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Store Support Email</label>
                   <input
@@ -787,16 +771,7 @@ export default function DevDashboard() {
                   </label>
                 </div>
 
-                <div className="flex items-center justify-between bg-gray-50 dark:bg-[#151522] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A3A]">
-                  <div className="flex flex-col">
-                    <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Medico Module</span>
-                    <span className="text-[10px] text-gray-400 font-medium">Enable Medicine Store</span>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={enableMedicine} onChange={(e) => setEnableMedicine(e.target.checked)} />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-500"></div>
-                  </label>
-                </div>
+
               </div>
 
               <div className="mt-8 flex justify-end">
@@ -1139,7 +1114,6 @@ export default function DevDashboard() {
                   >
                     <option value="" disabled>Select manager type…</option>
                     <option value="food">🍽️  Food</option>
-                    <option value="medicine">💊  Medicine</option>
                     <option value="store">🛍️  Store</option>
                   </select>
                 </div>

@@ -26,9 +26,8 @@ function AccountContent() {
   const searchParams = useSearchParams();
   const themeParam = searchParams.get('theme') || 'orange';
   const isBlue = themeParam === 'blue';
-  const isEmerald = themeParam === 'emerald';
   const isPurple = themeParam === 'purple';
-  const domain = isBlue ? 'store' : isEmerald ? 'medicine' : isPurple ? 'hotels' : 'food';
+  const domain = isBlue ? 'store' : isPurple ? 'hotels' : 'food';
   const [showAddresses, setShowAddresses] = useState(false);
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
   const [supportEmail, setSupportEmail] = useState("manager@nearbuy.com");
@@ -254,7 +253,7 @@ function AccountContent() {
   };
 
   const handleInvite = async () => {
-    const inviteText = "Hey! I'm inviting you to join NearBuy, an awesome app where you can get food from your nearest kitchens, medicine, and groceries from your local market places delivered fast right to your doorstep!";
+    const inviteText = "Hey! I'm inviting you to join NearBuy, an awesome app where you can get food from your nearest kitchens and groceries from your local market places delivered fast right to your doorstep!";
     const inviteUrl = window.location.origin;
 
     if (navigator.share) {

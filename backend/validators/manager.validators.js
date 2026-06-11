@@ -10,8 +10,8 @@ const createManagerSchema = Joi.object({
     "string.min": "Password must be at least 8 characters",
     "any.required": "Password is required"
   }),
-  managerType: Joi.string().valid("food", "medicine", "store").required().messages({
-    "any.only": "Manager type must be food, medicine, or store",
+  managerType: Joi.string().valid("food", "store").required().messages({
+    "any.only": "Manager type must be food or store",
     "any.required": "Manager type is required"
   })
 });
@@ -20,7 +20,7 @@ const createManagerSchema = Joi.object({
 const updateManagerSchema = Joi.object({
   email:       email.optional(),
   password:    Joi.string().min(8).max(128).optional().messages({ "string.min": "Password must be at least 8 characters" }),
-  managerType: Joi.string().valid("food", "medicine", "store").optional()
+  managerType: Joi.string().valid("food", "store").optional()
 }).min(1).messages({ "object.min": "At least one field must be provided to update" });
 
 /* ── Create vendor account (by manager) ───────────────────────────── */
@@ -57,10 +57,8 @@ const updateSettingsSchema = Joi.object({
   }),
   instagram_link: Joi.string().uri().allow("", null).optional(),
   food_email: email.allow("", null).optional(),
-  medicine_email: email.allow("", null).optional(),
   store_email: email.allow("", null).optional(),
   enable_food: Joi.boolean().optional(),
-  enable_medicine: Joi.boolean().optional(),
   enable_store: Joi.boolean().optional()
 });
 

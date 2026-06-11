@@ -11,7 +11,7 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   
   const getDomain = () => {
-    if (pathname.startsWith('/medicine')) return 'medicine';
+
     if (pathname.startsWith('/store')) return 'store';
     if (pathname.startsWith('/hotels')) return 'hotels';
     return 'food'; // Default fallback
@@ -19,13 +19,12 @@ export default function MobileBottomNav() {
 
   const domain = getDomain();
   const isStore = domain === 'store';
-  const isMedicine = domain === 'medicine';
   const isHotels = domain === 'hotels';
   const isFood = domain === 'food';
 
-  const activeBg = isStore ? "bg-blue-50/70 dark:bg-transparent" : isMedicine ? "bg-emerald-50/70 dark:bg-transparent" : isHotels ? "bg-purple-50/70 dark:bg-transparent" : "bg-orange-50/70 dark:bg-transparent";
-  const activeText = isStore ? "text-blue-600" : isMedicine ? "text-emerald-600" : isHotels ? "text-purple-600" : "text-orange-600";
-  const badgeColor = isStore ? "bg-blue-500" : isMedicine ? "bg-emerald-500" : isHotels ? "bg-purple-500" : "bg-orange-500";
+  const activeBg = isStore ? "bg-blue-50/70 dark:bg-transparent" : isHotels ? "bg-purple-50/70 dark:bg-transparent" : "bg-orange-50/70 dark:bg-transparent";
+  const activeText = isStore ? "text-blue-600" : isHotels ? "text-purple-600" : "text-orange-600";
+  const badgeColor = isStore ? "bg-blue-500" : isHotels ? "bg-purple-500" : "bg-orange-500";
 
   const { isLoggedIn, openLoginModal } = useAuth();
   const { getCartCount } = useCart();
@@ -42,7 +41,7 @@ export default function MobileBottomNav() {
       id: "mobile-nav-auth", 
       label: isLoggedIn ? "Account" : "Login", 
       icon: isLoggedIn ? User : LogIn, 
-      href: isLoggedIn ? `/account?theme=${isStore ? 'blue' : isMedicine ? 'emerald' : isHotels ? 'purple' : 'orange'}` : "#" 
+      href: isLoggedIn ? `/account?theme=${isStore ? 'blue' : isHotels ? 'purple' : 'orange'}` : "#" 
     },
   ];
 

@@ -290,19 +290,6 @@ export default function PartnerDashboard() {
     textDark: "text-blue-600",
     btnText: "text-blue-600",
     btnTextHover: "hover:text-blue-700",
-  } : type === "medicine" ? {
-    text: "text-emerald-500",
-    bg: "bg-emerald-50",
-    bgHover: "hover:bg-emerald-100",
-    border: "border-emerald-100",
-    borderHover: "hover:border-emerald-300",
-    shadowHover: "hover:shadow-emerald-500/10",
-    from: "from-emerald-500",
-    to: "to-emerald-600",
-    shadow: "shadow-emerald-500/20",
-    textDark: "text-emerald-600",
-    btnText: "text-emerald-600",
-    btnTextHover: "hover:text-emerald-700",
   } : {
     text: "text-orange-500",
     bg: "bg-orange-50",
@@ -475,7 +462,7 @@ export default function PartnerDashboard() {
                       placeholder="e.g. Sharma Dhaba"
                       value={vendorForm.businessName}
                       onChange={e => setVendorForm(f => ({ ...f, businessName: e.target.value }))}
-                      className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 focus:ring-2 focus:ring-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-100 transition-all`}
+                      className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : 'orange'}-400 focus:ring-2 focus:ring-${type === 'store' ? 'blue' : 'orange'}-100 transition-all`}
                     />
                   </div>
 
@@ -774,7 +761,7 @@ export default function PartnerDashboard() {
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">
                     This image is shown as the promotional banner on the{" "}
                     <span className={`font-bold ${theme.textDark}`}>
-                      {type === "food" ? "Home (Food)" : type === "medicine" ? "Medico" : "Store (Essentials)"}
+                      {type === "food" ? "Home (Food)" : "Store (Essentials)"}
                     </span>{" "}page.
                   </p>
                 </div>
@@ -933,7 +920,7 @@ export default function PartnerDashboard() {
                     required
                     value={editVendorForm.firstName}
                     onChange={e => setEditVendorForm(f => ({ ...f, firstName: e.target.value }))}
-                    className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : type === 'medicine' ? 'emerald' : 'orange'}-400 transition-all`}
+                    className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : 'orange'}-400 transition-all`}
                   />
                 </div>
                 <div>
