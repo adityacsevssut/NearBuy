@@ -477,7 +477,7 @@ function RestaurantOrderCard({
                   if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate tax payment");
 
                   const options = {
-                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_SyPFlFXJf4zf14",
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
                     amount: rzpOrder.amount,
                     currency: rzpOrder.currency,
                     name: "NearBuy Platform Fees",
@@ -514,6 +514,9 @@ function RestaurantOrderCard({
                     modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled"); } }
                   };
                   const rzp = new (window as any).Razorpay(options);
+                  rzp.on("payment.failed", function (response: any) {
+                    toast.error(response.error.description || "Payment failed");
+                  });
                   rzp.open();
                 } catch (err: any) {
                   toast.error(err.message || "Error initiating Razorpay");

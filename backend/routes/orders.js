@@ -26,7 +26,8 @@ router.post("/create-razorpay-order", authenticate, async (req, res) => {
     });
     res.json(order);
   } catch (error) {
-    res.status(500).json({ error: error.message || "Error creating Razorpay order" });
+    const errorMsg = error.error?.description || error.message || "Error creating Razorpay order";
+    res.status(500).json({ error: errorMsg });
   }
 });
 
