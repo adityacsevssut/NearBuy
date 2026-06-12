@@ -466,6 +466,18 @@ function RestaurantOrderCard({
                   return;
                 }
                 setIsPayingTaxes(true);
+
+                // --- MOCK PAYMENT BYPASS ---
+                // Remove or comment out this block to re-enable Razorpay
+                setTimeout(() => {
+                  toast.success("Fees paid successfully!");
+                  setFeesPaid(true);
+                  setIsPayingTaxes(false);
+                }, 500);
+                return; // Early return to bypass Razorpay below
+                // --- END MOCK PAYMENT BYPASS ---
+
+                /* Original Razorpay Code Below */
                 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
                 try {
                   const res = await fetch(`${API}/api/orders/create-razorpay-order`, {
