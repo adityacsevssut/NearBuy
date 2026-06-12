@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
@@ -156,20 +156,61 @@ export default function PartnerDashboard() {
     setSubmittingVendor(false);
   };
 
-  const handleDeleteVendor = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this vendor account? This cannot be undone.")) return;
-    try {
-      const res = await fetch(`${API}/api/managers/vendor/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete");
-      toast.success("Vendor deleted.");
-      fetchVendors();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
+  const handleDeleteVendor = (id: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Delete Vendor?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
+              Are you sure you want to delete this vendor account? This cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const res = await fetch(`${API}/api/managers/vendor/${id}`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to delete");
+                toast.success("Vendor deleted.");
+                fetchVendors();
+              } catch (err: any) {
+                toast.error(err.message);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid var(--toast-border, #fee2e2)",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "var(--toast-bg, #fff)",
+        color: "var(--toast-text, #000)",
+        maxWidth: "340px"
+      },
+      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+    });
   };
 
   const openEditVendor = (v: any) => {
@@ -221,20 +262,61 @@ export default function PartnerDashboard() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this vendor request? This cannot be undone.")) return;
-    try {
-      const res = await fetch(`${API}/api/vendor-requests/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete");
-      toast.success("Vendor request deleted.");
-      fetchRequests();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
+  const handleDelete = (id: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Delete Request?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
+              Are you sure you want to delete this vendor request? This cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const res = await fetch(`${API}/api/vendor-requests/${id}`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to delete");
+                toast.success("Vendor request deleted.");
+                fetchRequests();
+              } catch (err: any) {
+                toast.error(err.message);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid var(--toast-border, #fee2e2)",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "var(--toast-bg, #fff)",
+        color: "var(--toast-text, #000)",
+        maxWidth: "340px"
+      },
+      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+    });
   };
 
   const handleEditSave = async (id: string, updated: { owner_name: string; owner_email: string; owner_mobile: string }) => {

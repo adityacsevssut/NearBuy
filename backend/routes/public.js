@@ -6,7 +6,7 @@ const { updateSettingsSchema } = require("../validators/manager.validators");
 const cache = require("../middleware/cache");
 
 // GET /api/public/vendors
-router.get("/vendors", cache(300), async (req, res) => {
+router.get("/vendors", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -201,7 +201,7 @@ router.get("/service-centers", async (req, res) => {
 });
 
 // GET /api/public/dishes/:category
-router.get("/dishes/:category", cache(300), async (req, res) => {
+router.get("/dishes/:category", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -259,7 +259,8 @@ router.get("/dishes/:category", cache(300), async (req, res) => {
       SELECT 
          m.id, m.category, m.name, m.description as desc, m.price, m.actual_price, m.type, m.badge, m.image_url as image_url, 
          m.is_available, m.sort_order, m.rating, m.prep_time as time, m.reviews, m.front_page_category,
-         v.restaurant_name as vendor, v.user_id as vendor_id, v.latitude, v.longitude, v.delivery_range
+         v.restaurant_name as vendor, v.user_id as vendor_id, v.latitude, v.longitude, v.delivery_range,
+         v.is_open as vendor_is_open
       FROM vendor_menu_items m
       JOIN vendor_profiles v ON m.vendor_id = v.user_id
       ${whereClause}

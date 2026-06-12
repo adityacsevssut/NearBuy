@@ -216,7 +216,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         )}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-black/10 flex items-center justify-center rounded-t-2xl z-20">
+          <div className="absolute inset-0 bg-black/10 dark:bg-white/10 flex items-center justify-center rounded-t-2xl z-20">
             <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">
               {closed ? "Closed" : "Out of Range"}
             </span>
@@ -358,7 +358,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         )}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-black/10 flex items-center justify-center rounded-t-2xl z-20">
+          <div className="absolute inset-0 bg-black/10 dark:bg-white/10 flex items-center justify-center rounded-t-2xl z-20">
             <span className="text-white font-black text-[12px] uppercase bg-black/60 px-3 py-1 rounded-full">
               {closed ? "Closed" : "Out of Range"}
             </span>

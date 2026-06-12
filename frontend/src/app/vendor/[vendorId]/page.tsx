@@ -441,7 +441,7 @@ export default function VendorPage() {
                                     <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br />Stock</span>
                                   </div>
                                 ) : (isOutOfRange || isClosed) ? (
-                                  <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 rounded-xl z-20">
+                                  <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 dark:bg-white/10 rounded-xl z-20">
                                     <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">{isClosed ? "Closed" : "Out of Range"}</span>
                                   </div>
                                 ) : null}

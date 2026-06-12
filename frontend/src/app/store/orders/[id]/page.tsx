@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
-  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown
+  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown, AlertTriangle
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -92,28 +92,68 @@ export default function OrderStatusPage() {
     }
   };
 
-  const handleCancelOrder = async () => {
-    if (!window.confirm("Are you sure you want to cancel this order?")) return;
-    
-    setIsLoading(true);
-    try {
-      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-      const res = await fetch(`${API}/api/orders/${id}/cancel`, {
-        method: "PATCH",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Order cancelled successfully");
-        fetchOrderDetails();
-      } else {
-        toast.error(data.error || "Failed to cancel order");
-        setIsLoading(false);
-      }
-    } catch (err) {
-      toast.error("Network error");
-      setIsLoading(false);
-    }
+  const handleCancelOrder = () => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full shrink-0">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Cancel Order?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
+              Are you sure you want to cancel this order? This action cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+          >
+            No, Keep It
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              setIsLoading(true);
+              try {
+                const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                const res = await fetch(`${API}/api/orders/${id}/cancel`, {
+                  method: "PATCH",
+                  headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                const data = await res.json();
+                if (res.ok) {
+                  toast.success("Order cancelled successfully");
+                  fetchOrderDetails();
+                } else {
+                  toast.error(data.error || "Failed to cancel order");
+                  setIsLoading(false);
+                }
+              } catch (err) {
+                toast.error("Network error");
+                setIsLoading(false);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Cancel
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid var(--toast-border, #fee2e2)",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "var(--toast-bg, #fff)",
+        color: "var(--toast-text, #000)",
+        maxWidth: "340px"
+      },
+      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+    });
   };
 
   const generateReceipt = async () => {
@@ -184,7 +224,7 @@ export default function OrderStatusPage() {
             </div>
             
             {!isCancelled && currentStepIndex < 3 && (
-              <div className="flex items-center gap-2 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
+              <div className="flex items-center gap-2 bg-white/20 dark:bg-[#0D0D17]/20 backdrop-blur-sm px-3 py-1.5 rounded-full border border-white/20">
                 <Clock className="w-4 h-4 text-white animate-pulse" />
                 <span className="text-xs font-bold text-white uppercase tracking-wider">In Progress</span>
               </div>

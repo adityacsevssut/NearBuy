@@ -229,12 +229,14 @@ export default function DishPage() {
               const vendorLon = dish.longitude ? parseFloat(dish.longitude) : null;
               const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
               const isOutOfRange = rawDistance != null && rawDistance > (dish.delivery_range ? parseFloat(dish.delivery_range) : 5);
+              const isClosed = dish.vendor_is_open === false;
+              const isUnavailable = isOutOfRange || isClosed;
 
               return (
                 <div
                   key={dish.id}
                   onClick={() => setSelectedFood(dish)}
-                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 cursor-pointer ${isOutOfRange ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
+                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 cursor-pointer ${isUnavailable ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -325,7 +327,7 @@ export default function DishPage() {
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            if (isOutOfRange) return;
+                            if (isUnavailable) return;
                             toggleFood({
                               id: dish.id,
                               name: dish.name,
@@ -343,22 +345,22 @@ export default function DishPage() {
                               is_available: dish.is_available
                             });
                           }}
-                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isOutOfRange ? 'bg-gray-100 dark:bg-[#1F1F2E] border-gray-300 cursor-not-allowed' : 'bg-white dark:bg-[#0D0D17]/80 border-gray-200 dark:border-[#2A2A3A] hover:scale-110'}`}
-                          disabled={isOutOfRange}
+                          className={`p-1.5 rounded-full backdrop-blur-sm border shadow-sm transition-transform ${isUnavailable ? 'bg-gray-100 dark:bg-[#1F1F2E] border-gray-300 cursor-not-allowed' : 'bg-white dark:bg-[#0D0D17]/80 border-gray-200 dark:border-[#2A2A3A] hover:scale-110'}`}
+                          disabled={isUnavailable}
                         >
                           <Heart className={`w-3.5 h-3.5 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                         </button>
                       </div>
-                      {isOutOfRange && (
-                        <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 rounded-xl z-20">
-                          <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">Out of Range</span>
+                      {(isOutOfRange || isClosed) && (
+                        <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 dark:bg-white/10 rounded-xl z-20">
+                          <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">{isClosed ? "Closed" : "Out of Range"}</span>
                         </div>
                       )}
                     </div>
 
                     {/* Quantity Selector and ADD Button */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                      <div className={`flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6 ${isOutOfRange ? 'opacity-50 pointer-events-none' : ''}`}>
+                      <div className={`flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6 ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`}>
                         <button 
                           onClick={(e) => {
                             e.preventDefault();
@@ -385,7 +387,7 @@ export default function DishPage() {
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          if (isOutOfRange) return;
+                          if (isUnavailable) return;
                           if (!isLoggedIn) return openLoginModal();
                           const q = quantities[dish.id] || 1;
                           addItem({
@@ -400,9 +402,9 @@ export default function DishPage() {
                           }, q);
                           setQuantities(q => ({ ...q, [dish.id]: 1 }));
                         }}
-                        disabled={isOutOfRange}
+                        disabled={isUnavailable}
                         className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                          isOutOfRange 
+                          isUnavailable 
                             ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
                             : inCartCount > 0
                               ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
@@ -444,6 +446,8 @@ export default function DishPage() {
           const vendorLon = selectedFood.longitude ? parseFloat(selectedFood.longitude) : null;
           const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
           const isOutOfRange = rawDistance != null && rawDistance > (selectedFood.delivery_range ? parseFloat(selectedFood.delivery_range) : 5);
+          const isClosed = selectedFood.vendor_is_open === false;
+          const isUnavailable = isOutOfRange || isClosed;
 
           return (
             <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
@@ -563,9 +567,9 @@ export default function DishPage() {
                     <div className="flex-1 py-2.5 flex items-center justify-center font-black text-red-600 bg-red-50 border border-red-200 rounded-xl shadow-sm">
                       OUT OF STOCK
                     </div>
-                  ) : isOutOfRange ? (
+                  ) : isUnavailable ? (
                     <div className="flex-1 py-2.5 flex items-center justify-center font-black text-gray-400 bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-xs sm:text-sm shadow-sm">
-                      OUT OF RANGE
+                      {isClosed ? "CLOSED" : "OUT OF RANGE"}
                     </div>
                   ) : (
                     <div className="flex-[1.5] flex gap-2">
