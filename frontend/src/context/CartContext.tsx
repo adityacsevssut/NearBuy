@@ -50,6 +50,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       setLoaded(false);
       if (isLoggedIn && accessToken) {
         try {
+          // Immediately load from local cache for instant UI
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw && isMounted) {
+            try { setItems(JSON.parse(raw)); } catch { /* ignore */ }
+          }
+          
           const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
           const res = await fetch(`${API}/api/cart`, {
             headers: { "Authorization": `Bearer ${accessToken}` },
@@ -57,28 +63,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
           if (res.ok) {
             const data = await res.json();
             if (isMounted && data.items) {
-              // Merge local items with server items when logging in
-              const localRaw = localStorage.getItem(STORAGE_KEY);
-              let localItems: CartItem[] = [];
-              if (localRaw) {
-                try { localItems = JSON.parse(localRaw); } catch { /* ignore */ }
-              }
-              
-              if (localItems.length > 0) {
-                const merged = [...data.items];
-                for (const li of localItems) {
-                  const existing = merged.find(i => i.uid === li.uid);
-                  if (existing) {
-                    existing.quantity += li.quantity; // Or just Math.max(existing.quantity, li.quantity)
-                  } else {
-                    merged.push(li);
-                  }
-                }
-                setItems(merged);
-                localStorage.removeItem(STORAGE_KEY);
-              } else {
-                setItems(data.items);
-              }
+              setItems(data.items);
+              // Cache the fresh server data locally
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(data.items));
             }
           }
         } catch (err) {
@@ -107,6 +94,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   // Persist to backend or localStorage whenever items change
   useEffect(() => {
     if (!loaded || isFetchingRef.current) return;
+    
+    // Always keep a local cache for instant loading on refresh
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     
     if (isLoggedIn && accessToken) {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
