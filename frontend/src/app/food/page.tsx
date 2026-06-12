@@ -180,7 +180,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           <img
             src={r.image}
             alt={r.name}
-            className={`w-full h-full object-cover ${dim ? "grayscale" : ""}`}
+            className={`w-full h-full object-cover`}
           />
         ) : (
           <div className="w-full h-full bg-orange-50 flex items-center justify-center">
@@ -216,9 +216,9 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         )}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-black/20 dark:bg-gray-900/80 backdrop-grayscale flex items-center justify-center rounded-t-2xl z-20">
-            <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">
-              {closed ? "Closed" : "Out of Range"}
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-t-2xl z-20 pointer-events-none">
+            <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+              {closed ? "Closed Now" : "Out of Range"}
             </span>
           </div>
         )}
@@ -277,7 +277,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           <img
             src={r.image}
             alt={r.name}
-            className={`w-full h-full object-cover transition-transform duration-500 ${dim ? "grayscale" : ""}`}
+            className={`w-full h-full object-cover transition-transform duration-500`}
           />
         ) : (
           <div className="w-full h-full bg-orange-50 flex items-center justify-center">
@@ -358,9 +358,9 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         )}
         {/* Dim overlay */}
         {dim && (
-          <div className="absolute inset-0 bg-black/20 dark:bg-gray-900/80 backdrop-grayscale flex items-center justify-center rounded-t-2xl z-20">
-            <span className="text-white font-black text-[12px] uppercase bg-black/60 px-3 py-1 rounded-full">
-              {closed ? "Closed" : "Out of Range"}
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-t-2xl z-20 pointer-events-none">
+            <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
+              {closed ? "Closed Now" : "Out of Range"}
             </span>
           </div>
         )}

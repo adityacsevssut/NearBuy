@@ -85,7 +85,7 @@ export default function WishlistPage() {
                 >
                   <div className="relative w-full h-40 bg-gray-100 dark:bg-[#1F1F2E] flex items-center justify-center border-b border-gray-100 dark:border-[#2A2A3A] overflow-hidden">
                     {r.image_url ? (
-                      <img src={r.image_url} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ${r.isClosed ? 'grayscale' : ''}`} />
+                      <img src={r.image_url} alt={r.name} className={`w-full h-full object-cover group-hover:scale-105 transition-transform duration-500`} />
                     ) : (
                       <div className="w-full h-full bg-blue-50 flex items-center justify-center">
                         <Utensils className="w-10 h-10 text-blue-200" />
@@ -104,8 +104,8 @@ export default function WishlistPage() {
                     </button>
                     
                     {r.isClosed && (
-                      <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/40 flex items-center justify-center z-20 pointer-events-none">
-                        <span className="text-red-600 font-black text-xs uppercase tracking-widest px-3 py-1 bg-white dark:bg-[#0D0D17]/80 rounded-md shadow-sm">
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none">
+                        <span className="text-red-500 bg-white font-black text-xs uppercase tracking-widest px-3 py-1 rounded-full shadow-sm border border-red-100">
                           Closed Now
                         </span>
                       </div>

@@ -369,7 +369,7 @@ export default function VendorPage() {
                           <div
                             key={dish.id}
                             onClick={() => setSelectedFood(dish)}
-                            className={`cursor-pointer bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${(dish.is_available === false || isOutOfRange || isClosed) ? "opacity-60 grayscale" : "hover:border-orange-300 hover:shadow-md"}`}
+                            className={`cursor-pointer bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${(dish.is_available === false || isOutOfRange || isClosed) ? "opacity-60" : "hover:border-orange-300 hover:shadow-md"}`}
                           >
                             {/* Info Section */}
                             <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -441,8 +441,8 @@ export default function VendorPage() {
                                     <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br />Stock</span>
                                   </div>
                                 ) : (isOutOfRange || isClosed) ? (
-                                  <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/20 dark:bg-gray-900/80 backdrop-grayscale rounded-xl z-20">
-                                    <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">{isClosed ? "Closed" : "Out of Range"}</span>
+                                  <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/40 rounded-xl z-20 pointer-events-none">
+                                    <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">{isClosed ? "Closed Now" : "Out of Range"}</span>
                                   </div>
                                 ) : null}
 
