@@ -141,6 +141,13 @@ function RestaurantOrderCard({
   const isAddressValid = locationName !== "Select Location";
   const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (feesPaid || totalFees === 0) && !outOfRange && paymentMethod !== "" && isMobileValid && isAltMobileValid && isAddressValid;
 
+  let missingFieldsText = "Select Address & Payment";
+  if (!isAddressValid) missingFieldsText = "Add Delivery Address";
+  else if (!isMobileValid) missingFieldsText = "Enter Mobile Number";
+  else if (!isAltMobileValid) missingFieldsText = "Enter Valid Alt Mobile";
+  else if (paymentMethod === "") missingFieldsText = "Select Payment Method";
+  else missingFieldsText = "Complete Details";
+
   return (
     <motion.div
       layout
@@ -595,7 +602,7 @@ function RestaurantOrderCard({
                 ? "Pay Fees to Place Order"
                 : !meetsMinOrder && minOrder > 0
                   ? `Minimum Amount is ₹${minOrder}`
-                  : "Select Address & Payment"}
+                  : missingFieldsText}
         </button>
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
           Delivered by {restName} · Est. 15–25 min
