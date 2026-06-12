@@ -38,7 +38,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     
     const fetchNotifications = async () => {
       try {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("nb_access");
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications`, {
           headers: { Authorization: `Bearer ${token}` }
         });
@@ -130,7 +130,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             serviceWorkerRegistration: registration 
           });
           if (currentToken) {
-            const token = localStorage.getItem("token");
+            const token = localStorage.getItem("nb_access");
             await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {
               method: 'POST',
               headers: { 
@@ -182,7 +182,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const markAsRead = async (id: string) => {
     try {
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("nb_access");
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}/read`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -195,7 +195,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const markAllAsRead = async () => {
     try {
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("nb_access");
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/read-all`, {
         method: 'PATCH',
         headers: { Authorization: `Bearer ${token}` }
@@ -208,7 +208,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
   const deleteNotification = async (id: string) => {
     try {
       setNotifications(prev => prev.filter(n => n.id !== id));
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem("nb_access");
       await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }

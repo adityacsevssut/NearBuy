@@ -2,7 +2,7 @@
 
 import {
   createContext, useContext, useState,
-  useCallback, useEffect, ReactNode
+  useCallback, useEffect, ReactNode, useRef
 } from "react";
 import { useAuth } from "./AuthContext";
 
@@ -40,11 +40,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const { isLoggedIn, openLoginModal, accessToken } = useAuth();
   const [items, setItems] = useState<CartItem[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const isFetchingRef = useRef(false);
 
   // Load cart on mount or when auth state changes
   useEffect(() => {
     let isMounted = true;
     const loadCart = async () => {
+      isFetchingRef.current = true;
+      setLoaded(false);
       if (isLoggedIn && accessToken) {
         try {
           const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
@@ -87,12 +90,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
           if (raw && isMounted) setItems(JSON.parse(raw));
         } catch { /* ignore */ }
       }
-      if (isMounted) setLoaded(true);
+      if (isMounted) {
+        setLoaded(true);
+        // Add a tiny delay before allowing PUTs to ensure state has settled
+        setTimeout(() => {
+          isFetchingRef.current = false;
+        }, 100);
+      }
     };
 
-    // If we transition from logged out to logged in, we should consider it not loaded temporarily
-    // to avoid syncing the empty/local cart to the server immediately.
-    setLoaded(false); 
     loadCart();
 
     return () => { isMounted = false; };
@@ -100,7 +106,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Persist to backend or localStorage whenever items change
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || isFetchingRef.current) return;
     
     if (isLoggedIn && accessToken) {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
