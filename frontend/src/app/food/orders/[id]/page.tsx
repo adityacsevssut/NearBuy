@@ -375,7 +375,7 @@ export default function OrderStatusPage() {
             Need help?
           </a>
 
-          {currentStepIndex >= 1 && !isCancelled && order.delivery_boy_number && (
+          {currentStepIndex >= 3 && !isCancelled && order.delivery_boy_number && (
             <a 
               href={`tel:${order.delivery_boy_number}`}
               className="w-full py-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center gap-2 text-orange-600 font-bold text-sm transition-colors shadow-sm col-span-2 sm:col-span-1"
