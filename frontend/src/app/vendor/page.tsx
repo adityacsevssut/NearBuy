@@ -239,8 +239,8 @@ export default function VendorDashboard() {
 
           {/* Left: Icon + Restaurant name */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
-              <Store className="w-4.5 h-4.5 text-white" />
+            <div className="w-9 h-9 rounded-xl bg-white/20 dark:bg-[#0D0D17]/20 backdrop-blur-sm border border-white/30 flex items-center justify-center shadow-sm">
+              <Store className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
               <span className={`font-black text-[15px] tracking-tight ${t.navText} leading-tight max-w-[170px] sm:max-w-xs truncate`}>
