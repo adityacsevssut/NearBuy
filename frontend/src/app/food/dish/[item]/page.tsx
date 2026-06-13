@@ -243,8 +243,8 @@ export default function DishPage() {
                     <div>
                       {/* Veg/Non-veg icon & Badge */}
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-orange-600" : "border-red-600"}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-orange-600" : "bg-red-600"}`} />
+                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
                         </span>
                         {dish.badge && (
                           <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
