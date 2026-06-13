@@ -10,11 +10,11 @@ import { useAuth } from "@/context/AuthContext";
 export default function Footer() {
   const { isLoggedIn } = useAuth();
   const pathname = usePathname() || "";
-  const isEssentials = pathname.startsWith('/essentials');
-  const accentColor = isEssentials ? "text-blue-600" : "text-orange-500";
-  const hoverColor = isEssentials ? "hover:text-blue-600" : "hover:text-orange-600";
-  const bgHover = isEssentials ? "hover:bg-blue-50" : "hover:bg-orange-50";
-  
+  const isStore = pathname.startsWith('/store') || pathname.startsWith('/essentials');
+  const accentColor = isStore ? "text-blue-600" : "text-orange-500";
+  const hoverColor = isStore ? "hover:text-blue-600" : "hover:text-orange-600";
+  const bgHover = isStore ? "hover:bg-blue-50" : "hover:bg-orange-50";
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType] = useState<"student" | "vendor">("vendor");
 
@@ -47,16 +47,16 @@ export default function Footer() {
     <>
       <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 border-t border-gray-100 dark:border-[#2A2A3A] relative overflow-hidden mt-6 md:mt-12">
         {/* Subtle Background Glow */}
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isEssentials ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isStore ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
 
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 relative z-10">
-          
+
           <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16 mb-16">
-            
+
             {/* Column 1: Brand & Address */}
             <div className="md:col-span-3 lg:col-span-3">
               <div className="flex items-center flex-shrink-0 mb-6 group cursor-pointer">
-                
+
                 {/* Simple NB Logo */}
                 <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
                   <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${accentColor} tracking-tighter drop-shadow-sm`}>N</span>
@@ -65,11 +65,16 @@ export default function Footer() {
 
                 <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
                   <span className={`${accentColor} drop-shadow-sm`}>Near</span>
-                  <span className="text-black dark:text-white drop-shadow-sm">Buy</span>
+                  <span className="relative text-black dark:text-white drop-shadow-sm">
+                    Buy
+                    <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${accentColor}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                      <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
+                    </svg>
+                  </span>
                 </span>
               </div>
               <p className="text-gray-500 dark:text-gray-400 text-[13px] font-medium leading-relaxed mb-6 max-w-[250px]">
-                NearBuy HQ, 123 University Road<br/>
+                NearBuy HQ, 123 University Road<br />
                 VSSUT Campus, Burla 768018, India
               </p>
             </div>
@@ -84,8 +89,8 @@ export default function Footer() {
                   <ul className="space-y-3">
                     {items.map((item) => (
                       <li key={item.name}>
-                        <a 
-                          href={item.href} 
+                        <a
+                          href={item.href}
                           onClick={item.onClick}
                           className={`text-[13px] text-gray-500 dark:text-gray-400 font-medium ${hoverColor} transition-colors`}
                         >
@@ -118,16 +123,16 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
             {/* Copyright */}
             <div className="text-[12px] text-gray-400 font-medium text-center">
-              Copyright {new Date().getFullYear()} © <span className={accentColor}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br/>
+              Copyright {new Date().getFullYear()} © <span className={accentColor}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br />
               Platform by Students Of VSSUT Burla
             </div>
           </div>
         </div>
       </footer>
-      <BusinessRequestModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        defaultType={modalType} 
+      <BusinessRequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        defaultType={modalType}
       />
     </>
   );
