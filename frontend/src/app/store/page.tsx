@@ -300,7 +300,7 @@ export default function EssentialsPage() {
                           {p.emoji}
                         </div>
                         {!p.inStock && (
-                          <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/80 backdrop-blur-[2px] flex items-center justify-center z-20">
+                          <div className="absolute inset-0 bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-[2px] flex items-center justify-center z-20">
                             <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-3 py-1 bg-white dark:bg-[#0D0D17] rounded-full shadow-sm">Out of Stock</span>
                           </div>
                         )}

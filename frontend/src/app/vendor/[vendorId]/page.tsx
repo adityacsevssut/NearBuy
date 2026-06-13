@@ -437,7 +437,7 @@ export default function VendorPage() {
                                 )}
 
                                 {dish.is_available === false ? (
-                                  <div className="absolute inset-0 bg-white dark:bg-[#0D0D17]/60 backdrop-blur-[1px] flex items-center justify-center z-10">
+                                  <div className="absolute inset-0 bg-white/60 dark:bg-[#0D0D17]/60 backdrop-blur-[1px] flex items-center justify-center z-10">
                                     <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br />Stock</span>
                                   </div>
                                 ) : (isOutOfRange || isClosed) ? (
