@@ -10,10 +10,10 @@ import { useAuth } from "@/context/AuthContext";
 export default function Footer() {
   const { isLoggedIn } = useAuth();
   const pathname = usePathname() || "";
-  const isEssentials = pathname.startsWith('/essentials');
-  const accentColor = isEssentials ? "text-blue-600" : "text-orange-500";
-  const hoverColor = isEssentials ? "hover:text-blue-600" : "hover:text-orange-600";
-  const bgHover = isEssentials ? "hover:bg-blue-50" : "hover:bg-orange-50";
+  const isStore = pathname.startsWith('/store') || pathname.startsWith('/essentials');
+  const accentColor = isStore ? "text-blue-600" : "text-orange-500";
+  const hoverColor = isStore ? "hover:text-blue-600" : "hover:text-orange-600";
+  const bgHover = isStore ? "hover:bg-blue-50" : "hover:bg-orange-50";
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType] = useState<"student" | "vendor">("vendor");
@@ -47,7 +47,7 @@ export default function Footer() {
     <>
       <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 border-t border-gray-100 dark:border-[#2A2A3A] relative overflow-hidden mt-6 md:mt-12">
         {/* Subtle Background Glow */}
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isEssentials ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isStore ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
 
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 relative z-10">
 

@@ -14,25 +14,25 @@ import { useAuth } from "@/context/AuthContext";
 
 const categories = [
   { id: "all", label: "All", emoji: "🛒" },
-  { id: "stationery", label: "Stationery", emoji: "✏️" },
-  { id: "tech", label: "Tech & Cables", emoji: "🔌" },
-  { id: "lab", label: "Lab Supplies", emoji: "🥼" },
-  { id: "food", label: "Snacks & Drinks", emoji: "🍜" },
-  { id: "print", label: "Print & Copy", emoji: "🖨️" },
-  { id: "hygiene", label: "Hygiene", emoji: "🧴" },
+  { id: "stationery", label: "Student Stationary", emoji: "✏️" },
+  { id: "tech", label: "Electronic Gadgets", emoji: "🔌" },
+  { id: "lab", label: "Lab Essentials", emoji: "🥼" },
+  { id: "hostel", label: "Hostel Essentials", emoji: "🛏️" },
+  { id: "personal_care", label: "Personal Care", emoji: "🧴" },
+  { id: "lifestyle", label: "LifeStyle", emoji: "🎒" },
 ];
 
-const sortOptions = ["Relevance", "Price: Low to High", "Price: High to Low", "Ratings", "Newest"];
+const sortOptions = ["Relevance", "Price: Low to High", "Price: High to Low"];
 
 const products = [
-  { id: "p1", name: "USB-C Charger 65W GaN", cat: "tech", price: 349, mrp: 599, rating: 4.6, reviews: 128, emoji: "🔌", badge: "Best Seller", inStock: true, express: true },
-  { id: "p2", name: "Classmate A4 Notebook (200 pg)", cat: "stationery", price: 65, mrp: 80, rating: 4.4, reviews: 240, emoji: "📓", badge: "Top Pick", inStock: true, express: true },
+  { id: "p1", name: "USB-C Charger 65W GaN", cat: "tech", price: 349, mrp: 599, rating: 4.6, reviews: 128, emoji: "🔌", img: "/products/charger_real.png", badge: "Best Seller", inStock: true, express: true },
+  { id: "p2", name: "Classmate A4 Notebook (200 pg)", cat: "stationery", price: 65, mrp: 80, rating: 4.4, reviews: 240, emoji: "📓", img: "/products/notebook_real.png", badge: "Top Pick", inStock: true, express: true },
   { id: "p3", name: "Lab Coat White (L / XL)", cat: "lab", price: 280, mrp: 450, rating: 4.5, reviews: 90, emoji: "🥼", badge: "Practical Ready", inStock: true, express: false },
-  { id: "p4", name: "Staedtler HB Pencils (12-pack)", cat: "stationery", price: 65, mrp: 90, rating: 4.7, reviews: 185, emoji: "✏️", badge: "Lab Approved", inStock: true, express: true },
-  { id: "p5", name: "Maggi 2-Minute Noodles (4-pack)", cat: "food", price: 60, mrp: 72, rating: 4.8, reviews: 410, emoji: "🍜", badge: "Hostel Fave", inStock: true, express: true },
-  { id: "p6", name: "A4 Printout – B&W (per page)", cat: "print", price: 2, mrp: 3, rating: 4.3, reviews: 310, emoji: "📄", badge: "Upload & Print", inStock: true, express: true },
+  { id: "p4", name: "Staedtler HB Pencils (12-pack)", cat: "stationery", price: 65, mrp: 90, rating: 4.7, reviews: 185, emoji: "✏️", img: "/products/pencils_real.png", badge: "Lab Approved", inStock: true, express: true },
+  { id: "p5", name: "Maggi 2-Minute Noodles (4-pack)", cat: "hostel", price: 60, mrp: 72, rating: 4.8, reviews: 410, emoji: "🍜", badge: "Hostel Fave", inStock: true, express: true },
+  { id: "p6", name: "A4 Printout – B&W (per page)", cat: "stationery", price: 2, mrp: 3, rating: 4.3, reviews: 310, emoji: "📄", badge: "Upload & Print", inStock: true, express: true },
   { id: "p7", name: "Scientific Calculator FX-82", cat: "lab", price: 720, mrp: 950, rating: 4.9, reviews: 60, emoji: "🧮", badge: "Exam Essential", inStock: true, express: false },
-  { id: "p8", name: "Dove Men Shampoo 180ml", cat: "hygiene", price: 145, mrp: 185, rating: 4.4, reviews: 78, emoji: "🧴", badge: null, inStock: true, express: false },
+  { id: "p8", name: "Dove Men Shampoo 180ml", cat: "personal_care", price: 145, mrp: 185, rating: 4.4, reviews: 78, emoji: "🧴", badge: null, inStock: true, express: false },
   { id: "p9", name: "Data Cable 1m (Type-C to C)", cat: "tech", price: 120, mrp: 249, rating: 4.3, reviews: 99, emoji: "🔋", badge: "Value Pick", inStock: true, express: true },
   { id: "p10", name: "Highlighter Set (5 colours)", cat: "stationery", price: 85, mrp: 120, rating: 4.6, reviews: 155, emoji: "🖊️", badge: null, inStock: false, express: false },
 ];
@@ -45,7 +45,7 @@ const priceRanges = [
 ];
 
 export default function EssentialsPage() {
-  const [activeCat, setActiveCat] = useState("all");
+  const [activeCats, setActiveCats] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState("Relevance");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<string | null>(null);
@@ -75,7 +75,7 @@ export default function EssentialsPage() {
 
   const filtered = products
     .filter((p) => {
-      const matchCat = activeCat === "all" || p.cat === activeCat;
+      const matchCat = activeCats.length === 0 || activeCats.includes(p.cat);
       const matchSearch =
         !searchQuery ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -102,39 +102,117 @@ export default function EssentialsPage() {
       <Navbar />
 
       <main className="flex-1 pb-20 md:pb-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
-          {/* ── Mobile Top Bar (Location) ── */}
-          <div className="md:hidden pt-4 pb-2 px-1">
-            <button
-              onClick={() => setIsLocationModalOpen(true)}
-              className="flex items-center justify-between w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-white dark:bg-[#0D0D17] shadow-sm active:bg-blue-50 transition-colors"
-            >
-              <div className="flex items-center gap-2.5 overflow-hidden">
-                <MapPin className="w-6 h-6 text-blue-600 shrink-0" />
-                <div className="flex flex-col overflow-hidden text-left">
-                  <div className="flex items-center gap-1">
-                    <span className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight leading-none truncate">Delivery Location</span>
-                    <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
-                  </div>
-                  <span className="text-[12px] text-gray-500 dark:text-gray-400 font-medium leading-tight truncate">{locationName}{pincode ? ` · ${pincode}` : ''}</span>
+        {/* ══ STICKY TOP BAR (below blue navbar) ════════════════════════════ */}
+        <div className="sticky top-16 z-40 bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0">
+            {/* ROW 1 — Location (full width, bordered) */}
+            <div className="w-full pt-3 pb-3 border-b border-gray-100 dark:border-[#2A2A3A]">
+              <button
+                suppressHydrationWarning
+                onClick={() => setIsLocationModalOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#151522] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:border-blue-400 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-md active:scale-[0.99] transition-all duration-200"
+              >
+                <div className="w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
+                  <MapPin className="w-4 h-4 text-blue-600" />
                 </div>
+                {/* Location name + chevron */}
+                <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
+                    Deliver to
+                  </span>
+                  <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
+                    <span className="truncate max-w-[120px] sm:max-w-[200px]">
+                      {locationName}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
+                  </span>
+                </div>
+                {/* Pincode pushed to far right */}
+                {pincode && (
+                  <span className="ml-auto shrink-0 text-[12px] font-black text-blue-600 bg-blue-50 dark:bg-[#0D0D17] border border-blue-200 dark:border-blue-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+                    📍 {pincode}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* ROW 2 — Search bar + Filter (full width) */}
+            <div className="w-full flex items-center gap-3 py-3">
+              <div className="flex-1 flex items-center gap-2.5 bg-gray-50 dark:bg-[#151522] rounded-2xl px-4 py-3.5 border border-gray-200 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus-within:bg-white dark:focus-within:bg-[#0D0D17] dark:bg-[#0D0D17] focus-within:ring-4 focus-within:ring-blue-500/15 focus-within:border-blue-400 transition-all duration-200">
+                <Search className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
+                <input
+                  suppressHydrationWarning
+                  type="text"
+                  placeholder="Search for chargers, notebooks..."
+                  className="flex-1 bg-transparent text-[14px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-500 dark:text-gray-400 font-semibold"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center shrink-0 hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"
+                  >
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                )}
               </div>
-              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center shadow-sm shrink-0 ml-2">
-                <span className="text-sm font-black text-white uppercase">{locationName.charAt(0)}</span>
+
+              {/* Filter */}
+              <div className="relative shrink-0 md:hidden">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
+                    showFilters || activeCats.length > 0 || priceRange
+                      ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
+                      : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-blue-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:text-blue-600"
+                  }`}
+                >
+                  <SlidersHorizontal className="w-4 h-4" />
+                  <span className="hidden sm:inline">Filter</span>
+                  {(activeCats.length > 0 || priceRange) && (
+                    <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
+                  )}
+                </button>
               </div>
-            </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full mt-4">
+          {/* ── Visual Categories Section ── */}
+          <div className="pb-2 overflow-x-auto scrollbar-hide">
+            <div className="flex justify-start md:justify-center gap-4 md:gap-8 min-w-max px-2 py-2">
+              {[
+                { id: "stationery", name: "Student Stationary", src: "/categories/stationary_cat_v6.png" },
+                { id: "tech", name: "Electronic Gadgets", src: "/categories/gadgets_cat_v4.png" },
+                { id: "lab", name: "Lab Essentials", src: "/categories/lab_cat_modern_v2.png" },
+                { id: "hostel", name: "Hostel Essentials", src: "/categories/hostel_cat_modern_v2.png" },
+                { id: "personal_care", name: "Personal Care", src: "/categories/personal_care_cat_modern.png" },
+                { id: "lifestyle", name: "LifeStyle", src: "/categories/lifestyle_cat_modern.png" },
+              ].map((cat, i) => (
+                <div key={i} onClick={() => setActiveCats([cat.id])} className="flex flex-col items-center gap-2 cursor-pointer group w-16 md:w-20">
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-[3px] border-white shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 relative bg-white dark:border-gray-800">
+                    <Image src={cat.src} alt={cat.name} fill unoptimized className="object-cover hover:scale-110 transition-transform duration-500" />
+                  </div>
+                  <span className="text-[11px] md:text-[13px] font-bold text-gray-800 dark:text-gray-200 text-center leading-tight group-hover:text-blue-600 transition-colors">
+                    {cat.name}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* ── Banner Section ── */}
-          <div className="py-4 md:py-6 w-full">
-            <div className="relative w-full aspect-[2/1] md:aspect-[3/1] lg:aspect-[4/1] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-blue-50">
+          <div className="pb-4 md:pb-6 w-full">
+            <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-[#E8F2FB]">
               {posterLoading ? (
                 <div className="w-full h-full bg-blue-100/50 animate-pulse"></div>
               ) : posterUrl ? (
                 <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-cover object-center" />
               ) : (
                 <Image
-                  src="/store_hero_v4.png"
+                  src="/store_hero_v5.png"
                   alt="NearBuy Store Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
@@ -142,33 +220,6 @@ export default function EssentialsPage() {
                   priority
                 />
               )}
-            </div>
-          </div>
-
-          {/* ── Mobile Sub-header ── */}
-          <div className="md:hidden py-3 border-b border-blue-100 mb-4 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h1 className="font-black text-xl text-blue-600 tracking-tight">NearBuy Store</h1>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${showFilters ? "bg-blue-600 text-white border-blue-600 shadow-blue-500/30 shadow-sm" : "bg-white dark:bg-[#0D0D17] border-blue-200 text-gray-700 dark:text-gray-300 hover:border-blue-400"
-                    }`}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" /> Filters
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-blue-200 bg-white dark:bg-[#0D0D17] shadow-sm focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100/50 transition-all mx-1">
-              <Search className="w-4 h-4 text-blue-400 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="Search for chargers, notebooks..."
-                className="flex-1 bg-transparent text-sm text-gray-800 dark:text-gray-200 outline-none"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
             </div>
           </div>
 
@@ -205,79 +256,126 @@ export default function EssentialsPage() {
                 {/* Category filter */}
                 <div className="px-5 py-5 border-b border-gray-100 dark:border-[#2A2A3A]">
                   <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Category</p>
-                  <div className="space-y-1">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActiveCat(cat.id)}
-                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${activeCat === cat.id
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-md shadow-blue-500/20"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-transparent"
+                  <div className="space-y-2">
+                    {categories.filter(c => c.id !== "all").map((cat) => {
+                      const isActive = activeCats.includes(cat.id);
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => {
+                            setActiveCats(prev => 
+                              prev.includes(cat.id) 
+                                ? prev.filter(id => id !== cat.id) 
+                                : [...prev, cat.id]
+                            );
+                          }}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                            isActive
+                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
                           }`}
-                      >
-                        <span className="text-lg">{cat.emoji}</span>
-                        {cat.label}
-                      </button>
-                    ))}
+                        >
+                          <span>{cat.label}</span>
+                          <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
+                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Price range */}
                 <div className="px-5 py-5 border-b border-gray-100 dark:border-[#2A2A3A]">
                   <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Price Range</p>
-                  <div className="space-y-1">
-                    {priceRanges.map((r) => (
-                      <button
-                        key={r.label}
-                        onClick={() => setPriceRange(priceRange === r.label ? null : r.label)}
-                        className={`w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition-all ${priceRange === r.label
-                          ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white font-bold shadow-md shadow-blue-500/20"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-blue-50 hover:text-blue-600 border border-transparent font-medium"
+                  <div className="space-y-2">
+                    {priceRanges.map((r) => {
+                      const isActive = priceRange === r.label;
+                      return (
+                        <button
+                          key={r.label}
+                          onClick={() => setPriceRange(isActive ? null : r.label)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                            isActive
+                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
                           }`}
-                      >
-                        {r.label}
-                      </button>
-                    ))}
+                        >
+                          <span>{r.label}</span>
+                          <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
+                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
                 {/* Sort */}
                 <div className="px-5 py-5">
                   <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Sort By</p>
-                  <div className="space-y-1">
-                    {sortOptions.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => setActiveSort(s)}
-                        className={`w-full text-left px-3 py-2 rounded-xl text-sm transition-all ${activeSort === s
-                          ? "text-blue-700 font-bold bg-blue-50/50"
-                          : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 font-medium hover:bg-gray-50 dark:hover:bg-[#151522]"
+                  <div className="space-y-2">
+                    {sortOptions.map((s) => {
+                      const isActive = activeSort === s;
+                      return (
+                        <button
+                          key={s}
+                          onClick={() => setActiveSort(s)}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                            isActive
+                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
                           }`}
-                      >
-                        {s}
-                      </button>
-                    ))}
+                        >
+                          <span>{s}</span>
+                          <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
+                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
             </aside>
 
             {/* ── Product Grid ── */}
-            <div className="flex-1 min-w-0 pt-2">
-              <div className="hidden md:flex items-center justify-between mb-6">
-                <h1 className="font-black text-2xl text-blue-600 tracking-tight">NearBuy Store</h1>
-                <div className="flex items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-4 md:mb-6 px-1.5 md:px-2">
+                <h1 className="font-black text-xl md:text-2xl text-blue-600 tracking-tight">All Products</h1>
+                
+                {/* Desktop right side */}
+                <div className="hidden md:flex items-center gap-4">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                     Showing <span className="text-gray-900 dark:text-gray-100 font-black">{filtered.length}</span> products
                   </p>
-                  {(activeCat !== "all" || priceRange) && (
+                  {(activeCats.length > 0 || priceRange) && (
                     <button
-                      onClick={() => { setActiveCat("all"); setPriceRange(null); }}
+                      onClick={() => { setActiveCats([]); setPriceRange(null); }}
                       className="text-xs text-blue-600 font-bold hover:underline px-3 py-1.5 bg-blue-50 rounded-lg"
                     >
                       Clear filters
                     </button>
                   )}
+                </div>
+
+                {/* Mobile right side */}
+                <div className="flex md:hidden items-center gap-2">
+                  <p className="text-xs font-medium text-gray-500 mr-1">{filtered.length} items</p>
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${
+                      showFilters || activeCats.length > 0 || priceRange
+                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
+                        : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
+                    }`}
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5" />
+                    <span>Filter</span>
+                    {(activeCats.length > 0 || priceRange) && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                    )}
+                  </button>
                 </div>
               </div>
 
@@ -295,9 +393,13 @@ export default function EssentialsPage() {
                     >
                       {/* Image area */}
                       <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center
-                        justify-center h-44 md:h-48 text-8xl md:text-9xl border-b border-gray-100 dark:border-[#2A2A3A] p-4 overflow-hidden">
-                        <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md">
-                          {p.emoji}
+                        justify-center h-24 md:h-28 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] p-2 overflow-hidden">
+                        <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md w-full h-full flex items-center justify-center">
+                          {(p as any).img ? (
+                            <Image src={(p as any).img} alt={p.name} fill className="object-cover" />
+                          ) : (
+                            p.emoji
+                          )}
                         </div>
                         {!p.inStock && (
                           <div className="absolute inset-0 bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-[2px] flex items-center justify-center z-20">
@@ -376,10 +478,10 @@ export default function EssentialsPage() {
                 })}
 
                 {filtered.length === 0 && (
-                  <div className="col-span-full flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
+                  <div className="col-span-full flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A] px-4">
                     <span className="text-6xl mb-4">📦</span>
-                    <p className="font-black text-gray-700 dark:text-gray-300 text-xl">No products found</p>
-                    <p className="text-sm mt-2 font-medium">Try changing your filters or searching for something else.</p>
+                    <p className="font-black text-gray-700 dark:text-gray-300 text-xl text-center">No products found</p>
+                    <p className="text-sm mt-2 font-medium text-center text-balance max-w-sm">Try changing your filters or searching for something else.</p>
                   </div>
                 )}
               </div>

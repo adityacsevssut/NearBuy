@@ -39,7 +39,7 @@ export default function Navbar() {
 
   // App Modules state
   const [enableFood, setEnableFood] = useState(true);
-  const [enableStore, setEnableStore] = useState(false);
+  const [enableStore, setEnableStore] = useState(true); // Force enabled for this branch
 
   useEffect(() => {
     async function fetchSettings() {
@@ -49,7 +49,7 @@ export default function Navbar() {
         if (res.ok) {
           const data = await res.json();
           if (data.enable_food !== undefined) setEnableFood(data.enable_food);
-          if (data.enable_store !== undefined) setEnableStore(data.enable_store);
+          // if (data.enable_store !== undefined) setEnableStore(data.enable_store); // Disabled — force enabled on this branch
         }
       } catch (e) {
         // Silent catch
