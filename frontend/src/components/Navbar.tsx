@@ -166,7 +166,12 @@ export default function Navbar() {
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
                 <span className={`${primaryText} drop-shadow-sm`}>Near</span>
-                <span className="text-gray-900 dark:text-gray-100 drop-shadow-sm">Buy</span>
+                <span className="relative text-gray-900 dark:text-gray-100 drop-shadow-sm">
+                  Buy
+                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                    <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
+                  </svg>
+                </span>
               </span>
             </Link>
           </div>
@@ -457,7 +462,12 @@ export default function Navbar() {
                 </div>
                 <div className="flex items-baseline">
                   <span className="text-blue-600 drop-shadow-sm">Near</span>
-                  <span className="text-black dark:text-white drop-shadow-sm">Buy</span>
+                  <span className="relative text-black dark:text-white drop-shadow-sm">
+                    Buy
+                    <svg className="absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 text-blue-600" viewBox="0 0 100 20" preserveAspectRatio="none">
+                      <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
+                    </svg>
+                  </span>
                 </div>
               </div>
 
