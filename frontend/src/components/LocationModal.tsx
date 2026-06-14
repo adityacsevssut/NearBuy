@@ -34,7 +34,7 @@ export default function LocationModal() {
   const pathname = usePathname();
   const isStore = pathname?.startsWith("/store");
   const c = {
-    text: isStore ? "text-blue-500" : "text-blue-500",
+    text: isStore ? "text-blue-500" : "text-orange-500",
     textDark: isStore ? "text-blue-700" : "text-orange-700",
     textHover: isStore ? "group-hover:text-blue-700 dark:group-hover:text-blue-400" : "group-hover:text-orange-700 dark:group-hover:text-orange-400",
     textIconHover: isStore ? "text-blue-400" : "text-orange-400",
