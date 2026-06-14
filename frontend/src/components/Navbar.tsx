@@ -49,7 +49,7 @@ export default function Navbar() {
         if (res.ok) {
           const data = await res.json();
           if (data.enable_food !== undefined) setEnableFood(data.enable_food);
-          // if (data.enable_store !== undefined) setEnableStore(data.enable_store); // Disabled — force enabled on this branch
+          if (data.enable_store !== undefined) setEnableStore(data.enable_store);
         }
       } catch (e) {
         // Silent catch

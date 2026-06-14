@@ -204,19 +204,19 @@ export default function EssentialsPage() {
           </div>
 
           {/* ── Banner Section ── */}
-          <div className="pb-4 md:pb-6 w-full">
-            <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-[#E8F2FB]">
+          <div className="pb-4 md:pb-6 w-full flex justify-center">
+            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-[#E8F2FB]">
               {posterLoading ? (
                 <div className="w-full h-full bg-blue-100/50 animate-pulse"></div>
               ) : posterUrl ? (
-                <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-cover object-center" />
+                <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-contain object-center" />
               ) : (
                 <Image
                   src="/store_hero_v5.png"
                   alt="NearBuy Store Banner"
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                  className="object-cover object-center"
+                  className="object-contain object-center scale-105"
                   priority
                 />
               )}
