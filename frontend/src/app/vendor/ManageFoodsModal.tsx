@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import imageCompression from 'browser-image-compression';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -319,14 +320,26 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
   };
 
   // ── Image handler ─────────────────────────────────────────────────────────
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5MB"); return; }
-      setForm((f) => ({ ...f, imageFile: file }));
-      const reader = new FileReader();
-      reader.onload = () => setForm((f) => ({ ...f, imagePreview: reader.result as string }));
-      reader.readAsDataURL(file);
+      if (file.size > 20 * 1024 * 1024) { toast.error("Image must be under 20MB"); return; }
+      
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(file, options);
+        setForm((f) => ({ ...f, imageFile: compressedFile }));
+        const reader = new FileReader();
+        reader.onload = () => setForm((f) => ({ ...f, imagePreview: reader.result as string }));
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error("Compression error:", error);
+        toast.error("Failed to compress image");
+      }
     }
   };
 

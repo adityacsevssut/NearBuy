@@ -8,6 +8,7 @@ import {
   CheckCircle, Crosshair, Building2, Clock, Trash2,
 } from "lucide-react";
 import { useLocationContext, SavedAddress } from "@/context/LocationContext";
+import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
 import GeoapifySearch, { ResolvedGeoapifyAddress } from "./GeoapifySearch";
 
@@ -29,6 +30,9 @@ type View = "menu" | "map" | "search";
 // ── Main Modal ────────────────────────────────────────────────────────────────
 
 export default function LocationModal() {
+  const pathname = usePathname();
+  const isStore = pathname?.includes("/store");
+
   const {
     isLocationModalOpen, setIsLocationModalOpen, setLocation,
     savedAddresses, addSavedAddress, removeSavedAddress,
@@ -144,7 +148,10 @@ export default function LocationModal() {
       const position = await new Promise<GeolocationPosition>((resolve, reject) =>
         navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
       );
-      const { latitude, longitude } = position.coords;
+      const pathname = usePathname();
+  const isStore = pathname?.includes("/store");
+
+  const { latitude, longitude } = position.coords;
       setMapCoords({ lat: latitude, lng: longitude });
       await resolveAddress(latitude, longitude);
       setView("map");
@@ -245,18 +252,18 @@ export default function LocationModal() {
                     <button
                       onClick={handleDetectAndOpenMap}
                       disabled={isDetecting}
-                      className="w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-orange-50 dark:from-orange-900/20 to-amber-50 dark:to-amber-900/20 border-2 border-orange-200 dark:border-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]"
+                      className={`w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r border-2 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98] ${isStore ? "from-blue-50 dark:from-blue-900/20 to-cyan-50 dark:to-cyan-900/20 border-blue-200 dark:border-blue-500/20 hover:border-blue-400 dark:hover:border-blue-500/50" : "from-orange-50 dark:from-orange-900/20 to-amber-50 dark:to-amber-900/20 border-orange-200 dark:border-orange-500/20 hover:border-orange-400 dark:hover:border-orange-500/50"}`}
                     >
-                      <div className="w-11 h-11 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30">
+                      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 shadow-lg ${isStore ? "bg-blue-500 shadow-blue-500/30" : "bg-orange-500 shadow-orange-500/30"}`}>
                         {isDetecting ? <Loader2 className="w-6 h-6 text-white animate-spin" /> : <Crosshair className="w-6 h-6 text-white" />}
                       </div>
                       <div className="text-left">
-                        <p className="font-black text-gray-800 dark:text-gray-200 text-[15px] group-hover:text-orange-700 dark:group-hover:text-orange-400">
+                        <p className={`font-black text-gray-800 dark:text-gray-200 text-[15px] ${isStore ? "group-hover:text-blue-700 dark:group-hover:text-blue-400" : "group-hover:text-orange-700 dark:group-hover:text-orange-400"}`}>
                           {isDetecting ? "Detecting your location…" : "Use GPS / Current Location"}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Automatically detect where you are</p>
                       </div>
-                      {!isDetecting && <Navigation className="w-5 h-5 text-orange-400 ml-auto shrink-0" />}
+                      {!isDetecting && <Navigation className={`w-5 h-5 ml-auto shrink-0 ${isStore ? "text-blue-400" : "text-orange-400"}`} />}
                     </button>
 
                     <div className="flex items-center gap-3 px-2">
@@ -267,7 +274,7 @@ export default function LocationModal() {
 
                     <button
                       onClick={() => setView("search")}
-                      className="w-full flex items-center gap-4 px-5 py-4 bg-gray-50 dark:bg-[#151522] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-400 dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group active:scale-[0.98]"
+                      className={`w-full flex items-center gap-4 px-5 py-4 bg-gray-50 dark:bg-[#151522] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-400 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group active:scale-[0.98] ${isStore ? "dark:hover:border-blue-500/50" : "dark:hover:border-orange-500/50"}`}
                     >
                       <div className="w-11 h-11 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
                         <Search className="w-6 h-6 text-white" />
@@ -299,18 +306,18 @@ export default function LocationModal() {
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => e.key === "Enter" && handlePickSaved(addr)}
-                            className="w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 dark:hover:border-orange-500/50 hover:bg-orange-50/60 dark:hover:bg-orange-500/10 rounded-2xl transition-all group text-left shadow-sm cursor-pointer"
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl transition-all group text-left shadow-sm cursor-pointer ${isStore ? "hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-blue-50/60 dark:hover:bg-blue-500/10" : "hover:border-orange-300 dark:hover:border-orange-500/50 hover:bg-orange-50/60 dark:hover:bg-orange-500/10"}`}
                           >
-                            <div className="w-9 h-9 bg-orange-100 dark:bg-orange-500/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-200 dark:group-hover:bg-orange-500/30 transition-colors">
-                              <MapPin className="w-4 h-4 text-orange-500" />
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${isStore ? "bg-blue-100 dark:bg-blue-500/20 group-hover:bg-blue-200 dark:group-hover:bg-blue-500/30" : "bg-orange-100 dark:bg-orange-500/20 group-hover:bg-orange-200 dark:group-hover:bg-orange-500/30"}`}>
+                              <MapPin className={`w-4 h-4 ${isStore ? "text-blue-500" : "text-orange-500"}`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2 group-hover:text-orange-700 dark:group-hover:text-orange-400">
+                              <p className={`text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2 ${isStore ? "group-hover:text-blue-700 dark:group-hover:text-blue-400" : "group-hover:text-orange-700 dark:group-hover:text-orange-400"}`}>
                                 {addr.landmark ? addr.landmark : addr.name}
                               </p>
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 {addr.pincode && (
-                                  <span className="shrink-0 whitespace-nowrap text-[10px] font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-100">
+                                  <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full border ${isStore ? "text-blue-600 bg-blue-50 border-blue-100" : "text-orange-600 bg-orange-50 border-orange-100"}`}>
                                     PIN {addr.pincode}
                                   </span>
                                 )}
@@ -370,9 +377,9 @@ export default function LocationModal() {
                         <div className="w-full h-40 rounded-2xl overflow-hidden border border-gray-200 dark:border-[#2A2A3A] shadow-sm">
                           <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={(lat, lng) => { setMapCoords({ lat, lng }); resolveAddress(lat, lng); }} />
                         </div>
-                        <div className="flex flex-col gap-3 p-4 bg-orange-50 border border-orange-200 rounded-2xl">
+                        <div className={`flex flex-col gap-3 p-4 border rounded-2xl ${isStore ? "bg-blue-50 border-blue-200" : "bg-orange-50 border-orange-200"}`}>
                           <div className="flex items-start gap-3">
-                            <div className="w-9 h-9 bg-orange-500 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
+                            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isStore ? "bg-blue-500" : "bg-orange-500"}`}>
                               <MapPin className="w-4 h-4 text-white" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -380,24 +387,24 @@ export default function LocationModal() {
                               <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium mt-1 mb-3 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
                               <div className="space-y-2">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-orange-700 font-bold w-16">PIN:</span>
+                                  <span className={`text-xs font-bold w-16 ${isStore ? "text-blue-700" : "text-orange-700"}`}>PIN:</span>
                                   <input
                                     type="text"
                                     maxLength={6}
                                     value={resolvedAddress.pincode}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                    className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
+                                    className={`px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border rounded outline-none transition-colors flex-1 min-w-0 ${isStore ? "border-blue-200 focus:border-blue-400" : "border-orange-200 focus:border-orange-400"}`}
                                     placeholder="Auto-fetched or enter PIN"
                                     onClick={(e) => e.stopPropagation()}
                                   />
                                 </div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-xs text-orange-700 font-bold w-16">Landmark:</span>
+                                  <span className={`text-xs font-bold w-16 ${isStore ? "text-blue-700" : "text-orange-700"}`}>Landmark:</span>
                                   <input
                                     type="text"
                                     value={resolvedAddress.landmark || ""}
                                     onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                    className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border border-orange-200 rounded outline-none focus:border-orange-400 transition-colors flex-1 min-w-0"
+                                    className={`px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] border rounded outline-none transition-colors flex-1 min-w-0 ${isStore ? "border-blue-200 focus:border-blue-400" : "border-orange-200 focus:border-orange-400"}`}
                                     placeholder="E.g. Plot Name, Hostel Name"
                                     onClick={(e) => e.stopPropagation()}
                                   />
@@ -409,7 +416,7 @@ export default function LocationModal() {
                         <button
                           onClick={handleSaveAddress}
                           disabled={isSaving}
-                          className="w-full py-4 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg shadow-orange-500/25 disabled:opacity-40 transition-all active:scale-[0.98] text-[15px] flex items-center justify-center gap-2"
+                          className={`w-full py-4 text-white font-black rounded-2xl shadow-lg disabled:opacity-40 transition-all active:scale-[0.98] text-[15px] flex items-center justify-center gap-2 ${isStore ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/25" : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/25"}`}
                         >
                           {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</> : <><CheckCircle className="w-5 h-5" />Save This Address</>}
                         </button>
@@ -447,38 +454,38 @@ export default function LocationModal() {
                   <div className="shrink-0 bg-white dark:bg-[#0D0D17] border-t border-gray-100 dark:border-[#2A2A3A] p-4 shadow-[0_-8px_30px_rgb(0,0,0,0.08)]">
                     {isResolvingAddress ? (
                       <div className="flex items-center gap-3 py-2">
-                        <Loader2 className="w-5 h-5 animate-spin text-orange-500 shrink-0" />
+                        <Loader2 className={`w-5 h-5 animate-spin shrink-0 ${isStore ? "text-blue-500" : "text-orange-500"}`} />
                         <span className="text-sm font-medium text-gray-500 dark:text-gray-400">Resolving address…</span>
                       </div>
                     ) : resolvedAddress ? (
                       <>
                         <div className="flex items-start gap-3 mb-4">
-                          <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
-                            <MapPin className="w-5 h-5 text-orange-500" />
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isStore ? "bg-blue-100" : "bg-orange-100"}`}>
+                            <MapPin className={`w-5 h-5 ${isStore ? "text-blue-500" : "text-orange-500"}`} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="font-black text-gray-900 dark:text-gray-100 text-[16px] leading-tight">{resolvedAddress.name}</p>
                             <p className="text-[11px] text-gray-400 font-medium mt-1 mb-2 leading-snug line-clamp-2">{resolvedAddress.fullAddress}</p>
                             <div className="space-y-2">
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-orange-600 font-bold w-16">PIN:</span>
+                                <span className={`text-xs font-bold w-16 ${isStore ? "text-blue-600" : "text-orange-600"}`}>PIN:</span>
                                 <input
                                   type="text"
                                   maxLength={6}
                                   value={resolvedAddress.pincode}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, pincode: e.target.value.replace(/\D/g, "") })}
-                                  className="px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0"
+                                  className={`px-2 py-1.5 text-xs font-bold text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0 ${isStore ? "focus:border-blue-400" : "focus:border-orange-400"}`}
                                   placeholder="Auto-fetched or enter PIN"
                                   onClick={(e) => e.stopPropagation()}
                                 />
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-xs text-orange-600 font-bold w-16">Landmark:</span>
+                                <span className={`text-xs font-bold w-16 ${isStore ? "text-blue-600" : "text-orange-600"}`}>Landmark:</span>
                                 <input
                                   type="text"
                                   value={resolvedAddress.landmark || ""}
                                   onChange={(e) => setResolvedAddress({ ...resolvedAddress, landmark: e.target.value })}
-                                  className="px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:border-orange-400 focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0"
+                                  className={`px-2 py-1.5 text-xs font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded outline-none focus:bg-white dark:focus:bg-[#0D0D17] transition-colors flex-1 min-w-0 ${isStore ? "focus:border-blue-400" : "focus:border-orange-400"}`}
                                   placeholder="E.g. Plot Name, Hostel Name"
                                   onClick={(e) => e.stopPropagation()}
                                 />
@@ -489,7 +496,7 @@ export default function LocationModal() {
                         <button
                           onClick={handleSaveAddress}
                           disabled={isSaving}
-                          className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-2xl shadow-lg shadow-orange-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-[15px] disabled:opacity-40"
+                          className={`w-full py-3.5 text-white font-black rounded-2xl shadow-lg transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-[15px] disabled:opacity-40 ${isStore ? "bg-blue-500 hover:bg-blue-600 shadow-blue-500/20" : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"}`}
                         >
                           {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</> : <><CheckCircle className="w-5 h-5" />Save This Address</>}
                         </button>

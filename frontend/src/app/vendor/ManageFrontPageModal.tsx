@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import imageCompression from 'browser-image-compression';
 
 interface ManageFrontPageModalProps {
   isOpen: boolean;
@@ -88,17 +89,29 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
   // We removed handleDelete, hasProfile, isDeleting state parameters, so we can clean it up.
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error("Image size must be less than 5MB");
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Image size must be less than 20MB");
         return;
       }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = () => setImagePreview(reader.result as string);
-      reader.readAsDataURL(file);
+      
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1024,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(file, options);
+        setImageFile(compressedFile);
+        const reader = new FileReader();
+        reader.onload = () => setImagePreview(reader.result as string);
+        reader.readAsDataURL(compressedFile);
+      } catch (error) {
+        console.error("Compression error:", error);
+        toast.error("Failed to compress image");
+      }
     }
   };
 

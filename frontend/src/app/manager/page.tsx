@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import imageCompression from 'browser-image-compression';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -63,18 +64,30 @@ export default function PartnerDashboard() {
     setLoadingPoster(false);
   };
 
-  const handlePosterFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePosterFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      if (file.size > 8 * 1024 * 1024) {
-        toast.error("Image must be under 8 MB");
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Image must be under 20 MB");
         return;
       }
-      setPosterFile(prev => ({ ...prev, [posterTheme]: file }));
-      const reader = new FileReader();
-      reader.onload = () => setPosterPreview(prev => ({ ...prev, [posterTheme]: reader.result as string }));
-      reader.readAsDataURL(file);
-      setPosterSaved(false);
+      
+      try {
+        const options = {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true
+        };
+        const compressedFile = await imageCompression(file, options);
+        setPosterFile(prev => ({ ...prev, [posterTheme]: compressedFile }));
+        const reader = new FileReader();
+        reader.onload = () => setPosterPreview(prev => ({ ...prev, [posterTheme]: reader.result as string }));
+        reader.readAsDataURL(compressedFile);
+        setPosterSaved(false);
+      } catch (error) {
+        console.error("Compression error:", error);
+        toast.error("Failed to compress image");
+      }
     }
   };
 
