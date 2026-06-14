@@ -698,7 +698,7 @@ export default function HomePage() {
                             <div
                               className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
                                 active
-                                  ? "bg-white dark:bg-[#0D0D17]/30"
+                                  ? "bg-white/30 dark:bg-[#0D0D17]/50"
                                   : "bg-gray-200"
                               }`}
                             >
@@ -793,7 +793,7 @@ export default function HomePage() {
                   {/* Pill toggle */}
                   <div
                     className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                      active ? "bg-white dark:bg-[#0D0D17]/30" : "bg-gray-200"
+                      active ? "bg-white/30 dark:bg-[#0D0D17]/50" : "bg-gray-200"
                     }`}
                   >
                     <span
