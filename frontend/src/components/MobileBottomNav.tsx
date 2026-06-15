@@ -11,9 +11,9 @@ export default function MobileBottomNav() {
   const pathname = usePathname();
   
   const getDomain = () => {
-
-    if (pathname.startsWith('/store')) return 'store';
-    if (pathname.startsWith('/hotels')) return 'hotels';
+    const currentPath = typeof window !== "undefined" ? window.location.href : (pathname || "");
+    if (currentPath.toLowerCase().includes('/store') || currentPath.toLowerCase().includes('theme=blue')) return 'store';
+    if (currentPath.toLowerCase().includes('/hotels') || currentPath.toLowerCase().includes('theme=purple')) return 'hotels';
     return 'food'; // Default fallback
   };
 
