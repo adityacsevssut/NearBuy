@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useParams, useRouter } from "next/navigation";
 import {
   Search, Star, SlidersHorizontal, ChevronDown,
-  ShoppingCart, Heart, Zap, BadgePercent, Package, X, MapPin
+  ShoppingCart, Heart, Zap, BadgePercent, Package, X, MapPin, ArrowLeft
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -21,8 +22,6 @@ const categories = [
   { id: "personal_care", label: "Daily Need", emoji: "🧴" },
 ];
 
-const sortOptions = ["Relevance", "Price: Low to High", "Price: High to Low"];
-
 const subcategories: Record<string, { id: string, label: string }[]> = {
   stationery: [
     { id: "basic_stationery", label: "Basic Stationary" },
@@ -32,22 +31,64 @@ const subcategories: Record<string, { id: string, label: string }[]> = {
     { id: "calc", label: "Scientific calculator" },
     { id: "art_craft", label: "Art and Craft" },
     { id: "study_acc", label: "Study Accesories" },
-    { id: "printing", label: "Printing And Project Supplies" }
+    { id: "printing", label: "Printing And Project Supplies" },
+    { id: "others", label: "Others" }
+  ],
+  tech: [
+    { id: "charger", label: "Charger" },
+    { id: "extension_board", label: "Extension Board" },
+    { id: "small_fans", label: "Wired Small fans" },
+    { id: "study_lamp", label: "Study lamp" },
+    { id: "other", label: "Other Devices" }
+  ],
+  snacks: [
+    { id: "biscuit", label: "Biscuit" },
+    { id: "namkeen", label: "Namkeen Mix" },
+    { id: "chatua", label: "Chatua" },
+    { id: "chips", label: "Snacks And Chips" },
+    { id: "sprite", label: "Sprite" },
+    { id: "pepsi", label: "Pepsi" },
+    { id: "thumsup", label: "Thumsup" },
+    { id: "other_drinks", label: "Other Drinks" },
+    { id: "other_snacks", label: "Other Snacks" }
+  ],
+  hostel: [
+    { id: "bedsheet", label: "Bedsheet" },
+    { id: "pillow_cover", label: "Pillow Cover" },
+    { id: "bolster_pillow", label: "Bolster Pillow" },
+    { id: "bucket", label: "Bucket" },
+    { id: "mug", label: "Mug" },
+    { id: "umbrella", label: "Umbrella" },
+    { id: "hanger", label: "Hanger" },
+    { id: "lock_key", label: "Lock and Key" },
+    { id: "others", label: "Others" }
+  ],
+  personal_care: [
+    { id: "handwash", label: "Handwash" },
+    { id: "perfume", label: "Perfume" },
+    { id: "daily_needs", label: "Daily Needs" },
+    { id: "good_knight", label: "Good knight stick" },
+    { id: "others", label: "Others" }
   ]
 };
 
 const products = [
-  { id: "p1", name: "USB-C Charger 65W GaN", cat: "tech", price: 349, mrp: 599, rating: 4.6, reviews: 128, emoji: "🔌", img: "/products/charger_real.png", badge: "Best Seller", inStock: true, express: true },
+  { id: "p1", name: "USB-C Charger 65W GaN", cat: "tech", subcat: "charger", price: 349, mrp: 599, rating: 4.6, reviews: 128, emoji: "🔌", img: "/products/charger_real.png", badge: "Best Seller", inStock: true, express: true },
   { id: "p2", name: "Classmate A4 Notebook (200 pg)", cat: "stationery", subcat: "notebook", price: 65, mrp: 80, rating: 4.4, reviews: 240, emoji: "📓", img: "/products/notebook_real.png", badge: "Top Pick", inStock: true, express: true },
   { id: "p3", name: "Lab Coat White (L / XL)", cat: "stationery", subcat: "lab_apron", price: 280, mrp: 450, rating: 4.5, reviews: 90, emoji: "🥼", badge: "Practical Ready", inStock: true, express: false },
   { id: "p4", name: "Staedtler HB Pencils (12-pack)", cat: "stationery", subcat: "basic_stationery", price: 65, mrp: 90, rating: 4.7, reviews: 185, emoji: "✏️", img: "/products/pencils_real.png", badge: "Lab Approved", inStock: true, express: true },
   { id: "p5", name: "Maggi 2-Minute Noodles (4-pack)", cat: "hostel", price: 60, mrp: 72, rating: 4.8, reviews: 410, emoji: "🍜", badge: "Hostel Fave", inStock: true, express: true },
   { id: "p6", name: "A4 Printout – B&W (per page)", cat: "stationery", subcat: "printing", price: 2, mrp: 3, rating: 4.3, reviews: 310, emoji: "📄", badge: "Upload & Print", inStock: true, express: true },
   { id: "p7", name: "Scientific Calculator FX-82", cat: "stationery", subcat: "calc", price: 720, mrp: 950, rating: 4.9, reviews: 60, emoji: "🧮", badge: "Exam Essential", inStock: true, express: false },
-  { id: "p8", name: "Dove Men Shampoo 180ml", cat: "personal_care", price: 145, mrp: 185, rating: 4.4, reviews: 78, emoji: "🧴", badge: null, inStock: true, express: false },
-  { id: "p9", name: "Data Cable 1m (Type-C to C)", cat: "tech", price: 120, mrp: 249, rating: 4.3, reviews: 99, emoji: "🔋", badge: "Value Pick", inStock: true, express: true },
+  { id: "p8", name: "Dove Men Shampoo 180ml", cat: "personal_care", subcat: "others", price: 145, mrp: 185, rating: 4.4, reviews: 78, emoji: "🧴", badge: null, inStock: true, express: false },
+  { id: "p9", name: "Data Cable 1m (Type-C to C)", cat: "tech", subcat: "other", price: 120, mrp: 249, rating: 4.3, reviews: 99, emoji: "🔋", badge: "Value Pick", inStock: true, express: true },
   { id: "p10", name: "Highlighter Set (5 colours)", cat: "stationery", subcat: "study_acc", price: 85, mrp: 120, rating: 4.6, reviews: 155, emoji: "🖊️", badge: null, inStock: false, express: false },
+  { id: "p11", name: "Parle-G Gold Biscuits", cat: "snacks", subcat: "biscuit", price: 20, mrp: 20, rating: 4.8, reviews: 540, emoji: "🍪", badge: "All Time Classic", inStock: true, express: true },
+  { id: "p12", name: "Sprite Cold Drink 750ml", cat: "snacks", subcat: "sprite", price: 40, mrp: 40, rating: 4.6, reviews: 310, emoji: "🥤", badge: "Refreshing", inStock: true, express: true },
+  { id: "p13", name: "Cotton Single Bedsheet (Blue)", cat: "hostel", subcat: "bedsheet", price: 350, mrp: 499, rating: 4.5, reviews: 142, emoji: "🛏️", badge: "Dorm Classic", inStock: true, express: false },
 ];
+
+const sortOptions = ["Relevance", "Price: Low to High", "Price: High to Low"];
 
 const priceRanges = [
   { label: "Under ₹100", max: 100 },
@@ -56,11 +97,13 @@ const priceRanges = [
   { label: "Above ₹600", min: 600 },
 ];
 
-import { useRouter } from "next/navigation";
-
-export default function EssentialsPage() {
+export default function CategoryPage() {
   const router = useRouter();
-  const [activeCats, setActiveCats] = useState<string[]>([]);
+  const params = useParams();
+  const catId = params.id as string;
+  const mainCategory = categories.find(c => c.id === catId);
+
+  const [activeSubCat, setActiveSubCat] = useState<string | null>(null);
   const [activeSort, setActiveSort] = useState("Relevance");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<string | null>(null);
@@ -69,29 +112,13 @@ export default function EssentialsPage() {
   const [cart, setCart] = useState<string[]>([]);
   const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
-  const [posterLoading, setPosterLoading] = useState(true);
   const [previewProduct, setPreviewProduct] = useState<any>(null);
 
-  useEffect(() => {
-    async function fetchPoster() {
-      try {
-        const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-        const res = await fetch(`${API}/api/homepage-poster?type=store`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
-        }
-      } catch { /* silent */ } finally {
-        setPosterLoading(false);
-      }
-    }
-    fetchPoster();
-  }, []);
+  const subs = subcategories[catId] || [];
 
   const filtered = products
     .filter((p) => {
-      const matchCat = activeCats.length === 0 || activeCats.includes(p.cat);
+      const matchCat = p.cat === catId;
       const matchSearch =
         !searchQuery ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -102,7 +129,8 @@ export default function EssentialsPage() {
         const below = range.max ? p.price <= range.max : true;
         return above && below;
       })();
-      return matchCat && matchSearch && matchPrice;
+      const matchSubCat = !activeSubCat || (p as any).subcat === activeSubCat;
+      return matchCat && matchSearch && matchPrice && matchSubCat;
     })
     .sort((a, b) => {
       if (activeSort === "Price: Low to High") return a.price - b.price;
@@ -113,132 +141,63 @@ export default function EssentialsPage() {
 
   const discount = (p: number, m: number) => Math.round(((m - p) / m) * 100);
 
+  if (!mainCategory) {
+    return (
+      <div className="min-h-screen bg-blue-50/40 flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-black mb-4">Category not found</h1>
+        <button onClick={() => router.push("/store")} className="text-blue-600 font-bold hover:underline">Return to Store</button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-blue-50/40 flex flex-col pt-16">
       <Navbar />
 
-      <main className="flex-1 pb-20 md:pb-0">
-        {/* ══ STICKY TOP BAR (below blue navbar) ════════════════════════════ */}
-        <div className="sticky top-16 z-40 bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0">
-            {/* ROW 1 — Location (full width, bordered) */}
-            <div className="w-full pt-3 pb-3 border-b border-gray-100 dark:border-[#2A2A3A]">
+      <main className="pb-16 md:pb-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full mt-4">
+          
+          <div className="flex items-center justify-between mb-6 mt-2">
+            <button onClick={() => router.push("/store")} className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#0D0D17] rounded-xl border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors text-sm font-bold text-gray-700 dark:text-gray-300 shadow-sm">
+              <ArrowLeft className="w-4 h-4" />
+              Back to Home
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <p className="text-sm font-medium text-gray-500 dark:text-gray-400 hidden sm:block">
+                Showing <span className="text-gray-900 dark:text-gray-100 font-black">{filtered.length}</span> items
+              </p>
+              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 sm:hidden">
+                {filtered.length} items
+              </p>
+              
+              {(priceRange || activeSubCat) && (
+                <button
+                  onClick={() => { setActiveSubCat(null); setPriceRange(null); }}
+                  className="hidden md:block text-xs text-blue-600 font-bold hover:underline px-3 py-1.5 bg-blue-50 rounded-lg"
+                >
+                  Clear filters
+                </button>
+              )}
+              
               <button
-                suppressHydrationWarning
-                onClick={() => setIsLocationModalOpen(true)}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-gray-50 dark:bg-[#151522] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.04)] hover:border-blue-400 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:shadow-md active:scale-[0.99] transition-all duration-200"
+                onClick={() => setShowFilters(!showFilters)}
+                className={`md:hidden flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${
+                  showFilters || priceRange || activeSubCat
+                    ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
+                    : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
+                }`}
               >
-                <div className="w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                </div>
-                {/* Location name + chevron */}
-                <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
-                  <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
-                    Deliver to
-                  </span>
-                  <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
-                    <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                      {landmark ? `${landmark}, ${locationName}` : locationName}
-                    </span>
-                    <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
-                  </span>
-                </div>
-                {/* Pincode pushed to far right */}
-                {pincode && (
-                  <span className="ml-auto shrink-0 text-[12px] font-black text-blue-600 bg-blue-50 dark:bg-[#0D0D17] border border-blue-200 dark:border-blue-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
-                    📍 {pincode}
-                  </span>
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Filter</span>
+                {(priceRange || activeSubCat) && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
                 )}
               </button>
             </div>
-
-            {/* ROW 2 — Search bar + Filter (full width) */}
-            <div className="w-full flex items-center gap-3 py-3">
-              <div className="flex-1 flex items-center gap-2.5 bg-gray-50 dark:bg-[#151522] rounded-2xl px-4 py-3.5 border border-gray-200 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.04)] focus-within:bg-white dark:focus-within:bg-[#0D0D17] dark:bg-[#0D0D17] focus-within:ring-4 focus-within:ring-blue-500/15 focus-within:border-blue-400 transition-all duration-200">
-                <Search className="w-5 h-5 text-gray-500 dark:text-gray-400 shrink-0" />
-                <input
-                  suppressHydrationWarning
-                  type="text"
-                  placeholder="Search for chargers, notebooks..."
-                  className="flex-1 bg-transparent text-[14px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-500 dark:text-gray-400 font-semibold"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center shrink-0 hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"
-                  >
-                    <X className="w-3 h-3 text-white" />
-                  </button>
-                )}
-              </div>
-
-              {/* Filter */}
-              <div className="relative shrink-0 md:hidden">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
-                    showFilters || activeCats.length > 0 || priceRange
-                      ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
-                      : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-blue-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:text-blue-600"
-                  }`}
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filter</span>
-                  {(activeCats.length > 0 || priceRange) && (
-                    <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full mt-4">
-          {/* ── Visual Categories Section ── */}
-          <div className="pb-2 overflow-x-auto scrollbar-hide">
-            <div className="flex justify-start md:justify-center gap-4 md:gap-8 min-w-max px-2 py-2">
-              {[
-                { id: "stationery", name: "Student Stationary", src: "/categories/stationary_cat_v6.png" },
-                { id: "tech", name: "Electronic Gadgets", src: "/categories/gadgets_cat_v4.png" },
-                { id: "snacks", name: "Snacks & Beverages", src: "/categories/snacks_cat_v4.png" },
-                { id: "hostel", name: "Hostel Essentials", src: "/categories/hostel_cat_modern_v2.png" },
-                { id: "personal_care", name: "Daily Need\nEssentials", src: "/categories/personal_care_items_ultra_modern.png" },
-              ].map((cat, i) => (
-                <div key={i} onClick={() => router.push(`/store/category/${cat.id}`)} className="flex flex-col items-center gap-2 cursor-pointer group w-16 md:w-20">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-[3px] border-white shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 relative bg-white dark:border-gray-800">
-                    <Image src={cat.src} alt={cat.name} fill unoptimized className="object-cover hover:scale-110 transition-transform duration-500" />
-                  </div>
-                  <span className="text-[11px] md:text-[13px] font-bold text-gray-800 dark:text-gray-200 text-center leading-tight whitespace-pre-line group-hover:text-blue-600 transition-colors">
-                    {cat.name}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* ── Banner Section ── */}
-          <div className="pb-4 md:pb-6 w-full flex justify-center">
-            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-[#E8F2FB]">
-              {posterLoading ? (
-                <div className="w-full h-full bg-blue-100/50 animate-pulse"></div>
-              ) : posterUrl ? (
-                <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-contain object-center" />
-              ) : (
-                <Image
-                  src="/store_hero_v5.png"
-                  alt="NearBuy Store Banner"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                  className="object-contain object-center scale-105"
-                  priority
-                />
-              )}
-            </div>
-          </div>
-
-          <div className="flex gap-6 pb-12">
+          <div className="flex gap-6 pb-0">
             {/* ── Sidebar filters ── */}
             {/* Mobile Overlay */}
             {showFilters && (
@@ -262,43 +221,43 @@ export default function EssentialsPage() {
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0D0D17] md:rounded-2xl md:border md:border-gray-200 dark:border-[#2A2A3A] md:sticky md:top-24 md:shadow-sm pb-24 md:pb-0 scrollbar-hide">
+              <div className="flex-1 overflow-y-auto bg-white dark:bg-[#0D0D17] md:rounded-2xl md:border md:border-gray-200 dark:border-[#2A2A3A] md:sticky md:top-40 md:shadow-sm pb-24 md:pb-0 scrollbar-hide">
                 <div className="hidden md:flex px-5 py-4 border-b border-gray-100 dark:border-[#2A2A3A] items-center gap-2">
                   <Package className="w-5 h-5 text-blue-600" />
                   <p className="font-black text-base text-gray-900 dark:text-gray-100">Filters</p>
                 </div>
 
-                {/* Category filter */}
-                <div className="px-5 py-5 border-b border-gray-100 dark:border-[#2A2A3A]">
-                  <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Category</p>
-                  <div className="space-y-2">
-                    {categories.filter(c => c.id !== "all").map((cat) => {
-                      const isActive = activeCats.includes(cat.id);
-                      return (
+                {/* Subcategory filter */}
+                {subs.length > 0 && (
+                  <div className="px-5 py-5 border-b border-gray-100 dark:border-[#2A2A3A]">
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Subcategories</p>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => { setActiveSubCat(null); setShowFilters(false); }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-semibold transition-all ${
+                          !activeSubCat
+                            ? "bg-blue-100/50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                            : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#151522]"
+                        }`}
+                      >
+                        All {mainCategory.label}
+                      </button>
+                      {subs.map(sub => (
                         <button
-                          key={cat.id}
-                          onClick={() => {
-                            setActiveCats(prev => 
-                              prev.includes(cat.id) 
-                                ? prev.filter(id => id !== cat.id) 
-                                : [...prev, cat.id]
-                            );
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                            isActive
-                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
-                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
+                          key={sub.id}
+                          onClick={() => { setActiveSubCat(sub.id); setShowFilters(false); }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-[13px] font-semibold transition-all ${
+                            activeSubCat === sub.id
+                              ? "bg-blue-100/50 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300"
+                              : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#151522]"
                           }`}
                         >
-                          <span>{cat.label}</span>
-                          <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
-                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
-                          </div>
+                          {sub.label}
                         </button>
-                      );
-                    })}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Price range */}
                 <div className="px-5 py-5 border-b border-gray-100 dark:border-[#2A2A3A]">
@@ -309,7 +268,7 @@ export default function EssentialsPage() {
                       return (
                         <button
                           key={r.label}
-                          onClick={() => setPriceRange(isActive ? null : r.label)}
+                          onClick={() => { setPriceRange(isActive ? null : r.label); setShowFilters(false); }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                             isActive
                               ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
@@ -335,7 +294,7 @@ export default function EssentialsPage() {
                       return (
                         <button
                           key={s}
-                          onClick={() => setActiveSort(s)}
+                          onClick={() => { setActiveSort(s); setShowFilters(false); }}
                           className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
                             isActive
                               ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
@@ -356,46 +315,8 @@ export default function EssentialsPage() {
 
             {/* ── Product Grid ── */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center justify-between mb-4 md:mb-6 px-1.5 md:px-2">
-                <h1 className="font-black text-xl md:text-2xl text-blue-600 tracking-tight">All Products</h1>
-                
-                {/* Desktop right side */}
-                <div className="hidden md:flex items-center gap-4">
-                  <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    Showing <span className="text-gray-900 dark:text-gray-100 font-black">{filtered.length}</span> products
-                  </p>
-                  {(activeCats.length > 0 || priceRange) && (
-                    <button
-                      onClick={() => { setActiveCats([]); setPriceRange(null); }}
-                      className="text-xs text-blue-600 font-bold hover:underline px-3 py-1.5 bg-blue-50 rounded-lg"
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                </div>
-
-                {/* Mobile right side */}
-                <div className="flex md:hidden items-center gap-2">
-                  <p className="text-xs font-medium text-gray-500 mr-1">{filtered.length} items</p>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${
-                      showFilters || activeCats.length > 0 || priceRange
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
-                        : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
-                    }`}
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Filter</span>
-                    {(activeCats.length > 0 || priceRange) && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                    )}
-                  </button>
-                </div>
-              </div>
-
               {/* Grid */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {filtered.map((p) => {
                   const disc = discount(p.price, p.mrp);
                   const wished = wishlist.includes(p.id);
@@ -407,7 +328,6 @@ export default function EssentialsPage() {
                       className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden
                         shadow-sm hover:shadow-lg hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
-                      {/* Image area */}
                       <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center
                         justify-center h-24 md:h-28 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] p-2 overflow-hidden">
                         <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md w-full h-full flex items-center justify-center">
@@ -422,7 +342,6 @@ export default function EssentialsPage() {
                             <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-3 py-1 bg-white dark:bg-[#0D0D17] rounded-full shadow-sm">Out of Stock</span>
                           </div>
                         )}
-                        {/* Wishlist */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -434,7 +353,6 @@ export default function EssentialsPage() {
                         >
                           <Heart className={`w-4 h-4 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
                         </button>
-                        {/* Express badge removed */}
                       </div>
 
                       <div className="p-3.5 flex flex-col justify-between flex-1 bg-white dark:bg-[#0D0D17]">
@@ -509,7 +427,6 @@ export default function EssentialsPage() {
       {previewProduct && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl overflow-hidden flex flex-col relative animate-in fade-in zoom-in duration-200">
-            {/* Close Button at top-right */}
             <button
               onClick={() => setPreviewProduct(null)}
               className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 text-gray-800 transition-colors"
@@ -517,7 +434,6 @@ export default function EssentialsPage() {
               <X className="w-4 h-4" />
             </button>
 
-            {/* Image Area */}
             <div className="relative w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
               {previewProduct.img ? (
                 <Image src={previewProduct.img} alt={previewProduct.name} fill className="object-contain" />
@@ -526,7 +442,6 @@ export default function EssentialsPage() {
               )}
             </div>
 
-            {/* Content Area */}
             <div className="p-6 flex flex-col gap-4">
               <div>
                 <h2 className="text-xl font-black text-gray-900 dark:text-gray-100">{previewProduct.name}</h2>
@@ -553,7 +468,6 @@ export default function EssentialsPage() {
                 <span className="text-sm text-gray-400 line-through font-medium mb-1">₹{previewProduct.mrp}</span>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setPreviewProduct(null)}

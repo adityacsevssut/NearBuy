@@ -38,7 +38,7 @@ const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, sh
 
 export default function LoginModal({ isOpen, onClose }: Props) {
   const pathname = usePathname();
-  const isEssentials = pathname?.startsWith("/essentials") || false;
+  const isEssentials = pathname?.startsWith("/essentials") || pathname?.startsWith("/store") || (typeof window !== "undefined" && window.location.href.includes("theme=blue")) || false;
   // Theme: orange for Food, blue for Essentials
   const t = isEssentials ? {
     logoText: "text-blue-500",
