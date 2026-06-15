@@ -30,9 +30,18 @@ type View = "menu" | "map" | "search";
 // ── Main Modal ────────────────────────────────────────────────────────────────
 
 export default function LocationModal() {
-
   const pathname = usePathname();
-  const isStore = pathname?.startsWith("/store");
+  
+  // Calculate isStore synchronously. This avoids flash of incorrect colors
+  // and bypasses Next.js app router pathname caching bugs during client navigation.
+  const currentPath = typeof window !== "undefined" ? window.location.href : (pathname || "");
+  const isStore = currentPath.toLowerCase().includes("/store") || currentPath.toLowerCase().includes("/vendor") || currentPath.toLowerCase().includes("theme=blue");
+
+  const {
+    isLocationModalOpen, setIsLocationModalOpen, setLocation,
+    savedAddresses, addSavedAddress, removeSavedAddress,
+  } = useLocationContext();
+
   const c = {
     text: isStore ? "text-blue-500" : "text-orange-500",
     textDark: isStore ? "text-blue-700" : "text-orange-700",
@@ -56,11 +65,6 @@ export default function LocationModal() {
     btnShadow: isStore ? "shadow-blue-500/25" : "shadow-orange-500/25",
     btnShadow2: isStore ? "shadow-blue-500/20" : "shadow-orange-500/20",
   };
-
-  const {
-    isLocationModalOpen, setIsLocationModalOpen, setLocation,
-    savedAddresses, addSavedAddress, removeSavedAddress,
-  } = useLocationContext();
 
   const [view, setView] = useState<View>("menu");
   const [mapCoords, setMapCoords] = useState<{ lat: number; lng: number } | null>(null);
@@ -273,9 +277,9 @@ export default function LocationModal() {
                     <button
                       onClick={handleDetectAndOpenMap}
                       disabled={isDetecting}
-                      className={`w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r from-orange-50 dark:from-orange-900/20 to-amber-50 dark:to-amber-900/20 border-2 ${c.border} dark:border-orange-500/20 hover:${c.borderFocus} dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]`}
+                      className={`w-full flex items-center gap-4 px-5 py-4 bg-gradient-to-r ${c.gradient} border-2 ${c.border} ${c.borderHover} hover:shadow-md ${c.shadowHover} rounded-2xl transition-all group disabled:opacity-60 active:scale-[0.98]`}
                     >
-                      <div className={`w-11 h-11 ${c.bg} rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/30`}>
+                      <div className={`w-11 h-11 ${c.bg} rounded-xl flex items-center justify-center shrink-0 shadow-lg ${c.shadow}`}>
                         {isDetecting ? <Loader2 className="w-6 h-6 text-white animate-spin" /> : <Crosshair className="w-6 h-6 text-white" />}
                       </div>
                       <div className="text-left">
@@ -295,7 +299,7 @@ export default function LocationModal() {
 
                     <button
                       onClick={() => setView("search")}
-                      className="w-full flex items-center gap-4 px-5 py-4 bg-gray-50 dark:bg-[#151522] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-400 dark:hover:border-orange-500/50 hover:shadow-md dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] rounded-2xl transition-all group active:scale-[0.98]"
+                      className={`w-full flex items-center gap-4 px-5 py-4 bg-gray-50 dark:bg-[#151522] border-2 border-gray-200 dark:border-[#2A2A3A] hover:shadow-md ${c.borderHover} ${c.shadowHover} rounded-2xl transition-all group active:scale-[0.98]`}
                     >
                       <div className="w-11 h-11 bg-gray-700 rounded-xl flex items-center justify-center shrink-0">
                         <Search className="w-6 h-6 text-white" />
@@ -327,9 +331,9 @@ export default function LocationModal() {
                             role="button"
                             tabIndex={0}
                             onKeyDown={(e) => e.key === "Enter" && handlePickSaved(addr)}
-                            className={`w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 dark:hover:border-orange-500/50 hover:${c.bgLight}/60 dark:hover:${c.bg}/10 rounded-2xl transition-all group text-left shadow-sm cursor-pointer`}
+                            className={`w-full flex items-center gap-3 px-4 py-3.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${c.borderHoverList} ${c.bgLightHover} rounded-2xl transition-all group text-left shadow-sm cursor-pointer`}
                           >
-                            <div className={`w-9 h-9 ${c.iconBgLight} dark:${c.bg}/20 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-orange-200 dark:group-hover:${c.bg}/30 transition-colors`}>
+                            <div className={`w-9 h-9 ${c.iconBgLight} ${c.iconBgLightHover} rounded-xl flex items-center justify-center shrink-0 transition-colors`}>
                               <MapPin className={`w-4 h-4 ${c.text}`} />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -437,7 +441,7 @@ export default function LocationModal() {
                         <button
                           onClick={handleSaveAddress}
                           disabled={isSaving}
-                          className={`w-full py-4 ${c.bg} hover:${c.bgHover} text-white font-black rounded-2xl shadow-lg shadow-orange-500/25 disabled:opacity-40 transition-all active:scale-[0.98] text-[15px] flex items-center justify-center gap-2`}
+                          className={`w-full py-4 ${c.bg} ${c.bgHover} text-white font-black rounded-2xl shadow-lg ${c.btnShadow} disabled:opacity-40 transition-all active:scale-[0.98] text-[15px] flex items-center justify-center gap-2`}
                         >
                           {isSaving ? <><Loader2 className="w-5 h-5 animate-spin" />Saving…</> : <><CheckCircle className="w-5 h-5" />Save This Address</>}
                         </button>

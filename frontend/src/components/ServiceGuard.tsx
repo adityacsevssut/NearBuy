@@ -27,6 +27,8 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
 export default function ServiceGuard({ children }: { children: React.ReactNode }) {
   const { latitude, longitude, pincode, locationName, setLocation, setIsLocationModalOpen } = useLocationContext();
   const pathname = usePathname();
+  const currentPath = typeof window !== 'undefined' ? window.location.href : (pathname || '');
+  const isStore = currentPath.toLowerCase().includes('/store') || currentPath.toLowerCase().includes('theme=blue') || currentPath.toLowerCase().includes('/essentials');
   
   const [centers, setCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -189,25 +191,25 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       return <>{children}</>;
     }
     return (
-      <div className="min-h-screen bg-orange-50/20 dark:bg-black flex flex-col items-center justify-center p-4 select-none">
+      <div className={`min-h-screen ${isStore ? "bg-blue-50/20" : "bg-orange-50/20"} dark:bg-black flex flex-col items-center justify-center p-4 select-none`}>
         {/* Simple card container */}
         <div className="max-w-md w-full bg-white dark:bg-[#0D0D17] rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col items-center">
           {/* Logo */}
           <div className="flex items-center -skew-x-6 pr-1 mb-6">
-            <span className="font-black text-4xl tracking-tighter drop-shadow-sm text-orange-500">
+            <span className={`font-black text-4xl tracking-tighter drop-shadow-sm ${isStore ? "text-blue-600" : "text-orange-500"}`}>
               N
             </span>
             <span className="text-black dark:text-white font-black text-4xl tracking-tighter drop-shadow-sm">
               B
             </span>
             <span className="font-black text-2xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
-              <span className="text-orange-500">Near</span>Buy
+              <span className={isStore ? "text-blue-600" : "text-orange-500"}>Near</span>Buy
             </span>
           </div>
 
           {/* Texts */}
           <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight leading-tight">
-            Welcome to <span className="text-orange-500">Near</span>Buy
+            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-500"}>Near</span>Buy
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-tight mb-8">
             Explore Your Nearest Market
@@ -215,9 +217,9 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
           {/* Simple classic spinning loader with MapPin */}
           <div className="w-16 h-16 relative">
-            <div className="absolute inset-0 rounded-full border-4 border-orange-100"></div>
-            <div className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
-            <MapPin className="absolute inset-0 m-auto w-6 h-6 text-orange-500" />
+            <div className={`absolute inset-0 rounded-full border-4 ${isStore ? "border-blue-100" : "border-orange-100"}`}></div>
+            <div className={`absolute inset-0 rounded-full border-4 ${isStore ? "border-blue-600" : "border-orange-500"} border-t-transparent animate-spin`}></div>
+            <MapPin className={`absolute inset-0 m-auto w-6 h-6 ${isStore ? "text-blue-600" : "text-orange-500"}`} />
           </div>
         </div>
       </div>
@@ -235,12 +237,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           {/* Main Hero Image */}
           <div className="w-full max-w-[280px] sm:max-w-xs mx-auto mb-6 flex justify-center items-center">
             <img 
-              src="/images/out_of_service_hero.png" 
+              src={isStore ? "/images/out_of_service_store.png" : "/images/out_of_service_hero.png"}
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
             />
             <img 
-              src="/images/out_of_service_hero_dark.png" 
+              src={isStore ? "/images/out_of_service_store_dark.png" : "/images/out_of_service_hero_dark.png"}
               alt="Out of Service Area" 
               className="w-full h-auto mx-auto object-contain hidden dark:block" 
             />
@@ -248,7 +250,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
           {/* Heading */}
           <h1 
-            className="text-4xl font-bold text-orange-500 mb-2 tracking-wide"
+            className={`text-4xl font-bold ${isStore ? "text-blue-600" : "text-orange-500"} mb-2 tracking-wide`}
             style={{ fontFamily: "cursive" }}
           >
             Not Available At Your Location
@@ -274,12 +276,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
             </p>
             <div className="w-48 mx-auto mb-10">
               <img 
-                src="/images/delivery_boy_bottom.png" 
+                src={isStore ? "/images/delivery_store.png" : "/images/delivery_boy_bottom.png"}
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
               />
               <img 
-                src="/images/delivery_boy_bottom_dark.png" 
+                src={isStore ? "/images/delivery_store_dark.png" : "/images/delivery_boy_bottom_dark.png"}
                 alt="Delivery Info" 
                 className="w-full h-auto object-contain hidden dark:block rounded-xl" 
               />
@@ -290,7 +292,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           <div className="w-full max-w-sm mx-auto space-y-3 pb-8">
              <button 
                 onClick={() => setIsLocationModalOpen(true)}
-                className="w-full py-4 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-bold transition-all shadow-lg active:scale-[0.98]"
+                className={`w-full py-4 ${isStore ? "bg-blue-600 hover:bg-blue-700" : "bg-orange-500 hover:bg-orange-600"} rounded-xl text-white font-bold transition-all shadow-lg active:scale-[0.98]`}
               >
                 Change Location
               </button>

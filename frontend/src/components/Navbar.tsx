@@ -15,7 +15,6 @@ import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useCart } from "@/context/CartContext";
-import LocationModal from "./LocationModal";
 import { useNotifications } from "@/context/NotificationContext";
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
@@ -89,8 +88,9 @@ export default function Navbar() {
   }, []);
 
   const getDomain = () => {
-    if (pathname.startsWith('/store') || pathname.startsWith('/essentials')) return 'store';
-    if (pathname.startsWith('/hotels')) return 'hotels';
+    const currentPath = typeof window !== "undefined" ? window.location.href : (pathname || "");
+    if (currentPath.toLowerCase().includes('/store') || currentPath.toLowerCase().includes('theme=blue') || currentPath.toLowerCase().includes('/essentials')) return 'store';
+    if (currentPath.toLowerCase().includes('/hotels') || currentPath.toLowerCase().includes('theme=purple')) return 'hotels';
     return 'food'; // Default fallback
   };
 
@@ -490,8 +490,6 @@ export default function Navbar() {
           </div>
         )}
       </AnimatePresence>
-
-      <LocationModal />
     </>
   );
 }

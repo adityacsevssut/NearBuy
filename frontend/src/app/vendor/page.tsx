@@ -14,7 +14,6 @@ import ManageFrontPageModal from "./ManageFrontPageModal";
 import ManageLocationRangeModal from "./ManageLocationRangeModal";
 import ManageFoodsModal from "./ManageFoodsModal";
 import ManageContactDetailsModal from "./ManageContactDetailsModal";
-import LocationModal from "@/components/LocationModal";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Theme map: food → orange, store → blue
@@ -500,7 +499,6 @@ export default function VendorDashboard() {
             profile={profile}
             vendorType={vType}
           />
-          <LocationModal />
         </>
       )}
     </div>

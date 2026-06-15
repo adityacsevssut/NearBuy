@@ -52,7 +52,7 @@ export default function EssentialsPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
-  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(true);
@@ -122,7 +122,7 @@ export default function EssentialsPage() {
                   </span>
                   <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
                     <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                      {locationName}
+                      {landmark ? `${landmark}, ${locationName}` : locationName}
                     </span>
                     <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
                   </span>

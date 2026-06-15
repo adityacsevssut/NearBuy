@@ -5,6 +5,8 @@ import { RefreshCcw, WifiOff } from "lucide-react";
 
 export default function NetworkGuard({ children }: { children: React.ReactNode }) {
   const [isOffline, setIsOffline] = useState(false);
+  const currentPath = typeof window !== 'undefined' ? window.location.href : '';
+  const isStore = currentPath.toLowerCase().includes('/store') || currentPath.toLowerCase().includes('theme=blue') || currentPath.toLowerCase().includes('/essentials');
 
   useEffect(() => {
     // Only run on client side
@@ -46,9 +48,10 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
       <div 
         className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col items-center justify-center p-4 text-center font-sans ${isOffline ? 'flex' : 'hidden'}`}
       >
-        {/* Error Icon */}
-        <div className="w-32 h-32 mb-8 rounded-full bg-red-50 dark:bg-red-500/10 flex items-center justify-center shadow-inner ring-8 ring-red-50/50 dark:ring-red-500/5">
-          <WifiOff className="w-16 h-16 text-red-500 dark:text-red-400" />
+        {/* Error Illustration */}
+        <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-6">
+          <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_store.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
+          <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_store_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
         </div>
 
         {/* Error Text Content */}
@@ -67,7 +70,7 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
           <button 
             id="retry-btn"
             onClick={handleRetry}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-orange-500 hover:bg-orange-600 rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg shadow-orange-500/20"
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 ${isStore ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20'} rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg`}
           >
             <RefreshCcw className="w-5 h-5" />
             Try Again

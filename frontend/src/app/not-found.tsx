@@ -7,6 +7,9 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function NotFound() {
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const isStore = pathname.startsWith('/store') || pathname.startsWith('/essentials');
+
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
       <Navbar />
@@ -16,14 +19,14 @@ export default function NotFound() {
         {/* Error Illustration */}
         <div className="relative w-64 h-64 sm:w-80 sm:h-80 mb-6">
           <Image
-            src="/images/404_error_light.png"
+            src={isStore ? "/images/404_store_light.png" : "/images/404_error_light.png"}
             alt="Page Not Found"
             fill
             className="object-contain dark:hidden drop-shadow-xl"
             priority
           />
           <Image
-            src="/images/404_error_dark.png"
+            src={isStore ? "/images/404_store_dark.png" : "/images/404_error_dark.png"}
             alt="Page Not Found"
             fill
             className="object-contain hidden dark:block rounded-xl"
@@ -52,8 +55,8 @@ export default function NotFound() {
             Go Back
           </button>
           <Link 
-            href="/"
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-orange-500 hover:bg-orange-600 rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg shadow-orange-500/20"
+            href={isStore ? "/store" : "/"}
+            className={`flex-1 flex items-center justify-center gap-2 px-6 py-3.5 ${isStore ? "bg-blue-600 hover:bg-blue-700 shadow-blue-600/20" : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"} rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg`}
           >
             <Home className="w-5 h-5" />
             Home Page
