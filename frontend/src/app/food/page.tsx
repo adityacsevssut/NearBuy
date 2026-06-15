@@ -859,7 +859,7 @@ export default function HomePage() {
                 <img
                   src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"}
                   alt="NearBuy Special Offer"
-                  className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-[#151522] hidden dark:block"
+                  className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block"
                 />
               </div>
             )}

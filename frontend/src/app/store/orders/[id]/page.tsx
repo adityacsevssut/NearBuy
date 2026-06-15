@@ -13,6 +13,19 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 
+const blueToastStyle = {
+  style: {
+    background: '#eff6ff',
+    color: '#1e3a8a',
+    border: '1px solid #bfdbfe'
+  },
+  className: "dark:!bg-[#0D0D17] dark:!border-blue-500 dark:!text-white dark:!border",
+  iconTheme: {
+    primary: '#2563eb',
+    secondary: '#ffffff'
+  }
+};
+
 interface Order {
   id: string;
   vendor_id: string;
@@ -82,11 +95,11 @@ export default function OrderStatusPage() {
       if (res.ok) {
         setOrder(data.order);
       } else {
-        toast.error(data.error || "Failed to fetch order details");
+        toast.error(data.error || "Failed to fetch order details", blueToastStyle);
         router.push("/food/orders");
       }
     } catch (err) {
-      toast.error("Network error while fetching order details");
+      toast.error("Network error while fetching order details", blueToastStyle);
     } finally {
       setIsLoading(false);
     }
@@ -125,14 +138,14 @@ export default function OrderStatusPage() {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                  toast.success("Order cancelled successfully");
+                  toast.success("Order cancelled successfully", blueToastStyle);
                   fetchOrderDetails();
                 } else {
-                  toast.error(data.error || "Failed to cancel order");
+                  toast.error(data.error || "Failed to cancel order", blueToastStyle);
                   setIsLoading(false);
                 }
               } catch (err) {
-                toast.error("Network error");
+                toast.error("Network error", blueToastStyle);
                 setIsLoading(false);
               }
             }}
@@ -145,14 +158,14 @@ export default function OrderStatusPage() {
     ), {
       duration: Infinity,
       style: {
-        border: "1px solid var(--toast-border, #fee2e2)",
+        border: "1px solid #bfdbfe",
         padding: "16px",
         borderRadius: "16px",
-        background: "var(--toast-bg, #fff)",
-        color: "var(--toast-text, #000)",
+        background: "#eff6ff",
+        color: "#1e3a8a",
         maxWidth: "340px"
       },
-      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+      className: "dark:!bg-[#0D0D17] dark:!border-blue-500 dark:!text-white dark:!border"
     });
   };
 
