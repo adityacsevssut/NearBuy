@@ -16,6 +16,19 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
+const blueToastStyle = {
+  style: {
+    background: '#eff6ff',
+    color: '#1e3a8a',
+    border: '1px solid #bfdbfe'
+  },
+  className: "dark:!bg-[#0D0D17] dark:!border-blue-500 dark:!text-white dark:!border",
+  iconTheme: {
+    primary: '#2563eb',
+    secondary: '#ffffff'
+  }
+};
+
 interface OrderItem {
   id: number;
   name: string;
@@ -104,10 +117,10 @@ function OrdersPageContent() {
         setHasMore(pageNum < (data.pagination?.totalPages || 1));
         setOrders(prev => pageNum === 1 ? (data.orders || []) : [...prev, ...(data.orders || [])]);
       } else {
-        toast.error(data.error || "Failed to fetch orders");
+        toast.error(data.error || "Failed to fetch orders", blueToastStyle);
       }
     } catch (err) {
-      toast.error("Network error while fetching orders");
+      toast.error("Network error while fetching orders", blueToastStyle);
     } finally {
       setIsLoading(false);
       setLoadingMore(false);

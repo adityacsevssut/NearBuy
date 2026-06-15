@@ -18,6 +18,19 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 
+const blueToastStyle = {
+  style: {
+    background: '#eff6ff',
+    color: '#1e3a8a',
+    border: '1px solid #bfdbfe'
+  },
+  className: "dark:!bg-[#0D0D17] dark:!border-blue-500 dark:!text-white dark:!border",
+  iconTheme: {
+    primary: '#2563eb',
+    secondary: '#ffffff'
+  }
+};
+
 import { useEffect } from "react";
 
 // Platform fee and GST are now fetched dynamically from the backend
@@ -426,7 +439,7 @@ function RestaurantOrderCard({
           </label>
 
           <div
-            onClick={() => toast("This feature will be available soon", { icon: "ℹ️" })}
+            onClick={() => toast("This feature will be available soon", { icon: "ℹ️", ...blueToastStyle })}
             className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-[#2A2A3A] bg-gray-50/50 dark:bg-[#151522]/50 cursor-not-allowed opacity-60"
           >
             <input
@@ -469,7 +482,7 @@ function RestaurantOrderCard({
               onClick={async () => {
                 if (outOfRange) return;
                 if (!meetsMinOrder && minOrder > 0) {
-                  toast.error(`Minimum order amount is ₹${minOrder}`);
+                  toast.error(`Minimum order amount is ₹${minOrder}`, blueToastStyle);
                   return;
                 }
                 setIsPayingTaxes(true);
@@ -477,7 +490,7 @@ function RestaurantOrderCard({
                 // --- MOCK PAYMENT BYPASS ---
                 // Remove or comment out this block to re-enable Razorpay
                 setTimeout(() => {
-                  toast.success("Fees paid successfully!");
+                  toast.success("Fees paid successfully!", blueToastStyle);
                   setFeesPaid(true);
                   setIsPayingTaxes(false);
                 }, 500);
@@ -521,24 +534,24 @@ function RestaurantOrderCard({
                           razorpay_payment_id: response.razorpay_payment_id,
                           razorpay_signature: response.razorpay_signature,
                         });
-                        toast.success("Fees paid and verified successfully!");
+                        toast.success("Fees paid and verified successfully!", blueToastStyle);
                         setFeesPaid(true);
                       } catch (err: any) {
-                        toast.error(err.message || "Payment verification failed");
+                        toast.error(err.message || "Payment verification failed", blueToastStyle);
                       } finally {
                         setIsPayingTaxes(false);
                       }
                     },
                     theme: { color: "#f97316" },
-                    modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled"); } }
+                    modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled", blueToastStyle); } }
                   };
                   const rzp = new (window as any).Razorpay(options);
                   rzp.on("payment.failed", function (response: any) {
-                    toast.error(response.error.description || "Payment failed");
+                    toast.error(response.error.description || "Payment failed", blueToastStyle);
                   });
                   rzp.open();
                 } catch (err: any) {
-                  toast.error(err.message || "Error initiating Razorpay");
+                  toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
                   setIsPayingTaxes(false);
                 }
               }}
@@ -698,11 +711,11 @@ export default function CartPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to place order");
 
-      toast.success("Order placed! Wait for confirmation.");
+      toast.success("Order placed! Wait for confirmation.", blueToastStyle);
       orderItems.forEach(item => removeItem(item.uid));
       router.push("/food/orders");
     } catch (err: any) {
-      toast.error(err.message || "An error occurred");
+      toast.error(err.message || "An error occurred", blueToastStyle);
     } finally {
       setIsPlacingOrder(false);
     }

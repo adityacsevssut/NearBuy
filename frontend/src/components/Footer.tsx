@@ -27,9 +27,9 @@ export default function Footer() {
       { name: "Contact", href: "#" },
     ],
     "Important Links": [
-      { name: "Food Cart", href: "/food/cart" },
-      { name: "Wishlist", href: "/food/wishlist" },
-      { name: "Your Orders", href: "/food/orders?history=true" },
+      { name: isStore ? "Store Cart" : "Food Cart", href: isStore ? "/store/cart" : "/food/cart" },
+      { name: "Wishlist", href: isStore ? "/store/wishlist" : "/food/wishlist" },
+      { name: "Your Orders", href: isStore ? "/store/orders" : "/food/orders?history=true" },
       isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "/signup" },
     ],
     "Our Platforms": [

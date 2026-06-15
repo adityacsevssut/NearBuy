@@ -143,7 +143,7 @@ export default function CategoryPage() {
 
   if (!mainCategory) {
     return (
-      <div className="min-h-screen bg-blue-50/40 flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-blue-50/40 dark:bg-[#0D0D17] flex flex-col items-center justify-center p-4">
         <h1 className="text-2xl font-black mb-4">Category not found</h1>
         <button onClick={() => router.push("/store")} className="text-blue-600 font-bold hover:underline">Return to Store</button>
       </div>
@@ -151,7 +151,7 @@ export default function CategoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-blue-50/40 flex flex-col pt-16">
+    <div className="min-h-screen bg-blue-50/40 dark:bg-[#0D0D17] flex flex-col pt-16">
       <Navbar />
 
       <main className="pb-16 md:pb-0">
@@ -328,7 +328,7 @@ export default function CategoryPage() {
                       className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden
                         shadow-sm hover:shadow-lg hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
-                      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center
+                      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-[#1F1F2E] dark:to-[#151522] flex items-center
                         justify-center h-24 md:h-28 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] p-2 overflow-hidden">
                         <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md w-full h-full flex items-center justify-center">
                           {(p as any).img ? (
@@ -358,7 +358,7 @@ export default function CategoryPage() {
                       <div className="p-3.5 flex flex-col justify-between flex-1 bg-white dark:bg-[#0D0D17]">
                         <div>
                           {p.badge && (
-                            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded w-fit mb-1.5 block shadow-sm">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40 px-2 py-0.5 rounded w-fit mb-1.5 block shadow-sm">
                               {p.badge}
                             </span>
                           )}
@@ -379,7 +379,7 @@ export default function CategoryPage() {
                           <div className="flex items-baseline gap-2 mb-3">
                             <span className="text-[17px] font-black text-gray-900 dark:text-gray-100 tracking-tight">₹{p.price}</span>
                             <span className="text-[11px] text-gray-400 line-through font-medium">₹{p.mrp}</span>
-                            <span className="text-[10px] font-bold text-blue-600 flex items-center gap-0.5 bg-blue-50 px-1.5 py-0.5 rounded shadow-sm">
+                            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-0.5 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded shadow-sm">
                               <BadgePercent className="w-3 h-3" />{disc}% off
                             </span>
                           </div>
@@ -429,14 +429,14 @@ export default function CategoryPage() {
           <div className="w-full max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl overflow-hidden flex flex-col relative animate-in fade-in zoom-in duration-200">
             <button
               onClick={() => setPreviewProduct(null)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 text-gray-800 transition-colors"
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/50 hover:bg-white/80 dark:bg-black/40 dark:hover:bg-black/60 text-gray-900 dark:text-white backdrop-blur-md transition-all shadow-sm"
             >
               <X className="w-4 h-4" />
             </button>
 
-            <div className="relative w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+            <div className="relative w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-[#1F1F2E] dark:to-[#151522] flex items-center justify-center">
               {previewProduct.img ? (
-                <Image src={previewProduct.img} alt={previewProduct.name} fill className="object-contain" />
+                <Image src={previewProduct.img} alt={previewProduct.name} fill className="object-cover" />
               ) : (
                 <span className="text-8xl">{previewProduct.emoji}</span>
               )}
@@ -471,7 +471,7 @@ export default function CategoryPage() {
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setPreviewProduct(null)}
-                  className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2A2A3A] transition-colors"
                 >
                   Close
                 </button>

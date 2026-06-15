@@ -32,7 +32,44 @@ const subcategories: Record<string, { id: string, label: string }[]> = {
     { id: "calc", label: "Scientific calculator" },
     { id: "art_craft", label: "Art and Craft" },
     { id: "study_acc", label: "Study Accesories" },
-    { id: "printing", label: "Printing And Project Supplies" }
+    { id: "printing", label: "Printing And Project Supplies" },
+    { id: "others", label: "Others" }
+  ],
+  tech: [
+    { id: "charger", label: "Charger" },
+    { id: "extension_board", label: "Extension Board" },
+    { id: "small_fans", label: "Wired Small fans" },
+    { id: "study_lamp", label: "Study lamp" },
+    { id: "other", label: "Other Devices" }
+  ],
+  snacks: [
+    { id: "biscuit", label: "Biscuit" },
+    { id: "namkeen", label: "Namkeen Mix" },
+    { id: "chatua", label: "Chatua" },
+    { id: "chips", label: "Snacks And Chips" },
+    { id: "sprite", label: "Sprite" },
+    { id: "pepsi", label: "Pepsi" },
+    { id: "thumsup", label: "Thumsup" },
+    { id: "other_drinks", label: "Other Drinks" },
+    { id: "other_snacks", label: "Other Snacks" }
+  ],
+  hostel: [
+    { id: "bedsheet", label: "Bedsheet" },
+    { id: "pillow_cover", label: "Pillow Cover" },
+    { id: "bolster_pillow", label: "Bolster Pillow" },
+    { id: "bucket", label: "Bucket" },
+    { id: "mug", label: "Mug" },
+    { id: "umbrella", label: "Umbrella" },
+    { id: "hanger", label: "Hanger" },
+    { id: "lock_key", label: "Lock and Key" },
+    { id: "others", label: "Others" }
+  ],
+  personal_care: [
+    { id: "handwash", label: "Handwash" },
+    { id: "perfume", label: "Perfume" },
+    { id: "daily_needs", label: "Daily Needs" },
+    { id: "good_knight", label: "Good knight stick" },
+    { id: "others", label: "Others" }
   ]
 };
 
@@ -61,6 +98,7 @@ import { useRouter } from "next/navigation";
 export default function EssentialsPage() {
   const router = useRouter();
   const [activeCats, setActiveCats] = useState<string[]>([]);
+  const [activeSubCats, setActiveSubCats] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState("Relevance");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState<string | null>(null);
@@ -92,6 +130,15 @@ export default function EssentialsPage() {
   const filtered = products
     .filter((p) => {
       const matchCat = activeCats.length === 0 || activeCats.includes(p.cat);
+      const matchSubCat = (() => {
+        if (activeSubCats.length === 0) return true;
+        const catSubcats = subcategories[p.cat]?.map(s => s.id) || [];
+        const activeForThisCat = activeSubCats.filter(id => catSubcats.includes(id));
+        if (activeForThisCat.length > 0) {
+          return activeForThisCat.includes((p as any).subcat);
+        }
+        return true;
+      })();
       const matchSearch =
         !searchQuery ||
         p.name.toLowerCase().includes(searchQuery.toLowerCase());
@@ -102,7 +149,7 @@ export default function EssentialsPage() {
         const below = range.max ? p.price <= range.max : true;
         return above && below;
       })();
-      return matchCat && matchSearch && matchPrice;
+      return matchCat && matchSearch && matchPrice && matchSubCat;
     })
     .sort((a, b) => {
       if (activeSort === "Price: Low to High") return a.price - b.price;
@@ -114,7 +161,7 @@ export default function EssentialsPage() {
   const discount = (p: number, m: number) => Math.round(((m - p) / m) * 100);
 
   return (
-    <div className="min-h-screen bg-blue-50/40 flex flex-col pt-16">
+    <div className="min-h-screen bg-blue-50/40 dark:bg-[#0D0D17] flex flex-col pt-16">
       <Navbar />
 
       <main className="flex-1 pb-20 md:pb-0">
@@ -200,15 +247,16 @@ export default function EssentialsPage() {
           <div className="pb-2 overflow-x-auto scrollbar-hide">
             <div className="flex justify-start md:justify-center gap-4 md:gap-8 min-w-max px-2 py-2">
               {[
-                { id: "stationery", name: "Student Stationary", src: "/categories/stationary_cat_v6.png" },
-                { id: "tech", name: "Electronic Gadgets", src: "/categories/gadgets_cat_v4.png" },
-                { id: "snacks", name: "Snacks & Beverages", src: "/categories/snacks_cat_v4.png" },
-                { id: "hostel", name: "Hostel Essentials", src: "/categories/hostel_cat_modern_v2.png" },
-                { id: "personal_care", name: "Daily Need\nEssentials", src: "/categories/personal_care_items_ultra_modern.png" },
+                { id: "stationery", name: "Student Stationary", src: "/categories/stationary_cat_v6.png", darkSrc: "/categories/stationary_dark.png" },
+                { id: "tech", name: "Electronic Gadgets", src: "/categories/gadgets_cat_v4.png", darkSrc: "/categories/gadgets_dark.png" },
+                { id: "snacks", name: "Snacks & Beverages", src: "/categories/snacks_cat_v4.png", darkSrc: "/categories/snacks_dark.png" },
+                { id: "hostel", name: "Hostel Essentials", src: "/categories/hostel_cat_modern_v2.png", darkSrc: "/categories/hostel_dark.png" },
+                { id: "personal_care", name: "Daily Need\nEssentials", src: "/categories/personal_care_items_ultra_modern.png", darkSrc: "/categories/personal_care_dark.png" },
               ].map((cat, i) => (
                 <div key={i} onClick={() => router.push(`/store/category/${cat.id}`)} className="flex flex-col items-center gap-2 cursor-pointer group w-16 md:w-20">
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-[3px] border-white shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 relative bg-white dark:border-gray-800">
-                    <Image src={cat.src} alt={cat.name} fill unoptimized className="object-cover hover:scale-110 transition-transform duration-500" />
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-[3px] border-white shadow-md group-hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-1 relative bg-white dark:bg-[#151522] dark:border-gray-800">
+                    <Image src={cat.src} alt={cat.name} fill unoptimized className="object-cover hover:scale-110 transition-transform duration-500 dark:hidden" />
+                    <Image src={cat.darkSrc} alt={cat.name} fill unoptimized className="object-cover hover:scale-110 transition-transform duration-500 hidden dark:block" />
                   </div>
                   <span className="text-[11px] md:text-[13px] font-bold text-gray-800 dark:text-gray-200 text-center leading-tight whitespace-pre-line group-hover:text-blue-600 transition-colors">
                     {cat.name}
@@ -220,20 +268,30 @@ export default function EssentialsPage() {
 
           {/* ── Banner Section ── */}
           <div className="pb-4 md:pb-6 w-full flex justify-center">
-            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-xl border border-blue-100 bg-[#E8F2FB]">
+            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-xl border border-blue-100 dark:border-[#2A2A3A] bg-[#E8F2FB] dark:bg-[#0D0D17]">
               {posterLoading ? (
-                <div className="w-full h-full bg-blue-100/50 animate-pulse"></div>
+                <div className="w-full h-full bg-blue-100/50 dark:bg-[#2A2A3A]/50 animate-pulse"></div>
               ) : posterUrl ? (
                 <img src={posterUrl} alt="NearBuy Store Banner" className="w-full h-full object-contain object-center" />
               ) : (
-                <Image
-                  src="/store_hero_v5.png"
-                  alt="NearBuy Store Banner"
-                  fill
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                  className="object-contain object-center scale-105"
-                  priority
-                />
+                <>
+                  <Image
+                    src="/store_hero_v5.png"
+                    alt="NearBuy Store Banner"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
+                    className="object-cover object-center scale-105 dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/store_hero_16x9_dark.png"
+                    alt="NearBuy Store Banner"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
+                    className="object-cover object-center hidden dark:block"
+                    priority
+                  />
+                </>
               )}
             </div>
           </div>
@@ -275,26 +333,62 @@ export default function EssentialsPage() {
                     {categories.filter(c => c.id !== "all").map((cat) => {
                       const isActive = activeCats.includes(cat.id);
                       return (
-                        <button
-                          key={cat.id}
-                          onClick={() => {
-                            setActiveCats(prev => 
-                              prev.includes(cat.id) 
-                                ? prev.filter(id => id !== cat.id) 
-                                : [...prev, cat.id]
-                            );
-                          }}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                            isActive
-                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
-                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
-                          }`}
-                        >
-                          <span>{cat.label}</span>
-                          <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
-                            <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
-                          </div>
-                        </button>
+                        <div key={cat.id} className="space-y-1">
+                          <button
+                            onClick={() => {
+                              if (isActive) {
+                                setActiveCats(prev => prev.filter(id => id !== cat.id));
+                                const catSubcatIds = subcategories[cat.id]?.map(s => s.id) || [];
+                                setActiveSubCats(prev => prev.filter(id => !catSubcatIds.includes(id)));
+                              } else {
+                                setActiveCats(prev => [...prev, cat.id]);
+                              }
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
+                              isActive
+                                ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                                : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
+                            }`}
+                          >
+                            <span>{cat.label}</span>
+                            <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
+                              <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${isActive ? "translate-x-4" : "translate-x-0"}`} />
+                            </div>
+                          </button>
+                          {isActive && subcategories[cat.id] && (
+                            <div className="pl-3 pr-2 py-1 flex flex-col gap-1 animate-in fade-in slide-in-from-top-2">
+                              {subcategories[cat.id].map(sub => {
+                                const isSubActive = activeSubCats.includes(sub.id);
+                                return (
+                                  <button
+                                    key={sub.id}
+                                    onClick={() => {
+                                      setActiveSubCats(prev => 
+                                        prev.includes(sub.id) ? prev.filter(id => id !== sub.id) : [...prev, sub.id]
+                                      );
+                                    }}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-[12px] font-semibold transition-all ${
+                                      isSubActive 
+                                        ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
+                                        : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1F1F2E]"
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-colors ${
+                                        isSubActive 
+                                          ? "bg-blue-600 border-blue-600 text-white" 
+                                          : "bg-transparent border-gray-300 dark:border-gray-600"
+                                      }`}>
+                                        {isSubActive && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                                      </div>
+                                      {sub.label}
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
@@ -408,9 +502,9 @@ export default function EssentialsPage() {
                         shadow-sm hover:shadow-lg hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
                       {/* Image area */}
-                      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center
-                        justify-center h-24 md:h-28 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] p-2 overflow-hidden">
-                        <div className="group-hover:scale-110 transition-transform duration-500 drop-shadow-md w-full h-full flex items-center justify-center">
+                      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-[#1F1F2E] dark:to-[#151522] flex items-center
+                        justify-center h-32 md:h-40 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] overflow-hidden">
+                        <div className="group-hover:scale-110 transition-transform duration-500 w-full h-full flex items-center justify-center">
                           {(p as any).img ? (
                             <Image src={(p as any).img} alt={p.name} fill className="object-cover" />
                           ) : (
@@ -437,32 +531,32 @@ export default function EssentialsPage() {
                         {/* Express badge removed */}
                       </div>
 
-                      <div className="p-3.5 flex flex-col justify-between flex-1 bg-white dark:bg-[#0D0D17]">
+                      <div className="p-3 flex flex-col justify-between flex-1 bg-white dark:bg-[#0D0D17]">
                         <div>
                           {p.badge && (
-                            <span className="text-[10px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2 py-0.5 rounded w-fit mb-1.5 block shadow-sm">
+                            <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded w-fit mb-1 block shadow-sm">
                               {p.badge}
                             </span>
                           )}
 
-                          <p className="text-[13px] font-bold text-gray-800 dark:text-gray-200 leading-snug mb-1.5 line-clamp-2">
+                          <p className="text-[12px] font-bold text-gray-800 dark:text-gray-200 leading-snug mb-1 line-clamp-2">
                             {p.name}
                           </p>
 
-                          <div className="flex items-center gap-1.5 mb-2.5">
+                          <div className="flex items-center gap-1 mb-2">
                             <span className="inline-flex items-center gap-0.5 bg-blue-600 text-white
-                              text-[11px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                              <Star className="w-3 h-3 fill-white" />
+                              text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
+                              <Star className="w-2.5 h-2.5 fill-white" />
                               {p.rating}
                             </span>
-                            <span className="text-[11px] text-gray-400 font-medium">({p.reviews})</span>
+                            <span className="text-[10px] text-gray-400 font-medium">({p.reviews})</span>
                           </div>
 
-                          <div className="flex items-baseline gap-2 mb-3">
-                            <span className="text-[17px] font-black text-gray-900 dark:text-gray-100 tracking-tight">₹{p.price}</span>
-                            <span className="text-[11px] text-gray-400 line-through font-medium">₹{p.mrp}</span>
-                            <span className="text-[10px] font-bold text-blue-600 flex items-center gap-0.5 bg-blue-50 px-1.5 py-0.5 rounded shadow-sm">
-                              <BadgePercent className="w-3 h-3" />{disc}% off
+                          <div className="flex items-baseline gap-1.5 mb-2.5">
+                            <span className="text-[15px] font-black text-gray-900 dark:text-gray-100 tracking-tight">₹{p.price}</span>
+                            <span className="text-[10px] text-gray-400 line-through font-medium">₹{p.mrp}</span>
+                            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-0.5 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded shadow-sm">
+                              <BadgePercent className="w-2.5 h-2.5" />{disc}% off
                             </span>
                           </div>
                         </div>
@@ -474,7 +568,7 @@ export default function EssentialsPage() {
                             if (!isLoggedIn) return openLoginModal();
                             setCart(c => c.includes(p.id) ? c.filter(i => i !== p.id) : [...c, p.id]);
                           }}
-                          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-bold transition-all duration-300 mt-auto group active:scale-[0.97] ${!p.inStock
+                          className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all duration-300 mt-auto group active:scale-[0.97] ${!p.inStock
                             ? "bg-gray-50 dark:bg-[#1F1F2E] text-gray-400 cursor-not-allowed border border-gray-100 dark:border-[#2A2A3A]"
                             : inCart
                               ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25 border border-emerald-500"
@@ -512,15 +606,15 @@ export default function EssentialsPage() {
             {/* Close Button at top-right */}
             <button
               onClick={() => setPreviewProduct(null)}
-              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-black/10 hover:bg-black/20 text-gray-800 transition-colors"
+              className="absolute top-4 right-4 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/50 hover:bg-white/80 dark:bg-black/40 dark:hover:bg-black/60 text-gray-900 dark:text-white backdrop-blur-md transition-all shadow-sm"
             >
               <X className="w-4 h-4" />
             </button>
 
             {/* Image Area */}
-            <div className="relative w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center p-4">
+            <div className="relative w-full h-56 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-[#1F1F2E] dark:to-[#151522] flex items-center justify-center">
               {previewProduct.img ? (
-                <Image src={previewProduct.img} alt={previewProduct.name} fill className="object-contain" />
+                <Image src={previewProduct.img} alt={previewProduct.name} fill className="object-cover" />
               ) : (
                 <span className="text-8xl">{previewProduct.emoji}</span>
               )}
@@ -557,7 +651,7 @@ export default function EssentialsPage() {
               <div className="flex items-center gap-3 mt-4 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
                 <button
                   onClick={() => setPreviewProduct(null)}
-                  className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 hover:bg-gray-200 transition-colors"
+                  className="flex-1 py-3 rounded-xl font-bold bg-gray-100 dark:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#2A2A3A] transition-colors"
                 >
                   Close
                 </button>
