@@ -45,7 +45,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 border-t border-gray-100 dark:border-[#2A2A3A] relative overflow-hidden mt-6 md:mt-12">
+      <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 border-t border-gray-100 dark:border-[#2A2A3A] relative overflow-hidden">
         {/* Subtle Background Glow */}
         <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isStore ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
 

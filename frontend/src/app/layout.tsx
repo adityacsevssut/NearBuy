@@ -58,8 +58,8 @@ export default function RootLayout({
                     <NetworkGuard>
                       <ServiceGuard>
                         {children}
-                        <LocationModal />
                       </ServiceGuard>
+                      <LocationModal />
                     </NetworkGuard>
                   </LocationProvider>
                 </WishlistProvider>

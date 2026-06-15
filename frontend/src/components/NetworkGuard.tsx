@@ -2,11 +2,16 @@
 
 import React, { useEffect, useState } from "react";
 import { RefreshCcw, WifiOff } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function NetworkGuard({ children }: { children: React.ReactNode }) {
   const [isOffline, setIsOffline] = useState(false);
-  const currentPath = typeof window !== 'undefined' ? window.location.href : '';
-  const isStore = currentPath.toLowerCase().includes('/store') || currentPath.toLowerCase().includes('theme=blue') || currentPath.toLowerCase().includes('/essentials');
+  const pathname = usePathname() || '';
+  const [isStore, setIsStore] = useState(false);
+
+  useEffect(() => {
+    setIsStore(pathname.toLowerCase().includes('/store') || pathname.toLowerCase().includes('/essentials') || window.location.href.toLowerCase().includes('theme=blue'));
+  }, [pathname]);
 
   useEffect(() => {
     // Only run on client side
@@ -50,8 +55,8 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
       >
         {/* Error Illustration */}
         <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-6">
-          <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_store.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
-          <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_store_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
+          <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_food.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
+          <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_food_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
         </div>
 
         {/* Error Text Content */}

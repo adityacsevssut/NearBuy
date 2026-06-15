@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import toast from "react-hot-toast";
 import LoginModal from "@/components/LoginModal";
+import { usePathname } from "next/navigation";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -107,6 +108,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const pathname = usePathname();
+  const isEssentials = pathname?.startsWith("/essentials") || pathname?.startsWith("/store") || (typeof window !== "undefined" && window.location.href.includes("theme=blue")) || false;
+
   const login = (u: AuthUser, token: string, refresh: string) => {
     setUser(u);
     setAccessToken(token);
@@ -117,14 +121,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     toast.success("Welcome to NearBuy!", {
       duration: 3000,
       style: {
-        border: "1px solid #f97316",
+        border: `1px solid ${isEssentials ? '#3b82f6' : '#f97316'}`,
         padding: "16px",
-        color: "#f97316",
+        color: isEssentials ? '#3b82f6' : '#f97316',
         fontWeight: "bold",
         borderRadius: "12px",
         background: "#fff",
       },
-      iconTheme: { primary: "#f97316", secondary: "#FFFAEE" },
+      iconTheme: { primary: isEssentials ? '#3b82f6' : '#f97316', secondary: "#FFFAEE" },
     });
   };
 
