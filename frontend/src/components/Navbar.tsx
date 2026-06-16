@@ -358,7 +358,8 @@ export default function Navbar() {
                   if (pathname === '/account') {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                   } else {
-                    router.push('/account');
+                    const themeQuery = isStore ? '?theme=blue' : isHotels ? '?theme=purple' : '?theme=orange';
+                    router.push(`/account${themeQuery}`);
                   }
                 }}
                 className="hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522] transition-all duration-200 group"
