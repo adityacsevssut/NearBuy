@@ -540,7 +540,6 @@ export default function OrderStatusPage() {
                 </tbody>
               </table>
             </div>
-
             <div className="flex justify-end">
               <div className="w-full max-w-[300px] space-y-2">
                 <div className="flex justify-between font-medium" style={{ color: "#4b5563" }}>

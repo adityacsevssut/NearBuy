@@ -304,6 +304,17 @@ function AccountContent() {
 
       <div className="px-5 space-y-6 max-w-lg mx-auto md:pt-28 md:mt-0 -mt-14 relative z-20">
         
+        {/* Back to Home Button for PC */}
+        <div className="hidden md:flex">
+          <button 
+            onClick={() => router.push("/")}
+            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-colors shadow-sm"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home
+          </button>
+        </div>
+
         {/* Floating Profile Card */}
         <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-5 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex items-center border border-gray-50 dark:border-[#1F1F2E]/50">
           <div className="relative shrink-0">
