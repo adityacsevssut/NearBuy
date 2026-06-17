@@ -12,6 +12,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
+import Script from "next/script";
 
 const blueToastStyle = {
   style: {
@@ -41,6 +42,7 @@ interface Order {
   delivery_charge?: string;
   total_amount: string;
   payment_method: string;
+  payment_status: string;
   delivery_address: any;
   status: string;
   created_at: string;
@@ -58,6 +60,7 @@ export default function OrderStatusPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showBilling, setShowBilling] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [gstRate, setGstRate] = useState(18);
 
@@ -169,6 +172,61 @@ export default function OrderStatusPage() {
     });
   };
 
+  const handlePayNow = async () => {
+    setIsPaying(true);
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/initiate-payment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+      });
+      const rzpOrder = await res.json();
+      if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate payment");
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        name: "NearBuy Order Payment",
+        description: `Order ${id}`,
+        order_id: rzpOrder.id,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: id,
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
+            
+            toast.success("Payment successful!", blueToastStyle);
+            fetchOrderDetails();
+          } catch (err: any) {
+            toast.error(err.message || "Payment verification failed", blueToastStyle);
+          } finally {
+            setIsPaying(false);
+          }
+        },
+        theme: { color: "#f97316" },
+        modal: { ondismiss: function () { setIsPaying(false); toast.error("Payment cancelled", blueToastStyle); } }
+      };
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (response: any) {
+        toast.error(response.error.description || "Payment failed", blueToastStyle);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
+      setIsPaying(false);
+    }
+  };
+
   const generateReceipt = async () => {
     const element = document.getElementById("pdf-receipt-template-wrapper");
     if (element) {
@@ -201,8 +259,16 @@ export default function OrderStatusPage() {
   const currentStepIndex = STATUS_STEPS.indexOf(order.status.toLowerCase());
   const isCancelled = order.status.toLowerCase() === "cancelled";
 
+  const showPayNow = 
+    order.payment_status !== 'paid' && 
+    (
+      (order.payment_method === 'online_payment' && currentStepIndex >= 1 && !isCancelled) || 
+      (order.payment_method === 'online_on_delivery' && currentStepIndex >= 3 && !isCancelled)
+    );
+
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pb-20">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Dynamic Header based on status */}
       <div className={`${isCancelled ? 'bg-red-500' : 'bg-gradient-to-r from-orange-500 to-amber-500'} pt-8 pb-12 px-4 rounded-b-[40px] shadow-sm relative overflow-hidden`}>
         {/* Decorative elements */}
@@ -391,11 +457,22 @@ export default function OrderStatusPage() {
           {currentStepIndex >= 3 && !isCancelled && order.delivery_boy_number && (
             <a 
               href={`tel:${order.delivery_boy_number}`}
-              className="w-full py-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center gap-2 text-orange-600 font-bold text-sm transition-colors shadow-sm col-span-2 sm:col-span-1"
+              className={`w-full py-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center gap-2 text-orange-600 font-bold text-sm transition-colors shadow-sm ${showPayNow ? 'col-span-1' : 'col-span-2 sm:col-span-1'}`}
             >
               <Phone className="w-4 h-4" />
               Call Delivery Boy
             </a>
+          )}
+
+          {showPayNow && (
+            <button 
+              onClick={handlePayNow}
+              disabled={isPaying}
+              className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm col-span-2 animate-pulse"
+            >
+              {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              {isPaying ? "Processing..." : `Pay ₹${order.total_amount} Now`}
+            </button>
           )}
         </div>
 

@@ -65,7 +65,7 @@ const THEMES = {
 
 // ─────────────────────────────────────────────────────────────────────────────
 export default function VendorDashboard() {
-  const { user, logout, isLoggedIn, accessToken } = useAuth();
+  const { user, logout, isLoggedIn, accessToken, isInitializing } = useAuth();
   const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -131,16 +131,16 @@ export default function VendorDashboard() {
 
   // Auth guard — only vendors / admins
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || isInitializing) return;
     const timer = setTimeout(() => {
       if (!isLoggedIn || (user?.role !== "vendor" && user?.role !== "admin")) {
         router.push("/");
       }
     }, 120);
     return () => clearTimeout(timer);
-  }, [isLoggedIn, user, router, mounted]);
+  }, [isLoggedIn, user, router, mounted, isInitializing]);
 
-  if (!mounted || !isLoggedIn || (user?.role !== "vendor" && user?.role !== "admin")) {
+  if (!mounted || isInitializing || !isLoggedIn || (user?.role !== "vendor" && user?.role !== "admin")) {
     return <div className="min-h-screen bg-white dark:bg-[#0D0D17]" />;
   }
 

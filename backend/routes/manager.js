@@ -330,5 +330,140 @@ router.get("/dashboard-stats", authenticate, devOnly, async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/feedbacks  — list feedbacks for manager's division
+// ════════════════════════════════════════════════════════════════════
+router.get("/feedbacks", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const mType = (req.user.manager_type || "").toLowerCase();
+    let query, params;
+    if (req.user.role === "admin") {
+      query = `SELECT f.*, u.first_name, u.last_name, u.email 
+               FROM feedbacks f 
+               LEFT JOIN users u ON f.user_id = u.id 
+               ORDER BY f.created_at DESC`;
+      params = [];
+    } else {
+      query = `SELECT f.*, u.first_name, u.last_name, u.email 
+               FROM feedbacks f 
+               LEFT JOIN users u ON f.user_id = u.id 
+               WHERE f.type = $1 OR f.type = 'general'
+               ORDER BY f.created_at DESC`;
+      params = [mType];
+    }
+    const { rows } = await pool.query(query, params);
+    return res.json({ feedbacks: rows });
+  } catch (err) {
+    console.error("list feedbacks error:", err);
+    return res.status(500).json({ error: "Failed to fetch feedbacks." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/orders  — list orders for manager's division
+// ════════════════════════════════════════════════════════════════════
+router.get("/orders", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const mType = (req.user.manager_type || "").toLowerCase();
+    let query, params;
+    if (req.user.role === "admin") {
+      query = `SELECT o.*, v.first_name as vendor_first_name, v.last_name as vendor_last_name, 
+               u.first_name as user_first_name, u.last_name as user_last_name 
+               FROM orders o
+               LEFT JOIN users v ON o.vendor_id = v.id
+               LEFT JOIN users u ON o.user_id = u.id
+               ORDER BY o.created_at DESC`;
+      params = [];
+    } else {
+      query = `SELECT o.*, v.first_name as vendor_first_name, v.last_name as vendor_last_name, 
+               u.first_name as user_first_name, u.last_name as user_last_name 
+               FROM orders o
+               LEFT JOIN users v ON o.vendor_id = v.id
+               LEFT JOIN users u ON o.user_id = u.id
+               WHERE v.manager_type = $1
+               ORDER BY o.created_at DESC`;
+      params = [mType];
+    }
+    const { rows } = await pool.query(query, params);
+    return res.json({ orders: rows });
+  } catch (err) {
+    console.error("list orders error:", err);
+    return res.status(500).json({ error: "Failed to fetch orders." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/vendors/:vendorId/daily-stats
+// Returns aggregated stats for a specific vendor on a specific date
+// ════════════════════════════════════════════════════════════════════
+router.get("/vendors/:vendorId/daily-stats", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { vendorId } = req.params;
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+
+    const { rows } = await pool.query(
+      `SELECT 
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%cash%' OR LOWER(payment_method) = 'cod' THEN total_amount ELSE 0 END), 0) as cod_amount,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'online' THEN total_amount ELSE 0 END), 0) as online_amount,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online on delivery%' THEN total_amount ELSE 0 END), 0) as online_on_delivery_amount,
+        COUNT(CASE WHEN LOWER(status) = 'delivered' THEN 1 END) as delivered_count,
+        COUNT(CASE WHEN LOWER(status) = 'cancelled' THEN 1 END) as cancelled_count
+       FROM orders 
+       WHERE vendor_id = $1 AND DATE(created_at) = $2`,
+      [vendorId, date]
+    );
+
+    return res.json({ stats: rows[0] });
+  } catch (err) {
+    console.error("daily stats error:", err);
+    return res.status(500).json({ error: "Failed to fetch daily stats." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/vendors/:vendorId/orders
+// Returns orders for a specific vendor on a specific date, optionally filtered by status
+// ════════════════════════════════════════════════════════════════════
+router.get("/vendors/:vendorId/orders", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { vendorId } = req.params;
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const status = req.query.status ? req.query.status.toLowerCase() : null;
+
+    let query = `
+      SELECT o.id, o.status, o.total_amount, o.payment_method, u.first_name, u.last_name, o.created_at
+      FROM orders o
+      JOIN users u ON o.user_id = u.id
+      WHERE o.vendor_id = $1 AND DATE(o.created_at) = $2
+    `;
+    let params = [vendorId, date];
+
+    if (status) {
+      query += ` AND LOWER(o.status) = $3`;
+      params.push(status);
+    }
+
+    query += ` ORDER BY o.created_at DESC`;
+
+    const { rows } = await pool.query(query, params);
+    return res.json({ orders: rows });
+  } catch (err) {
+    console.error("vendor orders error:", err);
+    return res.status(500).json({ error: "Failed to fetch vendor orders." });
+  }
+});
+
 module.exports = router;
 

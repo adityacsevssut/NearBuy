@@ -1,24 +1,92 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
+import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
+function VendorCard({ vendor, date, theme, accessToken, onAction }: any) {
+  const [stats, setStats] = useState({ cod_amount: 0, online_amount: 0, online_on_delivery_amount: 0, delivered_count: 0, cancelled_count: 0 });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API}/api/managers/vendors/${vendor.id}/daily-stats?date=${date}`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const data = await res.json();
+        if (res.ok && data.stats) {
+          setStats(data.stats);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchStats();
+  }, [vendor.id, date, accessToken]);
+
+  const totalPayment = Number(stats.online_amount) + Number(stats.online_on_delivery_amount);
+
+  return (
+    <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group flex flex-col items-center text-center">
+      <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-3 border ${theme.border} group-hover:scale-105 transition-transform`}>
+        <StoreIcon className={`w-6 h-6 ${theme.text}`} />
+      </div>
+      <h4 className="font-bold text-gray-900 dark:text-gray-100 text-[15px] truncate w-full tracking-tight mb-1">{vendor.business_name || "Unnamed Shop"}</h4>
+      <p className="text-xs text-gray-500 dark:text-gray-400 truncate w-full font-medium mb-5">
+        Owner: <span className="text-gray-700 dark:text-gray-300">{vendor.first_name} {vendor.last_name}</span>
+      </p>
+
+      <div className="w-full grid grid-cols-3 gap-2 mt-auto">
+        <button onClick={() => onAction("vendor_payment", vendor, stats)} className="flex flex-col items-center justify-center p-2.5 bg-green-50 dark:bg-green-500/10 hover:bg-green-100 dark:hover:bg-green-500/20 text-green-700 dark:text-green-400 rounded-xl transition-transform hover:scale-[1.02] active:scale-95 border border-green-100 dark:border-green-500/20 shadow-sm">
+          <IndianRupee className="w-4 h-4 mb-1.5" />
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin mb-0.5" /> : <span className="text-[13px] font-black leading-none">₹{totalPayment}</span>}
+          <span className="text-[8px] font-bold uppercase tracking-wider opacity-80 mt-1">Pay</span>
+        </button>
+        <button onClick={() => onAction("vendor_delivered", vendor, stats)} className="flex flex-col items-center justify-center p-2.5 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-xl transition-transform hover:scale-[1.02] active:scale-95 border border-blue-100 dark:border-blue-500/20 shadow-sm">
+          <CheckCircle className="w-4 h-4 mb-1.5" />
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin mb-0.5" /> : <span className="text-[13px] font-black leading-none">{stats.delivered_count}</span>}
+          <span className="text-[8px] font-bold uppercase tracking-wider opacity-80 mt-1">Delvd</span>
+        </button>
+        <button onClick={() => onAction("vendor_cancelled", vendor, stats)} className="flex flex-col items-center justify-center p-2.5 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-700 dark:text-red-400 rounded-xl transition-transform hover:scale-[1.02] active:scale-95 border border-red-100 dark:border-red-500/20 shadow-sm">
+          <XCircle className="w-4 h-4 mb-1.5" />
+          {loading ? <RefreshCw className="w-3 h-3 animate-spin mb-0.5" /> : <span className="text-[13px] font-black leading-none">{stats.cancelled_count}</span>}
+          <span className="text-[8px] font-bold uppercase tracking-wider opacity-80 mt-1">Cancel</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function PartnerDashboard() {
-  const { user, logout, isLoggedIn, accessToken } = useAuth();
+  const { user, logout, isLoggedIn, accessToken, isInitializing } = useAuth();
+  const { theme: appTheme, toggleTheme } = useTheme();
   const router = useRouter();
-  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend">("dashboard");
+  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend" | "orders" | "feedback" | "vendor_payment" | "vendor_delivered" | "vendor_cancelled">("dashboard");
+  const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any | null>(null);
+  const [vendorDetailsData, setVendorDetailsData] = useState<any | null>(null);
+  const [vendorDetailsLoading, setVendorDetailsLoading] = useState(false);
   const [requests, setRequests] = useState<any[]>([]);
   const [loadingReqs, setLoadingReqs] = useState(false);
   const [editingReq, setEditingReq] = useState<any | null>(null);
 
+  const [feedbacks, setFeedbacks] = useState<any[]>([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
   // Vendor management state
+  const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [loadingVendors, setLoadingVendors] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -29,6 +97,42 @@ export default function PartnerDashboard() {
   const [editVendorForm, setEditVendorForm] = useState({ firstName: "", lastName: "", email: "", mobile: "", newPassword: "" });
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [submittingEdit, setSubmittingEdit] = useState(false);
+
+  // Mobile sidebar state
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Search states
+  const [vendorSearchQuery, setVendorSearchQuery] = useState("");
+  const [cancelSearchQuery, setCancelSearchQuery] = useState("");
+
+  const handleVendorAction = async (actionView: "vendor_payment" | "vendor_delivered" | "vendor_cancelled", vendor: any, stats: any) => {
+    setSelectedVendorForDetails(vendor);
+    setView(actionView);
+    if (actionView === "vendor_payment") {
+      setVendorDetailsData(stats);
+      return;
+    }
+    
+    // For delivered or cancelled, fetch orders list
+    setVendorDetailsLoading(true);
+    try {
+      const statusFilter = actionView === "vendor_delivered" ? "delivered" : "cancelled";
+      const res = await fetch(`${API}/api/managers/vendors/${vendor.id}/orders?date=${dashboardDate}&status=${statusFilter}`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setVendorDetailsData(data.orders || []);
+      } else {
+        toast.error(data.error || "Failed to fetch orders");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred");
+    } finally {
+      setVendorDetailsLoading(false);
+    }
+  };
 
   // Manage Frontend state
   const [posterTheme, setPosterTheme] = useState<"light" | "dark">("light");
@@ -349,23 +453,43 @@ export default function PartnerDashboard() {
     }
   };
 
+  const fetchFeedbacks = async () => {
+    setLoadingFeedbacks(true);
+    try {
+      const res = await fetch(`${API}/api/managers/feedbacks`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const data = await res.json();
+      if (res.ok) setFeedbacks(data.feedbacks || []);
+    } catch (err) { console.error(err); toast.error("Failed to load feedbacks"); }
+    setLoadingFeedbacks(false);
+  };
+
+  const fetchOrders = async () => {
+    setLoadingOrders(true);
+    try {
+      const res = await fetch(`${API}/api/managers/orders`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const data = await res.json();
+      if (res.ok) setOrders(data.orders || []);
+    } catch (err) { console.error(err); toast.error("Failed to load orders"); }
+    setLoadingOrders(false);
+  };
+
   useEffect(() => {
     if (view === "requests" && accessToken) fetchRequests();
-    if (view === "vendors" && accessToken) fetchVendors();
+    if ((view === "vendors" || view === "dashboard") && accessToken) fetchVendors();
     if (view === "frontend" && accessToken) fetchCurrentPoster();
+    if (view === "feedback" && accessToken) fetchFeedbacks();
+    if (view === "orders" && accessToken) fetchOrders();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, accessToken]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (!isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
-        router.push("/");
-      }
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [isLoggedIn, user, router]);
+    if (isInitializing) return;
+    if (!isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
+      router.push("/");
+    }
+  }, [isLoggedIn, user, router, isInitializing]);
 
-  if (!isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
+  if (isInitializing || !isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
     return <div className="min-h-screen bg-gray-50 dark:bg-[#151522]" />;
   }
 
@@ -416,27 +540,139 @@ export default function PartnerDashboard() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button 
+            onClick={toggleTheme}
+            className="p-2 rounded-full bg-gray-100 dark:bg-[#151522] text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 border border-gray-200 dark:border-[#2A2A3A] transition-colors"
+          >
+            {appTheme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-full">
             <UserCircle className="w-4 h-4 text-gray-400" />
             <span className="text-xs font-bold text-gray-600 dark:text-gray-400">{user?.email}</span>
           </div>
           <button 
-            onClick={() => { logout(); router.push("/"); }}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-red-500 hover:text-red-600 bg-red-50 hover:bg-red-100 rounded-full transition-all border border-red-100"
-            title="Log out"
+            onClick={() => setMobileSidebarOpen(true)}
+            className="md:hidden p-2 -mr-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors"
           >
-            <LogOut className="w-3.5 h-3.5" /> Logout
+            <Menu className="w-5 h-5" />
           </button>
         </div>
       </div>
     </nav>
   );
 
-  return (
-    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col">
-      <ManagerNavbar />
+  const ManagerSidebar = () => (
+    <>
+      {/* Mobile overlay */}
+      {mobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] md:hidden"
+          onClick={() => setMobileSidebarOpen(false)}
+        />
+      )}
+      
+      <aside className={`w-64 bg-white dark:bg-[#0D0D17] border-l border-gray-200 dark:border-[#2A2A3A] flex flex-col h-screen fixed right-0 md:sticky top-0 shrink-0 z-[70] transition-transform duration-300 ease-in-out ${mobileSidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"}`}>
+        <div className="p-6 border-b border-gray-200 dark:border-[#2A2A3A]">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${theme.from} ${theme.to} flex items-center justify-center shadow-lg ${theme.shadow} shrink-0`}>
+                <Building2 className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <span className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight leading-none mt-1">
+                  NB <span className={theme.text}>Partner</span>
+                </span>
+                <span className={`inline-flex items-center self-start text-[9px] font-black ${theme.textDark} ${theme.bg} px-2 py-0.5 rounded border ${theme.border} uppercase tracking-widest`}>
+                  {user?.manager_type || "Manager"}
+                </span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setMobileSidebarOpen(false)}
+              className="md:hidden p-1.5 -mr-2 -mt-1 text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
 
-      <main className="flex-1 max-w-6xl mx-auto w-full px-4 py-8">
+      <div className="flex-1 py-6 px-4 space-y-2 overflow-y-auto">
+        <button onClick={() => { setView("dashboard"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "dashboard" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <LayoutDashboard className="w-5 h-5 shrink-0" /> <span className="truncate">Dashboard</span>
+        </button>
+        <button onClick={() => { setView("frontend"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "frontend" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <LayoutTemplate className="w-5 h-5 shrink-0" /> <span className="truncate">Manage Frontend</span>
+        </button>
+        <button onClick={() => { setView("requests"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "requests" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <ClipboardList className="w-5 h-5 shrink-0" /> <span className="truncate">Vendor Requests</span>
+        </button>
+        <button onClick={() => { setView("vendors"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "vendors" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <StoreIcon className="w-5 h-5 shrink-0" /> <span className="truncate">Manage Vendors</span>
+        </button>
+        <button onClick={() => { setView("orders"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "orders" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <Receipt className="w-5 h-5 shrink-0" /> <span className="truncate whitespace-nowrap">See Order and Payment</span>
+        </button>
+        <button onClick={() => { setView("feedback"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "feedback" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <MessageSquare className="w-5 h-5 shrink-0" /> <span className="truncate">Show Feedback</span>
+        </button>
+      </div>
+
+      <div className="p-4 border-t border-gray-200 dark:border-[#2A2A3A]">
+        <div className="flex items-center gap-2 px-4 py-2 mb-2 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl">
+          <UserCircle className="w-4 h-4 text-gray-400 shrink-0" />
+          <span className="text-xs font-bold text-gray-600 dark:text-gray-400 truncate">{user?.email}</span>
+        </div>
+        <button onClick={() => { logout(); router.push("/"); }} className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-all">
+          <LogOut className="w-4 h-4" /> Logout
+        </button>
+      </div>
+    </aside>
+    </>
+  );
+
+  const renderCategoryTable = (title: string, orders: any[]) => (
+    <div className="mb-6">
+      <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 flex justify-between items-end">
+        {title}
+        <span className="text-xs bg-gray-200 dark:bg-[#2A2A3A] px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">{orders.length}</span>
+      </h3>
+      {orders.length === 0 ? (
+        <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl p-6 text-center text-gray-400 text-sm shadow-sm">
+          No orders in this category.
+        </div>
+      ) : (
+        <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl shadow-sm">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">User Name</th>
+                <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+              {orders.map((order: any) => (
+                <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
+                  <td className="p-3 font-mono text-xs font-bold text-gray-900 dark:text-gray-100">{order.id.slice(0, 8)}...</td>
+                  <td className="p-3 text-xs font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
+                  <td className="p-3 text-xs font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col md:flex-row-reverse">
+      <ManagerSidebar />
+      <div className="flex-1 flex flex-col min-w-0">
+        <div>
+          <ManagerNavbar />
+        </div>
+        <main className="flex-1 w-full px-4 sm:px-8 py-8 max-w-5xl mx-auto">
         
         <div className="mb-8 flex items-center justify-between">
           <div>
@@ -459,57 +695,56 @@ export default function PartnerDashboard() {
             <motion.div 
               key="dashboard"
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="space-y-8"
             >
-              {/* Button 1: Manage Frontend */}
-              <button
-                onClick={() => setView("frontend")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}>
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
-                  <LayoutTemplate className="w-24 h-24" />
+              {/* Registered Shops */}
+              <div>
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight flex items-center gap-2">
+                    <StoreIcon className="w-5 h-5 text-gray-400" /> Registered Shops
+                  </h3>
+                  <div className="flex items-center gap-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] px-3 py-1.5 rounded-xl shadow-sm">
+                    <Calendar className="w-4 h-4 text-gray-400" />
+                    <input 
+                      type="date" 
+                      value={dashboardDate}
+                      onChange={(e) => setDashboardDate(e.target.value)}
+                      className="bg-transparent border-none outline-none text-sm font-bold text-gray-700 dark:text-gray-300 cursor-pointer dark:[color-scheme:dark]"
+                    />
+                  </div>
                 </div>
-                <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border}`}>
-                  <LayoutTemplate className={`w-5 h-5 ${theme.text}`} />
+                <div className="mb-5">
+                  <input
+                    type="text"
+                    placeholder="Search shops by name or owner..."
+                    value={vendorSearchQuery}
+                    onChange={(e) => setVendorSearchQuery(e.target.value)}
+                    className="w-full sm:w-80 px-4 py-2.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm outline-none focus:border-orange-500 transition-colors shadow-sm placeholder:text-gray-400"
+                  />
                 </div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Manage Frontend</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
-                  Upload and publish the promotional banner/poster shown on your category home page.
-                </p>
-              </button>
-
-              {/* Button 2: Manage Vendor Requests */}
-              <button 
-                onClick={() => setView("requests")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
-              >
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
-                  <ClipboardList className="w-24 h-24" />
-                </div>
-                <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border}`}>
-                  <ClipboardList className={`w-5 h-5 ${theme.text}`} />
-                </div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Vendor Requests</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
-                  Review and approve new vendor owner registration requests for your category.
-                </p>
-              </button>
-
-              {/* Button 3: Manage Vendors */}
-              <button 
-                onClick={() => setView("vendors")}
-                className={`flex flex-col items-start p-6 rounded-2xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] ${theme.borderHover} hover:shadow-xl ${theme.shadowHover} transition-all group text-left relative overflow-hidden`}
-              >
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-5 transition-opacity">
-                  <StoreIcon className="w-24 h-24" />
-                </div>
-                <div className={`w-12 h-12 rounded-xl ${theme.bg} flex items-center justify-center mb-4 border ${theme.border} shadow-inner`}>
-                  <StoreIcon className={`w-5 h-5 ${theme.text}`} />
-                </div>
-                <h3 className="text-lg font-black text-gray-900 dark:text-gray-100 mb-2">Manage Vendors</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed relative z-10">
-                  Add new vendors manually, manage their credentials, and view their performance.
-                </p>
-              </button>
+                {loadingVendors ? (
+                  <div className="flex items-center gap-3 text-sm text-gray-500 font-medium bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6">
+                    <RefreshCw className="w-4 h-4 animate-spin" /> Loading shops...
+                  </div>
+                ) : vendors.length === 0 ? (
+                  <div className="text-sm text-gray-500 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-8 text-center font-medium">
+                    No shops registered in this division yet.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {vendors.filter((v: any) => (v.business_name || "").toLowerCase().includes(vendorSearchQuery.toLowerCase()) || (v.first_name || "").toLowerCase().includes(vendorSearchQuery.toLowerCase()) || (v.last_name || "").toLowerCase().includes(vendorSearchQuery.toLowerCase())).map((vendor: any) => (
+                      <VendorCard 
+                        key={vendor.id} 
+                        vendor={vendor} 
+                        date={dashboardDate} 
+                        theme={theme} 
+                        accessToken={accessToken} 
+                        onAction={handleVendorAction} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </motion.div>
           ) : view === "vendors" ? (
             <motion.div
@@ -991,10 +1226,203 @@ export default function PartnerDashboard() {
                 </div>
               </div>
             </motion.div>
+          ) : view === "orders" ? (
+            <motion.div
+              key="orders"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Orders & Payments</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Recent orders from {user?.manager_type} vendors</p>
+                </div>
+                <button onClick={fetchOrders} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingOrders ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingOrders ? "Loading..." : "Refresh"}
+                </button>
+              </div>
+
+              {orders.length === 0 && !loadingOrders ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center">
+                  <Receipt className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No orders found.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-2xl">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Date</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Vendor</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Total</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+                      {orders.map((order: any) => (
+                        <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50 transition-colors">
+                          <td className="p-4 font-mono text-sm text-gray-900 dark:text-gray-100 font-bold">{order.id.slice(0, 8)}...</td>
+                          <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{new Date(order.created_at).toLocaleString()}</td>
+                          <td className="p-4 text-sm font-bold text-gray-900 dark:text-gray-100">{order.vendor_first_name} {order.vendor_last_name}</td>
+                          <td className="p-4 text-sm font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
+                          <td className="p-4">
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
+          ) : view === "feedback" ? (
+            <motion.div
+              key="feedback"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">User Feedback</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Feedback for {user?.manager_type} services</p>
+                </div>
+                <button onClick={fetchFeedbacks} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingFeedbacks ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingFeedbacks ? "Loading..." : "Refresh"}
+                </button>
+              </div>
+
+              {feedbacks.length === 0 && !loadingFeedbacks ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center">
+                  <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No feedback received yet.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {feedbacks.map((fb: any) => (
+                    <div key={fb.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{fb.first_name} {fb.last_name}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{fb.email}</p>
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">{new Date(fb.created_at).toLocaleDateString()}</span>
+                      </div>
+                      {fb.rating && (
+                        <div className="flex items-center gap-1 mb-3">
+                          {[1,2,3,4,5].map(star => (
+                            <svg key={star} className={`w-4 h-4 ${star <= fb.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300 dark:text-gray-700"}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                            </svg>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-[#151522] p-3 rounded-xl border border-gray-100 dark:border-[#2A2A3A]">
+                        "{fb.message}"
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          ) : view === "vendor_payment" && selectedVendorForDetails ? (
+            <motion.div key="vendor_payment" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6">
+              <div className="flex items-center gap-4 mb-6">
+                <button onClick={() => setView("dashboard")} className="p-2 rounded-xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"><ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" /></button>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedVendorForDetails.business_name ? `${selectedVendorForDetails.business_name} Payments` : "Payments"}</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Date: {new Date(dashboardDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Cash On Delivery</h3>
+                  <p className="text-3xl font-black text-gray-900 dark:text-gray-100">₹{vendorDetailsData?.cod_amount || 0}</p>
+                </div>
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Online On Delivery</h3>
+                  <p className="text-3xl font-black text-gray-900 dark:text-gray-100">₹{vendorDetailsData?.online_on_delivery_amount || 0}</p>
+                </div>
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Online Payment</h3>
+                  <p className="text-3xl font-black text-gray-900 dark:text-gray-100">₹{vendorDetailsData?.online_amount || 0}</p>
+                </div>
+              </div>
+            </motion.div>
+          ) : view === "vendor_delivered" && selectedVendorForDetails ? (
+            <motion.div key="vendor_delivered" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6">
+              <div className="flex items-center gap-4 mb-6">
+                <button onClick={() => setView("dashboard")} className="p-2 rounded-xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"><ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" /></button>
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedVendorForDetails.business_name ? `${selectedVendorForDetails.business_name} Delivered Orders` : "Delivered Orders"}</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Date: {new Date(dashboardDate).toLocaleDateString()}</p>
+                </div>
+              </div>
+              {vendorDetailsLoading ? (
+                <div className="p-10 text-center"><RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto" /></div>
+              ) : vendorDetailsData?.length === 0 ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center text-gray-500 shadow-sm">No delivered orders found for this date.</div>
+              ) : (
+                <div className="space-y-4">
+                  {renderCategoryTable("Cash On Delivery", vendorDetailsData?.filter((o: any) => o.payment_method?.toLowerCase().includes('cash') || o.payment_method?.toLowerCase() === 'cod') || [])}
+                  {renderCategoryTable("Online On Delivery", vendorDetailsData?.filter((o: any) => o.payment_method?.toLowerCase().includes('online on delivery')) || [])}
+                  {renderCategoryTable("Online Payment", vendorDetailsData?.filter((o: any) => o.payment_method?.toLowerCase() === 'online') || [])}
+                </div>
+              )}
+            </motion.div>
+          ) : view === "vendor_cancelled" && selectedVendorForDetails ? (
+            <motion.div key="vendor_cancelled" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4">
+                  <button onClick={() => setView("dashboard")} className="p-2 rounded-xl bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"><ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" /></button>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">{selectedVendorForDetails.business_name ? `${selectedVendorForDetails.business_name} Cancelled Orders` : "Cancelled Orders"}</h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Date: {new Date(dashboardDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="w-full sm:w-64">
+                  <input
+                    type="text"
+                    placeholder="Search by Order ID..."
+                    value={cancelSearchQuery}
+                    onChange={(e) => setCancelSearchQuery(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm outline-none focus:border-red-500 transition-colors shadow-sm placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+              {vendorDetailsLoading ? (
+                <div className="p-10 text-center"><RefreshCw className="w-8 h-8 text-red-500 animate-spin mx-auto" /></div>
+              ) : vendorDetailsData?.length === 0 ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center text-gray-500 shadow-sm">No cancelled orders found for this date.</div>
+              ) : (
+                <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-sm">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">Order ID</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">User Name</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+                      {vendorDetailsData?.filter((o: any) => (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).map((order: any) => (
+                        <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
+                          <td className="p-4 font-mono text-sm font-bold text-gray-900 dark:text-gray-100">{order.id}</td>
+                          <td className="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
+                          <td className="p-4"><span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase bg-red-100 text-red-700">Cancelled</span></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </motion.div>
           ) : null}
         </AnimatePresence>
 
-      </main>
+        </main>
 
       {/* Edit Vendor Modal — outside AnimatePresence so it overlays correctly */}
       {editingVendor && (
@@ -1096,6 +1524,7 @@ export default function PartnerDashboard() {
           </div>
         </div>
       </footer>
+      </div>
     </div>
   );
 }

@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { RefreshCcw, WifiOff } from "lucide-react";
 import { usePathname } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function NetworkGuard({ children }: { children: React.ReactNode }) {
   const [isOffline, setIsOffline] = useState(false);
@@ -51,35 +54,48 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
     <>
       {/* Offline Overlay - always in DOM so images preload, but hidden when online */}
       <div 
-        className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col items-center justify-center p-4 text-center font-sans ${isOffline ? 'flex' : 'hidden'}`}
+        className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col font-sans overflow-y-auto ${isOffline ? 'flex' : 'hidden'}`}
       >
-        {/* Error Illustration */}
-        <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-6">
-          <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_food.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
-          <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_food_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
+        <div className="flex-none w-full">
+          <Navbar />
         </div>
 
-        {/* Error Text Content */}
-        <h1 className="text-4xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
-          Oops!
-        </h1>
-        <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
-          Poor Internet Connection
-        </h2>
-        <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
-          It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using NearBuy.
-        </p>
+        <div className="flex-1 flex flex-col items-center justify-center p-4 text-center mt-20 mb-20 md:mb-0">
+          {/* Error Illustration */}
+          <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-6">
+            <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_food.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
+            <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_food_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-sm mx-auto">
-          <button 
-            id="retry-btn"
-            onClick={handleRetry}
-            className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 ${isStore ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20'} rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg`}
-          >
-            <RefreshCcw className="w-5 h-5" />
-            Try Again
-          </button>
+          {/* Error Text Content */}
+          <h1 className="text-4xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
+            Oops!
+          </h1>
+          <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
+            Poor Internet Connection
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
+            It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using NearBuy.
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-sm mx-auto">
+            <button 
+              id="retry-btn"
+              onClick={handleRetry}
+              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 ${isStore ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20'} rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg`}
+            >
+              <RefreshCcw className="w-5 h-5" />
+              Try Again
+            </button>
+          </div>
+        </div>
+
+        <div className="flex-none w-full hidden md:block">
+          <Footer />
+        </div>
+        <div className="flex-none w-full md:hidden">
+          <MobileBottomNav />
         </div>
       </div>
 

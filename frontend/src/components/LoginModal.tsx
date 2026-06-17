@@ -21,7 +21,7 @@ const FloatingInput = ({ theme, icon: Icon, type, id, label, value, onChange, sh
       id={id}
       value={value}
       onChange={onChange}
-      className={`peer w-full bg-gray-50 dark:bg-[#151522]/80 border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none ${theme.inputBorder} focus:bg-white dark:bg-[#0D0D17] focus:ring-4 ${theme.inputRing} transition-all placeholder-transparent`}
+      className={`peer w-full bg-gray-50 dark:bg-[#151522]/80 border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none ${theme.inputBorder} focus:bg-white dark:focus:bg-[#0D0D17] focus:ring-4 ${theme.inputRing} transition-all placeholder-transparent`}
       placeholder={label}
       {...props}
     />
@@ -513,7 +513,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                     <div className="grid grid-cols-2 gap-3">
                       <FloatingInput theme={t} icon={User} type="text" id="su-first" label="First Name" value={firstName} onChange={(e:any) => setFirstName(e.target.value)} required />
                       <div className="relative group">
-                        <input type="text" id="su-last" value={lastName} onChange={(e:any) => setLastName(e.target.value)} required className={`peer w-full bg-gray-50 dark:bg-[#151522]/80 border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 text-sm text-gray-800 dark:text-gray-200 outline-none ${t.inputBorder} focus:bg-white dark:bg-[#0D0D17] focus:ring-4 ${t.inputRing} transition-all placeholder-transparent`} placeholder="Last Name" />
+                        <input type="text" id="su-last" value={lastName} onChange={(e:any) => setLastName(e.target.value)} required className={`peer w-full bg-gray-50 dark:bg-[#151522]/80 border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 text-sm text-gray-800 dark:text-gray-200 outline-none ${t.inputBorder} focus:bg-white dark:focus:bg-[#0D0D17] focus:ring-4 ${t.inputRing} transition-all placeholder-transparent`} placeholder="Last Name" />
                         <label htmlFor="su-last" className={`absolute left-4 top-2 text-[10px] uppercase font-bold tracking-wider text-gray-400 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-sm peer-placeholder-shown:font-medium peer-placeholder-shown:normal-case peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] peer-focus:font-bold peer-focus:uppercase ${t.labelFocus} transition-all pointer-events-none`}>Last Name</label>
                       </div>
                     </div>

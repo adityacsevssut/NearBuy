@@ -225,9 +225,22 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       </div>
       {/* Info */}
       <div className="px-2.5 py-2">
-        <p className="font-black text-[15px] text-gray-900 dark:text-gray-100 truncate leading-tight">
-          {r.name}
-        </p>
+        <div className="flex items-center gap-1.5">
+          <p className="font-black text-[15px] text-gray-900 dark:text-gray-100 truncate leading-tight flex-1">
+            {r.name}
+          </p>
+          {!closed ? (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider shrink-0 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
+              Open
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-[8px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider shrink-0 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              Offline
+            </span>
+          )}
+        </div>
         {/* Rating row */}
         <div className="flex items-center gap-1 mt-0.5">
           <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">
@@ -370,9 +383,22 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       <div className="p-3">
         {/* Name + rating */}
         <div className="flex items-start justify-between gap-1.5 mb-0.5">
-          <p className="font-black text-[16px] text-gray-900 dark:text-gray-100 leading-tight flex-1 truncate">
-            {r.name}
-          </p>
+          <div className="flex items-center gap-1.5 flex-1 min-w-0">
+            <p className="font-black text-[16px] text-gray-900 dark:text-gray-100 leading-tight truncate">
+              {r.name}
+            </p>
+            {!closed ? (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider shrink-0 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
+                Open
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-[8px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider shrink-0 shadow-sm">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Offline
+              </span>
+            )}
+          </div>
           <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded shrink-0">
             <Star className="w-2.5 h-2.5 fill-white" />
             {r.rating || "4.0"}
