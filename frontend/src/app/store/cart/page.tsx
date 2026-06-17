@@ -77,7 +77,7 @@ function RestaurantOrderCard({
   platformFee: number;
   gst: number;
   canPlaceOrder: boolean;
-  onPlaceOrder: (restId: string, items: any[], subtotal: number, gst: number, platformFee: number, total: number, customerMobile: string, alternateMobile: string, cookingInstructions: string, paymentMethod: string) => void;
+  onPlaceOrder: (restId: string, items: any[], subtotal: number, gst: number, platformFee: number, total: number, customerMobile: string, alternateMobile: string, cookingInstructions: string, paymentMethod: string, razorpayData?: any) => void;
   userLat: number | null;
   userLon: number | null;
   userPin: string | null;
@@ -90,10 +90,11 @@ function RestaurantOrderCard({
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
   const totalQty = restItems.reduce((s, i) => s + i.quantity, 0);
 
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [showBill, setShowBill] = useState(true);
-  const discount = couponApplied ? Math.floor(subtotal * 0.1) : 0;
+  const discount = (couponApplied && paymentMethod !== 'cod') ? Math.floor(subtotal * 0.1) : 0;
 
   // Calculate actual fee amounts based on percentage of subtotal, capped at ₹8 each
   const calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
@@ -108,7 +109,6 @@ function RestaurantOrderCard({
   const mainOrderTotal = subtotal - discount;
   const grandTotal = mainOrderTotal + totalFees;
 
-  const [paymentMethod, setPaymentMethod] = useState("");
   const [customerMobile, setCustomerMobile] = useState("");
   const [alternateMobile, setAlternateMobile] = useState("");
   const [cookingInstructions, setCookingInstructions] = useState("");
@@ -152,7 +152,7 @@ function RestaurantOrderCard({
 
   const meetsMinOrder = subtotal >= minOrder;
   const isAddressValid = locationName !== "Select Location";
-  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (feesPaid || totalFees === 0) && !outOfRange && paymentMethod !== "" && isMobileValid && isAltMobileValid && isAddressValid;
+  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (paymentMethod !== 'cod' || feesPaid || totalFees === 0) && !outOfRange && paymentMethod !== "" && isMobileValid && isAltMobileValid && isAddressValid;
 
   let missingFieldsText = "Select Address & Payment";
   if (!isAddressValid) missingFieldsText = "Add Delivery Address";
@@ -268,8 +268,9 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Coupon ── */}
-      <div className="px-5 py-4 border-t border-dashed border-blue-200">
-        <div className="flex gap-2">
+      {paymentMethod !== 'cod' && (
+        <div className="px-5 py-4 border-t border-dashed border-blue-200">
+          <div className="flex gap-2">
           <div className="flex items-center gap-2 flex-1 border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-3 py-2">
             <Tag className="w-3.5 h-3.5 text-blue-400 shrink-0" />
             <input
@@ -300,6 +301,7 @@ function RestaurantOrderCard({
           </p>
         )}
       </div>
+      )}
 
       {/* ── Bill breakdown (collapsible) ── */}
       <div className="border-t border-blue-100/50">
@@ -438,30 +440,59 @@ function RestaurantOrderCard({
             <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Cash on Delivery</span>
           </label>
 
-          <div
-            onClick={() => toast("This feature will be available soon", { icon: "ℹ️", ...blueToastStyle })}
-            className="flex items-center gap-3 p-3 rounded-xl border-2 border-gray-100 dark:border-[#2A2A3A] bg-gray-50/50 dark:bg-[#151522]/50 cursor-not-allowed opacity-60"
-          >
+          <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'online_on_delivery' ? 'border-blue-500 bg-blue-50/30' : 'border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A]'}`}>
             <input
               type="radio"
               name={`payment-${restId}`}
-              disabled
-              className="w-4 h-4 text-gray-300"
+              checked={paymentMethod === 'online_on_delivery'}
+              onChange={() => setPaymentMethod('online_on_delivery')}
+              className="w-4 h-4 text-blue-500 accent-blue-500"
             />
-            <Smartphone className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-            <span className="font-bold text-gray-500 dark:text-gray-400 text-sm flex-1">Online Payment</span>
-            <span className="text-[10px] font-black uppercase text-gray-400 bg-gray-200 px-2 py-0.5 rounded">Soon</span>
-          </div>
+            <CreditCard className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+            <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Online On Delivery</span>
+          </label>
+
+          <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'online_payment' ? 'border-blue-500 bg-blue-50/30' : 'border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A]'}`}>
+            <input
+              type="radio"
+              name={`payment-${restId}`}
+              checked={paymentMethod === 'online_payment'}
+              onChange={() => setPaymentMethod('online_payment')}
+              className="w-4 h-4 text-blue-500 accent-blue-500"
+            />
+            <Smartphone className="w-4 h-4 text-gray-700 dark:text-gray-300" />
+            <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Online Payment</span>
+          </label>
         </div>
       </div>
 
       {/* ── Taxes & Platform Fee (Separate Section) ── */}
-      {totalFees > 0 && (
+      {(totalFees > 0 || paymentMethod !== 'cod') && (
         <div className="px-5 py-4 border-t border-blue-100/50 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522]/50">
           <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-            Taxes & Platform Fees
+            {paymentMethod === 'cod' ? "Taxes & Platform Fees" : "Final Breakdown"}
           </p>
           <div className="space-y-2">
+            {paymentMethod !== 'cod' && (
+              <>
+                <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                  <span>Item Total</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">₹{subtotal.toFixed(2)}</span>
+                </div>
+                {discount > 0 && (
+                  <>
+                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <span className="text-green-600">Promo Discount</span>
+                      <span className="font-semibold text-green-600">− ₹{discount.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-bold text-gray-800 dark:text-gray-200">Total after promo code</span>
+                      <span className="font-bold text-gray-800 dark:text-gray-200">₹{mainOrderTotal.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
             <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
               <span>GST ({gst}%)</span>
               <span className="font-semibold text-gray-900 dark:text-gray-100">₹{calculatedGst.toFixed(2)}</span>
@@ -471,13 +502,14 @@ function RestaurantOrderCard({
               <span className="font-semibold text-gray-900 dark:text-gray-100">₹{calculatedPlatformFee.toFixed(2)}</span>
             </div>
             <div className="flex justify-between pt-3 mt-1 border-t border-dashed border-gray-200 dark:border-[#2A2A3A]">
-              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">Total Fees</span>
-              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">₹{totalFees.toFixed(2)}</span>
+              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">{paymentMethod === 'cod' ? "Total Fees" : "Grand Total"}</span>
+              <span className="font-black text-gray-900 dark:text-gray-100 text-lg">₹{(paymentMethod === 'cod' ? totalFees : grandTotal).toFixed(2)}</span>
             </div>
           </div>
 
-          {!feesPaid ? (
-            <button
+          {paymentMethod === 'cod' && (
+            !feesPaid ? (
+              <button
               disabled={outOfRange}
               onClick={async () => {
                 if (outOfRange) return;
@@ -567,6 +599,7 @@ function RestaurantOrderCard({
               <CheckCircle className="w-5 h-5 text-green-500" />
               <span className="text-sm font-black text-green-700">Fees Paid Successfully</span>
             </div>
+            )
           )}
         </div>
       )}
@@ -597,7 +630,7 @@ function RestaurantOrderCard({
           disabled={!finalCanPlaceOrder}
           onClick={() => {
             if (finalCanPlaceOrder) {
-              onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod);
+              onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod, razorpayData);
             }
           }}
           className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${finalCanPlaceOrder
@@ -611,7 +644,7 @@ function RestaurantOrderCard({
             ? "Out of Delivery Range"
             : finalCanPlaceOrder
               ? `Place Order · ₹${mainOrderTotal}`
-              : !(feesPaid || totalFees === 0) && meetsMinOrder
+              : !(feesPaid || totalFees === 0 || paymentMethod !== 'cod') && meetsMinOrder
                 ? "Pay Fees to Place Order"
                 : !meetsMinOrder && minOrder > 0
                   ? `Minimum Amount is ₹${minOrder}`

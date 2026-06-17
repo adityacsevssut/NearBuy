@@ -33,6 +33,7 @@ interface Order {
   platform_fee: string;
   total_amount: string;
   payment_method: string;
+  payment_status: string;
   delivery_address: any;
   status: string;
   created_at: string;
@@ -273,14 +274,34 @@ export default function VendorOrdersPage() {
                 </div>
 
                 {/* Status Banner */}
-                <div className={`px-5 py-3 border-b border-gray-50 dark:border-[#1F1F2E] flex items-center justify-between`}>
-                  <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
-                    {getStatusIcon(order.status)}
-                    {order.status}
+                <div className={`px-5 py-3 border-b border-gray-50 dark:border-[#1F1F2E] flex flex-col gap-2`}>
+                  <div className="flex items-center justify-between">
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
+                      {getStatusIcon(order.status)}
+                      {order.status}
+                    </div>
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                      {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
+                    </p>
                   </div>
-                  <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                    {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
-                  </p>
+                  
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Payment:</span>
+                      <span className="text-xs font-black text-gray-700 dark:text-gray-300 uppercase tracking-wider bg-gray-100 dark:bg-[#1F1F2E] px-2 py-0.5 rounded">
+                        {order.payment_method.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider border ${
+                        order.payment_status === 'paid' ? 'bg-green-50 text-green-600 border-green-200' : 
+                        order.payment_status === 'fees_paid' ? 'bg-orange-50 text-orange-600 border-orange-200' :
+                        'bg-red-50 text-red-600 border-red-200'
+                      }`}>
+                        {order.payment_status === 'paid' ? 'Paid' : order.payment_status === 'fees_paid' ? 'Fees Paid' : 'Unpaid'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 {/* Action Buttons */}
@@ -485,29 +506,48 @@ export default function VendorOrdersPage() {
               </div>
               
               <div className="space-y-2 mb-6">
-                {ORDER_STATUSES.map(status => (
-                  <button
-                    key={status}
-                    onClick={() => {
-                      if (status === "Confirmed") {
-                        setPendingStatusUpdate(status);
-                      } else {
-                        updateOrderStatus(statusModalOrder.id, status);
-                      }
-                    }}
-                    disabled={statusLoading}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-bold ${
-                      (statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status
-                        ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700`
-                        : "border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522]"
-                    }`}
-                  >
-                    {status}
-                    {((statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status) && (
-                      <CheckCircle className={`w-5 h-5 text-${tColor}-500`} />
-                    )}
-                  </button>
-                ))}
+                {ORDER_STATUSES.map(status => {
+                  let isBlocked = false;
+                  let blockReason = "";
+                  if (status === "Shipment" && statusModalOrder.payment_method === 'online_payment' && statusModalOrder.payment_status !== 'paid') {
+                    isBlocked = true;
+                    blockReason = "User must pay first";
+                  }
+                  if (status === "Delivered" && statusModalOrder.payment_method === 'online_on_delivery' && statusModalOrder.payment_status !== 'paid') {
+                    isBlocked = true;
+                    blockReason = "User must pay first";
+                  }
+
+                  return (
+                    <button
+                      key={status}
+                      onClick={() => {
+                        if (isBlocked) return;
+                        if (status === "Confirmed") {
+                          setPendingStatusUpdate(status);
+                        } else {
+                          updateOrderStatus(statusModalOrder.id, status);
+                        }
+                      }}
+                      disabled={statusLoading || isBlocked}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-bold ${
+                        isBlocked 
+                          ? "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-[#151522] dark:border-[#2A2A3A] opacity-60"
+                          : ((statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status)
+                            ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700`
+                            : "border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522]"
+                      }`}
+                    >
+                      <div className="flex flex-col items-start">
+                        <span>{status}</span>
+                        {isBlocked && <span className="text-[10px] uppercase text-red-500 font-bold">{blockReason}</span>}
+                      </div>
+                      {((statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status) && (
+                        <CheckCircle className={`w-5 h-5 text-${tColor}-500`} />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
 
               {pendingStatusUpdate === "Confirmed" && (

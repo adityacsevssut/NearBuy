@@ -58,7 +58,7 @@ app.use(globalLimiter);
 // ── Auth-specific stricter rate limit ────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
-  max: 20,                  // max 20 auth attempts per 15 min per IP
+  max: process.env.NODE_ENV === "production" ? 20 : 1000, // high limit for dev
   message: { error: "Too many auth attempts, please wait 15 minutes." },
 });
 app.use("/api/auth", authLimiter);

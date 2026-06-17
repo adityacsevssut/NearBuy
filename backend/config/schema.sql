@@ -118,3 +118,14 @@ CREATE INDEX IF NOT EXISTS idx_vendor_menu_available ON vendor_menu_items(is_ava
 CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_vendor_id ON orders(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_users_active_role ON users(is_active, role);
+
+-- Feedbacks Table
+CREATE TABLE IF NOT EXISTS feedbacks (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES users(id) ON DELETE SET NULL,
+  type        TEXT NOT NULL DEFAULT 'general',
+  message     TEXT NOT NULL,
+  rating      INT CHECK (rating >= 1 AND rating <= 5),
+  status      TEXT NOT NULL DEFAULT 'unread',
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

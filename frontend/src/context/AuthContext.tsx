@@ -33,6 +33,7 @@ interface AuthContextType {
   openLoginModal: () => void;
   closeLoginModal: () => void;
   updateUser: (updates: Partial<AuthUser>) => void;
+  isInitializing: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const openLoginModal = () => setIsLoginModalOpen(true);
@@ -102,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
     }
+    setIsInitializing(false);
     return () => {
       if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     };
@@ -171,7 +174,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, accessToken, login, logout, updateUser, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal }}>
+    <AuthContext.Provider value={{ user, accessToken, login, logout, updateUser, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal, isInitializing }}>
       {children}
       <LoginModal isOpen={isLoginModalOpen} onClose={closeLoginModal} />
     </AuthContext.Provider>

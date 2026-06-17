@@ -34,7 +34,7 @@ router.post("/create-razorpay-order", authenticate, async (req, res) => {
 // POST /api/orders/verify-payment
 router.post("/verify-payment", authenticate, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, order_id } = req.body;
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
       return res.status(400).json({ error: "Missing Razorpay fields" });
     }
@@ -46,6 +46,12 @@ router.post("/verify-payment", authenticate, async (req, res) => {
       .digest("hex");
       
     if (expectedSignature === razorpay_signature) {
+      if (order_id) {
+        await pool.query(
+          `UPDATE orders SET payment_status = 'paid', razorpay_order_id = $1, razorpay_payment_id = $2, updated_at = NOW() WHERE id = $3 AND user_id = $4`,
+          [razorpay_order_id, razorpay_payment_id, order_id, req.user.id]
+        );
+      }
       return res.json({ success: true, message: "Payment verified successfully" });
     } else {
       return res.status(400).json({ error: "Invalid signature" });
@@ -78,11 +84,12 @@ router.post(
     } = req.body;
 
     try {
+      const payment_status = payment_method === 'cod' ? 'fees_paid' : 'pending';
       const { rows } = await pool.query(
         `INSERT INTO orders (
-          user_id, vendor_id, items, subtotal, gst, platform_fee, total_amount, payment_method, delivery_address,
+          user_id, vendor_id, items, subtotal, gst, platform_fee, total_amount, payment_method, payment_status, delivery_address,
           customer_mobile, alternate_mobile, cooking_instructions
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
         [
           req.user.id,
           vendor_id,
@@ -92,6 +99,7 @@ router.post(
           platform_fee,
           total_amount,
           payment_method,
+          payment_status,
           JSON.stringify(delivery_address),
           customer_mobile,
           alternate_mobile || "",
@@ -245,6 +253,33 @@ router.get("/:id", authenticate, async (req, res) => {
   }
 });
 
+// POST /api/orders/:id/initiate-payment
+// Initiate Razorpay payment for an existing order (Full Amount)
+router.post("/:id/initiate-payment", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query("SELECT * FROM orders WHERE id = $1 AND user_id = $2", [req.params.id, req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Order not found" });
+    
+    const order = rows[0];
+    if (order.payment_status === 'paid') return res.status(400).json({ error: "Order is already paid" });
+
+    const amount = Number(order.total_amount);
+    if (amount < 1) return res.status(400).json({ error: "Minimum Amount is ₹1" });
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) return res.status(500).json({ error: "Razorpay keys not configured" });
+    
+    const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+    const rzpOrder = await instance.orders.create({
+      amount: Math.round(amount * 100),
+      currency: "INR",
+      receipt: "receipt_order_" + order.id.slice(0,8),
+    });
+    res.json(rzpOrder);
+  } catch (error) {
+    const errorMsg = error.error?.description || error.message || "Error creating Razorpay order";
+    res.status(500).json({ error: errorMsg });
+  }
+});
+
 
 // PATCH /api/orders/:id/status
 // Update order status by vendor
@@ -256,6 +291,17 @@ router.patch("/:id/status", authenticate, async (req, res) => {
   }
 
   try {
+    const checkQuery = await pool.query("SELECT payment_method, payment_status FROM orders WHERE id = $1 AND vendor_id = $2", [req.params.id, req.user.id]);
+    if (checkQuery.rows.length === 0) return res.status(404).json({ error: "Order not found or unauthorized." });
+    
+    const orderData = checkQuery.rows[0];
+    if (status.toLowerCase() === 'shipped' && orderData.payment_method === 'online_payment' && orderData.payment_status !== 'paid') {
+      return res.status(400).json({ error: "Cannot ship 'Online Payment' orders until payment is completed." });
+    }
+    if (status.toLowerCase() === 'delivered' && orderData.payment_method === 'online_on_delivery' && orderData.payment_status !== 'paid') {
+      return res.status(400).json({ error: "Cannot mark delivered. User must complete 'Online On Delivery' payment first." });
+    }
+
     let query = `UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 AND vendor_id = $3 RETURNING *`;
     let values = [status, req.params.id, req.user.id];
 
@@ -280,6 +326,22 @@ router.patch("/:id/status", authenticate, async (req, res) => {
     }
     
     const updatedOrder = rows[0];
+
+    // 10 minute Auto-Cancel logic for Online Payment
+    if (updatedOrder.payment_method === 'online_payment' && status.toLowerCase() === 'confirmed') {
+      setTimeout(async () => {
+        try {
+          const timeoutCheck = await pool.query("SELECT status, payment_status FROM orders WHERE id = $1", [req.params.id]);
+          if (timeoutCheck.rows.length > 0) {
+            const current = timeoutCheck.rows[0];
+            if (current.status.toLowerCase() === 'confirmed' && current.payment_status !== 'paid') {
+              await pool.query("UPDATE orders SET status = 'Cancelled', updated_at = NOW() WHERE id = $1", [req.params.id]);
+              console.log(`Auto-cancelled order ${req.params.id} due to 10 min payment timeout.`);
+            }
+          }
+        } catch(e) { console.error("Auto cancel error:", e); }
+      }, 10 * 60 * 1000); // 10 mins
+    }
 
     // Notify the user about the status update
     let notifTitle = "Order Update";
