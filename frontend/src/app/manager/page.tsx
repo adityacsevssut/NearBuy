@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
@@ -72,7 +72,7 @@ export default function PartnerDashboard() {
   const { user, logout, isLoggedIn, accessToken, isInitializing } = useAuth();
   const { theme: appTheme, toggleTheme } = useTheme();
   const router = useRouter();
-  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend" | "orders" | "feedback" | "vendor_payment" | "vendor_delivered" | "vendor_cancelled">("dashboard");
+  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend" | "orders" | "feedback" | "support" | "refunds" | "vendor_payment" | "vendor_delivered" | "vendor_cancelled">("dashboard");
   const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any | null>(null);
   const [vendorDetailsData, setVendorDetailsData] = useState<any | null>(null);
   const [vendorDetailsLoading, setVendorDetailsLoading] = useState(false);
@@ -82,6 +82,13 @@ export default function PartnerDashboard() {
 
   const [feedbacks, setFeedbacks] = useState<any[]>([]);
   const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
+  
+  const [supportRequests, setSupportRequests] = useState<any[]>([]);
+  const [loadingSupport, setLoadingSupport] = useState(false);
+
+  const [refundRequests, setRefundRequests] = useState<any[]>([]);
+  const [loadingRefunds, setLoadingRefunds] = useState(false);
+
   const [orders, setOrders] = useState<any[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
 
@@ -463,6 +470,170 @@ export default function PartnerDashboard() {
     setLoadingFeedbacks(false);
   };
 
+  const fetchSupportRequests = async () => {
+    setLoadingSupport(true);
+    try {
+      const res = await fetch(`${API}/api/managers/support-requests`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const data = await res.json();
+      if (res.ok) setSupportRequests(data.supportRequests || []);
+    } catch (err) { console.error(err); toast.error("Failed to load support requests"); }
+    setLoadingSupport(false);
+  };
+
+  const fetchRefundRequests = async () => {
+    setLoadingRefunds(true);
+    try {
+      const res = await fetch(`${API}/api/managers/refund-requests`, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const data = await res.json();
+      if (res.ok) setRefundRequests(data.refundRequests || []);
+    } catch (err) { console.error(err); toast.error("Failed to load refund requests"); }
+    setLoadingRefunds(false);
+  };
+
+  const handleUpdateRefundStatus = async (id: string, status: 'Approved' | 'Rejected' | 'Completed') => {
+    let rejection_reason = "";
+    if (status === 'Rejected') {
+      const reason = window.prompt("Reason for Cancellation:");
+      if (reason === null) return; // User cancelled prompt
+      if (!reason.trim()) {
+        toast.error("Rejection reason is required.");
+        return;
+      }
+      rejection_reason = reason.trim();
+    }
+    
+    try {
+      const res = await fetch(`${API}/api/managers/refund-requests/${id}`, {
+        method: "PATCH",
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}` 
+        },
+        body: JSON.stringify({ status, rejection_reason })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update refund status");
+      toast.success(data.message);
+      fetchRefundRequests();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+  };
+
+  const handleDeleteSupportRequest = (id: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full shrink-0">
+            <Trash2 className="w-5 h-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Delete Request?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
+              Are you sure you want to delete this support request?
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const res = await fetch(`${API}/api/managers/support-requests/${id}`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to delete support request");
+                toast.success("Support request deleted.");
+                fetchSupportRequests();
+              } catch (err: any) {
+                toast.error(err.message);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid var(--toast-border, #fee2e2)",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "var(--toast-bg, #fff)",
+        color: "var(--toast-text, #000)",
+        maxWidth: "340px"
+      },
+      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+    });
+  };
+
+  const handleDeleteFeedback = (id: string) => {
+    toast((t) => (
+      <div className="flex flex-col gap-3">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-red-100 dark:bg-red-500/20 rounded-full shrink-0">
+            <Trash2 className="w-5 h-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div>
+            <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Delete Feedback?</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
+              Are you sure you want to delete this feedback? This cannot be undone.
+            </p>
+          </div>
+        </div>
+        <div className="flex gap-2 justify-end mt-1">
+          <button 
+            onClick={() => toast.dismiss(t.id)}
+            className="px-4 py-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] text-gray-700 dark:text-gray-300 rounded-xl text-sm font-bold transition-colors"
+          >
+            Cancel
+          </button>
+          <button 
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                const res = await fetch(`${API}/api/managers/feedbacks/${id}`, {
+                  method: "DELETE",
+                  headers: { Authorization: `Bearer ${accessToken}` }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Failed to delete feedback");
+                toast.success("Feedback deleted.");
+                fetchFeedbacks();
+              } catch (err: any) {
+                toast.error(err.message);
+              }
+            }}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+          >
+            Yes, Delete
+          </button>
+        </div>
+      </div>
+    ), {
+      duration: Infinity,
+      style: {
+        border: "1px solid var(--toast-border, #fee2e2)",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "var(--toast-bg, #fff)",
+        color: "var(--toast-text, #000)",
+        maxWidth: "340px"
+      },
+      className: "dark:!bg-[#0D0D17] dark:!border-[#2A2A3A] dark:!text-white"
+    });
+  };
+
   const fetchOrders = async () => {
     setLoadingOrders(true);
     try {
@@ -614,6 +785,12 @@ export default function PartnerDashboard() {
         </button>
         <button onClick={() => { setView("feedback"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "feedback" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <MessageSquare className="w-5 h-5 shrink-0" /> <span className="truncate">Show Feedback</span>
+        </button>
+        <button onClick={() => { setView("support"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "support" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <LifeBuoy className="w-5 h-5 shrink-0" /> <span className="truncate">Support Request</span>
+        </button>
+        <button onClick={() => { setView("refunds"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "refunds" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <Undo2 className="w-5 h-5 shrink-0" /> <span className="truncate">Refund Requests</span>
         </button>
       </div>
 
@@ -1302,14 +1479,23 @@ export default function PartnerDashboard() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {feedbacks.map((fb: any) => (
-                    <div key={fb.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm">
-                      <div className="flex justify-between items-start mb-3">
+                    <div key={fb.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm relative group">
+                      <div className="flex justify-between items-start mb-3 pr-8">
                         <div>
                           <h4 className="font-bold text-gray-900 dark:text-gray-100">{fb.first_name} {fb.last_name}</h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400">{fb.email}</p>
                         </div>
                         <span className="text-xs text-gray-400 font-medium">{new Date(fb.created_at).toLocaleDateString()}</span>
                       </div>
+                      
+                      <button 
+                        onClick={() => handleDeleteFeedback(fb.id)}
+                        className="absolute top-4 right-4 p-2 bg-red-50 dark:bg-red-500/10 text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all border border-red-100 dark:border-red-500/20"
+                        title="Delete Feedback"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+
                       {fb.rating && (
                         <div className="flex items-center gap-1 mb-3">
                           {[1,2,3,4,5].map(star => (
@@ -1322,6 +1508,152 @@ export default function PartnerDashboard() {
                       <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-[#151522] p-3 rounded-xl border border-gray-100 dark:border-[#2A2A3A]">
                         "{fb.message}"
                       </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          ) : view === "support" ? (
+            <motion.div
+              key="support"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Support Requests</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Customer support tickets</p>
+                </div>
+                <button onClick={fetchSupportRequests} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingSupport ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingSupport ? "Loading..." : "Refresh"}
+                </button>
+              </div>
+
+              {supportRequests.length === 0 && !loadingSupport ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center">
+                  <LifeBuoy className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No support requests received.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {supportRequests.map((req: any) => (
+                    <div key={req.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm relative group">
+                      <div className="flex justify-between items-start mb-3 pr-8">
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{req.first_name} {req.last_name}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{req.user_email}</p>
+                        </div>
+                        <span className="text-xs text-gray-400 font-medium">{new Date(req.created_at).toLocaleDateString()}</span>
+                      </div>
+                      
+                      <button 
+                        onClick={() => handleDeleteSupportRequest(req.id)}
+                        className="absolute top-4 right-4 p-2 bg-red-50 dark:bg-red-500/10 text-red-500 hover:text-red-600 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg opacity-0 group-hover:opacity-100 transition-all border border-red-100 dark:border-red-500/20"
+                        title="Delete Request"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+
+                      <div className="flex gap-2 mb-3">
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider bg-blue-100 text-blue-700">
+                          {req.contact_method}
+                        </span>
+                        <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-gray-100 text-gray-700 dark:bg-[#2A2A3A] dark:text-gray-300">
+                          {req.contact_number}
+                        </span>
+                      </div>
+
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-[#151522] p-3 rounded-xl border border-gray-100 dark:border-[#2A2A3A]">
+                        "{req.issue}"
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </motion.div>
+          ) : view === "refunds" ? (
+            <motion.div
+              key="refunds"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-6"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Refund Requests</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Customer refund tickets</p>
+                </div>
+                <button onClick={fetchRefundRequests} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingRefunds ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingRefunds ? "Loading..." : "Refresh"}
+                </button>
+              </div>
+
+              {refundRequests.length === 0 && !loadingRefunds ? (
+                <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center">
+                  <Undo2 className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 dark:text-gray-400 font-medium">No refund requests pending.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {refundRequests.map((req: any) => (
+                    <div key={req.id} className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 shadow-sm flex flex-col">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-gray-100">{req.user_name}</h4>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">{req.email}</p>
+                          <span className="text-[10px] font-bold px-2 py-1 bg-gray-100 dark:bg-[#2A2A3A] text-gray-600 dark:text-gray-300 rounded font-mono">
+                            Order: {req.order_id}
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-end gap-1">
+                          <span className="text-[10px] font-bold text-gray-400">{new Date(req.created_at).toLocaleDateString()}</span>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                            req.status === 'Approved' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                            req.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
+                            req.status === 'Completed' ? 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400' :
+                            req.status === 'UPI Provided' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' :
+                            'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/20 dark:text-yellow-400'
+                          }`}>
+                            {req.status}
+                          </span>
+                        </div>
+                      </div>
+
+                      {req.status === 'Pending' && (
+                        <div className="grid grid-cols-2 gap-2 mt-4">
+                          <button 
+                            onClick={() => handleUpdateRefundStatus(req.id, 'Rejected')}
+                            className="w-full py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl text-xs font-bold transition-colors border border-red-100 dark:border-red-500/20 flex items-center justify-center gap-1"
+                          >
+                            <XCircle className="w-3.5 h-3.5" /> Reject
+                          </button>
+                          <button 
+                            onClick={() => handleUpdateRefundStatus(req.id, 'Approved')}
+                            className="w-full py-2 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 rounded-xl text-xs font-bold transition-colors border border-green-100 dark:border-green-500/20 flex items-center justify-center gap-1"
+                          >
+                            <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                          </button>
+                        </div>
+                      )}
+
+                      {req.status === 'Rejected' && req.rejection_reason && (
+                        <div className="mt-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl">
+                          <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Reason for Cancellation</p>
+                          <p className="text-sm font-medium text-red-700 dark:text-red-400">{req.rejection_reason}</p>
+                        </div>
+                      )}
+
+                      {req.status === 'UPI Provided' && req.upi_id && (
+                        <div className="mt-4 p-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-100 dark:border-purple-500/20 rounded-xl">
+                          <p className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-1">User UPI ID</p>
+                          <p className="text-sm font-mono font-bold text-purple-700 dark:text-purple-400 mb-3">{req.upi_id}</p>
+                          <button 
+                            onClick={() => handleUpdateRefundStatus(req.id, 'Completed')}
+                            className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-colors shadow-sm shadow-purple-500/30 flex items-center justify-center gap-1"
+                          >
+                            <CheckCircle2 className="w-4 h-4" /> Refund Successful
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

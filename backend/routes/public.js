@@ -4,6 +4,7 @@ const pool = require("../config/db");
 const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
 const cache = require("../middleware/cache");
+const { authenticate } = require("../middleware/auth");
 
 // GET /api/public/vendors
 router.get("/vendors", async (req, res) => {
@@ -376,6 +377,112 @@ router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
   } catch (err) {
     console.error("POST /api/public/settings error:", err);
     return res.status(500).json({ error: "Failed to update settings" });
+  }
+});
+
+// POST /api/public/feedback
+router.post("/feedback", authenticate, async (req, res) => {
+  try {
+    const { email, message, type } = req.body;
+    if (!message || message.trim() === '') {
+      return res.status(400).json({ error: "Message is required." });
+    }
+    const feedbackType = type || 'general';
+    await pool.query(
+      `INSERT INTO feedbacks (user_id, email, type, message) VALUES ($1, $2, $3, $4)`,
+      [req.user.id, email || null, feedbackType, message]
+    );
+    return res.json({ success: true, message: "Feedback submitted successfully." });
+  } catch (err) {
+    console.error("POST /api/public/feedback error:", err);
+    return res.status(500).json({ error: "Failed to submit feedback." });
+  }
+});
+
+// POST /api/public/support
+router.post("/support", authenticate, async (req, res) => {
+  try {
+    const { email, issue, contact_method, contact_number, type } = req.body;
+    if (!issue || issue.trim() === '') {
+      return res.status(400).json({ error: "Issue description is required." });
+    }
+    if (!contact_method || !contact_number) {
+      return res.status(400).json({ error: "Contact method and number are required." });
+    }
+    
+    const requestType = type || 'general';
+    await pool.query(
+      `INSERT INTO support_requests (user_id, email, issue, contact_method, contact_number, type) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.user.id, email || null, issue, contact_method, contact_number, requestType]
+    );
+    return res.json({ success: true, message: "Support request submitted successfully." });
+  } catch (err) {
+    console.error("POST /api/public/support error:", err);
+    return res.status(500).json({ error: "Failed to submit support request." });
+  }
+});
+
+// POST /api/public/refund
+router.post("/refund", authenticate, async (req, res) => {
+  try {
+    const { email, order_id, user_name, type } = req.body;
+    if (!email || !order_id || !user_name) {
+      return res.status(400).json({ error: "Email, Order ID, and User Name are required." });
+    }
+    
+    const requestType = type || 'general';
+    await pool.query(
+      `INSERT INTO refund_requests (user_id, email, order_id, user_name, type) VALUES ($1, $2, $3, $4, $5)`,
+      [req.user.id, email, order_id, user_name, requestType]
+    );
+    return res.json({ success: true, message: "Refund request submitted successfully." });
+  } catch (err) {
+    console.error("POST /api/public/refund error:", err);
+    return res.status(500).json({ error: "Failed to submit refund request." });
+  }
+});
+
+// GET /api/public/refunds
+router.get("/refunds", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(
+      `SELECT * FROM refund_requests WHERE user_id = $1 ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    return res.json({ refunds: rows });
+  } catch (err) {
+    console.error("GET /api/public/refunds error:", err);
+    return res.status(500).json({ error: "Failed to fetch refund requests." });
+  }
+});
+
+// PATCH /api/public/refunds/:id/upi
+router.patch("/refunds/:id/upi", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { upi_id } = req.body;
+    if (!upi_id) {
+      return res.status(400).json({ error: "UPI ID is required." });
+    }
+
+    const check = await pool.query("SELECT * FROM refund_requests WHERE id = $1 AND user_id = $2", [id, req.user.id]);
+    if (!check.rows.length) {
+      return res.status(404).json({ error: "Refund request not found." });
+    }
+
+    if (check.rows[0].status !== "Approved") {
+      return res.status(400).json({ error: "Refund request must be approved to provide UPI ID." });
+    }
+
+    await pool.query(
+      "UPDATE refund_requests SET upi_id = $1, status = 'UPI Provided' WHERE id = $2",
+      [upi_id, id]
+    );
+
+    return res.json({ success: true, message: "UPI ID submitted successfully." });
+  } catch (err) {
+    console.error("PATCH /api/public/refunds/:id/upi error:", err);
+    return res.status(500).json({ error: "Failed to submit UPI ID." });
   }
 });
 

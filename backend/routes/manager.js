@@ -341,13 +341,13 @@ router.get("/feedbacks", authenticate, async (req, res) => {
     const mType = (req.user.manager_type || "").toLowerCase();
     let query, params;
     if (req.user.role === "admin") {
-      query = `SELECT f.*, u.first_name, u.last_name, u.email 
+      query = `SELECT f.*, u.first_name, u.last_name, COALESCE(f.email, u.email) as email 
                FROM feedbacks f 
                LEFT JOIN users u ON f.user_id = u.id 
                ORDER BY f.created_at DESC`;
       params = [];
     } else {
-      query = `SELECT f.*, u.first_name, u.last_name, u.email 
+      query = `SELECT f.*, u.first_name, u.last_name, COALESCE(f.email, u.email) as email 
                FROM feedbacks f 
                LEFT JOIN users u ON f.user_id = u.id 
                WHERE f.type = $1 OR f.type = 'general'
@@ -359,6 +359,163 @@ router.get("/feedbacks", authenticate, async (req, res) => {
   } catch (err) {
     console.error("list feedbacks error:", err);
     return res.status(500).json({ error: "Failed to fetch feedbacks." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// DELETE /api/managers/feedbacks/:id  — delete a feedback
+// ════════════════════════════════════════════════════════════════════
+router.delete("/feedbacks/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { id } = req.params;
+    
+    // Admin can delete any, manager can only delete if it belongs to their type or general
+    const mType = (req.user.manager_type || "").toLowerCase();
+    
+    if (req.user.role === "manager") {
+      const check = await pool.query("SELECT type FROM feedbacks WHERE id=$1", [id]);
+      if (!check.rows.length) return res.status(404).json({ error: "Feedback not found." });
+      
+      const fType = check.rows[0].type;
+      if (fType !== 'general' && fType !== mType) {
+        return res.status(403).json({ error: "Cannot delete feedback from another division." });
+      }
+    }
+
+    await pool.query("DELETE FROM feedbacks WHERE id=$1", [id]);
+    return res.json({ message: "Feedback deleted successfully." });
+  } catch (err) {
+    console.error("delete feedback error:", err);
+    return res.status(500).json({ error: "Failed to delete feedback." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/support-requests  — list support requests for manager's division
+// ════════════════════════════════════════════════════════════════════
+router.get("/support-requests", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const mType = (req.user.manager_type || "").toLowerCase();
+    let query, params;
+    if (req.user.role === "admin") {
+      query = `SELECT s.*, u.first_name, u.last_name, COALESCE(s.email, u.email) as user_email 
+               FROM support_requests s 
+               LEFT JOIN users u ON s.user_id = u.id 
+               ORDER BY s.created_at DESC`;
+      params = [];
+    } else {
+      query = `SELECT s.*, u.first_name, u.last_name, COALESCE(s.email, u.email) as user_email 
+               FROM support_requests s 
+               LEFT JOIN users u ON s.user_id = u.id 
+               WHERE s.type = $1 OR s.type = 'general'
+               ORDER BY s.created_at DESC`;
+      params = [mType];
+    }
+    const { rows } = await pool.query(query, params);
+    return res.json({ supportRequests: rows });
+  } catch (err) {
+    console.error("list support requests error:", err);
+    return res.status(500).json({ error: "Failed to fetch support requests." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// DELETE /api/managers/support-requests/:id  — delete a support request
+// ════════════════════════════════════════════════════════════════════
+router.delete("/support-requests/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { id } = req.params;
+    
+    const mType = (req.user.manager_type || "").toLowerCase();
+    
+    if (req.user.role === "manager") {
+      const check = await pool.query("SELECT type FROM support_requests WHERE id=$1", [id]);
+      if (!check.rows.length) return res.status(404).json({ error: "Support request not found." });
+      
+      const sType = check.rows[0].type;
+      if (sType !== 'general' && sType !== mType) {
+        return res.status(403).json({ error: "Cannot delete support request from another division." });
+      }
+    }
+
+    await pool.query("DELETE FROM support_requests WHERE id=$1", [id]);
+    return res.json({ message: "Support request deleted successfully." });
+  } catch (err) {
+    console.error("delete support request error:", err);
+    return res.status(500).json({ error: "Failed to delete support request." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/refund-requests  — list refund requests for manager's division
+// ════════════════════════════════════════════════════════════════════
+router.get("/refund-requests", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const mType = (req.user.manager_type || "").toLowerCase();
+    let query, params;
+    if (req.user.role === "admin") {
+      query = `SELECT * FROM refund_requests ORDER BY created_at DESC`;
+      params = [];
+    } else {
+      query = `SELECT * FROM refund_requests WHERE type = $1 OR type = 'general' ORDER BY created_at DESC`;
+      params = [mType];
+    }
+    const { rows } = await pool.query(query, params);
+    return res.json({ refundRequests: rows });
+  } catch (err) {
+    console.error("list refund requests error:", err);
+    return res.status(500).json({ error: "Failed to fetch refund requests." });
+  }
+});
+
+// ════════════════════════════════════════════════════════════════════
+// PATCH /api/managers/refund-requests/:id  — update refund request status
+// ════════════════════════════════════════════════════════════════════
+router.patch("/refund-requests/:id", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { id } = req.params;
+    const { status, rejection_reason } = req.body; // 'Approved', 'Rejected', or 'Completed'
+    
+    if (status !== 'Approved' && status !== 'Rejected' && status !== 'Completed') {
+      return res.status(400).json({ error: "Invalid status." });
+    }
+
+    const mType = (req.user.manager_type || "").toLowerCase();
+    
+    if (req.user.role === "manager") {
+      const check = await pool.query("SELECT type FROM refund_requests WHERE id=$1", [id]);
+      if (!check.rows.length) return res.status(404).json({ error: "Refund request not found." });
+      
+      const sType = check.rows[0].type;
+      if (sType !== 'general' && sType !== mType) {
+        return res.status(403).json({ error: "Cannot modify refund request from another division." });
+      }
+    }
+
+    if (status === 'Rejected' && rejection_reason) {
+      await pool.query("UPDATE refund_requests SET status = $1, rejection_reason = $2 WHERE id = $3", [status, rejection_reason, id]);
+    } else {
+      await pool.query("UPDATE refund_requests SET status = $1 WHERE id = $2", [status, id]);
+    }
+    return res.json({ message: `Refund request ${status} successfully.` });
+  } catch (err) {
+    console.error("update refund request error:", err);
+    return res.status(500).json({ error: "Failed to update refund request." });
   }
 });
 

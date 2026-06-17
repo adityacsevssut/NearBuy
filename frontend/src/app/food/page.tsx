@@ -208,12 +208,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
             className={`w-3.5 h-3.5 ${wishlist.some((w: any) => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
           />
         </button>
-        {/* Badge */}
-        {r.badge && (
-          <span className="absolute top-2 left-2 bg-orange-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase">
-            {r.badge}
-          </span>
-        )}
+        {/* Badge removed from Homepage as requested */}
         {/* Dim overlay */}
         {dim && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-t-2xl z-20 pointer-events-none">
@@ -357,12 +352,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         >
           <Send className="w-4 h-4 text-orange-500 fill-orange-500" />
         </button>
-        {/* Badge */}
-        {r.badge && (
-          <span className="absolute top-2.5 left-2.5 bg-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full uppercase shadow-sm">
-            {r.badge}
-          </span>
-        )}
+        {/* Badge removed from Homepage as requested */}
         {/* Veg dot */}
         {r.veg && (
           <span className="absolute bottom-2.5 left-2.5 w-4 h-4 rounded-sm border-2 border-green-600 bg-white dark:bg-[#0D0D17] flex items-center justify-center">

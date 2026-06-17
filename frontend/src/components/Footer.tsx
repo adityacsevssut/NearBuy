@@ -5,6 +5,9 @@ import { useState } from "react";
 import { ArrowRight, Zap, Heart } from "lucide-react";
 import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import BusinessRequestModal from "./BusinessRequestModal";
+import FeedbackModal from "./FeedbackModal";
+import SupportModal from "./SupportModal";
+import RefundModal from "./RefundModal";
 import { useAuth } from "@/context/AuthContext";
 
 export default function Footer() {
@@ -17,14 +20,18 @@ export default function Footer() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType] = useState<"student" | "vendor">("vendor");
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isRefundOpen, setIsRefundOpen] = useState(false);
 
   const links: Record<string, { name: string, href: string, onClick?: (e: any) => void }[]> = {
     NearBuy: [
       { name: "Home", href: "/" },
       { name: "About Us", href: "/about" },
-      { name: "Careers", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "Contact", href: "#" },
+      { name: "Need Support", href: "#", onClick: (e: any) => { e.preventDefault(); setIsSupportOpen(true); } },
+      { name: "Request Refund", href: "#", onClick: (e: any) => { e.preventDefault(); setIsRefundOpen(true); } },
+      { name: "My Refunds", href: isStore ? "/refunds?theme=blue" : "/refunds" },
+      { name: "Feedback", href: "#", onClick: (e: any) => { e.preventDefault(); setIsFeedbackOpen(true); } },
     ],
     "Important Links": [
       { name: isStore ? "Store Cart" : "Food Cart", href: isStore ? "/store/cart" : "/food/cart" },
@@ -133,6 +140,21 @@ export default function Footer() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         defaultType={modalType}
+      />
+      <FeedbackModal
+        isOpen={isFeedbackOpen}
+        onClose={() => setIsFeedbackOpen(false)}
+        type={isStore ? "store" : "food"}
+      />
+      <SupportModal
+        isOpen={isSupportOpen}
+        onClose={() => setIsSupportOpen(false)}
+        type={isStore ? "store" : "food"}
+      />
+      <RefundModal
+        isOpen={isRefundOpen}
+        onClose={() => setIsRefundOpen(false)}
+        type={isStore ? "store" : "food"}
       />
     </>
   );

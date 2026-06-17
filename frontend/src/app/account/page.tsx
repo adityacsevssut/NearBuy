@@ -11,7 +11,7 @@ import {
   ArrowLeft, CreditCard, Bell, Heart, ShoppingBag, ShoppingCart, Utensils,
   MapPin, Calendar, Clock, Mail, MessageCircle, Phone,
   QrCode, Globe, Percent, Star, Users, Trash2, LogOut, Pencil, User as UserIcon,
-  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus, X, Check, Moon
+  ChevronRight, AlertTriangle, Code2, ChevronDown, Navigation, Plus, X, Check, Moon, Receipt
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import toast from "react-hot-toast";
@@ -589,9 +589,10 @@ function AccountContent() {
         </div>
 
         {/* Section: Help Center */}
-        <div className="space-y-3">
+        <div className="space-y-3 mt-6">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Help Center</h3>
-          <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
+          <div className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
+            <ModernRow icon={Receipt} label="My Refunds" onClick={() => router.push(`/refunds?theme=${themeParam}`)} theme={theme} />
             <ModernRow icon={Globe} label="Contact Us here" onClick={() => window.open(instagramLink, '_blank')} theme={theme} />
             <ModernRow icon={Mail} label="Need Help ? Facing Issues ?" onClick={() => window.location.href = `mailto:${supportEmail}?subject=Facing%20Issue`} theme={theme} />
           </div>

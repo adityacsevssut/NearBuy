@@ -150,16 +150,15 @@ function RestaurantOrderCard({
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -10 }}
-      className="bg-white dark:bg-[#151522] dark:bg-[#151522] rounded-3xl overflow-hidden shadow-xl shadow-orange-500/5 border border-orange-100/50"
+      className="bg-white dark:bg-[#0D0D17] rounded-3xl overflow-hidden shadow-xl shadow-orange-500/5 border border-orange-100/50 dark:border-white/20"
     >
       {/* ── Restaurant header ── */}
       <div className="flex items-center gap-4 px-5 py-4 border-b border-orange-100/50 bg-gradient-to-r from-orange-50/50 dark:from-[#1F1F2E] to-transparent dark:to-transparent">
         <div className="w-1 h-5 rounded-full bg-orange-500 shrink-0" />
-        <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-[#151522] flex items-center justify-center shrink-0">
+        <div className="w-8 h-8 rounded-xl bg-orange-50 dark:bg-[#0D0D17] flex items-center justify-center shrink-0">
           <Utensils className="w-4 h-4 text-orange-500" />
         </div>
         <div className="flex-1 min-w-0">
@@ -186,7 +185,7 @@ function RestaurantOrderCard({
               initial={{ opacity: 1 }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.15 }}
-              className="flex items-center gap-4 px-5 py-4 hover:bg-orange-50/30 dark:hover:bg-[#151522] transition-colors"
+              className="flex items-center gap-4 px-5 py-4 hover:bg-orange-50/30 dark:hover:bg-[#0D0D17] transition-colors"
             >
               {/* Thumbnail */}
               <div className="w-16 h-16 rounded-xl bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] overflow-hidden shrink-0 relative">
@@ -194,7 +193,7 @@ function RestaurantOrderCard({
                 <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 <div className="absolute top-1 left-1">
                   <div
-                    className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#151522] dark:bg-[#151522] flex items-center justify-center ${item.type === "veg" ? "border-green-600" : "border-red-600"
+                    className={`w-3 h-3 rounded-sm border bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] flex items-center justify-center ${item.type === "veg" ? "border-green-600" : "border-red-600"
                       }`}
                   >
                     <div
@@ -249,7 +248,7 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Subtotal row ── */}
-      <div className="flex items-center justify-between px-5 py-3.5 bg-orange-50/30 dark:bg-[#151522] border-t border-orange-100/50">
+      <div className="flex items-center justify-between px-5 py-3.5 bg-orange-50/30 dark:bg-[#0D0D17] border-t border-orange-100/50">
         <span className="text-sm text-gray-600 dark:text-gray-400 font-semibold">Items subtotal</span>
         <span className="text-sm font-black text-gray-900 dark:text-gray-100">₹{subtotal}</span>
       </div>
@@ -294,7 +293,7 @@ function RestaurantOrderCard({
       <div className="border-t border-orange-100/50">
         <button
           onClick={() => setShowBill(!showBill)}
-          className="w-full flex items-center justify-between px-5 py-4 text-sm font-black text-gray-900 dark:text-gray-100 hover:bg-orange-50/30 dark:hover:bg-[#151522] transition-colors"
+          className="w-full flex items-center justify-between px-5 py-4 text-sm font-black text-gray-900 dark:text-gray-100 hover:bg-orange-50/30 dark:hover:bg-[#0D0D17] transition-colors"
         >
           <span className="flex items-center gap-2">
             Bill Details
@@ -340,10 +339,10 @@ function RestaurantOrderCard({
       {/* ── Delivery Address ── */}
       <div
         onClick={() => setIsLocationModalOpen(true)}
-        className="px-5 py-4 border-t border-orange-100/50 cursor-pointer hover:bg-orange-50/30 dark:hover:bg-[#151522] transition-colors"
+        className="px-5 py-4 border-t border-orange-100/50 cursor-pointer hover:bg-orange-50/30 dark:hover:bg-[#0D0D17] transition-colors"
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-orange-50 dark:bg-[#151522] flex items-center justify-center shrink-0">
+          <div className="w-9 h-9 rounded-full bg-orange-50 dark:bg-[#0D0D17] flex items-center justify-center shrink-0">
             <MapPin className="w-4 h-4 text-orange-500" />
           </div>
           <div className="flex-1 min-w-0">
@@ -357,7 +356,7 @@ function RestaurantOrderCard({
       </div>
 
       {/* ── Contact & Instructions ── */}
-      <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50/50 dark:bg-[#151522]/50">
+      <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50/50 dark:bg-[#0D0D17]/50">
         <h3 className="font-black text-gray-900 dark:text-gray-100 mb-4 text-[15px]">Contact & Instructions</h3>
         <div className="space-y-4">
           <div>
@@ -370,7 +369,7 @@ function RestaurantOrderCard({
               placeholder="Enter 10-digit mobile number"
               value={customerMobile}
               onChange={(e) => setCustomerMobile(e.target.value.replace(/\D/g, ''))}
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] focus:outline-none transition-all ${customerMobile && !isMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
                 }`}
             />
             {customerMobile && !isMobileValid && (
@@ -388,7 +387,7 @@ function RestaurantOrderCard({
               placeholder="Enter alternate 10-digit number"
               value={alternateMobile}
               onChange={(e) => setAlternateMobile(e.target.value.replace(/\D/g, ''))}
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:outline-none transition-all ${alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
+              className={`w-full px-4 py-2.5 rounded-xl border text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] focus:outline-none transition-all ${alternateMobile && !isAltMobileValid ? 'border-red-300 focus:border-red-500 focus:ring-2 focus:ring-red-100' : 'border-gray-200 dark:border-[#2A2A3A] focus:border-orange-400 focus:ring-2 focus:ring-orange-100'
                 }`}
             />
             {alternateMobile && !isAltMobileValid && (
@@ -405,7 +404,7 @@ function RestaurantOrderCard({
               placeholder="e.g. Make it spicy, no onions, etc."
               value={cookingInstructions}
               onChange={(e) => setCookingInstructions(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#151522] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all custom-scrollbar resize-none"
+              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] text-sm font-semibold text-gray-900 dark:text-gray-100 bg-white dark:bg-[#0D0D17] focus:border-orange-400 focus:ring-2 focus:ring-orange-100 focus:outline-none transition-all custom-scrollbar resize-none"
             />
           </div>
         </div>
@@ -455,7 +454,7 @@ function RestaurantOrderCard({
 
       {/* ── Taxes & Platform Fee (Separate Section) ── */}
       {(totalFees > 0 || paymentMethod !== 'cod') && (
-        <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50 dark:bg-[#151522] dark:bg-[#151522]/50">
+        <div className="px-5 py-4 border-t border-orange-100/50 bg-gray-50 dark:bg-[#0D0D17] dark:bg-[#0D0D17]/50">
           <p className="text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
             {paymentMethod === 'cod' ? "Taxes & Platform Fees" : "Final Breakdown"}
           </p>
@@ -592,7 +591,7 @@ function RestaurantOrderCard({
       )}
 
       {/* ── Place Order button for THIS restaurant ── */}
-      <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30 dark:from-[#151522] dark:to-[#151522]">
+      <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30 dark:from-[#0D0D17] dark:to-[#0D0D17]">
         {outOfRange ? (
           <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2.5">
             <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
@@ -625,7 +624,7 @@ function RestaurantOrderCard({
               : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
             }`}
         >
-          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#151522] dark:bg-[#151522]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
+          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
           <CreditCard className="w-4 h-4" />
           {outOfRange
             ? "Out of Delivery Range"
@@ -745,15 +744,15 @@ export default function CartPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#151522] flex flex-col pt-16 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       <Navbar />
 
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#151522] dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-16 z-20">
+      <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-16 z-20">
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           {/* Back button */}
-          <Link href="/" className="flex items-center gap-1.5 px-3 py-2 -ml-2 rounded-xl bg-white dark:bg-[#151522] dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:bg-[#151522] dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 font-bold text-sm transition-all active:scale-95 shadow-sm">
+          <Link href="/" className="flex items-center gap-1.5 px-3 py-2 -ml-2 rounded-xl bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#0D0D17] text-gray-700 dark:text-gray-300 font-bold text-sm transition-all active:scale-95 shadow-sm">
             <ChevronLeft className="w-4 h-4" />
             Back to Home
           </Link>
@@ -762,7 +761,7 @@ export default function CartPage() {
           {foodItems.length > 0 && (
             <button
               onClick={clearCart}
-              className="flex items-center gap-1.5 px-3 py-1.5 -mr-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 text-xs font-black transition-all active:scale-[0.97]"
+              className="flex items-center gap-1.5 px-3 py-1.5 m-[10px] rounded-lg bg-red-50 text-red-500 hover:bg-red-100 text-xs font-black transition-all active:scale-[0.97]"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Clear All
@@ -780,7 +779,7 @@ export default function CartPage() {
             animate={{ opacity: 1, y: 0 }}
             className="flex flex-col items-center justify-center py-32 text-center"
           >
-            <div className="w-24 h-24 bg-orange-50 dark:bg-[#151522] rounded-full flex items-center justify-center mb-5">
+            <div className="w-24 h-24 bg-orange-50 dark:bg-[#0D0D17] rounded-full flex items-center justify-center mb-5">
               <ShoppingBag className="w-12 h-12 text-orange-300" />
             </div>
             <h2 className="font-black text-xl text-gray-800 dark:text-gray-200 mb-1">Your cart is empty</h2>
@@ -799,7 +798,7 @@ export default function CartPage() {
             {/* Notice about independent delivery */}
 
             {/* Notice about independent delivery */}
-            <div className="flex items-start gap-2.5 bg-orange-50 dark:bg-[#151522] border border-orange-100 dark:border-orange-500/20 rounded-xl px-4 py-3">
+            <div className="flex items-start gap-2.5 bg-orange-50 dark:bg-[#0D0D17] border border-orange-100 dark:border-orange-500/20 rounded-xl px-4 py-3">
               <Store className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
               <p className="text-xs text-orange-700 dark:text-orange-400 font-medium leading-relaxed">
                 Each restaurant handles its own delivery. Place separate orders below for each restaurant.
