@@ -60,6 +60,12 @@ export default function VendorPage() {
     fetchVendor();
   }, [vendorId]);
 
+  useEffect(() => {
+    if (vendor) {
+      document.title = `Items-${vendor.name}`;
+    }
+  }, [vendor]);
+
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "non-veg" | "available-veg" | "available-non-veg">("all");
   const [sortOrder, setSortOrder] = useState<"relevance" | "low-to-high" | "high-to-low">("relevance");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);

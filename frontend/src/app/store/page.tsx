@@ -97,6 +97,11 @@ import { useRouter } from "next/navigation";
 
 export default function EssentialsPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Home Shop Essential";
+  }, []);
+
   const [activeCats, setActiveCats] = useState<string[]>([]);
   const [activeSubCats, setActiveSubCats] = useState<string[]>([]);
   const [activeSort, setActiveSort] = useState("Relevance");
@@ -110,6 +115,11 @@ export default function EssentialsPage() {
   const [posterUrl, setPosterUrl] = useState<string | null>(null);
   const [posterLoading, setPosterLoading] = useState(true);
   const [previewProduct, setPreviewProduct] = useState<any>(null);
+  const [previewQuantity, setPreviewQuantity] = useState(1);
+
+  useEffect(() => {
+    if (previewProduct) setPreviewQuantity(1);
+  }, [previewProduct]);
 
   useEffect(() => {
     async function fetchPoster() {
@@ -225,11 +235,10 @@ export default function EssentialsPage() {
               <div className="relative shrink-0 md:hidden">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
-                    showFilters || activeCats.length > 0 || priceRange
-                      ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
-                      : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-blue-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:text-blue-600"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || activeCats.length > 0 || priceRange
+                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
+                    : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-blue-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:text-blue-600"
+                    }`}
                 >
                   <SlidersHorizontal className="w-4 h-4" />
                   <span className="hidden sm:inline">Filter</span>
@@ -344,11 +353,10 @@ export default function EssentialsPage() {
                                 setActiveCats(prev => [...prev, cat.id]);
                               }
                             }}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                              isActive
-                                ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
-                                : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
-                            }`}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${isActive
+                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
+                              }`}
                           >
                             <span>{cat.label}</span>
                             <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
@@ -363,22 +371,20 @@ export default function EssentialsPage() {
                                   <button
                                     key={sub.id}
                                     onClick={() => {
-                                      setActiveSubCats(prev => 
+                                      setActiveSubCats(prev =>
                                         prev.includes(sub.id) ? prev.filter(id => id !== sub.id) : [...prev, sub.id]
                                       );
                                     }}
-                                    className={`w-full text-left px-3 py-2 rounded-lg text-[12px] font-semibold transition-all ${
-                                      isSubActive 
-                                        ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" 
-                                        : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1F1F2E]"
-                                    }`}
+                                    className={`w-full text-left px-3 py-2 rounded-lg text-[12px] font-semibold transition-all ${isSubActive
+                                      ? "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                      : "text-gray-500 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-[#1F1F2E]"
+                                      }`}
                                   >
                                     <div className="flex items-center gap-2">
-                                      <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-colors ${
-                                        isSubActive 
-                                          ? "bg-blue-600 border-blue-600 text-white" 
-                                          : "bg-transparent border-gray-300 dark:border-gray-600"
-                                      }`}>
+                                      <div className={`w-3.5 h-3.5 rounded-sm border flex items-center justify-center transition-colors ${isSubActive
+                                        ? "bg-blue-600 border-blue-600 text-white"
+                                        : "bg-transparent border-gray-300 dark:border-gray-600"
+                                        }`}>
                                         {isSubActive && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
                                       </div>
                                       {sub.label}
@@ -404,11 +410,10 @@ export default function EssentialsPage() {
                         <button
                           key={r.label}
                           onClick={() => setPriceRange(isActive ? null : r.label)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                            isActive
-                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
-                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
-                          }`}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${isActive
+                            ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                            : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
+                            }`}
                         >
                           <span>{r.label}</span>
                           <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
@@ -430,11 +435,10 @@ export default function EssentialsPage() {
                         <button
                           key={s}
                           onClick={() => setActiveSort(s)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                            isActive
-                              ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
-                              : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
-                          }`}
+                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all border ${isActive
+                            ? "bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800/30 shadow-sm"
+                            : "bg-white text-gray-600 border-gray-200 dark:bg-[#151522] dark:text-gray-400 dark:border-[#2A2A3A] hover:border-blue-300"
+                            }`}
                         >
                           <span>{s}</span>
                           <div className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out px-[2px] ${isActive ? "bg-blue-600" : "bg-gray-200 dark:bg-[#2A2A3A]"}`}>
@@ -452,7 +456,7 @@ export default function EssentialsPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between mb-4 md:mb-6 px-1.5 md:px-2">
                 <h1 className="font-black text-xl md:text-2xl text-blue-600 tracking-tight">All Products</h1>
-                
+
                 {/* Desktop right side */}
                 <div className="hidden md:flex items-center gap-4">
                   <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
@@ -473,11 +477,10 @@ export default function EssentialsPage() {
                   <p className="text-xs font-medium text-gray-500 mr-1">{filtered.length} items</p>
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${
-                      showFilters || activeCats.length > 0 || priceRange
-                        ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
-                        : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
-                    }`}
+                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${showFilters || activeCats.length > 0 || priceRange
+                      ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
+                      : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
+                      }`}
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
                     <span>Filter</span>
@@ -498,86 +501,81 @@ export default function EssentialsPage() {
                     <div
                       key={p.id}
                       onClick={() => setPreviewProduct(p)}
-                      className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden
-                        shadow-sm hover:shadow-lg hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300 flex flex-col relative cursor-pointer"
+                      className="group bg-white dark:bg-[#0D0D17] rounded-xl border border-gray-100 dark:border-[#2A2A3A] overflow-hidden
+                        shadow-sm hover:shadow-md transition-all duration-300 flex flex-col relative cursor-pointer"
                     >
                       {/* Image area */}
-                      <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-[#1F1F2E] dark:to-[#151522] flex items-center
-                        justify-center h-32 md:h-40 text-5xl md:text-6xl border-b border-gray-100 dark:border-[#2A2A3A] overflow-hidden">
-                        <div className="group-hover:scale-110 transition-transform duration-500 w-full h-full flex items-center justify-center">
+                      <div className="relative bg-gradient-to-br from-gray-50 to-gray-100 dark:from-[#1F1F2E] dark:to-[#151522] w-full aspect-[4/5] flex items-center justify-center text-5xl md:text-6xl overflow-hidden">
+                        <div className="w-full h-full flex items-center justify-center">
                           {(p as any).img ? (
-                            <Image src={(p as any).img} alt={p.name} fill className="object-cover" />
+                            <Image src={(p as any).img} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                           ) : (
-                            p.emoji
+                            <span className="group-hover:scale-110 transition-transform duration-500">{p.emoji}</span>
                           )}
                         </div>
-                        {!p.inStock && (
-                          <div className="absolute inset-0 bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-[2px] flex items-center justify-center z-20">
-                            <span className="text-xs font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest px-3 py-1 bg-white dark:bg-[#0D0D17] rounded-full shadow-sm">Out of Stock</span>
+
+                        {/* Optional Badge on top right */}
+                        {p.badge && (
+                          <div className="absolute top-2 right-2 bg-white/90 dark:bg-[#0D0D17]/90 backdrop-blur-sm px-1.5 py-0.5 rounded text-[9px] font-bold text-gray-700 dark:text-gray-300 uppercase shadow-sm border border-gray-100 dark:border-[#2A2A3A]">
+                            {p.badge}
                           </div>
                         )}
-                        {/* Wishlist */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isLoggedIn) return openLoginModal();
-                            setWishlist(w => w.includes(p.id) ? w.filter(i => i !== p.id) : [...w, p.id]);
-                          }}
-                          className="absolute top-3 right-3 p-2 rounded-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A]
-                            shadow-sm hover:scale-110 transition-transform z-10"
-                        >
-                          <Heart className={`w-4 h-4 ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400"}`} />
-                        </button>
-                        {/* Express badge removed */}
+
+                        {!p.inStock && (
+                          <div className="absolute inset-0 bg-white/60 dark:bg-[#0D0D17]/60 backdrop-blur-[2px] flex items-center justify-center z-20">
+                            <span className="text-[11px] font-black text-gray-700 dark:text-gray-300 uppercase tracking-widest px-3 py-1 bg-white/90 dark:bg-[#0D0D17]/90 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]">Out of Stock</span>
+                          </div>
+                        )}
+
+                        {/* Rating overlay (bottom left on image) */}
+                        <div className="absolute bottom-2 left-2 bg-white/90 dark:bg-[#151522]/90 backdrop-blur-sm px-1.5 py-0.5 rounded-sm flex items-center gap-1 z-10 shadow-sm">
+                          <span className="text-[10px] font-bold text-gray-900 dark:text-gray-100">{p.rating}</span>
+                          <Star className="w-2.5 h-2.5 fill-blue-600 text-blue-600" />
+                          <span className="text-[9px] text-gray-500 dark:text-gray-400 font-medium pl-1 border-l border-gray-300 dark:border-gray-600">
+                            {(p.reviews >= 1000 ? (p.reviews / 1000).toFixed(1) + 'k' : p.reviews)}
+                          </span>
+                        </div>
                       </div>
 
-                      <div className="p-3 flex flex-col justify-between flex-1 bg-white dark:bg-[#0D0D17]">
-                        <div>
-                          {p.badge && (
-                            <span className="text-[9px] font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-1.5 py-0.5 rounded w-fit mb-1 block shadow-sm">
-                              {p.badge}
-                            </span>
-                          )}
-
-                          <p className="text-[12px] font-bold text-gray-800 dark:text-gray-200 leading-snug mb-1 line-clamp-2">
-                            {p.name}
-                          </p>
-
-                          <div className="flex items-center gap-1 mb-2">
-                            <span className="inline-flex items-center gap-0.5 bg-blue-600 text-white
-                              text-[10px] font-bold px-1.5 py-0.5 rounded shadow-sm">
-                              <Star className="w-2.5 h-2.5 fill-white" />
-                              {p.rating}
-                            </span>
-                            <span className="text-[10px] text-gray-400 font-medium">({p.reviews})</span>
+                      <div className="p-3 flex flex-col flex-1 bg-white dark:bg-[#0D0D17]">
+                        {/* Title and Wishlist Row */}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <h3 className="text-[13px] font-black text-gray-900 dark:text-gray-100 leading-tight truncate">
+                              {p.name.split(' ')[0]} {/* Brand/First Word */}
+                            </h3>
+                            <p className="text-[11px] text-gray-500 dark:text-gray-400 line-clamp-1 mt-0.5 font-medium">
+                              {p.name.split(' ').slice(1).join(' ') || p.name}
+                            </p>
                           </div>
-
-                          <div className="flex items-baseline gap-1.5 mb-2.5">
-                            <span className="text-[15px] font-black text-gray-900 dark:text-gray-100 tracking-tight">₹{p.price}</span>
-                            <span className="text-[10px] text-gray-400 line-through font-medium">₹{p.mrp}</span>
-                            <span className="text-[9px] font-bold text-blue-600 dark:text-blue-400 flex items-center gap-0.5 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded shadow-sm">
-                              <BadgePercent className="w-2.5 h-2.5" />{disc}% off
-                            </span>
-                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isLoggedIn) return openLoginModal();
+                              setWishlist(w => w.includes(p.id) ? w.filter(i => i !== p.id) : [...w, p.id]);
+                            }}
+                            className="p-1 -mr-1 -mt-1 rounded-full hover:bg-gray-50 dark:hover:bg-[#1F1F2E] transition-colors shrink-0"
+                          >
+                            <Heart className={`w-4 h-4 transition-colors ${wished ? "fill-rose-500 text-rose-500" : "text-gray-400 dark:text-gray-500"}`} />
+                          </button>
                         </div>
 
-                        <button
-                          disabled={!p.inStock}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (!isLoggedIn) return openLoginModal();
-                            setCart(c => c.includes(p.id) ? c.filter(i => i !== p.id) : [...c, p.id]);
-                          }}
-                          className={`w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-[12px] font-bold transition-all duration-300 mt-auto group active:scale-[0.97] ${!p.inStock
-                            ? "bg-gray-50 dark:bg-[#1F1F2E] text-gray-400 cursor-not-allowed border border-gray-100 dark:border-[#2A2A3A]"
-                            : inCart
-                              ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/25 border border-emerald-500"
-                              : "bg-white dark:bg-[#0D0D17] text-blue-600 border border-blue-200 dark:border-[#2A2A3A] hover:bg-blue-600 hover:border-blue-600 hover:text-white shadow-sm hover:shadow-lg hover:shadow-blue-500/25"
-                            }`}
-                        >
-                          <ShoppingCart className={`w-4 h-4 transition-transform duration-300 ${!p.inStock ? "" : inCart ? "scale-110" : "group-hover:-rotate-12 group-hover:scale-110"}`} />
-                          {!p.inStock ? "Out of Stock" : inCart ? "Added ✓" : "Add to Cart"}
-                        </button>
+                        {/* Prices */}
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 tracking-tight">₹{p.price}</span>
+                          <span className="text-[11px] text-gray-400 line-through font-medium">₹{p.mrp}</span>
+                          <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                            {disc}% OFF
+                          </span>
+                        </div>
+
+                        {/* Best Price Offer */}
+                        <p className="text-[10px] font-semibold mt-1">
+                          <span className="text-blue-600 dark:text-blue-400">Get At </span>
+                          <span className="text-gray-900 dark:text-gray-100 font-bold">₹{Math.floor(p.price * 0.85)}</span>
+                          <span className="text-gray-500 dark:text-gray-400"> with coupon</span>
+                        </p>
+
                       </div>
                     </div>
                   );
@@ -642,9 +640,33 @@ export default function EssentialsPage() {
                 </p>
               </div>
 
-              <div className="flex items-end gap-3 mt-2">
-                <span className="text-2xl font-black text-gray-900 dark:text-gray-100">₹{previewProduct.price}</span>
-                <span className="text-sm text-gray-400 line-through font-medium mb-1">₹{previewProduct.mrp}</span>
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-gray-900 dark:text-gray-100">₹{previewProduct.price * previewQuantity}</span>
+                    <span className="text-sm text-gray-400 line-through font-medium mb-1">₹{previewProduct.mrp * previewQuantity}</span>
+                  </div>
+                  {previewQuantity > 1 && (
+                    <span className="text-[11px] text-gray-500 font-medium -mt-1">₹{previewProduct.price} / item</span>
+                  )}
+                </div>
+
+                {/* Quantity Selector */}
+                <div className="flex items-center gap-1.5 bg-gray-50 dark:bg-[#1F1F2E] rounded-xl p-1 border border-gray-100 dark:border-[#2A2A3A]">
+                  <button
+                    onClick={() => setPreviewQuantity(Math.max(1, previewQuantity - 1))}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-[#2A2A3A] hover:shadow-sm transition-all"
+                  >
+                    -
+                  </button>
+                  <span className="font-black text-[15px] text-gray-900 dark:text-gray-100 w-6 text-center select-none">{previewQuantity}</span>
+                  <button
+                    onClick={() => setPreviewQuantity(previewQuantity + 1)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-gray-600 dark:text-gray-400 hover:bg-white dark:hover:bg-[#2A2A3A] hover:shadow-sm transition-all"
+                  >
+                    +
+                  </button>
+                </div>
               </div>
 
               {/* Action Buttons */}
@@ -661,16 +683,22 @@ export default function EssentialsPage() {
                     if (!isLoggedIn) return openLoginModal();
                     setCart(c => c.includes(previewProduct.id) ? c.filter(i => i !== previewProduct.id) : [...c, previewProduct.id]);
                   }}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all duration-300 group active:scale-[0.97] ${
-                    !previewProduct.inStock
-                      ? "bg-gray-50 dark:bg-[#1F1F2E] text-gray-400 cursor-not-allowed border border-gray-200 dark:border-[#2A2A3A]"
-                      : cart.includes(previewProduct.id)
-                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 border border-emerald-500"
-                        : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl hover:shadow-blue-600/30 border border-blue-600"
-                  }`}
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all duration-300 group active:scale-[0.97] ${!previewProduct.inStock
+                    ? "bg-gray-50 dark:bg-[#1F1F2E] text-gray-400 cursor-not-allowed border border-gray-200 dark:border-[#2A2A3A]"
+                    : cart.includes(previewProduct.id)
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25 border border-emerald-500"
+                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg hover:shadow-xl hover:shadow-blue-600/30 border border-blue-600"
+                    }`}
                 >
-                  <ShoppingCart className={`w-4 h-4 transition-transform duration-300 ${!previewProduct.inStock ? "" : cart.includes(previewProduct.id) ? "scale-110" : "group-hover:-rotate-12 group-hover:scale-110"}`} />
-                  {!previewProduct.inStock ? "Out of Stock" : cart.includes(previewProduct.id) ? "Added ✓" : "Add to Cart"}
+                  <ShoppingCart className={`w-4 h-4 shrink-0 transition-transform duration-300 ${!previewProduct.inStock ? "" : cart.includes(previewProduct.id) ? "scale-110" : "group-hover:-rotate-12 group-hover:scale-110"}`} />
+                  <span className="whitespace-nowrap">
+                    {!previewProduct.inStock
+                      ? "Out of Stock"
+                      : cart.includes(previewProduct.id)
+                        ? "Added ✓"
+                        : "Add to Cart"
+                    }
+                  </span>
                 </button>
               </div>
             </div>

@@ -412,6 +412,10 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
 /* ─── Main Page ────────────────────────────────────────────────────────────── */
 export default function HomePage() {
+  useEffect(() => {
+    document.title = "Home Food Essential";
+  }, []);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [foodPref, setFoodPref] = useState<
     "all" | "veg" | "non-veg" | "avail-all" | "avail-veg" | "avail-non-veg"

@@ -636,6 +636,7 @@ export default function CartPage() {
 
   useEffect(() => {
     setMounted(true);
+    document.title = "Shop cart";
   }, []);
 
   useEffect(() => {
