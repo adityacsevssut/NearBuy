@@ -38,7 +38,7 @@ export default function RefundModal({ isOpen, onClose, type }: RefundModalProps)
   // When modal opens, auto-fill email and name if user exists
   useState(() => {
     if (user?.email) setEmail(user.email);
-    if (user?.first_name) setUserName(`${user.first_name} ${user.last_name || ""}`.trim());
+    if (user?.firstName) setUserName(`${user.firstName} ${user.lastName || ""}`.trim());
   });
 
   const validateEmail = (e: string) => {
@@ -98,7 +98,7 @@ export default function RefundModal({ isOpen, onClose, type }: RefundModalProps)
       setSuccess(false);
       setOrderId("");
       setEmail(user?.email || "");
-      setUserName(user ? `${user.first_name} ${user.last_name || ""}`.trim() : "");
+      setUserName(user ? `${user.firstName} ${user.lastName || ""}`.trim() : "");
       setEmailError("");
     }, 300);
   };
