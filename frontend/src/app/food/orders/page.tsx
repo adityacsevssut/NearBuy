@@ -67,6 +67,7 @@ function OrdersPageContent() {
 
   useEffect(() => {
     setMounted(true);
+    document.title = isHistory ? "Recently Ordered" : "Your Orders";
     const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
     fetch(`${API}/api/public/settings`)
       .then((res) => res.json())

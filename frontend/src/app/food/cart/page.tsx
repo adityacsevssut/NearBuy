@@ -623,6 +623,7 @@ export default function CartPage() {
 
   useEffect(() => {
     setMounted(true);
+    document.title = "Food cart";
   }, []);
 
   useEffect(() => {
