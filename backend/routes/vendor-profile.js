@@ -116,7 +116,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       const fileName = `vendor_${req.user.id}_${Date.now()}.${fileExt}`;
 
       // Upload to 'vendor-images' bucket
-      const { data, error } = await supabase.storage
+      const { error } = await supabase.storage
         .from("vendor-images")
         .upload(fileName, req.file.buffer, {
           contentType: req.file.mimetype,

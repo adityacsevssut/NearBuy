@@ -7,7 +7,7 @@ const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
 
 // Generalized helper to auto-generate refund request and optionally trigger Razorpay auto-refund
-async function handleAutomatedRefundRequest(pool, order, reqUserId) {
+async function handleAutomatedRefundRequest(pool, order) {
   const isOwedRefund = order.advance_paid || order.payment_status === 'paid';
   if (!isOwedRefund) return;
 
@@ -537,7 +537,7 @@ router.patch("/:id/cancel", authenticate, async (req, res) => {
     
 
     // Generate refund request & auto-refund
-    await handleAutomatedRefundRequest(pool, { ...checkResult.rows[0], id: req.params.id }, req.user.id);
+    await handleAutomatedRefundRequest(pool, { ...checkResult.rows[0], id: req.params.id });
     
     // Notify vendor
     sendNotification(

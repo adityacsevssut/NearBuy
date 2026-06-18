@@ -12,7 +12,7 @@ function authenticate(req, res, next) {
     const token = auth.slice(7);
     req.user = verifyAccessToken(token);
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: "Invalid or expired access token" });
   }
 }

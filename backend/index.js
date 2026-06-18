@@ -82,6 +82,7 @@ app.use("/api/notifications", require("./routes/notifications"));
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));
 
 // ── Global Error Handler ──────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(500).json({ error: "Internal server error" });

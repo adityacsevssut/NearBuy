@@ -3,7 +3,6 @@ const router = express.Router();
 const pool = require("../config/db");
 const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
-const cache = require("../middleware/cache");
 const { authenticate } = require("../middleware/auth");
 
 // GET /api/public/vendors

@@ -12,7 +12,6 @@ const {
 
 const pool = require("../config/db");
 const { sendOtpEmail } = require("../config/mailer");
-const { sendOtpSms } = require("../config/sms");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const { authenticate } = require("../middleware/auth");
 
@@ -562,6 +561,7 @@ router.post("/refresh", async (req, res) => {
 
     return res.json({ accessToken: newAccessToken });
   } catch (err) {
+    console.error("Token refresh error:", err);
     return res.status(401).json({ error: "Token refresh failed." });
   }
 });
