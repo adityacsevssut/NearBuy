@@ -472,7 +472,7 @@ export default function OrderStatusPage() {
   const rawStepIndex = STATUS_STEPS.indexOf(order.status.toLowerCase());
   const isCancelled = order.status.toLowerCase() === "cancelled";
   
-  const isAwaitingAdvance = order.payment_method === 'online_on_delivery' && rawStepIndex >= 1 && !order.advance_paid;
+  const isAwaitingAdvance = order.payment_method === 'online_on_delivery' && parseFloat(order.advance_fee || "0") > 0 && !order.advance_paid;
   const currentStepIndex = isAwaitingAdvance ? 0 : rawStepIndex;
 
   const showPayNow = 
