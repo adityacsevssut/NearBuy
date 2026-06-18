@@ -178,13 +178,21 @@ export default function RefundsPage() {
                 <h4 className="font-bold text-gray-900 dark:text-gray-100 mb-1">{req.user_name}</h4>
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{req.email}</p>
                 
-                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-[#2A2A3A] flex justify-between items-end mb-4">
+                <div className="mt-auto pt-4 border-t border-gray-100 dark:border-[#2A2A3A] flex justify-between items-end mb-2">
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Order ID</p>
                     <p className="text-sm font-mono font-bold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-[#0D0D17] px-2 py-1 rounded">
                       {req.order_id}
                     </p>
                   </div>
+                  <div className="text-right">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Amount</p>
+                    <p className="text-lg font-black text-gray-900 dark:text-gray-100">
+                      ₹{Number(req.amount || 0).toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex justify-end mb-4">
                   <p className="text-[10px] font-bold text-gray-400">
                     {new Date(req.created_at).toLocaleDateString()}
                   </p>
@@ -223,7 +231,7 @@ export default function RefundsPage() {
                 {req.status === 'Completed' && (
                   <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-500/10 dark:to-emerald-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl text-center">
                     <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mb-1" />
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Refund Process Successfully progressed and Done</p>
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Refund of ₹{Number(req.amount || 0).toFixed(2)} Process Successfully progressed and Done</p>
                   </div>
                 )}
               </motion.div>

@@ -45,10 +45,19 @@ async function sendNotification(userId, title, message, type) {
         if (tokensRes.rows.length > 0) {
           const tokens = tokensRes.rows.map(row => row.token);
           
+          const frontendUrl = process.env.FRONTEND_URL || "https://near-buy-nine.vercel.app";
           const messagePayload = {
             notification: {
               title: title,
-              body: message
+              body: message,
+              image: `${frontendUrl}/icon.png`
+            },
+            webpush: {
+              notification: {
+                icon: `${frontendUrl}/icon.png`,
+                badge: `${frontendUrl}/icon.png`,
+                tag: notification.id.toString() // Deduplicates identical notifications on the device
+              }
             },
             data: {
               type: type,

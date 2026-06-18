@@ -42,6 +42,8 @@ interface Order {
   delivery_charge?: string;
   cancel_request_status?: string;
   cancel_request_reason?: string;
+  advance_fee?: string;
+  advance_paid?: boolean;
 }
 
 const ORDER_STATUSES = [
@@ -65,6 +67,7 @@ export default function VendorOrdersPage() {
   const [pendingStatusUpdate, setPendingStatusUpdate] = useState<string | null>(null);
   const [deliveryChargeInput, setDeliveryChargeInput] = useState<string>("");
   const [advanceFeeInput, setAdvanceFeeInput] = useState<string>("");
+  const [paymentTypeSelection, setPaymentTypeSelection] = useState<'advance' | 'full'>('advance');
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -125,6 +128,14 @@ export default function VendorOrdersPage() {
     setStatusLoading(true);
     try {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      
+      let finalAdvanceFee = parseFloat(advanceFeeInput || "0");
+      if (statusModalOrder?.payment_method === 'online_on_delivery' && paymentTypeSelection === 'full') {
+        const subtotal = parseFloat(statusModalOrder.subtotal || "0");
+        const gst = parseFloat(statusModalOrder.gst || "0");
+        finalAdvanceFee = subtotal + gst;
+      }
+
       const res = await fetch(`${API}/api/orders/${orderId}/status`, {
         method: "PATCH",
         headers: {
@@ -135,16 +146,22 @@ export default function VendorOrdersPage() {
           status: newStatus,
           ...(newStatus === "Confirmed" && { 
             delivery_charge: parseFloat(deliveryChargeInput || "0"),
-            ...(statusModalOrder?.payment_method === 'online_on_delivery' && { advance_fee: parseFloat(advanceFeeInput || "0") })
+            ...(statusModalOrder?.payment_method === 'online_on_delivery' && { advance_fee: finalAdvanceFee })
           })
         }),
       });
       if (res.ok) {
-        toast.success(`Order marked as ${newStatus}`);
+        const isOOD = statusModalOrder?.payment_method === 'online_on_delivery';
+        if (newStatus === "Confirmed" && isOOD && finalAdvanceFee > 0) {
+          toast.success(paymentTypeSelection === 'full' ? "Full payment requested." : "Confirmation requested. Waiting for advance payment.");
+        } else {
+          toast.success(`Order marked as ${newStatus}`);
+        }
         setStatusModalOrder(null);
         setPendingStatusUpdate(null);
         setDeliveryChargeInput("");
         setAdvanceFeeInput("");
+        setPaymentTypeSelection('advance');
         setPage(1);
         fetchOrders(1);
       } else {
@@ -261,6 +278,8 @@ export default function VendorOrdersPage() {
         ) : (
           orders.map((order) => {
             const customerName = `${order.first_name || "Guest"} ${order.last_name || ""}`.trim();
+            const isAwaitingAdvance = order.payment_method === 'online_on_delivery' && parseFloat(order.advance_fee || "0") > 0 && !order.advance_paid;
+            
             return (
               <motion.div
                 key={order.id}
@@ -336,9 +355,11 @@ export default function VendorOrdersPage() {
                 {/* Status Banner */}
                 <div className={`px-5 py-3 border-b border-gray-50 dark:border-[#1F1F2E] flex flex-col gap-2`}>
                   <div className="flex items-center justify-between">
-                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${getStatusColor(order.status)} font-bold text-xs uppercase tracking-wider`}>
-                      {getStatusIcon(order.status)}
-                      {order.status}
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
+                      isAwaitingAdvance ? "text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20" : getStatusColor(order.status)
+                    } font-bold text-xs uppercase tracking-wider`}>
+                      {isAwaitingAdvance ? <Clock className="w-4 h-4" /> : getStatusIcon(order.status)}
+                      {isAwaitingAdvance ? "AWAITING ADVANCE" : order.status}
                     </div>
                     <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">
                       {order.items.length} {order.items.length === 1 ? 'item' : 'items'}
@@ -576,15 +597,23 @@ export default function VendorOrdersPage() {
                   const currentStatusIndex = ORDER_STATUSES.findIndex(s => s.toLowerCase() === statusModalOrder.status.toLowerCase());
                   const thisStatusIndex = ORDER_STATUSES.findIndex(s => s.toLowerCase() === status.toLowerCase());
                   
-                  if (status !== "Cancelled" && currentStatusIndex !== -1 && thisStatusIndex < currentStatusIndex) {
-                    isBlocked = true;
-                    blockReason = "Cannot go back";
+                  const isAwaitingAdvanceModal = statusModalOrder.payment_method === 'online_on_delivery' && parseFloat(statusModalOrder.advance_fee || "0") > 0 && !statusModalOrder.advance_paid;
+
+                  if (isAwaitingAdvanceModal) {
+                    if (status !== "Cancelled") {
+                      isBlocked = true;
+                      blockReason = "User must pay advance";
+                    }
+                  } else if (status !== "Cancelled" && currentStatusIndex !== -1) {
+                    if (thisStatusIndex < currentStatusIndex) {
+                      isBlocked = true;
+                      blockReason = "Cannot go back";
+                    } else if (thisStatusIndex > currentStatusIndex + 1) {
+                      isBlocked = true;
+                      blockReason = "Cannot skip steps";
+                    }
                   }
 
-                  if (status === "Shipment" && statusModalOrder.payment_method === 'online_payment' && statusModalOrder.payment_status !== 'paid') {
-                    isBlocked = true;
-                    blockReason = "User must pay first";
-                  }
                   if (status === "Delivered" && statusModalOrder.payment_method === 'online_on_delivery' && statusModalOrder.payment_status !== 'paid') {
                     isBlocked = true;
                     blockReason = "User must pay first";
@@ -649,16 +678,37 @@ export default function VendorOrdersPage() {
                   
                   {statusModalOrder?.payment_method === 'online_on_delivery' && (
                     <>
-                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                        Advance Payment Required (₹)
-                      </label>
-                      <input
-                        type="number"
-                        value={advanceFeeInput}
-                        onChange={(e) => setAdvanceFeeInput(e.target.value)}
-                        placeholder="e.g. 100"
-                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-[#2A2A3A] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium mb-4"
-                      />
+                      <div className="flex gap-2 mb-4">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentTypeSelection('full')}
+                          className={`flex-1 py-2 text-xs font-bold rounded-xl border-2 transition-all ${paymentTypeSelection === 'full' ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700` : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                        >
+                          Full Payment
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPaymentTypeSelection('advance')}
+                          className={`flex-1 py-2 text-xs font-bold rounded-xl border-2 transition-all ${paymentTypeSelection === 'advance' ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700` : 'border-gray-200 text-gray-500 hover:bg-gray-50'}`}
+                        >
+                          Adv Payment
+                        </button>
+                      </div>
+
+                      {paymentTypeSelection === 'advance' && (
+                        <>
+                          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                            Advance Payment Required (₹)
+                          </label>
+                          <input
+                            type="number"
+                            value={advanceFeeInput}
+                            onChange={(e) => setAdvanceFeeInput(e.target.value)}
+                            placeholder="e.g. 100"
+                            className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-[#2A2A3A] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium mb-4"
+                          />
+                        </>
+                      )}
                     </>
                   )}
                   
@@ -667,7 +717,9 @@ export default function VendorOrdersPage() {
                     disabled={statusLoading}
                     className={`w-full py-3 bg-${tColor}-600 hover:bg-${tColor}-700 text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]`}
                   >
-                    {statusModalOrder?.payment_method === 'online_on_delivery' ? "Confirm & Request Advance" : "Confirm Order & Charge"}
+                    {statusModalOrder?.payment_method === 'online_on_delivery' 
+                      ? (paymentTypeSelection === 'full' ? "Confirm & Request Full Payment" : "Confirm & Request Advance") 
+                      : "Confirm Order & Charge"}
                   </button>
                 </div>
               )}

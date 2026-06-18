@@ -431,9 +431,10 @@ router.post("/refund", authenticate, async (req, res) => {
     }
     
     const requestType = type || 'general';
+    const refundAmount = req.body.amount ? Number(req.body.amount) : 0;
     await pool.query(
-      `INSERT INTO refund_requests (user_id, email, order_id, user_name, type) VALUES ($1, $2, $3, $4, $5)`,
-      [req.user.id, email, order_id, user_name, requestType]
+      `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, amount) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [req.user.id, email, order_id, user_name, requestType, refundAmount]
     );
     return res.json({ success: true, message: "Refund request submitted successfully." });
   } catch (err) {

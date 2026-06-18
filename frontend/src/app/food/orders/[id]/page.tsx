@@ -207,6 +207,28 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate payment");
 
+      // --- TESTING BYPASS START ---
+      if (true) {
+        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+          body: JSON.stringify({
+            razorpay_order_id: rzpOrder.id || "test_order",
+            razorpay_payment_id: "test_payment",
+            razorpay_signature: "test_signature",
+            order_id: id,
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
+        
+        toast.success("Payment successful!");
+        fetchOrderDetails();
+        setIsPaying(false);
+        return;
+      }
+      // --- TESTING BYPASS END ---
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
         amount: rzpOrder.amount,
@@ -262,6 +284,28 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate advance payment");
 
+      // --- TESTING BYPASS START ---
+      if (true) {
+        const verifyRes = await fetch(`${API}/api/orders/verify-advance`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+          body: JSON.stringify({
+            razorpay_order_id: rzpOrder.id || "test_order",
+            razorpay_payment_id: "test_payment",
+            razorpay_signature: "test_signature",
+            order_id: id,
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyRes.ok) throw new Error(verifyData.error || "Advance payment verification failed");
+        
+        toast.success("Advance payment successful!");
+        fetchOrderDetails();
+        setIsPaying(false);
+        return;
+      }
+      // --- TESTING BYPASS END ---
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
         amount: rzpOrder.amount,
@@ -316,6 +360,28 @@ export default function OrderStatusPage() {
       });
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate remaining payment");
+
+      // --- TESTING BYPASS START ---
+      if (true) {
+        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+          body: JSON.stringify({
+            razorpay_order_id: rzpOrder.id || "test_order",
+            razorpay_payment_id: "test_payment",
+            razorpay_signature: "test_signature",
+            order_id: id,
+          })
+        });
+        const verifyData = await verifyRes.json();
+        if (!verifyRes.ok) throw new Error(verifyData.error || "Final payment verification failed");
+        
+        toast.success("Final payment successful!");
+        fetchOrderDetails();
+        setIsPaying(false);
+        return;
+      }
+      // --- TESTING BYPASS END ---
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
@@ -472,6 +538,39 @@ export default function OrderStatusPage() {
 
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 -mt-6 space-y-4">
         
+        {/* Payment Buttons Priority Display */}
+        {(showAdvancePayNow || showPayNow) && (
+          <div className="bg-white dark:bg-[#0D0D17] rounded-3xl p-6 border border-orange-200 dark:border-orange-500/30 shadow-lg relative z-30 mb-4 animate-pulse-slow">
+            <h3 className="text-lg font-black text-gray-900 dark:text-white mb-3 text-center">
+              {showAdvancePayNow ? "Advance Payment Required" : "Final Payment Required"}
+            </h3>
+            {showAdvancePayNow && (
+              <button 
+                onClick={handlePayAdvance}
+                disabled={isPaying}
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm animate-pulse"
+              >
+                {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                {isPaying ? "Processing..." : `Pay Advance ₹${(Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0)).toFixed(2)}`}
+              </button>
+            )}
+            {showPayNow && (
+              <button 
+                onClick={order.payment_method === 'online_on_delivery' ? handlePayRemaining : handlePayNow}
+                disabled={isPaying}
+                className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm animate-pulse"
+              >
+                {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                {isPaying ? "Processing..." : `Pay ₹${
+                  order.payment_method === 'online_on_delivery' 
+                    ? (Number(order.total_amount) - (Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0))).toFixed(2)
+                    : order.total_amount
+                } Now`}
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Status Tracker */}
         <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-6 border border-gray-100 dark:border-[#2A2A3A] shadow-sm relative z-20">
           {order.cancel_request_status === 'pending' && !isCancelled && (
@@ -640,31 +739,6 @@ export default function OrderStatusPage() {
             </a>
           )}
 
-          {showAdvancePayNow && (
-            <button 
-              onClick={handlePayAdvance}
-              disabled={isPaying}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm col-span-2 animate-pulse"
-            >
-              {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-              {isPaying ? "Processing..." : `Pay Advance ₹${(Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0)).toFixed(2)}`}
-            </button>
-          )}
-
-          {showPayNow && (
-            <button 
-              onClick={order.payment_method === 'online_on_delivery' ? handlePayRemaining : handlePayNow}
-              disabled={isPaying}
-              className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm col-span-2 animate-pulse"
-            >
-              {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-              {isPaying ? "Processing..." : `Pay ₹${
-                order.payment_method === 'online_on_delivery' 
-                  ? (Number(order.total_amount) - (Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0))).toFixed(2)
-                  : order.total_amount
-              } Now`}
-            </button>
-          )}
         </div>
 
       </div>

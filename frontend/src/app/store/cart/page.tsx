@@ -452,17 +452,7 @@ function RestaurantOrderCard({
             <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Online On Delivery</span>
           </label>
 
-          <label className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'online_payment' ? 'border-blue-500 bg-blue-50/30' : 'border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A]'}`}>
-            <input
-              type="radio"
-              name={`payment-${restId}`}
-              checked={paymentMethod === 'online_payment'}
-              onChange={() => setPaymentMethod('online_payment')}
-              className="w-4 h-4 text-blue-500 accent-blue-500"
-            />
-            <Smartphone className="w-4 h-4 text-gray-700 dark:text-gray-300" />
-            <span className="font-bold text-gray-900 dark:text-gray-100 text-sm flex-1">Online Payment</span>
-          </label>
+
         </div>
       </div>
 

@@ -17,15 +17,8 @@ const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/icon-192x192.png',
-    data: payload.data
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  // Firebase automatically shows a notification if the payload contains a 'notification' object.
+  // Do not manually call self.registration.showNotification here, or it will show duplicate notifications!
 });
 
 self.addEventListener('notificationclick', (event) => {
