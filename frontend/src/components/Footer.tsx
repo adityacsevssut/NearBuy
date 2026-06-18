@@ -29,7 +29,6 @@ export default function Footer() {
       { name: "Home", href: "/" },
       { name: "About Us", href: "/about" },
       { name: "Need Support", href: "#", onClick: (e: any) => { e.preventDefault(); setIsSupportOpen(true); } },
-      { name: "Request Refund", href: "#", onClick: (e: any) => { e.preventDefault(); setIsRefundOpen(true); } },
       { name: "My Refunds", href: isStore ? "/refunds?theme=blue" : "/refunds" },
       { name: "Feedback", href: "#", onClick: (e: any) => { e.preventDefault(); setIsFeedbackOpen(true); } },
     ],

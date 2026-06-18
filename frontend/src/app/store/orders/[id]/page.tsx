@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
-  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown, AlertTriangle
+  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown, AlertTriangle, Copy
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -48,6 +48,10 @@ interface Order {
   created_at: string;
   owner_number?: string;
   delivery_boy_number?: string;
+  cancel_request_status?: string;
+  cancel_request_reason?: string;
+  advance_fee?: string;
+  advance_paid?: boolean;
 }
 
 const STATUS_STEPS = ["pending", "confirmed", "shipment", "out for delivery", "delivered"];
@@ -60,6 +64,9 @@ export default function OrderStatusPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showBilling, setShowBilling] = useState(false);
+  const [showCancelRequest, setShowCancelRequest] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [gstRate, setGstRate] = useState(18);
@@ -118,7 +125,9 @@ export default function OrderStatusPage() {
           <div>
             <h3 className="font-black text-gray-900 dark:text-gray-100 text-[15px]">Cancel Order?</h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 font-medium leading-tight mt-0.5">
-              Are you sure you want to cancel this order? This action cannot be undone.
+              {order?.payment_method === 'online_on_delivery' && order?.advance_paid 
+                ? "If you cancel this order, the Delivery Charge and Platform Fee will be deducted, and the rest of your Advance Amount will be refunded to you. Do you want to proceed?" 
+                : "Are you sure you want to cancel this order? This action cannot be undone."}
             </p>
           </div>
         </div>
@@ -159,7 +168,7 @@ export default function OrderStatusPage() {
         </div>
       </div>
     ), {
-      duration: Infinity,
+      duration: 2000,
       style: {
         border: "1px solid #bfdbfe",
         padding: "16px",
@@ -168,8 +177,36 @@ export default function OrderStatusPage() {
         color: "#1e3a8a",
         maxWidth: "340px"
       },
-      className: "dark:!bg-[#0D0D17] dark:!border-blue-500 dark:!text-white dark:!border"
+      className: "dark:!bg-[#0D0D17] dark:!border-red-500/20 dark:!text-white"
     });
+  };
+
+  const handleCancelRequest = async () => {
+    if (!cancelReason.trim()) {
+      toast.error("Please provide a reason", blueToastStyle);
+      return;
+    }
+    setIsSubmittingCancel(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/${id}/cancel-request`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ reason: cancelReason }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Cancellation request sent to vendor!", blueToastStyle);
+        setShowCancelRequest(false);
+        fetchOrderDetails();
+      } else {
+        toast.error(data.error || "Failed to send request", blueToastStyle);
+      }
+    } catch (err) {
+      toast.error("Network error", blueToastStyle);
+    } finally {
+      setIsSubmittingCancel(false);
+    }
   };
 
   const handlePayNow = async () => {
@@ -227,6 +264,116 @@ export default function OrderStatusPage() {
     }
   };
 
+  const handlePayAdvance = async () => {
+    setIsPaying(true);
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/initiate-advance`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+      });
+      const rzpOrder = await res.json();
+      if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate advance payment");
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        name: "NearBuy Advance Payment",
+        description: `Order ${id}`,
+        order_id: rzpOrder.id,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch(`${API}/api/orders/verify-advance`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: id,
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Advance payment verification failed");
+            
+            toast.success("Advance payment successful!", blueToastStyle);
+            fetchOrderDetails();
+          } catch (err: any) {
+            toast.error(err.message || "Advance verification failed", blueToastStyle);
+          } finally {
+            setIsPaying(false);
+          }
+        },
+        theme: { color: "#3b82f6" },
+        modal: { ondismiss: function () { setIsPaying(false); toast.error("Advance payment cancelled", blueToastStyle); } }
+      };
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (response: any) {
+        toast.error(response.error.description || "Payment failed", blueToastStyle);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
+      setIsPaying(false);
+    }
+  };
+
+  const handlePayRemaining = async () => {
+    setIsPaying(true);
+    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+    try {
+      const res = await fetch(`${API}/api/orders/${id}/initiate-remaining`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+      });
+      const rzpOrder = await res.json();
+      if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate remaining payment");
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        amount: rzpOrder.amount,
+        currency: rzpOrder.currency,
+        name: "NearBuy Final Payment",
+        description: `Order ${id}`,
+        order_id: rzpOrder.id,
+        handler: async function (response: any) {
+          try {
+            const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                order_id: id,
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok) throw new Error(verifyData.error || "Final payment verification failed");
+            
+            toast.success("Final payment successful!", blueToastStyle);
+            fetchOrderDetails();
+          } catch (err: any) {
+            toast.error(err.message || "Final payment verification failed", blueToastStyle);
+          } finally {
+            setIsPaying(false);
+          }
+        },
+        theme: { color: "#3b82f6" },
+        modal: { ondismiss: function () { setIsPaying(false); toast.error("Final payment cancelled", blueToastStyle); } }
+      };
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", function (response: any) {
+        toast.error(response.error.description || "Payment failed", blueToastStyle);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
+      setIsPaying(false);
+    }
+  };
+
   const generateReceipt = async () => {
     const element = document.getElementById("pdf-receipt-template-wrapper");
     if (element) {
@@ -256,8 +403,11 @@ export default function OrderStatusPage() {
 
   if (!order) return null;
 
-  const currentStepIndex = STATUS_STEPS.indexOf(order.status.toLowerCase());
+  const rawStepIndex = STATUS_STEPS.indexOf(order.status.toLowerCase());
   const isCancelled = order.status.toLowerCase() === "cancelled";
+  
+  const isAwaitingAdvance = order.payment_method === 'online_on_delivery' && rawStepIndex >= 1 && !order.advance_paid;
+  const currentStepIndex = isAwaitingAdvance ? 0 : rawStepIndex;
 
   const showPayNow = 
     order.payment_status !== 'paid' && 
@@ -265,12 +415,20 @@ export default function OrderStatusPage() {
       (order.payment_method === 'online_payment' && currentStepIndex >= 1 && !isCancelled) || 
       (order.payment_method === 'online_on_delivery' && currentStepIndex >= 3 && !isCancelled)
     );
+    
+  const showAdvancePayNow = isAwaitingAdvance && !isCancelled;
+
+  const isCOD = order.payment_method.toLowerCase().includes('cash') || order.payment_method.toLowerCase() === 'cod';
+  const isOOD = order.payment_method === 'online_on_delivery';
+  
+  const canDirectCancel = (isCOD && currentStepIndex <= 1) || (isOOD && rawStepIndex < 4);
+  const canRequestCancel = !canDirectCancel && currentStepIndex < 4 && !isCancelled && order.cancel_request_status !== 'pending' && !isOOD;
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pb-20">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       {/* Dynamic Header based on status */}
-      <div className={`${isCancelled ? 'bg-red-500' : 'bg-gradient-to-r from-orange-500 to-amber-500'} pt-8 pb-12 px-4 rounded-b-[40px] shadow-sm relative overflow-hidden`}>
+      <div className={`${isCancelled ? 'bg-red-500' : 'bg-gradient-to-r from-blue-500 to-indigo-500'} pt-8 pb-12 px-4 rounded-b-[40px] shadow-sm relative overflow-hidden`}>
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Package className="w-32 h-32" />
@@ -278,12 +436,24 @@ export default function OrderStatusPage() {
         
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <Link href="/store/orders" className="p-2 -ml-2 rounded-xl bg-white/20 dark:bg-[#0D0D17]/20 hover:bg-white/30 dark:hover:bg-[#0D0D17]/30 text-white transition-colors backdrop-blur-sm">
+            <Link href="/store/orders" className="p-2 -ml-2 rounded-xl bg-white/20 hover:bg-white/30 text-white transition-colors backdrop-blur-sm">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>
               <p className="text-white/80 text-xs font-bold uppercase tracking-widest">Order ID</p>
-              <h1 className="font-black text-white text-sm tracking-tight opacity-90 truncate max-w-[200px] sm:max-w-xs">{order.id}</h1>
+              <div className="flex items-center gap-1.5">
+                <h1 className="font-black text-white text-sm tracking-tight opacity-90 truncate max-w-[200px] sm:max-w-xs">#{order.id.slice(0, 8).toUpperCase()}</h1>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(order.id);
+                    toast.success("Order ID copied to clipboard!", blueToastStyle);
+                  }}
+                  className="p-1 hover:bg-white/20 rounded transition-colors text-white/80 hover:text-white cursor-pointer"
+                  title="Copy full Order ID"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -291,8 +461,9 @@ export default function OrderStatusPage() {
             <div>
               <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight mb-1">
                 {isCancelled ? "Order Cancelled" : 
+                 isAwaitingAdvance ? "Advance Payment Required" :
                  currentStepIndex === 0 ? "Awaiting Confirmation" :
-                 currentStepIndex === 1 ? "Preparing your order" :
+                 currentStepIndex === 1 ? "Packing your items" :
                  currentStepIndex === 2 ? "Order has been Shipped" :
                  currentStepIndex === 3 ? "Out for Delivery" :
                  currentStepIndex === 4 ? "Order Delivered!" : "Processing..."}
@@ -316,6 +487,15 @@ export default function OrderStatusPage() {
         
         {/* Status Tracker */}
         <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl p-6 border border-gray-100 dark:border-[#2A2A3A] shadow-sm relative z-20">
+          {order.cancel_request_status === 'pending' && !isCancelled && (
+            <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 rounded-2xl flex items-start gap-3">
+              <Clock className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-sm font-black text-orange-700 dark:text-orange-400">Cancellation Requested</h4>
+                <p className="text-xs text-orange-600 dark:text-orange-500/80 mt-1 font-medium">Awaiting vendor approval. Reason: {order.cancel_request_reason}</p>
+              </div>
+            </div>
+          )}
           {isCancelled ? (
             <div className="flex flex-col items-center justify-center py-4 text-center">
               <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-3">
@@ -427,12 +607,21 @@ export default function OrderStatusPage() {
 
         {/* Buttons Grid */}
         <div className="grid grid-cols-2 gap-3 mb-8">
-          {currentStepIndex <= 1 && !isCancelled && (
+          {canDirectCancel && !isCancelled && (
             <button 
               onClick={handleCancelOrder}
               className="w-full py-4 bg-red-50 hover:bg-red-100 border border-red-200 rounded-2xl flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors shadow-sm"
             >
               Cancel Order
+            </button>
+          )}
+
+          {canRequestCancel && (
+            <button 
+              onClick={() => setShowCancelRequest(true)}
+              className="w-full py-4 bg-red-50 hover:bg-red-100 border border-red-200 rounded-2xl flex items-center justify-center gap-2 text-red-600 font-bold text-sm transition-colors shadow-sm"
+            >
+              Request Cancellation
             </button>
           )}
           
@@ -457,21 +646,36 @@ export default function OrderStatusPage() {
           {currentStepIndex >= 3 && !isCancelled && order.delivery_boy_number && (
             <a 
               href={`tel:${order.delivery_boy_number}`}
-              className={`w-full py-4 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-2xl flex items-center justify-center gap-2 text-orange-600 font-bold text-sm transition-colors shadow-sm ${showPayNow ? 'col-span-1' : 'col-span-2 sm:col-span-1'}`}
+              className={`w-full py-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-2xl flex items-center justify-center gap-2 text-blue-600 font-bold text-sm transition-colors shadow-sm ${(showPayNow || showAdvancePayNow) ? 'col-span-1' : 'col-span-2 sm:col-span-1'}`}
             >
               <Phone className="w-4 h-4" />
               Call Delivery Boy
             </a>
           )}
 
+          {showAdvancePayNow && (
+            <button 
+              onClick={handlePayAdvance}
+              disabled={isPaying}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm col-span-2 animate-pulse"
+            >
+              {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+              {isPaying ? "Processing..." : `Pay Advance ₹${(Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0)).toFixed(2)}`}
+            </button>
+          )}
+
           {showPayNow && (
             <button 
-              onClick={handlePayNow}
+              onClick={order.payment_method === 'online_on_delivery' ? handlePayRemaining : handlePayNow}
               disabled={isPaying}
               className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm col-span-2 animate-pulse"
             >
               {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-              {isPaying ? "Processing..." : `Pay ₹${order.total_amount} Now`}
+              {isPaying ? "Processing..." : `Pay ₹${
+                order.payment_method === 'online_on_delivery' 
+                  ? (Number(order.total_amount) - (Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0))).toFixed(2)
+                  : order.total_amount
+              } Now`}
             </button>
           )}
         </div>
@@ -551,6 +755,74 @@ export default function OrderStatusPage() {
                   className="w-full py-4 bg-gray-900 hover:bg-black text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]"
                 >
                   Got it
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Cancel Request Modal */}
+      <AnimatePresence>
+        {showCancelRequest && (
+          <div className="fixed inset-0 z-[100] flex flex-col justify-center items-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowCancelRequest(false)}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="relative w-full max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              <div className="px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-500/20 rounded-xl flex items-center justify-center text-red-600 dark:text-red-500">
+                    <AlertTriangle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h2 className="font-black text-gray-900 dark:text-gray-100 text-lg">Request Cancel</h2>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowCancelRequest(false)}
+                  className="p-2 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 rounded-full text-gray-600 dark:text-gray-400 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 font-medium">
+                  Since your order is already being processed, cancellation must be approved by the vendor. Please provide a reason.
+                </p>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Why do you want to cancel?"
+                  className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl outline-none focus:ring-2 focus:ring-red-500/50 resize-none h-24 text-sm font-medium"
+                />
+              </div>
+              
+              <div className="p-5 bg-gray-50 dark:bg-[#151522] border-t border-gray-100 dark:border-[#2A2A3A] flex gap-3">
+                <button
+                  onClick={() => setShowCancelRequest(false)}
+                  className="flex-1 py-3.5 bg-white dark:bg-[#0D0D17] hover:bg-gray-50 text-gray-700 dark:text-gray-300 font-bold rounded-xl border border-gray-200 dark:border-[#2A2A3A] transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={handleCancelRequest}
+                  disabled={isSubmittingCancel || !cancelReason.trim()}
+                  className="flex-1 py-3.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98] flex justify-center items-center gap-2"
+                >
+                  {isSubmittingCancel ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                  Send Request
                 </button>
               </div>
             </motion.div>

@@ -76,6 +76,33 @@ export default function PartnerDashboard() {
   const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any | null>(null);
   const [vendorDetailsData, setVendorDetailsData] = useState<any | null>(null);
   const [vendorDetailsLoading, setVendorDetailsLoading] = useState(false);
+  
+  const handleToggleAdvRefund = async (orderId: string, currentStatus: boolean) => {
+    try {
+      const res = await fetch(`${API}/api/managers/orders/${orderId}/adv-refund`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ adv_refund_processed: !currentStatus }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Refund status updated");
+        setVendorDetailsData((prev: any) => 
+          prev ? prev.map((order: any) => 
+            order.id === orderId ? { ...order, adv_refund_processed: !currentStatus } : order
+          ) : prev
+        );
+      } else {
+        toast.error(data.error || "Failed to update status");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    }
+  };
+
   const [requests, setRequests] = useState<any[]>([]);
   const [loadingReqs, setLoadingReqs] = useState(false);
   const [editingReq, setEditingReq] = useState<any | null>(null);
@@ -824,14 +851,16 @@ export default function PartnerDashboard() {
               <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
                 <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Order ID</th>
                 <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">User Name</th>
+                <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Payment Method</th>
                 <th className="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Amount</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
               {orders.map((order: any) => (
                 <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
-                  <td className="p-3 font-mono text-xs font-bold text-gray-900 dark:text-gray-100">{order.id.slice(0, 8)}...</td>
+                  <td className="p-3 font-mono text-xs font-bold text-gray-900 dark:text-gray-100">#{order.id.slice(0, 8).toUpperCase()}</td>
                   <td className="p-3 text-xs font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
+                  <td className="p-3 text-xs font-medium text-gray-700 dark:text-gray-300 uppercase">{order.payment_method?.replace(/_/g, ' ') || 'N/A'}</td>
                   <td className="p-3 text-xs font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
                 </tr>
               ))}
@@ -1439,7 +1468,7 @@ export default function PartnerDashboard() {
                     <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
                       {orders.map((order: any) => (
                         <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50 transition-colors">
-                          <td className="p-4 font-mono text-sm text-gray-900 dark:text-gray-100 font-bold">{order.id.slice(0, 8)}...</td>
+                          <td className="p-4 font-mono text-sm text-gray-900 dark:text-gray-100 font-bold">#{order.id.slice(0, 8).toUpperCase()}</td>
                           <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{new Date(order.created_at).toLocaleString()}</td>
                           <td className="p-4 text-sm font-bold text-gray-900 dark:text-gray-100">{order.vendor_first_name} {order.vendor_last_name}</td>
                           <td className="p-4 text-sm font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
@@ -1619,18 +1648,26 @@ export default function PartnerDashboard() {
                       </div>
 
                       {req.status === 'Pending' && (
-                        <div className="grid grid-cols-2 gap-2 mt-4">
+                        <div className="flex flex-col gap-2 mt-4">
+                          <div className="grid grid-cols-2 gap-2">
+                            <button 
+                              onClick={() => handleUpdateRefundStatus(req.id, 'Approved')}
+                              className="w-full py-2 bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-500/20 rounded-xl text-xs font-bold transition-colors border border-orange-100 dark:border-orange-500/20 flex items-center justify-center gap-1"
+                            >
+                              Manual Flow
+                            </button>
+                            <button 
+                              onClick={() => handleUpdateRefundStatus(req.id, 'Completed')}
+                              className="w-full py-2 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 rounded-xl text-xs font-bold transition-colors border border-green-100 dark:border-green-500/20 flex items-center justify-center gap-1"
+                            >
+                              <CheckCircle2 className="w-3.5 h-3.5" /> Auto Flow
+                            </button>
+                          </div>
                           <button 
                             onClick={() => handleUpdateRefundStatus(req.id, 'Rejected')}
-                            className="w-full py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl text-xs font-bold transition-colors border border-red-100 dark:border-red-500/20 flex items-center justify-center gap-1"
+                            className="w-full py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-xl text-[10px] font-bold transition-colors border border-red-100 dark:border-red-500/20 flex items-center justify-center gap-1 mt-1"
                           >
-                            <XCircle className="w-3.5 h-3.5" /> Reject
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateRefundStatus(req.id, 'Approved')}
-                            className="w-full py-2 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 rounded-xl text-xs font-bold transition-colors border border-green-100 dark:border-green-500/20 flex items-center justify-center gap-1"
-                          >
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Approve
+                            <XCircle className="w-3 h-3" /> Reject
                           </button>
                         </div>
                       )}
@@ -1729,25 +1766,109 @@ export default function PartnerDashboard() {
               ) : vendorDetailsData?.length === 0 ? (
                 <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-10 text-center text-gray-500 shadow-sm">No cancelled orders found for this date.</div>
               ) : (
-                <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-sm">
-                  <table className="w-full text-left">
-                    <thead>
-                      <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
-                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">Order ID</th>
-                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">User Name</th>
-                        <th className="p-4 text-xs font-bold text-gray-500 uppercase">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
-                      {vendorDetailsData?.filter((o: any) => (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).map((order: any) => (
-                        <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
-                          <td className="p-4 font-mono text-sm font-bold text-gray-900 dark:text-gray-100">{order.id}</td>
-                          <td className="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
-                          <td className="p-4"><span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase bg-red-100 text-red-700">Cancelled</span></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="space-y-6">
+                  {/* Online On Delivery Cancelled Orders */}
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 flex justify-between items-end">
+                      Online On Delivery
+                      <span className="text-xs bg-gray-200 dark:bg-[#2A2A3A] px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">
+                        {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_on_delivery' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).length || 0}
+                      </span>
+                    </h3>
+                    {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_on_delivery' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).length === 0 ? (
+                      <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl p-6 text-center text-gray-400 text-sm shadow-sm">
+                        No cancelled orders in this category.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-sm">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Order ID</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">User Name</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase text-center">Advance Paid</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase text-center">Remaining Paid</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase text-center">Adv Refund</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase text-center">Processed</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+                            {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_on_delivery' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).map((order: any) => (
+                              <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
+                                <td className="p-4 font-mono text-sm font-bold text-gray-900 dark:text-gray-100">#{order.id.slice(0, 8).toUpperCase()}</td>
+                                <td className="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
+                                <td className="p-4 text-center">
+                                  {order.advance_paid ? <CheckCircle className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-5 h-5 text-gray-300 dark:text-[#2A2A3A] mx-auto" />}
+                                </td>
+                                <td className="p-4 text-center">
+                                  {order.payment_status === 'paid' ? <CheckCircle className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-5 h-5 text-gray-300 dark:text-[#2A2A3A] mx-auto" />}
+                                </td>
+                                <td className="p-4 text-center">
+                                  <span className={`font-bold ${order.advance_paid ? 'text-green-600 dark:text-green-500' : 'text-gray-400'}`}>
+                                    ₹{order.advance_paid ? Number(order.advance_fee || 0).toFixed(2) : "0.00"}
+                                  </span>
+                                </td>
+                                <td className="p-4 text-center">
+                                  {order.adv_refund_processed ? (
+                                    <span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 block w-max mx-auto text-center">Successfully Completed</span>
+                                  ) : (
+                                    <input 
+                                      type="checkbox" 
+                                      checked={!!order.adv_refund_processed}
+                                      onChange={() => handleToggleAdvRefund(order.id, !!order.adv_refund_processed)}
+                                      className="w-5 h-5 rounded border-gray-300 dark:border-[#2A2A3A] dark:bg-[#151522] text-orange-500 focus:ring-orange-500 cursor-pointer mx-auto block" 
+                                    />
+                                  )}
+                                </td>
+                                <td className="p-4"><span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase bg-red-100 text-red-700">Cancelled</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Online Payment Cancelled Orders */}
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-3 flex justify-between items-end">
+                      Online Payment
+                      <span className="text-xs bg-gray-200 dark:bg-[#2A2A3A] px-2 py-0.5 rounded text-gray-700 dark:text-gray-300">
+                        {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_payment' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).length || 0}
+                      </span>
+                    </h3>
+                    {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_payment' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).length === 0 ? (
+                      <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl p-6 text-center text-gray-400 text-sm shadow-sm">
+                        No cancelled orders in this category.
+                      </div>
+                    ) : (
+                      <div className="overflow-x-auto bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-sm">
+                        <table className="w-full text-left">
+                          <thead>
+                            <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Order ID</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">User Name</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase text-center">Payment Status</th>
+                              <th className="p-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+                            {vendorDetailsData?.filter((o: any) => o.payment_method === 'online_payment' && (o.id || "").toLowerCase().includes(cancelSearchQuery.toLowerCase())).map((order: any) => (
+                              <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50">
+                                <td className="p-4 font-mono text-sm font-bold text-gray-900 dark:text-gray-100">#{order.id.slice(0, 8).toUpperCase()}</td>
+                                <td className="p-4 text-sm font-medium text-gray-700 dark:text-gray-300">{order.first_name} {order.last_name}</td>
+                                <td className="p-4 text-center">
+                                  {order.payment_status === 'paid' ? <CheckCircle className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-5 h-5 text-gray-300 dark:text-[#2A2A3A] mx-auto" />}
+                                </td>
+                                <td className="p-4"><span className="text-[10px] font-bold px-2 py-1 rounded-md uppercase bg-red-100 text-red-700">Cancelled</span></td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </motion.div>

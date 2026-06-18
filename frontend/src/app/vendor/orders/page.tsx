@@ -40,6 +40,8 @@ interface Order {
   customer_mobile?: string;
   alternate_mobile?: string;
   delivery_charge?: string;
+  cancel_request_status?: string;
+  cancel_request_reason?: string;
 }
 
 const ORDER_STATUSES = [
@@ -62,6 +64,7 @@ export default function VendorOrdersPage() {
   const [statusLoading, setStatusLoading] = useState(false);
   const [pendingStatusUpdate, setPendingStatusUpdate] = useState<string | null>(null);
   const [deliveryChargeInput, setDeliveryChargeInput] = useState<string>("");
+  const [advanceFeeInput, setAdvanceFeeInput] = useState<string>("");
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -130,7 +133,10 @@ export default function VendorOrdersPage() {
         },
         body: JSON.stringify({ 
           status: newStatus,
-          ...(newStatus === "Confirmed" && { delivery_charge: parseFloat(deliveryChargeInput || "0") })
+          ...(newStatus === "Confirmed" && { 
+            delivery_charge: parseFloat(deliveryChargeInput || "0"),
+            ...(statusModalOrder?.payment_method === 'online_on_delivery' && { advance_fee: parseFloat(advanceFeeInput || "0") })
+          })
         }),
       });
       if (res.ok) {
@@ -138,6 +144,7 @@ export default function VendorOrdersPage() {
         setStatusModalOrder(null);
         setPendingStatusUpdate(null);
         setDeliveryChargeInput("");
+        setAdvanceFeeInput("");
         setPage(1);
         fetchOrders(1);
       } else {
@@ -148,6 +155,33 @@ export default function VendorOrdersPage() {
       toast.error("Network error");
     } finally {
       setStatusLoading(false);
+    }
+  };
+
+  const handleRespondToCancelRequest = async (orderId: string, action: 'approve' | 'reject') => {
+    setIsLoading(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/${orderId}/cancel-request/respond`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ action }),
+      });
+      if (res.ok) {
+        toast.success(`Cancellation request ${action}d successfully`);
+        setPage(1);
+        fetchOrders(1);
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to respond");
+        setIsLoading(false);
+      }
+    } catch {
+      toast.error("Network error");
+      setIsLoading(false);
     }
   };
 
@@ -171,11 +205,11 @@ export default function VendorOrdersPage() {
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "pending": return "text-orange-600 bg-orange-100 border-orange-200";
-      case "confirmed": return "text-blue-600 bg-blue-100 border-blue-200";
-      case "out for delivery": return "text-violet-600 bg-violet-100 border-violet-200";
-      case "delivered": return "text-green-600 bg-green-100 border-green-200";
-      case "cancelled": return "text-red-600 bg-red-100 border-red-200";
+      case "pending": return "text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/20";
+      case "confirmed": return "text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-500/10 border-blue-200 dark:border-blue-500/20";
+      case "out for delivery": return "text-violet-600 dark:text-violet-400 bg-violet-100 dark:bg-violet-500/10 border-violet-200 dark:border-violet-500/20";
+      case "delivered": return "text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-500/10 border-green-200 dark:border-green-500/20";
+      case "cancelled": return "text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-500/10 border-red-200 dark:border-red-500/20";
       default: return "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]";
     }
   };
@@ -198,7 +232,7 @@ export default function VendorOrdersPage() {
   const tColor = vType === "store" ? "blue" : "orange";
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] flex flex-col pt-4 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#151522] flex flex-col pt-4 pb-20">
 
       {/* Page Header */}
       <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-0 z-20 shadow-sm">
@@ -236,7 +270,7 @@ export default function VendorOrdersPage() {
               >
                 {/* Card Header (Customer Info) */}
                 <div className="p-5 border-b border-gray-50 dark:border-[#1F1F2E] flex items-start gap-4">
-                  <div className={`w-14 h-14 bg-${tColor}-50 rounded-2xl overflow-hidden shrink-0 border border-${tColor}-100 shadow-sm flex items-center justify-center text-${tColor}-600`}>
+                  <div className={`w-14 h-14 bg-${tColor}-50 dark:bg-${tColor}-500/10 rounded-2xl overflow-hidden shrink-0 border border-${tColor}-100 dark:border-${tColor}-500/20 shadow-sm flex items-center justify-center text-${tColor}-600 dark:text-${tColor}-400`}>
                     <User className="w-7 h-7" />
                   </div>
                   <div className="flex-1 min-w-0 pt-0.5">
@@ -253,7 +287,7 @@ export default function VendorOrdersPage() {
                         </span>
                       </div>
                       {order.customer_mobile ? (
-                        <a href={`tel:${order.customer_mobile}`} className={`inline-flex items-center gap-1.5 px-3 py-1.5 mt-1 bg-${tColor}-50 hover:bg-${tColor}-100 border border-${tColor}-200 text-${tColor}-700 text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit`}>
+                        <a href={`tel:${order.customer_mobile}`} className={`inline-flex items-center gap-1.5 px-3 py-1.5 mt-1 bg-${tColor}-50 dark:bg-${tColor}-500/10 hover:bg-${tColor}-100 dark:hover:bg-${tColor}-500/20 border border-${tColor}-200 dark:border-${tColor}-500/30 text-${tColor}-700 dark:text-${tColor}-400 text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit`}>
                           <Phone className="w-3.5 h-3.5 shrink-0" />
                           <span>Call: {order.customer_mobile}</span>
                         </a>
@@ -272,6 +306,32 @@ export default function VendorOrdersPage() {
                     </p>
                   </div>
                 </div>
+
+                {order.cancel_request_status === 'pending' && order.status.toLowerCase() !== 'cancelled' && (
+                  <div className="mx-5 mb-2 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl">
+                    <div className="flex items-start gap-2 mb-2">
+                      <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+                      <div>
+                        <h4 className="text-xs font-black text-red-700 dark:text-red-400">Cancellation Requested</h4>
+                        <p className="text-[10px] font-medium text-red-600 dark:text-red-500 mt-0.5">{order.cancel_request_reason}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleRespondToCancelRequest(order.id, 'approve')}
+                        className="flex-1 py-1.5 bg-red-600 hover:bg-red-700 text-white text-[10px] font-bold rounded-lg transition-colors"
+                      >
+                        Approve Cancel
+                      </button>
+                      <button
+                        onClick={() => handleRespondToCancelRequest(order.id, 'reject')}
+                        className="flex-1 py-1.5 bg-white dark:bg-[#0D0D17] hover:bg-gray-50 border border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 text-[10px] font-bold rounded-lg transition-colors"
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {/* Status Banner */}
                 <div className={`px-5 py-3 border-b border-gray-50 dark:border-[#1F1F2E] flex flex-col gap-2`}>
@@ -294,9 +354,9 @@ export default function VendorOrdersPage() {
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full tracking-wider border ${
-                        order.payment_status === 'paid' ? 'bg-green-50 text-green-600 border-green-200' : 
-                        order.payment_status === 'fees_paid' ? 'bg-orange-50 text-orange-600 border-orange-200' :
-                        'bg-red-50 text-red-600 border-red-200'
+                        order.payment_status === 'paid' ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-200 dark:border-green-500/20' : 
+                        order.payment_status === 'fees_paid' ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/20' :
+                        'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-200 dark:border-red-500/20'
                       }`}>
                         {order.payment_status === 'paid' ? 'Paid' : order.payment_status === 'fees_paid' ? 'Fees Paid' : 'Unpaid'}
                       </span>
@@ -308,14 +368,14 @@ export default function VendorOrdersPage() {
                 <div className="p-4 bg-gray-50 dark:bg-[#151522]/50 flex gap-3">
                   <button
                     onClick={() => setSelectedOrderForItems(order)}
-                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-[#0D0D17] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all active:scale-[0.98]"
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-[#0D0D17] border-2 border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 dark:hover:border-gray-500 rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 transition-all active:scale-[0.98]"
                   >
                     <Eye className="w-4 h-4" />
                     See Items
                   </button>
                   <button
                     onClick={() => setStatusModalOrder(order)}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-${tColor}-50 hover:bg-${tColor}-100 border-2 border-${tColor}-200 rounded-xl text-sm font-bold text-${tColor}-600 transition-all active:scale-[0.98]`}
+                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-${tColor}-50 dark:bg-${tColor}-500/10 hover:bg-${tColor}-100 dark:hover:bg-${tColor}-500/20 border-2 border-${tColor}-200 dark:border-${tColor}-500/30 rounded-xl text-sm font-bold text-${tColor}-600 dark:text-${tColor}-400 transition-all active:scale-[0.98]`}
                   >
                     <Settings2 className="w-4 h-4" />
                     Update Status
@@ -466,7 +526,7 @@ export default function VendorOrdersPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="relative w-full max-w-sm bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6"
+              className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6"
             >
               <div className="flex items-center justify-between mb-5">
                 <h3 className="text-lg font-black text-gray-900 dark:text-gray-100">Update Status</h3>
@@ -506,9 +566,21 @@ export default function VendorOrdersPage() {
               </div>
               
               <div className="space-y-2 mb-6">
-                {ORDER_STATUSES.map(status => {
+                {ORDER_STATUSES.filter(status => {
+                  if (status === "Cancelled" && statusModalOrder.status.toLowerCase() !== "pending") return false;
+                  return true;
+                }).map(status => {
                   let isBlocked = false;
                   let blockReason = "";
+                  
+                  const currentStatusIndex = ORDER_STATUSES.findIndex(s => s.toLowerCase() === statusModalOrder.status.toLowerCase());
+                  const thisStatusIndex = ORDER_STATUSES.findIndex(s => s.toLowerCase() === status.toLowerCase());
+                  
+                  if (status !== "Cancelled" && currentStatusIndex !== -1 && thisStatusIndex < currentStatusIndex) {
+                    isBlocked = true;
+                    blockReason = "Cannot go back";
+                  }
+
                   if (status === "Shipment" && statusModalOrder.payment_method === 'online_payment' && statusModalOrder.payment_status !== 'paid') {
                     isBlocked = true;
                     blockReason = "User must pay first";
@@ -517,6 +589,8 @@ export default function VendorOrdersPage() {
                     isBlocked = true;
                     blockReason = "User must pay first";
                   }
+
+                  const isSelected = (statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status;
 
                   return (
                     <button
@@ -530,21 +604,31 @@ export default function VendorOrdersPage() {
                         }
                       }}
                       disabled={statusLoading || isBlocked}
-                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all font-bold ${
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all ${
                         isBlocked 
                           ? "border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed dark:bg-[#151522] dark:border-[#2A2A3A] opacity-60"
-                          : ((statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status)
-                            ? `border-${tColor}-500 bg-${tColor}-50 text-${tColor}-700`
+                          : isSelected
+                            ? `border-${tColor}-500 bg-${tColor}-50 dark:bg-${tColor}-500/10`
                             : "border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-700 dark:text-gray-300 hover:border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:hover:bg-[#151522]"
                       }`}
                     >
-                      <div className="flex flex-col items-start">
-                        <span>{status}</span>
-                        {isBlocked && <span className="text-[10px] uppercase text-red-500 font-bold">{blockReason}</span>}
+                      <div className="flex items-center gap-3">
+                        <div className={`w-5 h-5 rounded-[6px] border-2 flex items-center justify-center transition-all ${
+                          isSelected 
+                            ? `border-${tColor}-500 bg-${tColor}-500` 
+                            : `border-gray-300 dark:border-[#4A4A5A] bg-transparent`
+                        }`}>
+                          {isSelected && (
+                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex flex-col items-start">
+                          <span className={isSelected ? `text-${tColor}-700 dark:text-${tColor}-400 font-black` : "font-semibold"}>{status}</span>
+                          {isBlocked && <span className="text-[10px] uppercase text-red-500 font-bold">{blockReason}</span>}
+                        </div>
                       </div>
-                      {((statusModalOrder.status.toLowerCase() === status.toLowerCase() && pendingStatusUpdate !== status) || pendingStatusUpdate === status) && (
-                        <CheckCircle className={`w-5 h-5 text-${tColor}-500`} />
-                      )}
                     </button>
                   );
                 })}
@@ -560,14 +644,30 @@ export default function VendorOrdersPage() {
                     value={deliveryChargeInput}
                     onChange={(e) => setDeliveryChargeInput(e.target.value)}
                     placeholder="e.g. 40"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium mb-3"
+                    className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-[#2A2A3A] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium mb-3"
                   />
+                  
+                  {statusModalOrder?.payment_method === 'online_on_delivery' && (
+                    <>
+                      <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                        Advance Payment Required (₹)
+                      </label>
+                      <input
+                        type="number"
+                        value={advanceFeeInput}
+                        onChange={(e) => setAdvanceFeeInput(e.target.value)}
+                        placeholder="e.g. 100"
+                        className="w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-[#2A2A3A] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all font-medium mb-4"
+                      />
+                    </>
+                  )}
+                  
                   <button
                     onClick={() => updateOrderStatus(statusModalOrder.id, "Confirmed")}
                     disabled={statusLoading}
                     className={`w-full py-3 bg-${tColor}-600 hover:bg-${tColor}-700 text-white font-black rounded-xl shadow-md transition-all active:scale-[0.98]`}
                   >
-                    Confirm Order & Charge
+                    {statusModalOrder?.payment_method === 'online_on_delivery' ? "Confirm & Request Advance" : "Confirm Order & Charge"}
                   </button>
                 </div>
               )}

@@ -75,6 +75,7 @@ export default function VendorDashboard() {
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [isOpenToggle, setIsOpenToggle] = useState(true);
+  const [vendorStats, setVendorStats] = useState({ todaysOrders: 0, avgRating: 0, totalRevenue: 0 });
 
   const fetchProfile = async () => {
     try {
@@ -96,9 +97,25 @@ export default function VendorDashboard() {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/vendor/stats`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setVendorStats(data);
+      }
+    } catch (err) {
+      console.error("Failed to load stats", err);
+    }
+  };
+
   useEffect(() => {
     if (isLoggedIn && accessToken) {
       fetchProfile();
+      fetchStats();
     }
   }, [isLoggedIn, accessToken]);
 
@@ -222,11 +239,11 @@ export default function VendorDashboard() {
     },
   ];
 
-  // ── Quick stats (placeholder) ─────────────────────────────────────────────
+  // ── Quick stats ─────────────────────────────────────────────
   const stats = [
-    { label: "Today's Orders", value: "—", icon: ShoppingBag },
-    { label: "Avg. Rating", value: "—", icon: Star },
-    { label: "Total Revenue", value: "—", icon: TrendingUp },
+    { id: "todays_orders", label: "Today's Orders", value: vendorStats.todaysOrders.toString(), icon: ShoppingBag },
+    { id: "avg_rating", label: "Avg. Rating", value: "—", icon: Star },
+    { id: "total_revenue", label: "Total Revenue", value: `₹${vendorStats.totalRevenue}`, icon: TrendingUp },
   ];
 
   return (
@@ -361,7 +378,10 @@ export default function VendorDashboard() {
             {stats.map((s) => (
               <div
                 key={s.label}
-                className={`rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] px-3 py-3 flex flex-col items-center text-center gap-1 shadow-sm`}
+                onClick={() => {
+                  if (s.id === "todays_orders") router.push("/vendor/todays-orders");
+                }}
+                className={`rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] px-3 py-3 flex flex-col items-center text-center gap-1 shadow-sm ${s.id === "todays_orders" ? "cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors" : ""}`}
               >
                 <div className={`w-8 h-8 rounded-xl ${t.iconBg} flex items-center justify-center mb-0.5`}>
                   <s.icon className={`w-4 h-4 ${t.iconColor}`} />

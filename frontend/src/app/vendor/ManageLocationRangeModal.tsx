@@ -111,12 +111,12 @@ export default function ManageLocationRangeModal({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           
           {/* Delivery Range Slider */}
-          <div className="bg-orange-50/50 border border-orange-100 rounded-2xl p-4 space-y-3">
+          <div className="bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-2xl p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-orange-950 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-orange-950 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-orange-500 animate-pulse" /> Max Delivery Range
               </label>
-              <span className="text-sm font-black text-orange-600 bg-white dark:bg-[#0D0D17] border border-orange-100 px-2.5 py-0.5 rounded-full shadow-sm">
+              <span className="text-sm font-black text-orange-600 bg-white dark:bg-[#0D0D17] border border-orange-100 dark:border-orange-500/20 px-2.5 py-0.5 rounded-full shadow-sm">
                 {formData.delivery_range} km
               </span>
             </div>
@@ -128,7 +128,7 @@ export default function ManageLocationRangeModal({
               step="0.5"
               value={formData.delivery_range}
               onChange={(e) => setFormData({ ...formData, delivery_range: parseFloat(e.target.value) })}
-              className="w-full h-1.5 bg-orange-100 rounded-lg appearance-none cursor-pointer accent-orange-500"
+              className="w-full h-1.5 bg-orange-100 dark:bg-orange-500/30 rounded-lg appearance-none cursor-pointer accent-orange-500"
             />
             
             <div className="flex justify-between text-[10px] font-bold text-orange-400/80 uppercase">
@@ -137,8 +137,8 @@ export default function ManageLocationRangeModal({
               <span>25 km</span>
             </div>
             
-            <p className="text-xs text-orange-800/80 leading-normal">
-              Customers outside of a <span className="font-bold">{formData.delivery_range} km</span> radius from your store coordinates will see your restaurant marked as <span className="font-bold text-red-600">"Not available in your location"</span>.
+            <p className="text-xs text-orange-800/80 dark:text-orange-400/80 leading-normal">
+              Customers outside of a <span className="font-bold">{formData.delivery_range} km</span> radius from your store coordinates will see your restaurant marked as <span className="font-bold text-red-600 dark:text-red-500">"Not available in your location"</span>.
             </p>
           </div>
 
@@ -168,7 +168,7 @@ export default function ManageLocationRangeModal({
                         }}
                         className={`w-full flex flex-col text-left px-4 py-3 border rounded-xl transition-all shadow-sm ${
                           isSelected 
-                            ? 'bg-orange-50 border-orange-500' 
+                            ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-500' 
                             : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]'
                         }`}
                       >
@@ -183,8 +183,8 @@ export default function ManageLocationRangeModal({
                   })}
                 </div>
               ) : (
-                <div className="p-4 bg-orange-50/50 border border-orange-100 rounded-xl text-center">
-                  <p className="text-xs text-orange-800">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
+                <div className="p-4 bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-xl text-center">
+                  <p className="text-xs text-orange-800 dark:text-orange-400">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
                 </div>
               )}
             </div>
