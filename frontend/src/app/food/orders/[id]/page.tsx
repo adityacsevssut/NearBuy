@@ -39,6 +39,7 @@ interface Order {
   cancel_request_reason?: string;
   advance_fee?: string;
   advance_paid?: boolean;
+  refund_ticket?: any;
 }
 
 const STATUS_STEPS = ["pending", "confirmed", "shipment", "out for delivery", "delivered"];
@@ -57,6 +58,32 @@ export default function OrderStatusPage() {
   const [isPaying, setIsPaying] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [gstRate, setGstRate] = useState(18);
+  const [upiId, setUpiId] = useState("");
+  const [isSubmittingUpi, setIsSubmittingUpi] = useState(false);
+
+  const handleSubmitUpi = async () => {
+    if (!upiId.trim()) return toast.error("Please enter a valid UPI ID");
+    setIsSubmittingUpi(true);
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/orders/${id}/upi`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ upi_id: upiId })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("UPI ID submitted successfully!");
+        fetchOrderDetails();
+      } else {
+        toast.error(data.error || "Failed to submit UPI ID");
+      }
+    } catch (err) {
+      toast.error("Network error");
+    } finally {
+      setIsSubmittingUpi(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -207,30 +234,10 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
-        
-        toast.success("Payment successful!");
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
+
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Order Payment",
@@ -284,30 +291,10 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate advance payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-advance`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Advance payment verification failed");
-        
-        toast.success("Advance payment successful!");
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
+
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Advance Payment",
@@ -361,30 +348,10 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate remaining payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Final payment verification failed");
-        
-        toast.success("Final payment successful!");
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
+
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Final Payment",
@@ -462,8 +429,12 @@ export default function OrderStatusPage() {
   const isAwaitingAdvance = order.payment_method === 'online_on_delivery' && parseFloat(order.advance_fee || "0") > 0 && !order.advance_paid;
   const currentStepIndex = isAwaitingAdvance ? 0 : rawStepIndex;
 
+  const advancePaidAmount = parseFloat(order.platform_fee || "0") + parseFloat(order.delivery_charge || "0") + parseFloat(order.advance_fee || "0");
+  const isFullyPaidThroughAdvance = order.advance_paid && (parseFloat(order.total_amount || "0") - advancePaidAmount <= 0.01);
+
   const showPayNow = 
     order.payment_status !== 'paid' && 
+    !isFullyPaidThroughAdvance &&
     (
       (order.payment_method === 'online_payment' && currentStepIndex >= 1 && !isCancelled) || 
       (order.payment_method === 'online_on_delivery' && currentStepIndex >= 3 && !isCancelled)
@@ -540,7 +511,7 @@ export default function OrderStatusPage() {
         
         {/* Payment Buttons Priority Display */}
         {(showAdvancePayNow || showPayNow) && (
-          <div className="bg-white dark:bg-[#0D0D17] rounded-3xl p-6 border border-orange-200 dark:border-orange-500/30 shadow-lg relative z-30 mb-4 animate-pulse-slow">
+          <div className="bg-white dark:bg-[#0D0D17] rounded-3xl p-6 border border-orange-200 dark:border-orange-500/30 shadow-lg relative z-30 mb-4">
             <h3 className="text-lg font-black text-gray-900 dark:text-white mb-3 text-center">
               {showAdvancePayNow ? "Advance Payment Required" : "Final Payment Required"}
             </h3>
@@ -548,7 +519,7 @@ export default function OrderStatusPage() {
               <button 
                 onClick={handlePayAdvance}
                 disabled={isPaying}
-                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm animate-pulse"
+                className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm"
               >
                 {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                 {isPaying ? "Processing..." : `Pay Advance ₹${(Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0)).toFixed(2)}`}
@@ -558,7 +529,7 @@ export default function OrderStatusPage() {
               <button 
                 onClick={order.payment_method === 'online_on_delivery' ? handlePayRemaining : handlePayNow}
                 disabled={isPaying}
-                className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm animate-pulse"
+                className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl flex items-center justify-center gap-2 font-bold text-sm transition-colors shadow-sm"
               >
                 {isPaying ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                 {isPaying ? "Processing..." : `Pay ₹${
@@ -583,12 +554,78 @@ export default function OrderStatusPage() {
             </div>
           )}
           {isCancelled ? (
-            <div className="flex flex-col items-center justify-center py-4 text-center">
-              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-3">
-                <Info className="w-8 h-8 text-red-500" />
+            <div className="flex flex-col py-2">
+              <div className="flex flex-col items-center justify-center py-4 text-center mb-4">
+                <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mb-3">
+                  <Info className="w-8 h-8 text-red-500" />
+                </div>
+                <p className="text-gray-900 dark:text-gray-100 font-black text-lg mb-1">This order was cancelled</p>
               </div>
-              <p className="text-gray-900 dark:text-gray-100 font-black text-lg mb-1">This order was cancelled</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">If you have already paid, your refund will be processed within 3-5 business days.</p>
+
+              {order.refund_ticket ? (
+                <div className="bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-5 mb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-black text-gray-900 dark:text-gray-100">Refund Status</h3>
+                    <span className={`text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wider ${
+                      order.refund_ticket.status === 'Completed' ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400' :
+                      order.refund_ticket.status === 'Rejected' ? 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400' :
+                      order.refund_ticket.status === 'Awaiting UPI' ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400' :
+                      order.refund_ticket.status === 'UPI Provided' ? 'bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400' :
+                      'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-400'
+                    }`}>
+                      {order.refund_ticket.status === 'Pending' ? 'Processing' : order.refund_ticket.status}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-500 dark:text-gray-400 font-medium">Refund Amount:</span>
+                      <span className="font-black text-gray-900 dark:text-gray-100">₹{order.refund_ticket.amount}</span>
+                    </div>
+
+                    {order.refund_ticket.status === 'Rejected' && order.refund_ticket.rejection_reason && (
+                      <div className="mt-4 p-3 bg-red-100/50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl">
+                        <p className="text-xs font-bold text-red-600 dark:text-red-400 mb-1">Your refund was cancelled by manager:</p>
+                        <p className="text-sm font-medium text-red-800 dark:text-red-300">{order.refund_ticket.rejection_reason}</p>
+                      </div>
+                    )}
+
+                    {order.refund_ticket.status === 'Awaiting UPI' && (
+                      <div className="mt-4 p-4 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 rounded-xl flex flex-col gap-3">
+                        <div>
+                          <p className="text-xs font-bold text-orange-600 dark:text-orange-400 mb-1">Action Required</p>
+                          <p className="text-sm text-orange-800 dark:text-orange-300">Please provide your UPI ID to receive your refund manually.</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            placeholder="e.g. mobile@upi" 
+                            value={upiId}
+                            onChange={(e) => setUpiId(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-orange-200 dark:border-orange-500/30 rounded-xl outline-none focus:ring-2 focus:ring-orange-500/50 text-sm font-medium bg-white dark:bg-[#0D0D17]"
+                          />
+                          <button 
+                            onClick={handleSubmitUpi}
+                            disabled={isSubmittingUpi}
+                            className="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white font-bold rounded-xl text-sm transition-colors disabled:opacity-50"
+                          >
+                            {isSubmittingUpi ? "..." : "Submit"}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {order.refund_ticket.status === 'UPI Provided' && (
+                      <div className="mt-4 p-3 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl">
+                        <p className="text-xs font-bold text-purple-600 dark:text-purple-400 mb-1">UPI ID Submitted</p>
+                        <p className="text-sm font-medium text-purple-800 dark:text-purple-300">Waiting for manager to process the refund to your UPI ID: <span className="font-mono">{order.refund_ticket.upi_id}</span></p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">If you have already paid, your refund will be processed shortly.</p>
+              )}
             </div>
           ) : (
             <div className="relative">
@@ -914,7 +951,7 @@ export default function OrderStatusPage() {
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Order ID</p>
-                <p className="font-black text-sm break-all">{order.id}</p>
+                <p className="font-black text-sm break-all">#{order.id.slice(0, 8).toUpperCase()}</p>
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Date</p>

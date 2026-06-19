@@ -5,6 +5,7 @@ const validate = require("../middleware/validate");
 const { createManagerSchema, updateManagerSchema, createVendorAccountSchema, editVendorAccountSchema } = require("../validators/manager.validators");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
+const Razorpay = require("razorpay");
 
 const DEV_EMAIL = "nahakaditya344@gmail.com";
 
@@ -466,14 +467,35 @@ router.get("/refund-requests", authenticate, async (req, res) => {
     const mType = (req.user.manager_type || "").toLowerCase();
     let query, params;
     if (req.user.role === "admin") {
-      query = `SELECT * FROM refund_requests ORDER BY created_at DESC`;
+      query = `
+        SELECT r.*, u.first_name, u.last_name, u.email as user_email, u.mobile as user_mobile 
+        FROM refund_requests r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        ORDER BY r.created_at DESC
+      `;
       params = [];
     } else {
-      query = `SELECT * FROM refund_requests WHERE type = $1 OR type = 'general' ORDER BY created_at DESC`;
+      query = `
+        SELECT r.*, u.first_name, u.last_name, u.email as user_email, u.mobile as user_mobile 
+        FROM refund_requests r 
+        LEFT JOIN users u ON r.user_id = u.id 
+        WHERE r.type = $1 OR r.type = 'general' 
+        ORDER BY r.created_at DESC
+      `;
       params = [mType];
     }
     const { rows } = await pool.query(query, params);
-    return res.json({ refundRequests: rows });
+    
+    const formattedRows = rows.map(r => {
+      const name = `${r.first_name || ''} ${r.last_name || ''}`.trim();
+      return {
+        ...r,
+        user_name: name || r.user_name || 'Guest User',
+        email: r.user_email || r.email || r.user_mobile || 'No contact provided'
+      };
+    });
+
+    return res.json({ refundRequests: formattedRows });
   } catch (err) {
     console.error("list refund requests error:", err);
     return res.status(500).json({ error: "Failed to fetch refund requests." });
@@ -489,9 +511,10 @@ router.patch("/refund-requests/:id", authenticate, async (req, res) => {
       return res.status(403).json({ error: "Access denied." });
     }
     const { id } = req.params;
-    const { status, rejection_reason } = req.body; // 'Approved', 'Rejected', or 'Completed'
+    const { status, rejection_reason } = req.body; 
     
-    if (status !== 'Approved' && status !== 'Rejected' && status !== 'Completed') {
+    const validStatuses = ['Approved', 'Rejected', 'Completed', 'Awaiting UPI'];
+    if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: "Invalid status." });
     }
 
@@ -516,6 +539,54 @@ router.patch("/refund-requests/:id", authenticate, async (req, res) => {
   } catch (err) {
     console.error("update refund request error:", err);
     return res.status(500).json({ error: "Failed to update refund request." });
+  }
+});
+
+// POST /api/managers/refund-requests/:id/process-razorpay
+router.post("/refund-requests/:id/process-razorpay", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const { id } = req.params;
+
+    const check = await pool.query("SELECT * FROM refund_requests WHERE id=$1", [id]);
+    if (!check.rows.length) return res.status(404).json({ error: "Refund request not found." });
+    
+    const refundData = check.rows[0];
+    
+    if (req.user.role === "manager") {
+      const mType = (req.user.manager_type || "").toLowerCase();
+      if (refundData.type !== 'general' && refundData.type !== mType) {
+        return res.status(403).json({ error: "Cannot process refund from another division." });
+      }
+    }
+
+    if (!refundData.payment_id || !refundData.amount) {
+      return res.status(400).json({ error: "Missing payment ID or amount. Try manual refund." });
+    }
+
+    if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+      return res.status(500).json({ error: "Razorpay keys not configured." });
+    }
+
+    const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+    const refundAmount = Math.round(Number(refundData.amount) * 100);
+
+    try {
+      await instance.payments.refund(refundData.payment_id, { amount: refundAmount, speed: "normal" });
+    } catch (razorpayErr) {
+      console.error("Razorpay refund error:", razorpayErr);
+      return res.status(400).json({ error: "Razorpay refund failed. Try manual refund." });
+    }
+
+    await pool.query(`UPDATE orders SET adv_refund_processed = true WHERE id = $1`, [refundData.order_id]);
+    await pool.query(`UPDATE refund_requests SET status = 'Completed' WHERE id = $1`, [id]);
+
+    return res.json({ message: "Refund processed successfully via Razorpay." });
+  } catch (err) {
+    console.error("Process razorpay error:", err);
+    return res.status(500).json({ error: "Failed to process Razorpay refund." });
   }
 });
 
@@ -570,10 +641,11 @@ router.get("/vendors/:vendorId/daily-stats", authenticate, async (req, res) => {
     const { rows } = await pool.query(
       `SELECT 
         COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%cash%' OR LOWER(payment_method) = 'cod' THEN total_amount ELSE 0 END), 0) as cod_amount,
-        COALESCE(SUM(CASE WHEN LOWER(payment_method) = 'online' THEN total_amount ELSE 0 END), 0) as online_amount,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online%' AND LOWER(payment_method) NOT LIKE '%delivery%' THEN total_amount ELSE 0 END), 0) as online_amount,
         COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online on delivery%' THEN total_amount ELSE 0 END), 0) as online_on_delivery_amount,
         COUNT(CASE WHEN LOWER(status) = 'delivered' THEN 1 END) as delivered_count,
-        COUNT(CASE WHEN LOWER(status) = 'cancelled' THEN 1 END) as cancelled_count
+        COUNT(CASE WHEN LOWER(status) = 'cancelled' THEN 1 END) as cancelled_count,
+        COALESCE(SUM(CASE WHEN LOWER(status) = 'cancelled' AND (payment_status = 'paid' OR advance_paid = true) THEN COALESCE(delivery_charge, 0) ELSE 0 END), 0) as cancelled_delivery_fee
        FROM orders 
        WHERE vendor_id = $1 AND DATE(created_at) = $2`,
       [vendorId, date]
@@ -622,6 +694,55 @@ router.get("/vendors/:vendorId/orders", authenticate, async (req, res) => {
   }
 });
 
+// ════════════════════════════════════════════════════════════════════
+// GET /api/managers/nearbuy-payments
+// Returns day-wise total platform fee and gst collected by all vendors
+// ════════════════════════════════════════════════════════════════════
+router.get("/nearbuy-payments", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    const date = req.query.date || new Date().toISOString().split('T')[0];
+    const mType = (req.user.manager_type || "").toLowerCase();
+    let query, params;
+
+    const baseSelect = `
+      SELECT 
+        COALESCE(SUM(
+          CASE WHEN LOWER(o.status) = 'delivered' THEN COALESCE(o.platform_fee, 0) ELSE 0 END
+        ), 0) as delivered_platform_fee,
+        COALESCE(SUM(
+          CASE WHEN LOWER(o.status) = 'delivered' THEN COALESCE(o.gst, 0) ELSE 0 END
+        ), 0) as delivered_gst,
+        COALESCE(SUM(
+          CASE WHEN LOWER(o.status) = 'cancelled' AND (o.payment_status = 'paid' OR o.advance_paid = true) 
+          THEN COALESCE(o.platform_fee, 0) ELSE 0 END
+        ), 0) as cancelled_platform_fee,
+        COALESCE(SUM(
+          CASE WHEN LOWER(o.status) = 'cancelled' AND (o.payment_status = 'paid' OR o.advance_paid = true) 
+          THEN COALESCE(o.gst, 0) ELSE 0 END
+        ), 0) as cancelled_gst
+      FROM orders o
+      LEFT JOIN users v ON o.vendor_id = v.id
+      WHERE DATE(o.created_at) = $1
+    `;
+
+    if (req.user.role === "admin") {
+      query = baseSelect;
+      params = [date];
+    } else {
+      query = baseSelect + ` AND v.manager_type = $2`;
+      params = [date, mType];
+    }
+
+    const { rows } = await pool.query(query, params);
+    return res.json({ payments: rows[0] });
+  } catch (err) {
+    console.error("nearbuy payments error:", err);
+    return res.status(500).json({ error: "Failed to fetch nearbuy payments." });
+  }
+});
 
 // ════════════════════════════════════════════════════════════════════
 // PATCH /api/managers/orders/:id/adv-refund

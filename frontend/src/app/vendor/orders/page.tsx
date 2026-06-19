@@ -130,10 +130,21 @@ export default function VendorOrdersPage() {
       const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
       
       let finalAdvanceFee = parseFloat(advanceFeeInput || "0");
-      if (statusModalOrder?.payment_method === 'online_on_delivery' && paymentTypeSelection === 'full') {
+      if (statusModalOrder?.payment_method === 'online_on_delivery' && newStatus === "Confirmed") {
         const subtotal = parseFloat(statusModalOrder.subtotal || "0");
         const gst = parseFloat(statusModalOrder.gst || "0");
-        finalAdvanceFee = subtotal + gst;
+        const maxAdvanceFee = subtotal + gst;
+
+        if (paymentTypeSelection === 'advance') {
+          if (finalAdvanceFee >= maxAdvanceFee && maxAdvanceFee > 0) {
+            const suggested = Math.max(0, Math.floor(maxAdvanceFee - 1));
+            toast.error(`You can't set full amount. If you want full money switch to full payment mode or give value of ${suggested} which is lesser than ${maxAdvanceFee}`);
+            setStatusLoading(false);
+            return;
+          }
+        } else if (paymentTypeSelection === 'full') {
+          finalAdvanceFee = maxAdvanceFee;
+        }
       }
 
       const res = await fetch(`${API}/api/orders/${orderId}/status`, {
@@ -614,7 +625,16 @@ export default function VendorOrdersPage() {
                     }
                   }
 
-                  if (status === "Delivered" && statusModalOrder.payment_method === 'online_on_delivery' && statusModalOrder.payment_status !== 'paid') {
+                  let isFullyPaidThroughAdvance = false;
+                  if (statusModalOrder.advance_paid) {
+                    const advancePaidAmount = parseFloat(statusModalOrder.platform_fee || "0") + parseFloat(statusModalOrder.delivery_charge || "0") + parseFloat(statusModalOrder.advance_fee || "0");
+                    const totalAmount = parseFloat(statusModalOrder.total_amount || "0");
+                    if (totalAmount - advancePaidAmount <= 0.01) {
+                      isFullyPaidThroughAdvance = true;
+                    }
+                  }
+
+                  if (status === "Delivered" && statusModalOrder.payment_method === 'online_on_delivery' && statusModalOrder.payment_status !== 'paid' && !isFullyPaidThroughAdvance) {
                     isBlocked = true;
                     blockReason = "User must pay first";
                   }

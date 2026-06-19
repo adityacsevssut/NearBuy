@@ -442,7 +442,7 @@ function OrdersPageContent() {
             <div className="grid grid-cols-3 gap-4 mb-8">
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Order ID</p>
-                <p className="font-black text-sm break-all">{orderToDownload.id}</p>
+                <p className="font-black text-sm break-all">#{orderToDownload.id.slice(0, 8).toUpperCase()}</p>
               </div>
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: "#9ca3af" }}>Date</p>

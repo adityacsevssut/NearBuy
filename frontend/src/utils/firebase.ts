@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 
 // TODO: Replace with your actual Firebase config from Firebase Console
 const firebaseConfig = {
-  apiKey: "AIzaSyASz7huPhBJ3JbYtwGyQz6WBktDcpu0yFo",
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
   authDomain: "nearbuy-d7daf.firebaseapp.com",
   projectId: "nearbuy-d7daf",
   storageBucket: "nearbuy-d7daf.firebasestorage.app",

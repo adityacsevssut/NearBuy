@@ -517,7 +517,7 @@ function RestaurantOrderCard({
                   if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate tax payment");
 
                   const options = {
-                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
                     amount: rzpOrder.amount,
                     currency: rzpOrder.currency,
                     name: "NearBuy Platform Fees",

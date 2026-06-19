@@ -243,7 +243,7 @@ export default function OrderStatusPage() {
       // --- TESTING BYPASS END ---
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Order Payment",
@@ -320,7 +320,7 @@ export default function OrderStatusPage() {
       // --- TESTING BYPASS END ---
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Advance Payment",
@@ -397,7 +397,7 @@ export default function OrderStatusPage() {
       // --- TESTING BYPASS END ---
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_T0LUBHCjIdPwYL",
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
         amount: rzpOrder.amount,
         currency: rzpOrder.currency,
         name: "NearBuy Final Payment",

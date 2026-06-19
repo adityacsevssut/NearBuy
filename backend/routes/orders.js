@@ -6,7 +6,7 @@ const validate = require("../middleware/validate");
 const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
 
-// Generalized helper to auto-generate refund request and optionally trigger Razorpay auto-refund
+// Generalized helper to auto-generate refund request
 async function handleAutomatedRefundRequest(pool, order) {
   const isOwedRefund = order.advance_paid || order.payment_status === 'paid';
   if (!isOwedRefund) return;
@@ -18,24 +18,52 @@ async function handleAutomatedRefundRequest(pool, order) {
     const customer = customerQ.rows[0] || {};
     const userName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'User';
 
-    const amount = order.advance_fee ? Number(order.advance_fee) : 0;
-    const insertRefund = await pool.query(
-      `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount) VALUES ($1, $2, $3, $4, $5, 'Pending', $6) RETURNING id`,
-      [order.user_id, customer.email || '', order.id, userName, reqType, amount]
-    );
-    const refundReqId = insertRefund.rows[0].id;
+    let amount = 0;
+    let paymentIdToRefund = null;
 
-    if (order.advance_paid && order.adv_payment_id && order.advance_fee > 0) {
-      if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
-        const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
-        const refundAmount = Math.round(Number(order.advance_fee) * 100);
-        console.log(`Triggering automated refund for order ${order.id}: ₹${refundAmount / 100}`);
-        await instance.payments.refund(order.adv_payment_id, { amount: refundAmount, speed: "normal" });
-        
-        await pool.query(`UPDATE orders SET adv_refund_processed = true WHERE id = $1`, [order.id]);
-        await pool.query(`UPDATE refund_requests SET status = 'Completed' WHERE id = $1`, [refundReqId]);
+    if (order.payment_status === 'paid' && order.razorpay_payment_id && order.advance_paid) {
+      // User paid BOTH advance AND remaining balance
+      // 1. Advance refund (refund only the advance_fee part, keep platform & delivery)
+      const advRefundAmount = Number(order.advance_fee || 0);
+      if (advRefundAmount > 0) {
+        await pool.query(
+          `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount, payment_id) VALUES ($1, $2, $3, $4, $5, 'Pending', $6, $7)`,
+          [order.user_id, customer.email || '', order.id, userName, reqType, advRefundAmount, order.adv_payment_id]
+        );
       }
+      
+      // 2. Remaining refund (refund 100% of the remaining amount paid)
+      const advancePaidAmount = Number(order.platform_fee) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0);
+      const remainingRefundAmount = Number(order.total_amount) - advancePaidAmount;
+      if (remainingRefundAmount > 0) {
+        await pool.query(
+          `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount, payment_id) VALUES ($1, $2, $3, $4, $5, 'Pending', $6, $7)`,
+          [order.user_id, customer.email || '', order.id, userName, reqType, remainingRefundAmount, order.razorpay_payment_id]
+        );
+      }
+      return;
+    } else if (order.advance_paid && order.adv_payment_id && order.advance_fee > 0) {
+      // User ONLY paid the advance payment
+      // They paid advance_fee + delivery + platform. 
+      // We deduct delivery + platform, meaning we only refund advance_fee.
+      amount = Number(order.advance_fee || 0);
+      paymentIdToRefund = order.adv_payment_id;
+    } else if (order.payment_status === 'paid' && order.razorpay_payment_id) {
+      // User paid 100% upfront (not advance flow)
+      const totalAmount = Number(order.total_amount || 0);
+      const deliveryCharge = Number(order.delivery_charge || 0);
+      const platformFee = Number(order.platform_fee || 0);
+      amount = totalAmount - deliveryCharge - platformFee;
+      paymentIdToRefund = order.razorpay_payment_id;
     }
+
+    if (amount <= 0) return;
+
+    await pool.query(
+      `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount, payment_id) VALUES ($1, $2, $3, $4, $5, 'Pending', $6, $7)`,
+      [order.user_id, customer.email || '', order.id, userName, reqType, amount, paymentIdToRefund]
+    );
+
   } catch(err) {
     console.error("Auto refund request err:", err);
   }
@@ -66,6 +94,61 @@ router.post("/create-razorpay-order", authenticate, async (req, res) => {
   }
 });
 
+// Helper for initiating razorpay
+const initiateRazorpay = async (amount, receipt) => {
+  if (amount < 1) throw new Error("Minimum Amount is ₹1");
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) throw new Error("Razorpay keys not configured");
+  const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+  return await instance.orders.create({
+    amount: Math.round(amount * 100),
+    currency: "INR",
+    receipt: receipt,
+  });
+};
+
+// POST /api/orders/:id/initiate-payment
+router.post("/:id/initiate-payment", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [req.params.id, req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Order not found" });
+    const order = rows[0];
+    const amount = Number(order.total_amount);
+    const rzpOrder = await initiateRazorpay(amount, "receipt_" + order.id);
+    res.json(rzpOrder);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/orders/:id/initiate-advance
+router.post("/:id/initiate-advance", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [req.params.id, req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Order not found" });
+    const order = rows[0];
+    const advanceAmount = Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0);
+    const rzpOrder = await initiateRazorpay(advanceAmount, "adv_" + order.id);
+    res.json(rzpOrder);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/orders/:id/initiate-remaining
+router.post("/:id/initiate-remaining", authenticate, async (req, res) => {
+  try {
+    const { rows } = await pool.query(`SELECT * FROM orders WHERE id = $1 AND user_id = $2`, [req.params.id, req.user.id]);
+    if (rows.length === 0) return res.status(404).json({ error: "Order not found" });
+    const order = rows[0];
+    const advanceAmount = Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0);
+    const remainingAmount = Number(order.total_amount) - advanceAmount;
+    const rzpOrder = await initiateRazorpay(remainingAmount, "rem_" + order.id);
+    res.json(rzpOrder);
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/orders/verify-payment
 router.post("/verify-payment", authenticate, async (req, res) => {
   try {
@@ -80,7 +163,7 @@ router.post("/verify-payment", authenticate, async (req, res) => {
       .update(body.toString())
       .digest("hex");
       
-    if (expectedSignature === razorpay_signature || razorpay_signature === "test_signature") {
+    if (expectedSignature === razorpay_signature) {
       if (order_id) {
         await pool.query(
           `UPDATE orders SET payment_status = 'paid', razorpay_order_id = $1, razorpay_payment_id = $2, updated_at = NOW() WHERE id = $3 AND user_id = $4`,
@@ -110,7 +193,7 @@ router.post("/verify-advance", authenticate, async (req, res) => {
       .update(body.toString())
       .digest("hex");
       
-    if (expectedSignature === razorpay_signature || razorpay_signature === "test_signature") {
+    if (expectedSignature === razorpay_signature) {
       if (order_id) {
         const { rows } = await pool.query(
           `UPDATE orders SET advance_paid = true, adv_payment_id = $1, status = 'Confirmed', updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING vendor_id`,
@@ -359,7 +442,16 @@ router.get("/:id", authenticate, async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ error: "Order not found" });
     }
-    return res.json({ order: rows[0] });
+    
+    const order = rows[0];
+
+    // Check for refund request
+    const refundRes = await pool.query(`SELECT id, status, amount, upi_id, rejection_reason FROM refund_requests WHERE order_id = $1`, [req.params.id]);
+    if (refundRes.rows.length > 0) {
+      order.refund_ticket = refundRes.rows[0];
+    }
+
+    return res.json({ order });
   } catch (err) {
     console.error("Get order error:", err);
     return res.status(500).json({ error: "Failed to fetch order details." });
@@ -441,7 +533,16 @@ router.patch("/:id/status", authenticate, async (req, res) => {
     
     const orderData = checkQuery.rows[0];
 
-    if (status.toLowerCase() === 'delivered' && orderData.payment_method === 'online_on_delivery' && orderData.payment_status !== 'paid') {
+    let isFullyPaidThroughAdvance = false;
+    if (orderData.advance_paid) {
+      const advancePaidAmount = Number(orderData.platform_fee || 0) + Number(orderData.delivery_charge || 0) + Number(orderData.advance_fee || 0);
+      const totalAmount = Number(orderData.total_amount || 0);
+      if (totalAmount - advancePaidAmount <= 0.01) {
+        isFullyPaidThroughAdvance = true;
+      }
+    }
+
+    if (status.toLowerCase() === 'delivered' && orderData.payment_method === 'online_on_delivery' && orderData.payment_status !== 'paid' && !isFullyPaidThroughAdvance) {
       return res.status(400).json({ error: "Cannot mark delivered. User must complete 'Online On Delivery' payment first." });
     }
 
@@ -505,6 +606,10 @@ router.patch("/:id/status", authenticate, async (req, res) => {
     }
 
     sendNotification(updatedOrder.user_id, notifTitle, notifMessage, "order_status");
+    
+    if (finalStatus.toLowerCase() === 'cancelled') {
+      await handleAutomatedRefundRequest(pool, updatedOrder);
+    }
 
     return res.json({ message: "Status updated successfully", order: updatedOrder });
   } catch (err) {
@@ -518,7 +623,7 @@ router.patch("/:id/status", authenticate, async (req, res) => {
 router.patch("/:id/cancel", authenticate, async (req, res) => {
   try {
     // First, check the current status of the order to see if it's eligible for cancellation
-    const checkQuery = `SELECT status, vendor_id, advance_paid, adv_payment_id, advance_fee FROM orders WHERE id = $1 AND user_id = $2`;
+    const checkQuery = `SELECT * FROM orders WHERE id = $1 AND user_id = $2`;
     const checkResult = await pool.query(checkQuery, [req.params.id, req.user.id]);
     
     if (checkResult.rows.length === 0) {
@@ -636,6 +741,8 @@ router.patch("/:id/cancel-request/respond", authenticate, async (req, res) => {
       
       sendNotification(order.user_id, "Order Cancelled !!!", `Your cancellation request for Order #${req.params.id.slice(0, 8).toUpperCase()} was approved.`, "order_status");
       
+      await handleAutomatedRefundRequest(pool, rows[0]);
+      
       return res.json({ message: "Cancellation request approved.", order: rows[0] });
     } else {
       const { rows } = await pool.query(
@@ -650,6 +757,36 @@ router.patch("/:id/cancel-request/respond", authenticate, async (req, res) => {
   } catch (err) {
     console.error("Cancel response error:", err);
     return res.status(500).json({ error: "Failed to respond to cancellation request." });
+  }
+});
+
+// PATCH /api/orders/:id/upi
+router.patch("/:id/upi", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { upi_id } = req.body;
+    
+    if (!upi_id) return res.status(400).json({ error: "UPI ID is required" });
+
+    // Validate the order belongs to the user
+    const orderCheck = await pool.query(`SELECT id FROM orders WHERE id=$1 AND user_id=$2`, [id, req.user.id]);
+    if (!orderCheck.rows.length) return res.status(404).json({ error: "Order not found" });
+
+    // Find the pending refund ticket
+    const refundCheck = await pool.query(`SELECT id, status FROM refund_requests WHERE order_id=$1`, [id]);
+    if (!refundCheck.rows.length) return res.status(404).json({ error: "No refund request found for this order" });
+    
+    const refundReq = refundCheck.rows[0];
+    if (refundReq.status !== 'Awaiting UPI') {
+      return res.status(400).json({ error: "Refund is not awaiting UPI" });
+    }
+
+    await pool.query(`UPDATE refund_requests SET upi_id = $1, status = 'UPI Provided' WHERE id = $2`, [upi_id, refundReq.id]);
+    
+    res.json({ message: "UPI ID submitted successfully" });
+  } catch(err) {
+    console.error("Error updating UPI ID:", err);
+    res.status(500).json({ error: "Failed to submit UPI ID" });
   }
 });
 

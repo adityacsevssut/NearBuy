@@ -99,16 +99,16 @@ export default function RefundsPage() {
             <XCircle className="w-3.5 h-3.5" /> Cancelled
           </span>
         );
-      case "approved":
-        return (
-          <span className="flex items-center gap-1.5 px-3 py-1 bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400 rounded-full text-xs font-bold tracking-wide">
-            <CheckCircle className="w-3.5 h-3.5" /> Approved
-          </span>
-        );
       case "upi provided":
         return (
           <span className="flex items-center gap-1.5 px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-500/20 dark:text-purple-400 rounded-full text-xs font-bold tracking-wide">
             <CheckCircle className="w-3.5 h-3.5" /> UPI Submitted
+          </span>
+        );
+      case "awaiting upi":
+        return (
+          <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 rounded-full text-xs font-bold tracking-wide">
+            <Clock className="w-3.5 h-3.5" /> Action Required
           </span>
         );
       case "completed":
@@ -182,7 +182,7 @@ export default function RefundsPage() {
                   <div>
                     <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Order ID</p>
                     <p className="text-sm font-mono font-bold text-gray-800 dark:text-gray-200 bg-gray-50 dark:bg-[#0D0D17] px-2 py-1 rounded">
-                      {req.order_id}
+                      #{req.order_id?.slice(0, 8).toUpperCase()}
                     </p>
                   </div>
                   <div className="text-right">
@@ -198,7 +198,7 @@ export default function RefundsPage() {
                   </p>
                 </div>
 
-                {req.status === 'Approved' && (
+                {req.status === 'Awaiting UPI' && (
                   <div className="mt-2 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
                     <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-2">Enter your UPI ID for refund</label>
                     <div className="flex gap-2">
