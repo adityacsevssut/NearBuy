@@ -284,6 +284,11 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     if (Capacitor.isNativePlatform()) {
       try {
         setLoading(true);
+        await GoogleAuth.initialize({
+          clientId: '301370621443-q2b5mgd8pc92h2mevr38nm8fhu3ua48g.apps.googleusercontent.com',
+          scopes: ['profile', 'email'],
+          grantOfflineAccess: true,
+        });
         const user = await GoogleAuth.signIn();
         if (!user.authentication.accessToken) {
           setError("Google sign-in did not return a token.");
