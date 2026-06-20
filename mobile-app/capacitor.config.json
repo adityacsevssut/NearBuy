@@ -1,0 +1,16 @@
+{
+  "appId": "com.aditya.nearbuy",
+  "appName": "NearBuy",
+  "webDir": "www",
+  "server": {
+    "url": "https://near-buy-nine.vercel.app/",
+    "cleartext": true
+  },
+  "plugins": {
+    "GoogleAuth": {
+      "scopes": ["profile", "email"],
+      "serverClientId": "301370621443-q2b5mgd8pc92h2mevr38nm8fhu3ua48g.apps.googleusercontent.com",
+      "forceCodeForRefreshToken": true
+    }
+  }
+}

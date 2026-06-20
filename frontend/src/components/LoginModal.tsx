@@ -6,6 +6,8 @@ import { useAuth } from "@/context/AuthContext";
 import { usePathname } from "next/navigation";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
+import { Capacitor } from "@capacitor/core";
+import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -278,6 +280,28 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     onError: () => setError("Google sign-in was cancelled or failed."),
   });
 
+  const handleGoogleLogin = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        setLoading(true);
+        const user = await GoogleAuth.signIn();
+        if (!user.authentication.accessToken) {
+          setError("Google sign-in did not return a token.");
+          setLoading(false);
+          return;
+        }
+        const data = await post("google", { accessToken: user.authentication.accessToken });
+        login(data.user, data.accessToken, data.refreshToken);
+        onClose();
+      } catch (err: any) {
+        setError(err.message || "Native Google sign-in failed.");
+      }
+      setLoading(false);
+    } else {
+      googleLoginAction();
+    }
+  };
+
   const BtnPrimary = ({ children, disabled, type = "submit", onClick }: any) => (
     <button
       type={type}
@@ -294,7 +318,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     <div className="w-full mt-2 flex justify-center items-center">
       <button
         type="button"
-        onClick={() => googleLoginAction()}
+        onClick={handleGoogleLogin}
         disabled={loading}
         className="w-full py-3.5 rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-black/20 hover:bg-gray-50 dark:hover:bg-black/40 text-gray-700 dark:text-gray-300 font-bold text-[14px] shadow-sm flex items-center justify-center gap-3 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
       >
