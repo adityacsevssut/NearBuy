@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import { GoogleLogin, useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
 import { Capacitor } from "@capacitor/core";
-import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
+import { GoogleAuth } from "@southdevs/capacitor-google-auth";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -289,7 +289,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
           scopes: ['profile', 'email'],
           grantOfflineAccess: true,
         });
-        const user = await GoogleAuth.signIn();
+        const user = await GoogleAuth.signIn({ scopes: ['profile', 'email'] });
         if (!user.authentication.accessToken) {
           setError("Google sign-in did not return a token.");
           setLoading(false);
