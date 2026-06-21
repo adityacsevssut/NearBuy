@@ -889,8 +889,8 @@ export default function HomePage() {
               <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
-                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={true} className="object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
-                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={true} className="object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
+                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "auto" }} priority={true} className="object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
+                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "auto" }} priority={true} className="object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
               </div>
             )}
           </section>
