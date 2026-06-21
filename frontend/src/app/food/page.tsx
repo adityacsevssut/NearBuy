@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
   Search,
@@ -177,11 +178,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       {/* Image */}
       <div className="relative h-[100px] bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
         {r.image ? (
-          <img
-            src={r.image}
-            alt={r.name}
-            className={`w-full h-full object-cover`}
-          />
+          <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 50vw, 33vw" className={`object-cover`} />
         ) : (
           <div className="w-full h-full bg-orange-50 flex items-center justify-center">
             <Utensils className="w-7 h-7 text-orange-200" />
@@ -282,11 +279,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       {/* Image */}
       <div className="relative h-40 bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
         {r.image ? (
-          <img
-            src={r.image}
-            alt={r.name}
-            className={`w-full h-full object-cover transition-transform duration-500`}
-          />
+          <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 100vw, 50vw" className={`object-cover transition-transform duration-500`} />
         ) : (
           <div className="w-full h-full bg-orange-50 flex items-center justify-center">
             <Utensils className="w-10 h-10 text-orange-200" />
@@ -878,19 +871,9 @@ export default function HomePage() {
                   href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                   className="flex-shrink-0 flex flex-col items-center gap-1.5 group"
                 >
-                  <div className="w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-200 isolate">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image}
-                      alt={label}
-                      className="w-full h-full object-cover transition-transform duration-200 dark:hidden"
-                    />
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image.replace('.png', '_dark.png')}
-                      alt={label}
-                      className="w-full h-full object-cover transition-transform duration-200 hidden dark:block"
-                    />
+                  <div className="relative w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-200 isolate">
+                    <Image src={image} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-200 dark:hidden" />
+                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-200 hidden dark:block" />
                   </div>
                   <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
                     {label}
@@ -906,18 +889,8 @@ export default function HomePage() {
               <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={posterObj?.image_url || "/1000242984.png"}
-                  alt="NearBuy Special Offer"
-                  className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden"
-                />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"}
-                  alt="NearBuy Special Offer"
-                  className="w-full h-auto md:max-h-72 lg:max-h-80 object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block"
-                />
+                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={true} className="object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
+                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={true} className="object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
               </div>
             )}
           </section>
@@ -963,13 +936,8 @@ export default function HomePage() {
                   key={label}
                   className={`group flex-shrink-0 flex items-center gap-2 pr-3.5 pl-1.5 py-1.5 rounded-full border ${bg} dark:bg-[#151522] ${border} dark:border-[#2A2A3A] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-[12px] font-bold text-gray-800 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-default`}
                 >
-                  <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 transition-transform duration-300 ">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image}
-                      alt={label}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 transition-transform duration-300 ">
+                    <Image src={image} alt={label} fill sizes="32px" priority={true} className="object-cover" />
                   </div>
                   {label}
                 </div>
