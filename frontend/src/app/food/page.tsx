@@ -427,15 +427,25 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 }
 
 /* ─── Main Page ────────────────────────────────────────────────────────────── */
+let cachedState = {
+  restaurants: [] as any[],
+  page: 1,
+  hasMore: true,
+  searchQuery: "",
+  foodPref: "all" as any,
+  posterObj: null as any,
+  posterLoaded: false
+};
+
 export default function HomePage() {
   useEffect(() => {
     document.title = "Home Food Essential";
   }, []);
 
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(cachedState.searchQuery);
   const [foodPref, setFoodPref] = useState<
     "all" | "veg" | "non-veg" | "avail-all" | "avail-veg" | "avail-non-veg"
-  >("all");
+  >(cachedState.foodPref);
   const [showFilters, setShowFilters] = useState(false);
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
@@ -451,32 +461,47 @@ export default function HomePage() {
   } = useLocationContext();
   const { restaurantWishlist, toggleRestaurant } = useWishlist();
 
-  const [restaurants, setRestaurants] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [restaurants, setRestaurants] = useState<any[]>(cachedState.restaurants);
+  const [isLoading, setIsLoading] = useState(cachedState.restaurants.length === 0);
+  const [page, setPage] = useState(cachedState.page);
+  const [hasMore, setHasMore] = useState(cachedState.hasMore);
   const [loadingMore, setLoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [posterObj, setPosterObj] = useState<{ image_url?: string; dark_image_url?: string } | null>(null);
-  const [posterLoading, setPosterLoading] = useState(true);
+  const [posterObj, setPosterObj] = useState<{ image_url?: string; dark_image_url?: string } | null>(cachedState.posterObj);
+  const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
 
   // Debounce search
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   useEffect(() => {
-    const handler = setTimeout(() => setDebouncedSearch(searchQuery), 500);
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      cachedState.searchQuery = searchQuery;
+    }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
   useEffect(() => {
-    fetchFoodPoster();
+    if (!cachedState.posterLoaded) {
+      fetchFoodPoster();
+    }
   }, []);
 
   // Fetch when filters change
   useEffect(() => {
+    if (cachedState.restaurants.length > 0 && 
+        cachedState.foodPref === foodPref && 
+        cachedState.searchQuery === debouncedSearch) {
+      // Used cached data initially
+      setIsLoading(false);
+      return;
+    }
+    
+    cachedState.foodPref = foodPref;
     setPage(1);
-    setRestaurants([]);
+    // DO NOT setRestaurants([]) so we don't flash blank if just changing filters slightly
+    if (restaurants.length === 0) setIsLoading(true);
     setHasMore(true);
     fetchRestaurants(1, true);
   }, [debouncedSearch, foodPref, latitude, longitude, pincode]);
@@ -511,12 +536,16 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/homepage-poster?type=food`);
       if (res.ok) {
         const data = await res.json();
-        if (data.poster) setPosterObj(data.poster);
+        if (data.poster) {
+          setPosterObj(data.poster);
+          cachedState.posterObj = data.poster;
+        }
       }
     } catch {
       /* silent — fallback to static image */
     } finally {
       setPosterLoading(false);
+      cachedState.posterLoaded = true;
     }
   }
 
@@ -546,8 +575,16 @@ export default function HomePage() {
         const result = await res.json();
         let data = result.data || [];
 
-        setHasMore(pageNum < (result.pagination?.totalPages || 1));
-        setRestaurants((prev) => (isReset ? data : [...prev, ...data]));
+        const more = pageNum < (result.pagination?.totalPages || 1);
+        setHasMore(more);
+        cachedState.hasMore = more;
+        cachedState.page = pageNum;
+        
+        setRestaurants((prev) => {
+          const newArr = isReset ? data : [...prev, ...data];
+          cachedState.restaurants = newArr;
+          return newArr;
+        });
       }
     } catch {
       /* silent */
