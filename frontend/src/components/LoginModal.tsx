@@ -290,12 +290,15 @@ export default function LoginModal({ isOpen, onClose }: Props) {
           grantOfflineAccess: true,
         });
         const user = await GoogleAuth.signIn({ scopes: ['profile', 'email'] });
-        if (!user.authentication.accessToken) {
+        if (!user.authentication.accessToken && !user.authentication.idToken) {
           setError("Google sign-in did not return a token.");
           setLoading(false);
           return;
         }
-        const data = await post("google", { accessToken: user.authentication.accessToken });
+        const data = await post("google", { 
+          accessToken: user.authentication.accessToken,
+          idToken: user.authentication.idToken
+        });
         login(data.user, data.accessToken, data.refreshToken);
         onClose();
       } catch (err: any) {
@@ -472,6 +475,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
               <>
                 <ModalHeader title="User Account" back="choose" />
                 <div className="p-6 sm:p-8 space-y-4 relative z-10 overflow-y-auto no-scrollbar">
+                  <ErrorBanner />
                   <BtnPrimary type="button" disabled={false} onClick={() => reset("login")}>
                     <Mail className="w-4 h-4" /> Log In with Email
                   </BtnPrimary>
