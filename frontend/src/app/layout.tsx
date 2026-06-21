@@ -31,6 +31,7 @@ import ServiceGuard from "@/components/ServiceGuard";
 import NetworkGuard from "@/components/NetworkGuard";
 import { Toaster } from 'react-hot-toast';
 import LocationModal from "@/components/LocationModal";
+import CapacitorHardwareBackButton from "@/components/CapacitorHardwareBackButton";
 
 export default function RootLayout({
   children,
@@ -55,6 +56,7 @@ export default function RootLayout({
                         }
                       }}
                     />
+                    <CapacitorHardwareBackButton />
                     <NetworkGuard>
                       <ServiceGuard>
                         {children}

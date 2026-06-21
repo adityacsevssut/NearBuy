@@ -95,6 +95,16 @@ const priceRanges = [
 
 import { useRouter } from "next/navigation";
 
+let cachedState = {
+  activeCats: [] as string[],
+  activeSubCats: [] as string[],
+  activeSort: "Relevance",
+  searchQuery: "",
+  priceRange: null as string | null,
+  posterUrl: null as string | null,
+  posterLoaded: false
+};
+
 export default function EssentialsPage() {
   const router = useRouter();
 
@@ -102,18 +112,18 @@ export default function EssentialsPage() {
     document.title = "Home Shop Essential";
   }, []);
 
-  const [activeCats, setActiveCats] = useState<string[]>([]);
-  const [activeSubCats, setActiveSubCats] = useState<string[]>([]);
-  const [activeSort, setActiveSort] = useState("Relevance");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [priceRange, setPriceRange] = useState<string | null>(null);
+  const [activeCats, setActiveCats] = useState<string[]>(cachedState.activeCats);
+  const [activeSubCats, setActiveSubCats] = useState<string[]>(cachedState.activeSubCats);
+  const [activeSort, setActiveSort] = useState(cachedState.activeSort);
+  const [searchQuery, setSearchQuery] = useState(cachedState.searchQuery);
+  const [priceRange, setPriceRange] = useState<string | null>(cachedState.priceRange);
   const [showFilters, setShowFilters] = useState(false);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [cart, setCart] = useState<string[]>([]);
   const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
-  const [posterUrl, setPosterUrl] = useState<string | null>(null);
-  const [posterLoading, setPosterLoading] = useState(true);
+  const [posterUrl, setPosterUrl] = useState<string | null>(cachedState.posterUrl);
+  const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
   const [previewProduct, setPreviewProduct] = useState<any>(null);
   const [previewQuantity, setPreviewQuantity] = useState(1);
 
@@ -121,17 +131,29 @@ export default function EssentialsPage() {
     if (previewProduct) setPreviewQuantity(1);
   }, [previewProduct]);
 
+  // Update cache when state changes
+  useEffect(() => { cachedState.activeCats = activeCats; }, [activeCats]);
+  useEffect(() => { cachedState.activeSubCats = activeSubCats; }, [activeSubCats]);
+  useEffect(() => { cachedState.activeSort = activeSort; }, [activeSort]);
+  useEffect(() => { cachedState.searchQuery = searchQuery; }, [searchQuery]);
+  useEffect(() => { cachedState.priceRange = priceRange; }, [priceRange]);
+
   useEffect(() => {
+    if (cachedState.posterLoaded) return;
     async function fetchPoster() {
       try {
         const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
         const res = await fetch(`${API}/api/homepage-poster?type=store`);
         if (res.ok) {
           const data = await res.json();
-          if (data.poster?.image_url) setPosterUrl(data.poster.image_url);
+          if (data.poster?.image_url) {
+            setPosterUrl(data.poster.image_url);
+            cachedState.posterUrl = data.poster.image_url;
+          }
         }
       } catch { /* silent */ } finally {
         setPosterLoading(false);
+        cachedState.posterLoaded = true;
       }
     }
     fetchPoster();
