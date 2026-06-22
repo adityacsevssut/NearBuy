@@ -200,31 +200,24 @@ export default function PartnerDashboard() {
 
   // Manage Frontend state
   const [posterTheme, setPosterTheme] = useState<"light" | "dark">("light");
-  const [currentPoster, setCurrentPoster] = useState<{ light: string | null; dark: string | null }>({ light: null, dark: null });
+  const [currentPosters, setCurrentPosters] = useState<any[]>([]);
+  const [editingPosterId, setEditingPosterId] = useState<number | null>(null);
   const [posterPreview, setPosterPreview] = useState<{ light: string | null; dark: string | null }>({ light: null, dark: null });
   const [posterFile, setPosterFile] = useState<{ light: File | null; dark: File | null }>({ light: null, dark: null });
   const [loadingPoster, setLoadingPoster] = useState(false);
   const [savingPoster, setSavingPoster] = useState(false);
   const [posterSaved, setPosterSaved] = useState(false);
 
-  const fetchCurrentPoster = async () => {
+  const fetchCurrentPosters = async () => {
     setLoadingPoster(true);
     try {
       const mType = (user?.manager_type || "food").toLowerCase();
       const res = await fetch(`${API}/api/homepage-poster?type=${mType}`);
       const data = await res.json();
-      if (data.poster) {
-        setCurrentPoster({
-          light: data.poster.image_url || null,
-          dark: data.poster.dark_image_url || null
-        });
-        setPosterPreview({
-          light: data.poster.image_url || null,
-          dark: data.poster.dark_image_url || null
-        });
+      if (data.posters) {
+        setCurrentPosters(data.posters);
       } else {
-        setCurrentPoster({ light: null, dark: null });
-        setPosterPreview({ light: null, dark: null });
+        setCurrentPosters([]);
       }
     } catch (err) {
       console.error(err);
@@ -267,6 +260,9 @@ export default function PartnerDashboard() {
       const form = new FormData();
       form.append("image", fileToSave);
       form.append("theme", posterTheme);
+      if (editingPosterId) {
+        form.append("id", String(editingPosterId));
+      }
       const res = await fetch(`${API}/api/homepage-poster`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -276,14 +272,46 @@ export default function PartnerDashboard() {
       if (!res.ok) throw new Error(data.error || "Failed to save poster");
       toast.success(`${posterTheme === 'dark' ? 'Dark' : 'Light'} poster published successfully!`);
       
-      const newUrl = posterTheme === 'dark' ? data.poster.dark_image_url : data.poster.image_url;
-      setCurrentPoster(prev => ({ ...prev, [posterTheme]: newUrl }));
       setPosterFile(prev => ({ ...prev, [posterTheme]: null }));
       setPosterSaved(true);
+      fetchCurrentPosters();
     } catch (err: any) {
       toast.error(err.message);
     }
     setSavingPoster(false);
+  };
+
+  const handleDeletePoster = async (id: number) => {
+    if (!confirm("Are you sure you want to delete this poster pair?")) return;
+    try {
+      const res = await fetch(`${API}/api/homepage-poster/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      if (res.ok) {
+        toast.success("Poster deleted successfully");
+        fetchCurrentPosters();
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Failed to delete poster");
+      }
+    } catch (err) {
+      toast.error("An error occurred");
+    }
+  };
+
+  const handleAddNewPoster = () => {
+    setEditingPosterId(null);
+    setPosterPreview({ light: null, dark: null });
+    setPosterFile({ light: null, dark: null });
+    setPosterSaved(false);
+  };
+
+  const handleEditPoster = (poster: any) => {
+    setEditingPosterId(poster.id);
+    setPosterPreview({ light: poster.image_url, dark: poster.dark_image_url });
+    setPosterFile({ light: null, dark: null });
+    setPosterSaved(false);
   };
 
   const fetchRequests = async () => {
@@ -725,7 +753,7 @@ export default function PartnerDashboard() {
   useEffect(() => {
     if (view === "requests" && accessToken) fetchRequests();
     if ((view === "vendors" || view === "dashboard") && accessToken) fetchVendors();
-    if (view === "frontend" && accessToken) fetchCurrentPoster();
+    if (view === "frontend" && accessToken) fetchCurrentPosters();
     if (view === "feedback" && accessToken) fetchFeedbacks();
     if (view === "orders" && accessToken) fetchOrders();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1356,7 +1384,7 @@ export default function PartnerDashboard() {
                   </p>
                 </div>
                 <button
-                  onClick={fetchCurrentPoster}
+                  onClick={fetchCurrentPosters}
                   className={`p-2 rounded-xl ${theme.bg} border ${theme.border} ${theme.text} hover:opacity-80 transition-opacity`}
                   title="Refresh"
                 >
@@ -1386,22 +1414,40 @@ export default function PartnerDashboard() {
 
               {/* Current live poster */}
               <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Current {posterTheme === 'dark' ? 'Dark' : 'Light'} Poster</p>
+                <div className="flex justify-between items-center mb-4">
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Current Posters</p>
+                  <button onClick={handleAddNewPoster} className={`px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-gradient-to-r ${theme.from} ${theme.to} shadow-sm`}>+ Add New Poster</button>
+                </div>
                 {loadingPoster ? (
                   <div className="h-48 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse" />
-                ) : currentPoster[posterTheme] ? (
-                  <div className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] shadow-sm">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={currentPoster[posterTheme] as string} alt="Current poster" className="w-full object-cover max-h-64" />
-                    <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full ${theme.bg} border ${theme.border} text-[10px] font-black ${theme.textDark} uppercase tracking-widest shadow-sm`}>
-                      <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                      Live
-                    </div>
+                ) : currentPosters.length > 0 ? (
+                  <div className="space-y-4">
+                    {currentPosters.map((poster, idx) => (
+                      <div key={poster.id || idx} className="relative w-full rounded-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] shadow-sm p-4 bg-gray-50 dark:bg-[#151522]">
+                        <div className="flex justify-between items-center mb-2">
+                           <span className="text-xs font-bold text-gray-500">Poster #{poster.id}</span>
+                           <div className="flex gap-2">
+                             <button onClick={() => handleEditPoster(poster)} className="text-blue-500 hover:text-blue-600 text-xs font-bold bg-blue-50 px-2 py-1 rounded">Edit</button>
+                             <button onClick={() => handleDeletePoster(poster.id)} className="text-red-500 hover:text-red-600 text-xs font-bold bg-red-50 px-2 py-1 rounded">Delete</button>
+                           </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 mb-1">LIGHT THEME</p>
+                            {poster.image_url ? <img src={poster.image_url} alt="Light poster" className="w-full object-cover rounded max-h-32" /> : <div className="h-32 bg-gray-200 dark:bg-[#2A2A3A] rounded flex items-center justify-center text-xs text-gray-400">No Image</div>}
+                          </div>
+                          <div>
+                            <p className="text-[10px] font-bold text-gray-400 mb-1">DARK THEME</p>
+                            {poster.dark_image_url ? <img src={poster.dark_image_url} alt="Dark poster" className="w-full object-cover rounded max-h-32" /> : <div className="h-32 bg-gray-200 dark:bg-[#2A2A3A] rounded flex items-center justify-center text-xs text-gray-400">No Image</div>}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className={`h-48 ${theme.bg} rounded-2xl border-2 border-dashed ${theme.border} flex flex-col items-center justify-center gap-3`}>
                     <ImageIcon className={`w-10 h-10 ${theme.text} opacity-40`} />
-                    <p className="text-sm font-semibold text-gray-400">No {posterTheme} poster uploaded yet</p>
+                    <p className="text-sm font-semibold text-gray-400">No posters uploaded yet</p>
                     <p className="text-xs text-gray-400">Upload one below to make it live</p>
                   </div>
                 )}
@@ -1409,18 +1455,20 @@ export default function PartnerDashboard() {
 
               {/* Upload new poster */}
               <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-3xl p-6 shadow-sm">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">Upload New {posterTheme === 'dark' ? 'Dark' : 'Light'} Poster</p>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-4">
+                  {editingPosterId ? `Edit Poster #${editingPosterId} (${posterTheme === 'dark' ? 'Dark' : 'Light'})` : `Upload New Poster (${posterTheme === 'dark' ? 'Dark' : 'Light'})`}
+                </p>
 
                 {/* Drop zone */}
                 <label
                   htmlFor="poster-upload"
                   className={`relative flex flex-col items-center justify-center w-full min-h-56 rounded-2xl border-2 border-dashed transition-all cursor-pointer group ${
-                    posterPreview[posterTheme] && posterPreview[posterTheme] !== currentPoster[posterTheme]
+                    posterPreview[posterTheme]
                       ? `border-transparent`
                       : `${theme.border} hover:border-opacity-60 ${theme.bg}`
                   }`}
                 >
-                  {posterPreview[posterTheme] && posterPreview[posterTheme] !== currentPoster[posterTheme] ? (
+                  {posterPreview[posterTheme] ? (
                     <>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={posterPreview[posterTheme] as string} alt="Preview" className="w-full rounded-2xl object-cover max-h-72" />
@@ -1482,7 +1530,7 @@ export default function PartnerDashboard() {
                 {/* Tip */}
                 <div className="mt-4 flex items-start gap-2 text-xs text-gray-400 bg-gray-50 dark:bg-[#151522] rounded-xl px-4 py-3 border border-gray-100 dark:border-[#2A2A3A]">
                   <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                  <p>The poster goes live instantly after publishing. Previous posters are overwritten. Use high-resolution landscape images for the best result.</p>
+                  <p>The poster goes live instantly after publishing. Upload a new poster or edit an existing one above. Use high-resolution landscape images for the best result.</p>
                 </div>
               </div>
             </motion.div>

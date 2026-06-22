@@ -427,7 +427,7 @@ let cachedState = {
   hasMore: true,
   searchQuery: "",
   foodPref: "all" as any,
-  posterObj: null as any,
+  posters: [] as any[],
   posterLoaded: false
 };
 
@@ -463,8 +463,46 @@ export default function HomePage() {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
 
-  const [posterObj, setPosterObj] = useState<{ image_url?: string; dark_image_url?: string } | null>(cachedState.posterObj);
+  const [posters, setPosters] = useState<any[]>(cachedState.posters);
   const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
+  
+  const [activePosterIndex, setActivePosterIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const isUserScrolling = useRef(false);
+  const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-scroll logic
+  useEffect(() => {
+    if (posters.length <= 1) return;
+    const interval = setInterval(() => {
+      if (isUserScrolling.current) return;
+      setActivePosterIndex((prev) => {
+        const next = (prev + 1) % posters.length;
+        if (carouselRef.current) {
+          carouselRef.current.scrollTo({
+            left: next * carouselRef.current.clientWidth,
+            behavior: "smooth"
+          });
+        }
+        return next;
+      });
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [posters.length]);
+
+  const handleCarouselScroll = () => {
+    if (carouselRef.current) {
+      const index = Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth);
+      if (index !== activePosterIndex) setActivePosterIndex(index);
+      
+      // Pause auto-scroll
+      isUserScrolling.current = true;
+      if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+      scrollTimeout.current = setTimeout(() => {
+        isUserScrolling.current = false;
+      }, 4000);
+    }
+  };
 
   // Debounce search
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
@@ -530,9 +568,9 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/homepage-poster?type=food`);
       if (res.ok) {
         const data = await res.json();
-        if (data.poster) {
-          setPosterObj(data.poster);
-          cachedState.posterObj = data.poster;
+        if (data.posters) {
+          setPosters(data.posters);
+          cachedState.posters = data.posters;
         }
       }
     } catch {
@@ -878,13 +916,40 @@ export default function HomePage() {
           </section>
 
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
-          <section className="px-4 pb-3 pt-[22px]">
+          <section className="w-full pt-2 pb-2 relative">
             {posterLoading ? (
               <div className="w-full h-[208px] sm:h-[220px] md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
+            ) : posters.length > 0 ? (
+              <div className="relative group">
+                <div
+                  ref={carouselRef}
+                  onScroll={handleCarouselScroll}
+                  onTouchStart={handleCarouselScroll}
+                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full gap-4 pb-2"
+                >
+                  {posters.map((poster, index) => (
+                    <div key={poster.id || index} className="flex-shrink-0 w-full snap-center block relative rounded-2xl overflow-hidden shadow-sm">
+                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
+                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out hidden dark:block" />
+                    </div>
+                  ))}
+                </div>
+                {/* Dots indicator */}
+                {posters.length > 1 && (
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                    {posters.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activePosterIndex ? "bg-white scale-125 shadow-sm" : "bg-white/50"}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
-                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
-                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
+                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out hidden dark:block" />
               </div>
             )}
           </section>
