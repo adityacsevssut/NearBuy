@@ -916,27 +916,27 @@ export default function HomePage() {
           </section>
 
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
-          <section className="w-full pt-2 pb-2 relative">
+          <section className="w-full pt-2 pb-2 relative px-[2px] md:px-0">
             {posterLoading ? (
-              <div className="w-full h-[208px] sm:h-[220px] md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
+              <div className="w-full aspect-[2/1] md:aspect-[21/9] bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl md:rounded-3xl animate-pulse"></div>
             ) : posters.length > 0 ? (
-              <div className="relative group overflow-hidden rounded-2xl bg-transparent">
+              <div className="relative group overflow-hidden rounded-2xl md:rounded-3xl bg-transparent">
                 <div
                   ref={carouselRef}
                   onScroll={handleCarouselScroll}
                   onTouchStart={handleCarouselScroll}
-                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full gap-4"
+                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full"
                 >
                   {posters.map((poster, index) => (
-                    <div key={poster.id || index} className="flex-shrink-0 w-full snap-center block relative rounded-2xl overflow-hidden bg-transparent">
-                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={index === 0} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:hidden" />
-                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={index === 0} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:block" />
+                    <div key={poster.id || index} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
+                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
                     </div>
                   ))}
                 </div>
                 {/* Dots indicator */}
                 {posters.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
                     {posters.map((_, i) => (
                       <span
                         key={i}
@@ -947,9 +947,9 @@ export default function HomePage() {
                 )}
               </div>
             ) : (
-              <div className="block relative w-full rounded-2xl overflow-hidden group bg-transparent">
-                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={true} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:hidden" />
-                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={true} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:block" />
+              <div className="block relative w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl md:rounded-3xl overflow-hidden group bg-transparent">
+                <Image src="/1000242984.png" alt="NearBuy Special Offer" fill priority={true} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" fill priority={true} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
               </div>
             )}
           </section>
