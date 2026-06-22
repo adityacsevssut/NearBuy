@@ -486,7 +486,7 @@ export default function HomePage() {
         }
         return next;
       });
-    }, 2000);
+    }, 1500);
     return () => clearInterval(interval);
   }, [posters.length]);
 
@@ -920,17 +920,17 @@ export default function HomePage() {
             {posterLoading ? (
               <div className="w-full h-[208px] sm:h-[220px] md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
             ) : posters.length > 0 ? (
-              <div className="relative group">
+              <div className="relative group overflow-hidden rounded-2xl bg-transparent">
                 <div
                   ref={carouselRef}
                   onScroll={handleCarouselScroll}
                   onTouchStart={handleCarouselScroll}
-                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full gap-4 pb-2"
+                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full gap-4"
                 >
                   {posters.map((poster, index) => (
-                    <div key={poster.id || index} className="flex-shrink-0 w-full snap-center block relative rounded-2xl overflow-hidden shadow-sm">
-                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
-                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:block" />
+                    <div key={poster.id || index} className="flex-shrink-0 w-full snap-center block relative rounded-2xl overflow-hidden bg-transparent">
+                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={index === 0} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:hidden" />
+                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={index === 0} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:block" />
                     </div>
                   ))}
                 </div>
@@ -947,9 +947,9 @@ export default function HomePage() {
                 )}
               </div>
             ) : (
-              <div className="block relative w-full rounded-2xl overflow-hidden group">
-                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
-                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:block" />
+              <div className="block relative w-full rounded-2xl overflow-hidden group bg-transparent">
+                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={true} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "100%", display: "block" }} priority={true} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out dark:block" />
               </div>
             )}
           </section>
