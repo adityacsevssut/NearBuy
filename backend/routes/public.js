@@ -290,6 +290,67 @@ router.get("/dishes/:category", async (req, res) => {
   }
 });
 
+// GET /api/public/hot-deals
+router.get("/hot-deals", async (req, res) => {
+  try {
+    const { lat, lon, pincode } = req.query;
+
+    let whereClause = "WHERE m.price <= 100 AND m.price > 0 AND m.is_available = TRUE AND v.is_active = TRUE";
+    const queryParams = [];
+    let paramIndex = 1;
+
+    if (lat && lon) {
+      whereClause += ` AND (
+        v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
+        (6371 * acos(
+          LEAST(1.0, GREATEST(-1.0,
+            cos(radians($${paramIndex}::numeric)) * cos(radians(CAST(v.latitude AS numeric))) *
+            cos(radians(CAST(v.longitude AS numeric)) - radians($${paramIndex+1}::numeric)) +
+            sin(radians($${paramIndex}::numeric)) * sin(radians(CAST(v.latitude AS numeric)))
+          ))
+        )) <= COALESCE(CAST(v.delivery_range AS numeric), 5)
+      )`;
+      queryParams.push(parseFloat(lat), parseFloat(lon));
+      paramIndex += 2;
+    } else if (pincode) {
+      whereClause += ` AND v.pincode = $${paramIndex}`;
+      queryParams.push(pincode);
+      paramIndex++;
+    }
+
+    const dataQuery = `
+      SELECT 
+         m.id, m.name, m.price as "discountPrice", m.actual_price as "originalPrice", m.type, m.image_url as image, m.rating,
+         v.restaurant_name as "restaurantName", v.user_id as "restaurantId"
+      FROM vendor_menu_items m
+      JOIN vendor_profiles v ON m.vendor_id = v.user_id
+      ${whereClause}
+      ORDER BY RANDOM()
+      LIMIT 150
+    `;
+
+    const { rows } = await pool.query(dataQuery, queryParams);
+    
+    // Provide default values and formatting
+    const formatDeal = (r) => ({
+      ...r,
+      originalPrice: (r.originalPrice && r.originalPrice > r.discountPrice) 
+        ? r.originalPrice 
+        : Math.floor(r.discountPrice * 1.5), // fallback if originalPrice missing or invalid
+      rating: r.rating ? parseFloat(r.rating).toFixed(1) : "4.0",
+    });
+
+    // Separate into two arrays, max 15 items each
+    const under50 = rows.filter(r => parseFloat(r.discountPrice) < 50).slice(0, 15).map(formatDeal);
+    const under100 = rows.filter(r => parseFloat(r.discountPrice) >= 50 && parseFloat(r.discountPrice) <= 100).slice(0, 15).map(formatDeal);
+
+    return res.json({ under50, under100 });
+  } catch (err) {
+    console.error("GET /api/public/hot-deals error:", err);
+    return res.status(500).json({ error: "Failed to load hot deals" });
+  }
+});
+
 // GET /api/public/settings
 router.get("/settings", async (req, res) => {
   try {
