@@ -26,8 +26,7 @@ import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
-import { dummyRestaurants } from "./dummyRestaurants";
-import { dummyHotDealsUnder50, dummyHotDealsUnder100 } from "./dummyDeals";
+
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
@@ -692,17 +691,16 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/public/hot-deals?${query.toString()}`);
       if (res.ok) {
         const data = await res.json();
-        // Fallback to dummy data if backend has no items yet
-        setHotDealsUnder50(data.under50?.length > 0 ? data.under50 : dummyHotDealsUnder50);
-        setHotDealsUnder100(data.under100?.length > 0 ? data.under100 : dummyHotDealsUnder100);
+        setHotDealsUnder50(data.under50 || []);
+        setHotDealsUnder100(data.under100 || []);
       } else {
-        setHotDealsUnder50(dummyHotDealsUnder50);
-        setHotDealsUnder100(dummyHotDealsUnder100);
+        setHotDealsUnder50([]);
+        setHotDealsUnder100([]);
       }
     } catch (err) {
       console.error("Failed to fetch hot deals", err);
-      setHotDealsUnder50(dummyHotDealsUnder50);
-      setHotDealsUnder100(dummyHotDealsUnder100);
+      setHotDealsUnder50([]);
+      setHotDealsUnder100([]);
     }
   }
 
@@ -804,7 +802,7 @@ export default function HomePage() {
         cachedState.page = pageNum;
 
         setRestaurants((prev) => {
-          const newArr = isReset ? [...data, ...dummyRestaurants] : [...prev, ...data];
+          const newArr = isReset ? [...data] : [...prev, ...data];
           cachedState.restaurants = newArr;
           return newArr;
         });
