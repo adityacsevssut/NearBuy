@@ -299,11 +299,11 @@ export default function EssentialsPage() {
 
           {/* ── Banner Section ── */}
           <div className="pb-4 md:pb-6 w-full flex justify-center">
-            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden shadow-xl border border-blue-100 dark:border-[#2A2A3A] bg-[#E8F2FB] dark:bg-[#0D0D17]">
+            <div className="relative w-full max-w-6xl aspect-video md:aspect-[21/9] rounded-3xl overflow-hidden bg-transparent">
               {posterLoading ? (
                 <div className="w-full h-full bg-blue-100/50 dark:bg-[#2A2A3A]/50 animate-pulse"></div>
               ) : posterUrl ? (
-                <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-contain object-center" />
+                <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
               ) : (
                 <>
                   <Image
@@ -311,16 +311,18 @@ export default function EssentialsPage() {
                     alt="NearBuy Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                    className="block object-cover object-center scale-105 dark:hidden"
+                    className="block object-cover object-center w-full h-full dark:hidden"
                     priority
+                    style={{ display: 'block' }}
                   />
                   <Image
                     src="/store_hero_16x9_dark.png"
                     alt="NearBuy Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                    className="hidden object-cover object-center dark:block"
+                    className="hidden object-cover object-center w-full h-full dark:block"
                     priority
+                    style={{ display: 'block' }}
                   />
                 </>
               )}
