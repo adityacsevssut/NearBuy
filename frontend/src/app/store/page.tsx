@@ -303,7 +303,7 @@ export default function EssentialsPage() {
               {posterLoading ? (
                 <div className="w-full h-full bg-blue-100/50 dark:bg-[#2A2A3A]/50 animate-pulse"></div>
               ) : posterUrl ? (
-                <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="object-contain object-center" />
+                <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-contain object-center" />
               ) : (
                 <>
                   <Image
@@ -311,7 +311,7 @@ export default function EssentialsPage() {
                     alt="NearBuy Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                    className="object-cover object-center scale-105 dark:hidden"
+                    className="block object-cover object-center scale-105 dark:hidden"
                     priority
                   />
                   <Image
@@ -319,7 +319,7 @@ export default function EssentialsPage() {
                     alt="NearBuy Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
-                    className="object-cover object-center hidden dark:block"
+                    className="hidden object-cover object-center dark:block"
                     priority
                   />
                 </>
