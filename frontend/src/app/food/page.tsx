@@ -483,14 +483,14 @@ export default function HomePage() {
 
   // Fetch when filters change
   useEffect(() => {
-    if (cachedState.restaurants.length > 0 && 
-        cachedState.foodPref === foodPref && 
-        cachedState.searchQuery === debouncedSearch) {
+    if (cachedState.restaurants.length > 0 &&
+      cachedState.foodPref === foodPref &&
+      cachedState.searchQuery === debouncedSearch) {
       // Used cached data initially
       setIsLoading(false);
       return;
     }
-    
+
     cachedState.foodPref = foodPref;
     setPage(1);
     // DO NOT setRestaurants([]) so we don't flash blank if just changing filters slightly
@@ -572,7 +572,7 @@ export default function HomePage() {
         setHasMore(more);
         cachedState.hasMore = more;
         cachedState.page = pageNum;
-        
+
         setRestaurants((prev) => {
           const newArr = isReset ? data : [...prev, ...data];
           cachedState.restaurants = newArr;
@@ -678,11 +678,10 @@ export default function HomePage() {
               <div className="relative shrink-0">
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${
-                    showFilters || foodPref !== "all"
-                      ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
-                      : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:text-orange-600"
-                  }`}
+                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || foodPref !== "all"
+                    ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
+                    : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:text-orange-600"
+                    }`}
                 >
                   <SlidersHorizontal className="w-4 h-4" />
                   <span className="hidden sm:inline">Filter</span>
@@ -737,27 +736,24 @@ export default function HomePage() {
                               setFoodPref(p);
                               setShowFilters(false);
                             }}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                              active
-                                ? `${activeBg} text-white`
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                            }`}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
+                              ? `${activeBg} text-white`
+                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
+                              }`}
                           >
                             <span>{label}</span>
                             {/* Pill toggle */}
                             <div
-                              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                                active
-                                  ? "bg-white/30 dark:bg-[#0D0D17]/50"
-                                  : "bg-gray-200"
-                              }`}
+                              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
+                                ? "bg-white/30 dark:bg-[#0D0D17]/50"
+                                : "bg-gray-200"
+                                }`}
                             >
                               <span
-                                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${
-                                  active
-                                    ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                                    : "translate-x-0 bg-gray-400"
-                                }`}
+                                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
+                                  ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
+                                  : "translate-x-0 bg-gray-400"
+                                  }`}
                               />
                             </div>
                           </button>
@@ -833,25 +829,22 @@ export default function HomePage() {
                     setFoodPref(p);
                     setShowFilters(false);
                   }}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all ${
-                    active
-                      ? `${activeBg} text-white shadow-md`
-                      : "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
-                  }`}
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all ${active
+                    ? `${activeBg} text-white shadow-md`
+                    : "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
+                    }`}
                 >
                   <span>{label}</span>
                   {/* Pill toggle */}
                   <div
-                    className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                      active ? "bg-white/30 dark:bg-[#0D0D17]/50" : "bg-gray-200"
-                    }`}
+                    className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active ? "bg-white/30 dark:bg-[#0D0D17]/50" : "bg-gray-200"
+                      }`}
                   >
                     <span
-                      className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${
-                        active
-                          ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                          : "translate-x-0 bg-gray-400"
-                      }`}
+                      className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
+                        ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
+                        : "translate-x-0 bg-gray-400"
+                        }`}
                     />
                   </div>
                 </button>
@@ -884,13 +877,13 @@ export default function HomePage() {
           </section>
 
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
-          <section className="px-4 py-3">
+          <section className="px-4 pb-3 pt-[22px]">
             {posterLoading ? (
-              <div className="w-full h-40 md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
+              <div className="w-full h-[208px] sm:h-[220px] md:h-72 lg:h-80 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl animate-pulse"></div>
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
-                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "auto" }} priority={true} className="object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
-                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%", height: "auto" }} priority={true} className="object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
+                <Image src={posterObj?.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out bg-orange-50 dark:hidden" />
+                <Image src={posterObj?.dark_image_url || posterObj?.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain transition-transform duration-500 ease-out bg-[#0D0D17] hidden dark:block" />
               </div>
             )}
           </section>
@@ -966,29 +959,26 @@ export default function HomePage() {
                 onClick={() =>
                   setFoodPref((p) => (p === "veg" ? "all" : "veg"))
                 }
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 shrink-0 transition-all duration-200 ${
-                  foodPref === "veg"
-                    ? "bg-green-600 border-green-600 text-white shadow-md shadow-green-200 dark:shadow-green-900/30"
-                    : "bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
-                }`}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 shrink-0 transition-all duration-200 ${foodPref === "veg"
+                  ? "bg-green-600 border-green-600 text-white shadow-md shadow-green-200 dark:shadow-green-900/30"
+                  : "bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
+                  }`}
               >
                 <span className="text-[13px] font-black whitespace-nowrap">
                   Pure Veg
                 </span>
                 {/* Mini toggle track */}
                 <div
-                  className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${
-                    foodPref === "veg"
-                      ? "bg-white dark:bg-[#0D0D17]/30"
-                      : "bg-gray-200"
-                  }`}
+                  className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${foodPref === "veg"
+                    ? "bg-white dark:bg-[#0D0D17]/30"
+                    : "bg-gray-200"
+                    }`}
                 >
                   <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${
-                      foodPref === "veg"
-                        ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                        : "translate-x-0 bg-gray-400"
-                    }`}
+                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${foodPref === "veg"
+                      ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
+                      : "translate-x-0 bg-gray-400"
+                      }`}
                   />
                 </div>
               </button>
