@@ -25,6 +25,7 @@ import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { dummyRestaurants } from "./dummyRestaurants";
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
@@ -574,7 +575,7 @@ export default function HomePage() {
         cachedState.page = pageNum;
 
         setRestaurants((prev) => {
-          const newArr = isReset ? data : [...prev, ...data];
+          const newArr = isReset ? [...data, ...dummyRestaurants] : [...prev, ...data];
           cachedState.restaurants = newArr;
           return newArr;
         });
