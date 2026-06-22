@@ -929,8 +929,8 @@ export default function HomePage() {
                 >
                   {posters.map((poster, index) => (
                     <div key={poster.id || index} className="flex-shrink-0 w-full snap-center block relative rounded-2xl overflow-hidden shadow-sm">
-                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
-                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out hidden dark:block" />
+                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
+                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={index === 0} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:block" />
                     </div>
                   ))}
                 </div>
@@ -948,8 +948,8 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="block relative w-full rounded-2xl overflow-hidden group">
-                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
-                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out hidden dark:block" />
+                <Image src="/1000242984.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="block h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" width={1200} height={400} style={{ width: "100%" }} priority={true} className="hidden h-[208px] sm:h-[220px] md:h-auto object-cover md:object-contain scale-[1.02] transition-transform duration-500 ease-out dark:block" />
               </div>
             )}
           </section>

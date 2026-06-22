@@ -234,20 +234,30 @@ export default function PartnerDashboard() {
       }
       
       try {
-        const options = {
-          maxSizeMB: 2,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true
-        };
-        const compressedFile = await imageCompression(file, options);
-        setPosterFile(prev => ({ ...prev, [posterTheme]: compressedFile }));
+        let finalFile = file;
+        // Only compress if larger than 1MB
+        if (file.size > 1 * 1024 * 1024) {
+          const toastId = toast.loading("Processing image...");
+          try {
+            const options = {
+              maxSizeMB: 2,
+              maxWidthOrHeight: 1920,
+              useWebWorker: false // Disabling web worker fixes "taking too much time" and loading failures on some devices
+            };
+            finalFile = await imageCompression(file, options);
+          } finally {
+            toast.dismiss(toastId);
+          }
+        }
+        
+        setPosterFile(prev => ({ ...prev, [posterTheme]: finalFile }));
         const reader = new FileReader();
         reader.onload = () => setPosterPreview(prev => ({ ...prev, [posterTheme]: reader.result as string }));
-        reader.readAsDataURL(compressedFile);
+        reader.readAsDataURL(finalFile);
         setPosterSaved(false);
       } catch (error) {
         console.error("Compression error:", error);
-        toast.error("Failed to compress image");
+        toast.error("Failed to process image. Please try a different image.");
       }
     }
   };
