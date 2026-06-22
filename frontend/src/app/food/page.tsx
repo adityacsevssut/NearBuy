@@ -25,7 +25,9 @@ import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
 import { dummyRestaurants } from "./dummyRestaurants";
+import { dummyHotDealsUnder50, dummyHotDealsUnder100 } from "./dummyDeals";
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
@@ -258,6 +260,134 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   );
 }
 
+/* ─── Compact "Deal" card ──────────────────────────────────────────── */
+function DealCard({ deal, onConfirmNeeded }: any) {
+  const { items, addItem, updateQty, itemQty } = useCart();
+  
+  // Create a numeric ID from string for CartContext
+  const numericId = parseInt(deal.id.toString().replace(/[^0-9]/g, '')) || Math.floor(Math.random() * 1000);
+  const isVeg = numericId % 2 === 0;
+
+  const quantity = itemQty(numericId, deal.restaurantId);
+
+  const discountPercent = Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100);
+
+  const handlePlus = (e: any) => {
+    e.preventDefault();
+    if (quantity === 0) {
+      const hasRestaurantItems = items.some((i: any) => i.restaurantId === deal.restaurantId);
+      if (hasRestaurantItems) {
+        onConfirmNeeded({
+          ...deal,
+          numericId,
+          type: isVeg ? "veg" : "non-veg"
+        });
+      } else {
+        addItem({
+          id: numericId,
+          name: deal.name,
+          price: deal.discountPrice,
+          image: deal.image,
+          type: isVeg ? "veg" : "non-veg",
+          restaurantId: deal.restaurantId,
+          restaurantName: deal.restaurantName,
+          section: "food"
+        }, 1);
+      }
+    } else {
+      updateQty(`${deal.restaurantId}__${numericId}`, quantity + 1);
+    }
+  };
+
+  const handleMinus = (e: any) => {
+    e.preventDefault();
+    updateQty(`${deal.restaurantId}__${numericId}`, Math.max(0, quantity - 1));
+  };
+
+  return (
+    <div className="group flex-shrink-0 w-[140px] flex flex-col gap-2 cursor-pointer">
+      {/* Image container */}
+      <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E]">
+        {deal.image ? (
+          <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
+        ) : (
+          <div className="w-full h-full bg-orange-50 flex items-center justify-center">
+            <Utensils className="w-7 h-7 text-orange-200" />
+          </div>
+        )}
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+        {/* Discount / Popular Pill */}
+        <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm border border-orange-100 dark:border-orange-500/20">
+          {discountPercent}% OFF
+        </div>
+
+        {/* Floating Add to Cart Button */}
+        <div className="absolute bottom-2 right-2">
+          {quantity === 0 ? (
+            <button 
+              onClick={handlePlus}
+              className="w-8 h-8 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 hover:scale-105 active:scale-95 transition-all"
+            >
+              <span className="text-2xl leading-none font-light mb-0.5">+</span>
+            </button>
+          ) : (
+            <div className="flex items-center bg-white dark:bg-[#151522] rounded-lg shadow-lg border border-orange-200 dark:border-orange-500/30 overflow-hidden h-8">
+              <button 
+                onClick={handleMinus}
+                className="w-7 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 active:bg-orange-100 dark:active:bg-orange-500/20 font-bold text-lg"
+              >
+                −
+              </button>
+              <span className="text-xs font-black text-gray-800 dark:text-gray-100 w-4 text-center">{quantity}</span>
+              <button 
+                onClick={handlePlus}
+                className="w-7 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 active:bg-orange-100 dark:active:bg-orange-500/20 font-bold text-lg"
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="flex flex-col gap-0.5 px-1">
+        {/* Name with Veg/NonVeg icon */}
+        <div className="flex items-start gap-1.5">
+          <div className={`mt-1 flex-shrink-0 w-3 h-3 border flex items-center justify-center rounded-sm ${isVeg ? 'border-green-600' : 'border-red-600'}`}>
+            <div className={`w-1.5 h-1.5 rounded-full ${isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
+          </div>
+          <p className="font-bold text-[14px] text-gray-900 dark:text-gray-100 leading-tight line-clamp-2">
+            {deal.name}
+          </p>
+        </div>
+
+        {/* by Restaurant */}
+        <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+          by {deal.restaurantName}
+        </p>
+
+        {/* Rating and Time */}
+        <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 mt-1">
+          <span className="flex items-center gap-0.5 text-green-700 dark:text-green-400 font-bold">
+            <Star className="w-3 h-3 fill-current" /> {deal.rating}
+          </span>
+          <span className="text-gray-300 dark:text-gray-600">•</span>
+          <span>{20 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5}-{30 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5} mins</span>
+        </div>
+
+        {/* Price */}
+        <div className="flex items-center gap-1.5 mt-1.5">
+          <span className="text-[12px] text-gray-400 line-through font-medium">₹{deal.originalPrice}</span>
+          <span className="font-black text-[12px] text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded border border-orange-100 dark:border-orange-500/20">₹{deal.discountPrice}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── Full grid restaurant card ───────────────────────────────────────────── */
 function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   const dist = fmtDist(lat, lon, pin, r);
@@ -440,6 +570,7 @@ export default function HomePage() {
   const [foodPref, setFoodPref] = useState<
     "all" | "veg" | "non-veg" | "avail-all" | "avail-veg" | "avail-non-veg"
   >(cachedState.foodPref);
+
   const [showFilters, setShowFilters] = useState(false);
   const [reqModal, setReqModal] = useState(false);
   const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
@@ -470,6 +601,30 @@ export default function HomePage() {
   const carouselRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Hot Deals State
+  const [hotDealsUnder50, setHotDealsUnder50] = useState<any[]>([]);
+  const [hotDealsUnder100, setHotDealsUnder100] = useState<any[]>([]);
+  const [dealToConfirm, setDealToConfirm] = useState<any>(null);
+  const { addItem, clearVendorCart } = useCart();
+
+  const handleConfirmDeal = (action: "replace" | "add") => {
+    if (!dealToConfirm) return;
+    if (action === "replace") {
+      clearVendorCart(dealToConfirm.restaurantId);
+    }
+    addItem({
+      id: dealToConfirm.numericId,
+      name: dealToConfirm.name,
+      price: dealToConfirm.discountPrice,
+      image: dealToConfirm.image,
+      type: dealToConfirm.type,
+      restaurantId: dealToConfirm.restaurantId,
+      restaurantName: dealToConfirm.restaurantName,
+      section: "food"
+    }, 1);
+    setDealToConfirm(null);
+  };
 
   // Auto-scroll logic
   useEffect(() => {
@@ -519,6 +674,42 @@ export default function HomePage() {
       fetchFoodPoster();
     }
   }, []);
+
+  async function fetchHotDeals() {
+    try {
+      const API = (
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+      ).replace(/\/+$/, "");
+      
+      const query = new URLSearchParams();
+      if (latitude && longitude) {
+        query.append("lat", latitude.toString());
+        query.append("lon", longitude.toString());
+      } else if (pincode) {
+        query.append("pincode", pincode);
+      }
+
+      const res = await fetch(`${API}/api/public/hot-deals?${query.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        // Fallback to dummy data if backend has no items yet
+        setHotDealsUnder50(data.under50?.length > 0 ? data.under50 : dummyHotDealsUnder50);
+        setHotDealsUnder100(data.under100?.length > 0 ? data.under100 : dummyHotDealsUnder100);
+      } else {
+        setHotDealsUnder50(dummyHotDealsUnder50);
+        setHotDealsUnder100(dummyHotDealsUnder100);
+      }
+    } catch (err) {
+      console.error("Failed to fetch hot deals", err);
+      setHotDealsUnder50(dummyHotDealsUnder50);
+      setHotDealsUnder100(dummyHotDealsUnder100);
+    }
+  }
+
+  // Fetch Hot Deals when location changes
+  useEffect(() => {
+    fetchHotDeals();
+  }, [latitude, longitude, pincode]);
 
   // Fetch when filters change
   useEffect(() => {
@@ -986,6 +1177,36 @@ export default function HomePage() {
             )}
           </section>
 
+          {/* ── Hot Deals Under 50 ────────────────────────────────────────── */}
+          {hotDealsUnder50.length > 0 && (
+            <section className="py-3">
+              <SectionHeader
+                title="Hot Deals Under ₹50"
+                onViewAll={() => {}}
+              />
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
+                {hotDealsUnder50.map((deal) => (
+                  <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* ── Hot Deals Under 100 ───────────────────────────────────────── */}
+          {hotDealsUnder100.length > 0 && (
+            <section className="py-3">
+              <SectionHeader
+                title="Hot Deals Under ₹100"
+                onViewAll={() => {}}
+              />
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
+                {hotDealsUnder100.map((deal) => (
+                  <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
+                ))}
+              </div>
+            </section>
+          )}
+
           {/* ── 4. Top Cuisines ─────────────────────────────────────────────── */}
           <section className="py-3">
             <SectionHeader title="Top Cuisines" />
@@ -1170,6 +1391,38 @@ export default function HomePage() {
         onClose={() => setReqModal(false)}
         defaultType={reqType}
       />
+
+      {/* Confirmation Modal for Hot Deals */}
+      {dealToConfirm && (
+        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#151522] w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-0 md:zoom-in-95 duration-300">
+            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Existing Items in Cart</h3>
+            <p className="text-[13px] text-gray-600 dark:text-gray-400 mb-6 font-medium leading-relaxed">
+              You already have items from <span className="font-bold text-gray-800 dark:text-gray-200">{dealToConfirm.restaurantName}</span> in your cart. Do you want to replace them with this deal, or append this deal to your existing cart?
+            </p>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => handleConfirmDeal("add")}
+                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-md active:scale-[0.98]"
+              >
+                Append to Cart
+              </button>
+              <button
+                onClick={() => handleConfirmDeal("replace")}
+                className="w-full bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold py-3.5 rounded-2xl transition-all active:scale-[0.98]"
+              >
+                Replace Cart Items
+              </button>
+              <button
+                onClick={() => setDealToConfirm(null)}
+                className="w-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-bold py-2 transition-colors mt-1"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
