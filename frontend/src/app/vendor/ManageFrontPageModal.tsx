@@ -6,6 +6,8 @@ import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, 
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import imageCompression from 'browser-image-compression';
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 interface ManageFrontPageModalProps {
   isOpen: boolean;
@@ -117,41 +119,42 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
   const fetchGpsLocation = async () => {
     setIsGpsLoading(true);
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported by browser");
-      setIsGpsLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`);
-          const data = await res.json();
-          const address = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-          const pincode = data.address?.postcode || "";
-
-          setFormData((prev) => ({
-            ...prev,
-            latitude: latitude.toString(),
-            longitude: longitude.toString(),
-            gps_address: address,
-            pincode: pincode,
-          }));
-          toast.success("GPS location auto-filled");
-        } catch (err) {
-          toast.error("Could not resolve address");
-        } finally {
-          setIsGpsLoading(false);
-        }
-      },
-      () => {
-        toast.error("Location permission denied");
+    
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const perm = await Geolocation.requestPermissions();
+        if (perm.location !== 'granted') throw new Error("Permission denied");
+      } else if (!navigator.geolocation) {
+        toast.error("Geolocation not supported by browser");
         setIsGpsLoading(false);
-      },
-      { enableHighAccuracy: true }
-    );
+        return;
+      }
+
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true });
+      const { latitude, longitude } = position.coords;
+      
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=en`);
+        const data = await res.json();
+        const address = data.display_name || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+        const pincode = data.address?.postcode || "";
+
+        setFormData((prev) => ({
+          ...prev,
+          latitude: latitude.toString(),
+          longitude: longitude.toString(),
+          gps_address: address,
+          pincode: pincode,
+        }));
+        toast.success("GPS location auto-filled");
+      } catch (err) {
+        toast.error("Could not resolve address");
+      }
+    } catch (err: any) {
+      toast.error(err.message === "Permission denied" ? "Location permission denied" : "Could not get GPS signal.");
+    } finally {
+      setIsGpsLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

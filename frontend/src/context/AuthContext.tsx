@@ -3,6 +3,7 @@ import { createContext, useContext, useState, useEffect, useRef, ReactNode } fro
 import toast from "react-hot-toast";
 import LoginModal from "@/components/LoginModal";
 import { usePathname } from "next/navigation";
+import { initPushNotifications } from "@/utils/PushNotificationService";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -110,6 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // ── Initialize Native Push Notifications on Login ──
+  useEffect(() => {
+    if (accessToken) {
+      initPushNotifications(accessToken);
+    }
+  }, [accessToken]);
 
   const pathname = usePathname();
   const isEssentials = pathname?.startsWith("/essentials") || pathname?.startsWith("/store") || (typeof window !== "undefined" && window.location.href.includes("theme=blue")) || false;

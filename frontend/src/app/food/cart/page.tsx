@@ -10,6 +10,8 @@ import {
   CreditCard, Smartphone, Wallet, ChevronDown, ChevronUp,
   Phone, FileText, MessageSquare
 } from "lucide-react";
+import { Checkout } from 'capacitor-razorpay';
+import { Capacitor } from '@capacitor/core';
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
@@ -56,6 +58,7 @@ function RestaurantOrderCard({
   landmark,
   setIsLocationModalOpen,
   accessToken,
+  settingsLoaded,
 }: {
   restId: string;
   restItems: ReturnType<typeof useCart>["items"];
@@ -72,6 +75,7 @@ function RestaurantOrderCard({
   landmark: string;
   setIsLocationModalOpen: (v: boolean) => void;
   accessToken: string | null;
+  settingsLoaded: boolean;
 }) {
   const restName = restItems[0].restaurantName;
   const subtotal = restItems.reduce((s, i) => s + i.price * i.quantity, 0);
@@ -84,12 +88,14 @@ function RestaurantOrderCard({
   const discount = (couponApplied && paymentMethod !== 'cod') ? Math.floor(subtotal * 0.1) : 0;
 
   // Calculate actual fee amounts based on percentage of subtotal, capped at ₹8 each
-  const calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
+  let calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
   const calculatedGst = Math.min((subtotal * gst) / 100, 8);
   let totalFees = calculatedPlatformFee + calculatedGst;
 
   // Razorpay requires a minimum amount of ₹1. Enforce this if fees are non-zero.
+  // Add any deficit to the platform fee so the UI matches the total.
   if (totalFees > 0 && totalFees < 1) {
+    calculatedPlatformFee += (1 - totalFees);
     totalFees = 1;
   }
 
@@ -123,6 +129,7 @@ function RestaurantOrderCard({
   }, [restId]);
 
   useEffect(() => {
+    if (!settingsLoaded) return;
     try {
       const saved = localStorage.getItem(`fees_${restId}`);
       if (saved) {
@@ -137,7 +144,7 @@ function RestaurantOrderCard({
         }
       }
     } catch (e) {}
-  }, [restId, totalFees]);
+  }, [restId, totalFees, settingsLoaded]);
 
   let outOfRange = false;
   if (vendorData) {
@@ -532,6 +539,13 @@ function RestaurantOrderCard({
                     name: "NearBuy Platform Fees",
                     description: "Tax and Platform Fees",
                     order_id: rzpOrder.id,
+                    config: {
+                      display: {
+                        blocks: { upi: { name: "Pay using UPI", instruments: [{ method: "upi" }] } },
+                        sequence: ["block.upi"],
+                        preferences: { show_default_blocks: false },
+                      },
+                    },
                     handler: async function (response: any) {
                       try {
                         const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
@@ -564,11 +578,23 @@ function RestaurantOrderCard({
                     theme: { color: "#f97316" },
                     modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled"); } }
                   };
-                  const rzp = new (window as any).Razorpay(options);
-                  rzp.on("payment.failed", function (response: any) {
-                    toast.error(response.error.description || "Payment failed");
-                  });
-                  rzp.open();
+                  if (Capacitor.isNativePlatform()) {
+                    try {
+                      const data = await Checkout.open(options);
+                      options.handler(data);
+                    } catch (error: any) {
+                      toast.error(error.description || "Payment failed");
+                      if (options.modal && options.modal.ondismiss) {
+                        options.modal.ondismiss();
+                      }
+                    }
+                  } else {
+                    const rzp = new (window as any).Razorpay(options);
+                    rzp.on("payment.failed", function (response: any) {
+                      toast.error(response.error.description || "Payment failed");
+                    });
+                    rzp.open();
+                  }
                 } catch (err: any) {
                   toast.error(err.message || "Error initiating Razorpay");
                   setIsPayingTaxes(false);
@@ -672,6 +698,7 @@ export default function CartPage() {
 
   const [platformFee, setPlatformFee] = useState(0);
   const [gst, setGst] = useState(0);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
@@ -682,8 +709,12 @@ export default function CartPage() {
       .then((data) => {
         if (data.platform_fee !== undefined) setPlatformFee(data.platform_fee);
         if (data.gst !== undefined) setGst(data.gst);
+        setSettingsLoaded(true);
       })
-      .catch(console.error);
+      .catch((err) => {
+        console.error(err);
+        setSettingsLoaded(true);
+      });
   }, []);
 
   const handlePlaceOrder = async (restId: string, orderItems: any[], subtotal: number, gstAmount: number, platformFeeAmount: number, totalAmount: number, customerMobile: string, alternateMobile: string, cookingInstructions: string, paymentMethod: string, razorpayData: any = null) => {
@@ -706,7 +737,7 @@ export default function CartPage() {
         body: JSON.stringify({
           vendor_id: restId,
           items: orderItems.map((item: any) => ({
-            id: item.id,
+            id: String(item.id),
             name: item.name,
             price: item.price,
             qty: item.quantity,       // backend expects `qty`, cart uses `quantity`
@@ -827,6 +858,7 @@ export default function CartPage() {
                   landmark={landmark}
                   setIsLocationModalOpen={setIsLocationModalOpen}
                   accessToken={accessToken}
+                  settingsLoaded={settingsLoaded}
                 />
               ))}
             </AnimatePresence>
