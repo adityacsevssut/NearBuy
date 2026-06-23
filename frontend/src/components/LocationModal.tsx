@@ -11,6 +11,8 @@ import {
 import { useLocationContext, SavedAddress } from "@/context/LocationContext";
 import toast from "react-hot-toast";
 import GeoapifySearch, { ResolvedGeoapifyAddress } from "./GeoapifySearch";
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 // Dynamically import map to avoid SSR issues with Leaflet
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -172,16 +174,21 @@ export default function LocationModal() {
   const handleDetectAndOpenMap = async () => {
     setIsDetecting(true);
     try {
-      if (!navigator.geolocation) { toast.error("Geolocation not supported"); return; }
-      const position = await new Promise<GeolocationPosition>((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 })
-      );
-      const { latitude, longitude } = position.coords;
+      if (Capacitor.isNativePlatform()) {
+        const perm = await Geolocation.requestPermissions();
+        if (perm.location !== 'granted') throw new Error("Permission denied");
+      } else if (!navigator.geolocation) { 
+        toast.error("Geolocation not supported"); 
+        return; 
+      }
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
       setMapCoords({ lat: latitude, lng: longitude });
       await resolveAddress(latitude, longitude);
       setView("map");
     } catch (err: any) {
-      toast.error(err.code === 1 ? "Location permission denied." : "Could not get GPS signal.");
+      toast.error(err.message === "Permission denied" ? "Location permission denied." : "Could not get GPS signal.");
     } finally {
       setIsDetecting(false);
     }

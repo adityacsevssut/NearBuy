@@ -13,6 +13,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import Script from "next/script";
+import { Checkout } from 'capacitor-razorpay';
+import { Capacitor } from '@capacitor/core';
 
 interface Order {
   id: string;
@@ -243,6 +245,13 @@ export default function OrderStatusPage() {
         name: "NearBuy Order Payment",
         description: `Order ${id}`,
         order_id: rzpOrder.id,
+        config: {
+          display: {
+            blocks: { upi: { name: "Pay using UPI", instruments: [{ method: "upi" }] } },
+            sequence: ["block.upi"],
+            preferences: { show_default_blocks: false },
+          },
+        },
         handler: async function (response: any) {
           try {
             const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
@@ -269,11 +278,23 @@ export default function OrderStatusPage() {
         theme: { color: "#f97316" },
         modal: { ondismiss: function () { setIsPaying(false); toast.error("Payment cancelled"); } }
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        toast.error(response.error.description || "Payment failed");
-      });
-      rzp.open();
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const data = await Checkout.open(options);
+          options.handler(data);
+        } catch (error: any) {
+          toast.error(error.description || "Payment failed");
+          if (options.modal && options.modal.ondismiss) {
+            options.modal.ondismiss();
+          }
+        }
+      } else {
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on("payment.failed", function (response: any) {
+          toast.error(response.error.description || "Payment failed");
+        });
+        rzp.open();
+      }
     } catch (err: any) {
       toast.error(err.message || "Error initiating Razorpay");
       setIsPaying(false);

@@ -13,6 +13,8 @@ import {
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
+import { Checkout } from 'capacitor-razorpay';
+import { Capacitor } from '@capacitor/core';
 import { useLocationContext } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -546,6 +548,13 @@ function RestaurantOrderCard({
                     name: "NearBuy Platform Fees",
                     description: "Tax and Platform Fees",
                     order_id: rzpOrder.id,
+                    config: {
+                      display: {
+                        blocks: { upi: { name: "Pay using UPI", instruments: [{ method: "upi" }] } },
+                        sequence: ["block.upi"],
+                        preferences: { show_default_blocks: false },
+                      },
+                    },
                     handler: async function (response: any) {
                       try {
                         const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
@@ -578,11 +587,23 @@ function RestaurantOrderCard({
                     theme: { color: "#f97316" },
                     modal: { ondismiss: function () { setIsPayingTaxes(false); toast.error("Tax payment cancelled", blueToastStyle); } }
                   };
-                  const rzp = new (window as any).Razorpay(options);
-                  rzp.on("payment.failed", function (response: any) {
-                    toast.error(response.error.description || "Payment failed", blueToastStyle);
-                  });
-                  rzp.open();
+                  if (Capacitor.isNativePlatform()) {
+                    try {
+                      const data = await Checkout.open(options);
+                      options.handler(data);
+                    } catch (error: any) {
+                      toast.error(error.description || "Payment failed");
+                      if (options.modal && options.modal.ondismiss) {
+                        options.modal.ondismiss();
+                      }
+                    }
+                  } else {
+                    const rzp = new (window as any).Razorpay(options);
+                    rzp.on("payment.failed", function (response: any) {
+                      toast.error(response.error.description || "Payment failed");
+                    });
+                    rzp.open();
+                  }
                 } catch (err: any) {
                   toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
                   setIsPayingTaxes(false);

@@ -5,6 +5,8 @@ import { useLocationContext } from "@/context/LocationContext";
 import { usePathname } from "next/navigation";
 import { MapPin, Navigation, Map, ShieldAlert, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -85,33 +87,33 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       }
       if (!permissionPrompted) {
         setPermissionPrompted(true);
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(
-            async (pos) => {
-              const lat = pos.coords.latitude;
-              const lon = pos.coords.longitude;
-              
-              // Reverse geocode to get name/pincode (optional but good)
-              try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
-                const data = await res.json();
-                const pin = data.address?.postcode || "";
-                const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-                setLocation(name, pin, "", lat, lon);
-              } catch {
-                setLocation("Current Location", "", "", lat, lon);
-              }
-            },
-            (err) => {
-              console.warn("Geolocation error or denied:", err);
-              // Set status to denied so it shows "Not Available" screen
-              setStatus("denied");
-            },
-            { enableHighAccuracy: true, timeout: 15000 }
-          );
-        } else {
-          setStatus("denied");
-        }
+        const fetchPos = async () => {
+          try {
+            if (Capacitor.isNativePlatform()) {
+              const perm = await Geolocation.requestPermissions();
+              if (perm.location !== 'granted') throw new Error("Permission denied");
+            } else if (typeof window === "undefined" || !navigator.geolocation) {
+              throw new Error("Not supported");
+            }
+            const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            
+            try {
+              const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
+              const data = await res.json();
+              const pin = data.address?.postcode || "";
+              const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
+              setLocation(name, pin, "", lat, lon);
+            } catch {
+              setLocation("Current Location", "", "", lat, lon);
+            }
+          } catch (err) {
+            console.warn("Geolocation error or denied:", err);
+            setStatus("denied");
+          }
+        };
+        fetchPos();
       }
       return;
     }
@@ -146,42 +148,42 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
   const [isDetecting, setIsDetecting] = useState(false);
 
-  const handleAutoDetectLocation = () => {
+  const handleAutoDetectLocation = async () => {
     setIsDetecting(true);
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported by your browser");
-      setIsDetecting(false);
-      return;
-    }
-    
     const toastId = toast.loading("Detecting location...");
     
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lon = pos.coords.longitude;
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
-          const data = await res.json();
-          const pin = data.address?.postcode || "";
-          const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-          setLocation(name, pin, "", lat, lon);
-          toast.success("Location detected!", { id: toastId });
-        } catch {
-          setLocation("Current Location", "", "", lat, lon);
-          toast.success("Location detected!", { id: toastId });
-        } finally {
-          setIsDetecting(false);
-        }
-      },
-      (err) => {
-        console.warn("Geolocation error or denied:", err);
-        toast.error("Location permission denied. Please select manually.", { id: toastId });
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const perm = await Geolocation.requestPermissions();
+        if (perm.location !== 'granted') throw new Error("Permission denied");
+      } else if (typeof window === "undefined" || !navigator.geolocation) {
+        toast.error("Geolocation not supported by your browser", { id: toastId });
         setIsDetecting(false);
-        setIsLocationModalOpen(true);
-      },
-      { enableHighAccuracy: true, timeout: 15000 }
-    );
+        return;
+      }
+
+      const pos = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      const lat = pos.coords.latitude;
+      const lon = pos.coords.longitude;
+      
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`);
+        const data = await res.json();
+        const pin = data.address?.postcode || "";
+        const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
+        setLocation(name, pin, "", lat, lon);
+        toast.success("Location detected!", { id: toastId });
+      } catch {
+        setLocation("Current Location", "", "", lat, lon);
+        toast.success("Location detected!", { id: toastId });
+      }
+    } catch (err) {
+      console.warn("Geolocation error or denied:", err);
+      toast.error("Location permission denied. Please select manually.", { id: toastId });
+      setIsLocationModalOpen(true);
+    } finally {
+      setIsDetecting(false);
+    }
   };
 
   if (isBypassed) return <>{children}</>;

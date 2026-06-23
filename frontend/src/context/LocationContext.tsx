@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useAuth } from "./AuthContext";
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -297,46 +299,44 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
 
   const fetchExactLocation = async () => {
-    if (typeof window === "undefined" || !navigator.geolocation) {
-      console.warn("Geolocation not supported by this browser.");
-      return;
-    }
     setIsFetchingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude: lat, longitude: lon } = pos.coords;
-        try {
-          const res = await fetch(`/api/geocode-reverse?lat=${lat}&lng=${lon}`);
-          if (res.ok) {
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-              const address = data.results[0];
-              const name = address.name || "Current Location";
-              let pin = "";
-              for (const comp of address.address_components || []) {
-                if (comp.types.includes("postal_code")) {
-                  pin = comp.long_name;
-                  break;
-                }
-              }
-              setLocation(name, pin, "", lat, lon);
-            } else {
-              setLocation("Current Location", "", "", lat, lon);
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const permissionStatus = await Geolocation.requestPermissions();
+        if (permissionStatus.location !== 'granted') {
+          console.warn("User denied location permission");
+          setIsFetchingLocation(false);
+          return;
+        }
+      }
+      
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      const res = await fetch(`/api/geocode-reverse?lat=${lat}&lng=${lon}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const address = data.results[0];
+          const name = address.name || "Current Location";
+          let pin = "";
+          for (const comp of address.address_components || []) {
+            if (comp.types.includes("postal_code")) {
+              pin = comp.long_name;
+              break;
             }
           }
-        } catch (err) {
-          console.error("Failed to reverse geocode", err);
+          setLocation(name, pin, "", lat, lon);
+        } else {
           setLocation("Current Location", "", "", lat, lon);
-        } finally {
-          setIsFetchingLocation(false);
         }
-      },
-      (err) => {
-        console.error("Geolocation error:", err);
-        setIsFetchingLocation(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+      }
+    } catch (err) {
+      console.error("Geolocation/Geocoding error:", err);
+    } finally {
+      setIsFetchingLocation(false);
+    }
   };
 
   return (
