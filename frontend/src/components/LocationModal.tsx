@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import GeoapifySearch, { ResolvedGeoapifyAddress } from "./GeoapifySearch";
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { requestGpsActivation } from '@/utils/locationHelper';
 
 // Dynamically import map to avoid SSR issues with Leaflet
 const MapPicker = dynamic(() => import("./MapPicker"), {
@@ -175,8 +176,7 @@ export default function LocationModal() {
     setIsDetecting(true);
     try {
       if (Capacitor.isNativePlatform()) {
-        const perm = await Geolocation.requestPermissions();
-        if (perm.location !== 'granted') throw new Error("Permission denied");
+        await requestGpsActivation();
       } else if (!navigator.geolocation) { 
         toast.error("Geolocation not supported"); 
         return; 

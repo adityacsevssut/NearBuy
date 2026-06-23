@@ -580,7 +580,12 @@ function RestaurantOrderCard({
                   };
                   if (Capacitor.isNativePlatform()) {
                     try {
-                      const data = await Checkout.open(options);
+                      const nativeOptions = { ...options };
+                      delete (nativeOptions as any).config;
+                      if (nativeOptions.amount) {
+                        nativeOptions.amount = nativeOptions.amount.toString();
+                      }
+                      const data = await Checkout.open(nativeOptions);
                       options.handler(data);
                     } catch (error: any) {
                       toast.error(error.description || "Payment failed");

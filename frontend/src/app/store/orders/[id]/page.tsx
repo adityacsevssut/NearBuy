@@ -265,7 +265,12 @@ export default function OrderStatusPage() {
       };
       if (Capacitor.isNativePlatform()) {
         try {
-          const data = await Checkout.open(options);
+          const nativeOptions = { ...options };
+          delete (nativeOptions as any).config;
+          if (nativeOptions.amount) {
+            nativeOptions.amount = nativeOptions.amount.toString();
+          }
+          const data = await Checkout.open(nativeOptions);
           options.handler(data);
         } catch (error: any) {
           toast.error(error.description || "Payment failed", blueToastStyle);
@@ -331,11 +336,28 @@ export default function OrderStatusPage() {
         theme: { color: "#3b82f6" },
         modal: { ondismiss: function () { setIsPaying(false); toast.error("Advance payment cancelled", blueToastStyle); } }
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        toast.error(response.error.description || "Payment failed", blueToastStyle);
-      });
-      rzp.open();
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const nativeOptions = { ...options };
+          delete (nativeOptions as any).config;
+          if (nativeOptions.amount) {
+            nativeOptions.amount = nativeOptions.amount.toString();
+          }
+          const data = await Checkout.open(nativeOptions);
+          options.handler(data);
+        } catch (error: any) {
+          toast.error(error.description || "Payment failed", blueToastStyle);
+          if (options.modal && options.modal.ondismiss) {
+            options.modal.ondismiss();
+          }
+        }
+      } else {
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on("payment.failed", function (response: any) {
+          toast.error(response.error.description || "Payment failed", blueToastStyle);
+        });
+        rzp.open();
+      }
     } catch (err: any) {
       toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
       setIsPaying(false);
@@ -387,11 +409,28 @@ export default function OrderStatusPage() {
         theme: { color: "#3b82f6" },
         modal: { ondismiss: function () { setIsPaying(false); toast.error("Final payment cancelled", blueToastStyle); } }
       };
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", function (response: any) {
-        toast.error(response.error.description || "Payment failed", blueToastStyle);
-      });
-      rzp.open();
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const nativeOptions = { ...options };
+          delete (nativeOptions as any).config;
+          if (nativeOptions.amount) {
+            nativeOptions.amount = nativeOptions.amount.toString();
+          }
+          const data = await Checkout.open(nativeOptions);
+          options.handler(data);
+        } catch (error: any) {
+          toast.error(error.description || "Payment failed", blueToastStyle);
+          if (options.modal && options.modal.ondismiss) {
+            options.modal.ondismiss();
+          }
+        }
+      } else {
+        const rzp = new (window as any).Razorpay(options);
+        rzp.on("payment.failed", function (response: any) {
+          toast.error(response.error.description || "Payment failed", blueToastStyle);
+        });
+        rzp.open();
+      }
     } catch (err: any) {
       toast.error(err.message || "Error initiating Razorpay", blueToastStyle);
       setIsPaying(false);

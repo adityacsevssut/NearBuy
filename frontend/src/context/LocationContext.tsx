@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { useAuth } from "./AuthContext";
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { requestGpsActivation } from '@/utils/locationHelper';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -302,12 +303,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     setIsFetchingLocation(true);
     try {
       if (Capacitor.isNativePlatform()) {
-        const permissionStatus = await Geolocation.requestPermissions();
-        if (permissionStatus.location !== 'granted') {
-          console.warn("User denied location permission");
-          setIsFetchingLocation(false);
-          return;
-        }
+        await requestGpsActivation();
       }
       
       const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });

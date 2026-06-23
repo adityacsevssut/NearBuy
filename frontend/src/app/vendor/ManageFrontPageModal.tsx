@@ -8,6 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import imageCompression from 'browser-image-compression';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { requestGpsActivation } from '@/utils/locationHelper';
 
 interface ManageFrontPageModalProps {
   isOpen: boolean;
@@ -122,8 +123,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
     
     try {
       if (Capacitor.isNativePlatform()) {
-        const perm = await Geolocation.requestPermissions();
-        if (perm.location !== 'granted') throw new Error("Permission denied");
+        await requestGpsActivation();
       } else if (!navigator.geolocation) {
         toast.error("Geolocation not supported by browser");
         setIsGpsLoading(false);

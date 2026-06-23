@@ -7,6 +7,7 @@ import { MapPin, Navigation, Map, ShieldAlert, ArrowRight } from "lucide-react";
 import toast from "react-hot-toast";
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
+import { requestGpsActivation } from '@/utils/locationHelper';
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -90,8 +91,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         const fetchPos = async () => {
           try {
             if (Capacitor.isNativePlatform()) {
-              const perm = await Geolocation.requestPermissions();
-              if (perm.location !== 'granted') throw new Error("Permission denied");
+              await requestGpsActivation();
             } else if (typeof window === "undefined" || !navigator.geolocation) {
               throw new Error("Not supported");
             }
@@ -154,8 +154,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     
     try {
       if (Capacitor.isNativePlatform()) {
-        const perm = await Geolocation.requestPermissions();
-        if (perm.location !== 'granted') throw new Error("Permission denied");
+        await requestGpsActivation();
       } else if (typeof window === "undefined" || !navigator.geolocation) {
         toast.error("Geolocation not supported by your browser", { id: toastId });
         setIsDetecting(false);
