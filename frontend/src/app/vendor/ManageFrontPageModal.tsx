@@ -151,7 +151,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
         toast.error("Could not resolve address");
       }
     } catch (err: any) {
-      toast.error(err.message === "Permission denied" ? "Location permission denied" : "Could not get GPS signal.");
+      toast.error(err.message === "Permission denied" ? "Location permission denied" : "Please Turn On Location.");
     } finally {
       setIsGpsLoading(false);
     }

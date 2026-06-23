@@ -181,14 +181,14 @@ export default function LocationModal() {
         toast.error("Geolocation not supported"); 
         return; 
       }
-      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 5000 });
       const latitude = position.coords.latitude;
       const longitude = position.coords.longitude;
       setMapCoords({ lat: latitude, lng: longitude });
       await resolveAddress(latitude, longitude);
       setView("map");
     } catch (err: any) {
-      toast.error(err.message === "Permission denied" ? "Location permission denied." : "Could not get GPS signal.");
+      toast.error(err.message === "Permission denied" ? "Location permission denied." : "Please Turn On Location.");
     } finally {
       setIsDetecting(false);
     }
@@ -249,7 +249,7 @@ export default function LocationModal() {
           <motion.div
             key="backdrop"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[300] bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 z-[300] bg-black/60 "
             onClick={handleClose}
           />
           <div className="fixed inset-0 z-[301] flex items-center justify-center p-4 pointer-events-none">
@@ -479,7 +479,7 @@ export default function LocationModal() {
                   </div>
                   <div className="flex-1 relative min-h-0">
                     {mapCoords && <MapPicker lat={mapCoords.lat} lng={mapCoords.lng} onLocationChange={handleMapMove} />}
-                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white dark:bg-[#0D0D17]/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-[#2A2A3A] text-xs font-bold text-gray-600 dark:text-gray-400 pointer-events-none whitespace-nowrap">
+                    <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-white dark:bg-[#0D0D17]/90  px-3 py-1.5 rounded-full shadow-md border border-gray-200 dark:border-[#2A2A3A] text-xs font-bold text-gray-600 dark:text-gray-400 pointer-events-none whitespace-nowrap">
                       📍 Drag the map to place the pin
                     </div>
                   </div>
