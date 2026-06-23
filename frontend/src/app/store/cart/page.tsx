@@ -591,10 +591,9 @@ function RestaurantOrderCard({
                     try {
                       const nativeOptions = { ...options };
                       delete (nativeOptions as any).config;
-                      if (nativeOptions.amount) {
-                        nativeOptions.amount = nativeOptions.amount.toString();
-                      }
-                      const data = await Checkout.open(nativeOptions);
+          delete (nativeOptions as any).handler;
+          delete (nativeOptions as any).modal;
+          const data = await Checkout.open(nativeOptions);
                       options.handler(data);
                     } catch (error: any) {
                       toast.error(error.description || "Payment failed");
