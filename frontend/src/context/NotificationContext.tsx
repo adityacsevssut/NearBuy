@@ -92,7 +92,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             </button>
           </div>
         </div>
-      ), { duration: 5000, position: 'top-center' });
+      ), { duration: 1000, position: 'top-center' });
     });
 
     return () => {

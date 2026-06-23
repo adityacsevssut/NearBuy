@@ -356,7 +356,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
           initial={{ opacity: 0, y: -10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -10, scale: 0.95 }}
-          className="bg-red-50/80 backdrop-blur-sm border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm flex items-start gap-3 shadow-sm mb-4"
+          className="bg-red-50/80  border border-red-200 text-red-600 rounded-xl px-4 py-3 text-sm flex items-start gap-3 shadow-sm mb-4"
         >
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <span className="font-medium leading-tight">{error}</span>
@@ -368,7 +368,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
 
 
   const ModalHeader = ({ title, back }: { title: string; back?: Flow }) => (
-    <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50 backdrop-blur-md relative z-20">
+    <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50  relative z-20">
       {back ? (
         <button onClick={() => reset(back)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 transition-colors">
           <ArrowLeft className="w-5 h-5" />
@@ -395,7 +395,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-gray-900/60 "
             onClick={onClose}
           />
 
