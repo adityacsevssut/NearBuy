@@ -220,27 +220,6 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
-        
-        toast.success("Payment successful!");
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
@@ -297,27 +276,6 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate advance payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-advance`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Advance payment verification failed");
-        
-        toast.success("Advance payment successful!", blueToastStyle);
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
@@ -374,27 +332,6 @@ export default function OrderStatusPage() {
       const rzpOrder = await res.json();
       if (!res.ok) throw new Error(rzpOrder.error || "Failed to initiate remaining payment");
 
-      // --- TESTING BYPASS START ---
-      if (true) {
-        const verifyRes = await fetch(`${API}/api/orders/verify-payment`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${accessToken || ""}` },
-          body: JSON.stringify({
-            razorpay_order_id: rzpOrder.id || "test_order",
-            razorpay_payment_id: "test_payment",
-            razorpay_signature: "test_signature",
-            order_id: id,
-          })
-        });
-        const verifyData = await verifyRes.json();
-        if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
-        
-        toast.success("Payment successful!");
-        fetchOrderDetails();
-        setIsPaying(false);
-        return;
-      }
-      // --- TESTING BYPASS END ---
 
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
@@ -601,7 +538,9 @@ export default function OrderStatusPage() {
                 <Info className="w-8 h-8 text-red-500" />
               </div>
               <p className="text-gray-900 dark:text-gray-100 font-black text-lg mb-1">This order was cancelled</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">If you have already paid, your refund will be processed within 3-5 business days.</p>
+              {!isCOD && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">If you have already paid, your refund will be processed within 3-5 business days.</p>
+              )}
             </div>
           ) : (
             <div className="relative">

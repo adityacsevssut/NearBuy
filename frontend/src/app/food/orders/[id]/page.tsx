@@ -624,7 +624,7 @@ export default function OrderStatusPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">If you have already paid, your refund will be processed shortly.</p>
+                !isCOD && <p className="text-sm text-gray-500 dark:text-gray-400 font-medium text-center">If you have already paid, your refund will be processed shortly.</p>
               )}
             </div>
           ) : (

@@ -122,6 +122,23 @@ function RestaurantOrderCard({
       .catch(console.error);
   }, [restId]);
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`fees_${restId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Math.abs(parsed.amount - totalFees) < 0.01) {
+          setRazorpayData(parsed.razorpayData);
+          setFeesPaid(true);
+        } else {
+          localStorage.removeItem(`fees_${restId}`);
+          setFeesPaid(false);
+          setRazorpayData(null);
+        }
+      }
+    } catch (e) {}
+  }, [restId, totalFees]);
+
   let outOfRange = false;
   if (vendorData) {
     if (userLat !== null && userLon !== null && vendorData.latitude && vendorData.longitude) {
@@ -495,15 +512,7 @@ function RestaurantOrderCard({
                 }
                 setIsPayingTaxes(true);
 
-                // --- MOCK PAYMENT BYPASS ---
-                // Remove or comment out this block to re-enable Razorpay
-                setTimeout(() => {
-                  toast.success("Fees paid successfully!");
-                  setFeesPaid(true);
-                  setIsPayingTaxes(false);
-                }, 500);
-                return; // Early return to bypass Razorpay below
-                // --- END MOCK PAYMENT BYPASS ---
+
 
                 /* Original Razorpay Code Below */
                 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
@@ -537,11 +546,13 @@ function RestaurantOrderCard({
                         const verifyData = await verifyRes.json();
                         if (!verifyRes.ok) throw new Error(verifyData.error || "Payment verification failed");
                         
-                        setRazorpayData({
+                        const rzpData = {
                           razorpay_order_id: response.razorpay_order_id,
                           razorpay_payment_id: response.razorpay_payment_id,
                           razorpay_signature: response.razorpay_signature,
-                        });
+                        };
+                        setRazorpayData(rzpData);
+                        localStorage.setItem(`fees_${restId}`, JSON.stringify({ amount: totalFees, razorpayData: rzpData }));
                         toast.success("Fees paid and verified successfully!");
                         setFeesPaid(true);
                       } catch (err: any) {
@@ -723,6 +734,7 @@ export default function CartPage() {
 
       toast.success("Order placed! Wait for confirmation.");
       orderItems.forEach(item => removeItem(item.uid));
+      localStorage.removeItem(`fees_${restId}`);
       router.push("/food/orders");
     } catch (err: any) {
       toast.error(err.message || "An error occurred");
