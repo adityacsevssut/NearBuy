@@ -12,7 +12,7 @@ dependencies {
     implementation project(':capacitor-geolocation')
     implementation project(':capacitor-push-notifications')
     implementation project(':southdevs-capacitor-google-auth')
-
+    implementation "com.google.android.gms:play-services-location:16.+"
 }
 
 
