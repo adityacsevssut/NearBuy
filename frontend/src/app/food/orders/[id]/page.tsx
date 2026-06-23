@@ -282,9 +282,8 @@ export default function OrderStatusPage() {
         try {
           const nativeOptions = { ...options };
           delete (nativeOptions as any).config;
-          if (nativeOptions.amount) {
-            nativeOptions.amount = nativeOptions.amount.toString();
-          }
+          delete (nativeOptions as any).handler;
+          delete (nativeOptions as any).modal;
           const data = await Checkout.open(nativeOptions);
           options.handler(data);
         } catch (error: any) {
@@ -356,9 +355,8 @@ export default function OrderStatusPage() {
         try {
           const nativeOptions = { ...options };
           delete (nativeOptions as any).config;
-          if (nativeOptions.amount) {
-            nativeOptions.amount = nativeOptions.amount.toString();
-          }
+          delete (nativeOptions as any).handler;
+          delete (nativeOptions as any).modal;
           const data = await Checkout.open(nativeOptions);
           options.handler(data);
         } catch (error: any) {
@@ -430,9 +428,8 @@ export default function OrderStatusPage() {
         try {
           const nativeOptions = { ...options };
           delete (nativeOptions as any).config;
-          if (nativeOptions.amount) {
-            nativeOptions.amount = nativeOptions.amount.toString();
-          }
+          delete (nativeOptions as any).handler;
+          delete (nativeOptions as any).modal;
           const data = await Checkout.open(nativeOptions);
           options.handler(data);
         } catch (error: any) {
