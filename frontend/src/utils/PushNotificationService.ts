@@ -64,10 +64,8 @@ export const initPushNotifications = async (accessToken: string | null) => {
     // 5. Handle incoming push notification while the app is actively open (foreground)
     PushNotifications.addListener('pushNotificationReceived', (notification: PushNotificationSchema) => {
       console.log('Push received in foreground: ', notification);
-      toast.success(`${notification.title}\n${notification.body}`, {
-        duration: 5000,
-        position: 'top-center'
-      });
+      // Removed toast here to prevent duplicate toasts, since Socket.IO (NotificationContext) 
+      // already shows a real-time notification UI for both web and app.
     });
 
     // 6. Handle action performed (When user taps the notification from the system tray)
