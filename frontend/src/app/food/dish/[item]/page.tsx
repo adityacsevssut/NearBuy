@@ -241,21 +241,21 @@ export default function DishPage() {
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
-                      {/* Veg/Non-veg icon & Badge */}
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className={`w-4 h-4 rounded-sm border-2 flex items-center justify-center bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
-                        </span>
-                        {dish.badge && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
-                            {dish.badge}
+                      <div>
+                        <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight mb-0.5 leading-tight">
+                          <span className={`inline-flex flex-shrink-0 w-4 h-4 border-2 items-center justify-center rounded-sm mr-2 align-middle -mt-1 bg-white dark:bg-[#0D0D17] ${dish.type === "veg" ? "border-green-600" : "border-red-600"}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`}></span>
                           </span>
+                          <span className="align-middle">{dish.name}</span>
+                        </h3>
+                        {dish.badge && (
+                          <div className="mb-1.5 mt-1">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
+                              {dish.badge}
+                            </span>
+                          </div>
                         )}
                       </div>
-
-                      <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight mb-0.5">
-                        {dish.name}
-                      </h3>
                       
                       {/* Vendor name with location pin styling */}
                       <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">

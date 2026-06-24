@@ -640,9 +640,9 @@ router.get("/vendors/:vendorId/daily-stats", authenticate, async (req, res) => {
 
     const { rows } = await pool.query(
       `SELECT 
-        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%cash%' OR LOWER(payment_method) = 'cod' THEN total_amount ELSE 0 END), 0) as cod_amount,
-        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online%' AND LOWER(payment_method) NOT LIKE '%delivery%' THEN total_amount ELSE 0 END), 0) as online_amount,
-        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online on delivery%' THEN total_amount ELSE 0 END), 0) as online_on_delivery_amount,
+        COALESCE(SUM(CASE WHEN (LOWER(payment_method) LIKE '%cash%' OR LOWER(payment_method) = 'cod') AND LOWER(status) != 'cancelled' THEN total_amount ELSE 0 END), 0) as cod_amount,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online%' AND LOWER(payment_method) NOT LIKE '%delivery%' AND LOWER(status) != 'cancelled' THEN total_amount ELSE 0 END), 0) as online_amount,
+        COALESCE(SUM(CASE WHEN LOWER(payment_method) LIKE '%online on delivery%' AND LOWER(status) != 'cancelled' THEN total_amount ELSE 0 END), 0) as online_on_delivery_amount,
         COUNT(CASE WHEN LOWER(status) = 'delivered' THEN 1 END) as delivered_count,
         COUNT(CASE WHEN LOWER(status) = 'cancelled' THEN 1 END) as cancelled_count,
         COALESCE(SUM(CASE WHEN LOWER(status) = 'cancelled' AND (payment_status = 'paid' OR advance_paid = true) THEN COALESCE(delivery_charge, 0) ELSE 0 END), 0) as cancelled_delivery_fee

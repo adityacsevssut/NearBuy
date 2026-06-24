@@ -274,8 +274,11 @@ function OrdersPageContent() {
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-lg font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 mb-1">
                     {new Date(order.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                  </p>
+                  <p className="text-[9px] font-bold text-blue-500 uppercase tracking-widest bg-blue-50 dark:bg-blue-500/10 px-1.5 py-0.5 rounded inline-block border border-blue-200/50 dark:border-blue-500/20">
+                    {order.payment_method || "COD"}
                   </p>
                 </div>
               </div>
@@ -416,6 +419,10 @@ function OrdersPageContent() {
                   <div className="flex justify-between text-lg font-black text-gray-900 dark:text-gray-100 pt-3 border-t border-gray-100 dark:border-[#2A2A3A] mt-3">
                     <span>Grand Total</span>
                     <span>₹{selectedOrderForItems.total_amount}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold text-gray-500 dark:text-gray-400 pt-1">
+                    <span>Payment Method</span>
+                    <span className="uppercase text-blue-600">{selectedOrderForItems.payment_method || "COD"}</span>
                   </div>
                 </div>
               </div>

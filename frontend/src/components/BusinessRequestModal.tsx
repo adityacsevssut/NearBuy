@@ -89,6 +89,7 @@ export default function BusinessRequestModal({
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const [restaurantName, setRestaurantName] = useState("");
   const [ownerName,   setOwnerName]   = useState("");
   const [ownerMobile, setOwnerMobile] = useState("");
   const [ownerEmail,  setOwnerEmail]  = useState("");
@@ -110,7 +111,7 @@ export default function BusinessRequestModal({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
-          ownerName, ownerMobile, ownerEmail, password, vendorType, 
+          restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, 
           requestType: defaultType, collegeName 
         }),
       });
@@ -129,7 +130,7 @@ export default function BusinessRequestModal({
     onClose();
     setTimeout(() => {
       setSuccess(false);
-      setOwnerName(""); setOwnerMobile(""); setOwnerEmail(""); setPassword(""); setCollegeName("");
+      setRestaurantName(""); setOwnerName(""); setOwnerMobile(""); setOwnerEmail(""); setPassword(""); setCollegeName("");
     }, 500);
   };
 
@@ -227,6 +228,13 @@ export default function BusinessRequestModal({
                   </div>
 
                   {/* Fields — themed by selected category */}
+                  <FormInput
+                    icon={Store} id="br-restaurant-name" label={vendorType === "food" ? "Restaurant Name" : "Store Name"}
+                    type="text" value={restaurantName} onChange={(e) => setRestaurantName(e.target.value)}
+                    iconClass={theme.icon} focusBorderClass={theme.focus} labelFocusClass={theme.label}
+                    required
+                  />
+
                   <FormInput
                     icon={User}  id="br-name"   label="Owner Name"
                     type="text"  value={ownerName}   onChange={(e) => setOwnerName(e.target.value)}

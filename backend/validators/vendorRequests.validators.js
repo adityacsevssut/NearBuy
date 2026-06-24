@@ -6,6 +6,10 @@ const mobile10 = Joi.string()
 
 /* ── Create vendor request (public signup) ────────────────────────── */
 const createVendorRequestSchema = Joi.object({
+  restaurantName: Joi.string().trim().min(2).max(150).required().messages({
+    "any.required": "Restaurant/Store name is required",
+    "string.min": "Name must be at least 2 characters"
+  }),
   ownerName:   Joi.string().trim().min(2).max(100).required().messages({
     "any.required": "Owner name is required",
     "string.min": "Owner name must be at least 2 characters"
