@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2 } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2, Mail, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
@@ -1259,7 +1259,7 @@ export default function PartnerDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="font-bold text-gray-900 dark:text-gray-100">{req.owner_name}</h3>
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100">{req.restaurant_name || req.owner_name}</h3>
                             {req.status === 'approved' && (
                               <span className="flex items-center gap-1 text-[9px] font-black bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 uppercase tracking-tighter">
                                 <ShieldCheck className="w-2.5 h-2.5" /> Verified
@@ -1279,10 +1279,13 @@ export default function PartnerDashboard() {
                       
                       <div className="space-y-2 mb-5">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] px-3 py-2 rounded-lg">
-                          <UserCircle className="w-4 h-4 text-gray-400" /> {req.owner_email}
+                          <UserCircle className="w-4 h-4 text-gray-400" /> {req.owner_name}
                         </div>
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] px-3 py-2 rounded-lg">
-                          <ShieldCheck className="w-4 h-4 text-gray-400" /> {req.owner_mobile}
+                          <Mail className="w-4 h-4 text-gray-400" /> {req.owner_email}
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] px-3 py-2 rounded-lg">
+                          <Phone className="w-4 h-4 text-gray-400" /> {req.owner_mobile}
                         </div>
                         {req.status === 'approved' && req.password && (
                           <div className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100 border-dashed">

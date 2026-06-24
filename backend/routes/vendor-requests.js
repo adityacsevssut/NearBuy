@@ -12,7 +12,7 @@ router.post(
   validate(createVendorRequestSchema),
   async (req, res) => {
 
-    const { ownerName, ownerMobile, ownerEmail, password, vendorType, requestType, collegeName } = req.body;
+    const { restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, requestType, collegeName } = req.body;
     try {
       // Check if email already exists in vendor_requests
       const existing = await pool.query("SELECT id FROM vendor_requests WHERE owner_email=$1", [ownerEmail]);
@@ -27,10 +27,10 @@ router.post(
       }
       
       const { rows } = await pool.query(
-        `INSERT INTO vendor_requests (owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO vendor_requests (restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
-        [ownerName, ownerMobile, ownerEmail, password, vendorType, requestType || 'vendor', collegeName]
+        [restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, requestType || 'vendor', collegeName]
       );
 
       return res.status(201).json({ message: "Vendor request submitted successfully.", requestId: rows[0].id });
@@ -49,7 +49,7 @@ router.get("/", authenticate, async (req, res) => {
        return res.status(403).json({ error: "Access denied." });
     }
     
-    let queryStr = `SELECT id, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name, status, created_at 
+    let queryStr = `SELECT id, restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name, status, created_at 
                     FROM vendor_requests`;
     let queryParams = [];
 

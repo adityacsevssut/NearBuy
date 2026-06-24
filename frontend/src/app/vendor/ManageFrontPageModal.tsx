@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag } from "lucide-react";
+import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag, Heart, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import imageCompression from 'browser-image-compression';
@@ -242,55 +242,79 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                 {/* ════════ Live Preview Card ════════ */}
                 <div>
                   <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-3">Live Customer Preview</label>
-                  <div className="max-w-[340px] mx-auto sm:mx-0 bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-100 dark:border-[#2A2A3A] shadow-md overflow-hidden relative">
-                    {/* Image Banner */}
-                    <div className="relative w-full h-40 bg-gray-100 dark:bg-[#1F1F2E]">
-                      {imagePreview ? (
-                        <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400">
-                          <ImageIcon className="w-8 h-8 opacity-50" />
-                        </div>
-                      )}
-                      {formData.badge && (
-                        <div className="absolute top-3 left-3 px-2.5 py-0.5 bg-white dark:bg-[#0D0D17] text-orange-600 text-[11px] font-black uppercase tracking-wider rounded-md shadow-sm">
-                          {formData.badge}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Card Content */}
-                    <div className="p-4">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg leading-tight truncate">
-                          {formData.restaurant_name || "Your Shop Name"}
-                        </h3>
-                        <div className="flex items-center gap-1 bg-orange-500 text-white px-1.5 py-0.5 rounded shadow-sm shrink-0">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span className="text-xs font-bold">{formData.rating || "0.0"}</span>
-                        </div>
+                  <div className="relative block h-[260px] max-w-[340px] w-full mx-auto sm:mx-0 bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-[#2A2A3A]">
+                    {/* Image Background */}
+                    {imagePreview ? (
+                      <img src={imagePreview} alt="Preview" className="absolute inset-0 w-full h-full object-cover z-0" />
+                    ) : (
+                      <div className="absolute inset-0 bg-orange-50 flex items-center justify-center z-0">
+                        <ImageIcon className="w-16 h-16 text-orange-200" />
                       </div>
-                      
-                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium truncate mb-3">
+                    )}
+
+                    {/* Gradient Overlay for Text Readability */}
+                    <div className="absolute bottom-0 left-0 w-full h-[60%] bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10" />
+
+                    {/* Top Left Badge */}
+                    {formData.badge && (
+                      <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+                        {formData.badge}
+                      </div>
+                    )}
+
+                    {/* Top Right Heart */}
+                    <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md shadow flex items-center justify-center z-20">
+                      <Heart className="w-4 h-4 text-white" />
+                    </div>
+
+                    {/* Top Right Share */}
+                    <div className="absolute top-3 right-14 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md shadow flex items-center justify-center z-20">
+                      <Send className="w-4 h-4 text-white fill-white" />
+                    </div>
+
+                    {/* Info Content Container */}
+                    <div className="absolute bottom-0 left-0 w-full px-2 pb-1.5 pt-4 flex flex-col justify-end z-20">
+                      {/* Row 1: Name and Rating */}
+                      <div className="flex items-start justify-between gap-1.5 mb-0.5">
+                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                          <span className="w-3 h-3 rounded-sm border-2 border-green-500 bg-black/20 flex items-center justify-center shrink-0">
+                            <span className="w-1 h-1 rounded-full bg-green-500" />
+                          </span>
+                          <h3 className="font-black text-[17px] text-white leading-tight truncate drop-shadow-sm">
+                            {formData.restaurant_name || "Your Shop Name"}
+                          </h3>
+                        </div>
+                        <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 border border-green-500">
+                          <Star className="w-2.5 h-2.5 fill-white" />
+                          {formData.rating || "4.5"}
+                        </span>
+                      </div>
+
+                      {/* Row 2: Cuisine */}
+                      <p className="text-[11px] text-gray-200 font-medium truncate drop-shadow-sm mb-0.5">
                         {formData.cuisine || "Category · Tags"}
                       </p>
-                      
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] rounded-lg">
-                          <Clock className="w-3.5 h-3.5 text-orange-500" />
-                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{formData.delivery_time || "Time"}</span>
+
+                      {/* Row 3: Stats & Open Badge */}
+                      <div className="flex items-center justify-between gap-1 mt-0.5">
+                        <div className="flex items-center flex-wrap gap-1">
+                          <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-white bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                            <Clock className="w-2.5 h-2.5 text-orange-400" />
+                            {formData.delivery_time || "Time"}
+                          </span>
+                          <span className="inline-flex items-center text-[9px] font-semibold text-white bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                            Min ₹{formData.min_order || "0"}
+                          </span>
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-400 bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                            <MapPin className="w-2.5 h-2.5" />
+                            2.5 km
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] rounded-lg">
-                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">Min ₹{formData.min_order || "0"}</span>
-                        </div>
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-500/20 border border-green-400/30 text-[8px] font-bold text-green-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                          <span className="w-1 h-1 rounded-full bg-green-400 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
+                          Open
+                        </span>
                       </div>
-                      
-                      {formData.offer && (
-                        <div className="pt-3 border-t border-gray-100 dark:border-[#2A2A3A] border-dashed flex items-center gap-2 text-orange-600">
-                          <Tag className="w-4 h-4 shrink-0" />
-                          <span className="text-xs font-bold truncate">{formData.offer}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>

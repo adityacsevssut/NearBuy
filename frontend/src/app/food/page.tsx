@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import {
   Search,
   Star,
@@ -143,7 +144,11 @@ function SectionHeader({
 }) {
   return (
     <div className="flex items-center justify-between mb-3 px-4">
-      <h2 className="text-[15px] font-black text-gray-900 dark:text-gray-100 tracking-tight">
+      <h2 className={`text-[17px] font-black tracking-tight drop-shadow-sm ${
+        title.includes('Hot Deals') || title.includes('Popular')
+          ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400' 
+          : 'text-gray-900 dark:text-gray-100'
+      }`}>
         {title}
       </h2>
       {onViewAll && (
@@ -175,81 +180,86 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   return (
     <Link
       href={`/vendor/${r.id}`}
-      className={`group flex-shrink-0 w-[148px] bg-white dark:bg-[#0D0D17] rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all active:scale-[0.97] ${dim ? "opacity-60" : ""}`}
+      className={`group flex-shrink-0 w-[148px] h-[168px] relative bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl overflow-hidden shadow-sm border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] active:scale-[0.97] ${dim ? "opacity-60" : ""}`}
     >
-      {/* Image */}
-      <div className="relative h-[100px] bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
-        {r.image ? (
-          <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 50vw, 33vw" className={`object-cover`} />
-        ) : (
-          <div className="w-full h-full bg-orange-50 flex items-center justify-center">
-            <Utensils className="w-7 h-7 text-orange-200" />
-          </div>
-        )}
-        {/* Heart */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggle({
-              id: r.id,
-              name: r.name,
-              type: r.cuisine,
-              image_url: r.image,
-              rating: r.rating,
-              distance: dist || "0 km",
-              isClosed: dim,
-            });
-          }}
-          className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white dark:bg-[#0D0D17]/90 shadow flex items-center justify-center active:scale-95 transition-transform"
-        >
-          <Heart
-            className={`w-3.5 h-3.5 ${wishlist.some((w: any) => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
-          />
-        </button>
-        {/* Badge removed from Homepage as requested */}
-        {/* Dim overlay */}
-        {dim && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-t-2xl z-20 pointer-events-none">
-            <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
-              {closed ? "Closed Now" : "Out of Range"}
-            </span>
-          </div>
-        )}
-      </div>
-      {/* Info */}
-      <div className="px-2.5 py-2">
-        <div className="flex items-center gap-1.5">
-          <p className="font-black text-[15px] text-gray-900 dark:text-gray-100 truncate leading-tight flex-1">
+      {/* Background Image */}
+      {r.image ? (
+        <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover z-0" />
+      ) : (
+        <div className="w-full h-full bg-orange-50 flex items-center justify-center z-0">
+          <Utensils className="w-7 h-7 text-orange-200" />
+        </div>
+      )}
+
+      {/* Heart */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          toggle({
+            id: r.id,
+            name: r.name,
+            type: r.cuisine,
+            image_url: r.image,
+            rating: r.rating,
+            distance: dist || "0 km",
+            isClosed: dim,
+          });
+        }}
+        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white dark:bg-[#0D0D17]/90 shadow flex items-center justify-center active:scale-95 transition-transform z-30"
+      >
+        <Heart
+          className={`w-3.5 h-3.5 ${wishlist.some((w: any) => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
+        />
+      </button>
+
+      {/* Dim overlay */}
+      {dim && (
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 pointer-events-none">
+          <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+            {closed ? "Closed Now" : "Out of Range"}
+          </span>
+        </div>
+      )}
+
+      {/* Gradient Overlay */}
+      <div className="absolute bottom-0 left-0 w-full h-[65%] bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
+
+      {/* Content Container (Bottom) */}
+      <div className="absolute bottom-0 left-0 w-full p-2.5 flex flex-col justify-end z-20">
+        {/* Name and Open/Offline Badge */}
+        <div className="flex items-start justify-between gap-1 w-full mb-0.5">
+          <p className="font-bold text-[13px] text-white leading-tight line-clamp-1 drop-shadow-sm flex-1">
             {r.name}
           </p>
           {!closed ? (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider shrink-0 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
+            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-green-500/20 border border-green-400/30 text-[7px] font-bold text-green-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+              <span className="w-1 h-1 rounded-full bg-green-400 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
               Open
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-[8px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider shrink-0 shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[7px] font-bold text-red-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+              <span className="w-1 h-1 rounded-full bg-red-400"></span>
               Offline
             </span>
           )}
         </div>
-        {/* Rating row */}
-        <div className="flex items-center gap-1 mt-0.5">
-          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded">
-            <Star className="w-2.5 h-2.5 fill-white" />
-            {r.rating || "4.0"}
+
+        {/* Rating, Time, Distance Row */}
+        <div className="flex items-center gap-1.5 text-[9px] text-gray-200 drop-shadow-sm flex-wrap w-full">
+          <span className="flex items-center gap-0.5 text-green-400 font-bold">
+            <Star className="w-2.5 h-2.5 fill-current" /> {r.rating || "4.0"}
           </span>
-          <span className="text-gray-400 text-[10px]">·</span>
-          <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-0.5">
+          <span className="text-gray-400">•</span>
+          <span className="flex items-center gap-0.5">
             <Clock className="w-2.5 h-2.5 text-orange-400" />
             {fmtTime(r)}
           </span>
         </div>
+        
         {/* Distance */}
         {dist && (
-          <p className="text-[10px] text-orange-500 font-bold mt-0.5 flex items-center gap-0.5">
+          <p className="text-[10px] text-orange-400 font-bold mt-1 flex items-center gap-0.5 drop-shadow-sm">
             <MapPin className="w-2.5 h-2.5" />
             {dist}
           </p>
@@ -262,13 +272,16 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 /* ─── Compact "Deal" card ──────────────────────────────────────────── */
 function DealCard({ deal, onConfirmNeeded }: any) {
   const { items, addItem, updateQty, itemQty } = useCart();
-  
+
   // Create a numeric ID from string for CartContext
   const numericId = parseInt(deal.id.toString().replace(/[^0-9]/g, '')) || Math.floor(Math.random() * 1000);
-  const isVeg = numericId % 2 === 0;
+  
+  // Determine if item is veg based on backend data (type, veg flag, or name)
+  const isVeg = deal.type ? deal.type.toLowerCase() === 'veg' : 
+                (deal.veg === true || deal.veg === 'Yes' || deal.veg === 1 || deal.veg === '1' || 
+                (deal.name && !deal.name.toLowerCase().includes('chicken') && !deal.name.toLowerCase().includes('egg') && !deal.name.toLowerCase().includes('mutton') && !deal.name.toLowerCase().includes('fish') && deal.veg !== false && deal.veg !== 'No'));
 
   const quantity = itemQty(numericId, deal.restaurantId);
-
   const discountPercent = Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100);
 
   const handlePlus = (e: any) => {
@@ -304,83 +317,89 @@ function DealCard({ deal, onConfirmNeeded }: any) {
   };
 
   return (
-    <div className="group flex-shrink-0 w-[140px] flex flex-col gap-2 cursor-pointer">
-      {/* Image container */}
-      <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E]">
-        {deal.image ? (
-          <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full bg-orange-50 flex items-center justify-center">
-            <Utensils className="w-7 h-7 text-orange-200" />
-          </div>
-        )}
-        
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-        {/* Discount / Popular Pill */}
-        <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm border border-orange-100 dark:border-orange-500/20">
-          {discountPercent}% OFF
+    <div className="group flex-shrink-0 w-[140px] h-[200px] relative rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E] cursor-pointer border border-gray-200 dark:border-[#2A2A3A]">
+      {/* Background Image */}
+      {deal.image ? (
+        <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover z-0" />
+      ) : (
+        <div className="w-full h-full bg-orange-50 flex items-center justify-center z-0">
+          <Utensils className="w-7 h-7 text-orange-200" />
         </div>
+      )}
 
-        {/* Floating Add to Cart Button */}
-        <div className="absolute bottom-2 right-2">
-          {quantity === 0 ? (
-            <button 
-              onClick={handlePlus}
-              className="w-8 h-8 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 hover:scale-105 active:scale-95 transition-all"
-            >
-              <span className="text-2xl leading-none font-light mb-0.5">+</span>
-            </button>
-          ) : (
-            <div className="flex items-center bg-white dark:bg-[#151522] rounded-lg shadow-lg border border-orange-200 dark:border-orange-500/30 overflow-hidden h-8">
-              <button 
-                onClick={handleMinus}
-                className="w-7 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 active:bg-orange-100 dark:active:bg-orange-500/20 font-bold text-lg"
-              >
-                −
-              </button>
-              <span className="text-xs font-black text-gray-800 dark:text-gray-100 w-4 text-center">{quantity}</span>
-              <button 
-                onClick={handlePlus}
-                className="w-7 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-500/10 active:bg-orange-100 dark:active:bg-orange-500/20 font-bold text-lg"
-              >
-                +
-              </button>
-            </div>
-          )}
-        </div>
+      {/* Gradient Overlay */}
+      <div className="absolute bottom-0 left-0 w-full h-[65%] bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
+
+      {/* Discount Pill (Top Left) */}
+      <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+        {discountPercent}% OFF
       </div>
 
-      {/* Content */}
-      <div className="flex flex-col gap-0.5 px-1">
-        {/* Name with Veg/NonVeg icon */}
-        <div className="flex items-start gap-1.5">
-          <div className={`mt-1 flex-shrink-0 w-3 h-3 border flex items-center justify-center rounded-sm ${isVeg ? 'border-green-600' : 'border-red-600'}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${isVeg ? 'bg-green-600' : 'bg-red-600'}`}></div>
+      {/* Add Button (Top Right) */}
+      <div className="absolute top-2 right-2 z-30">
+        {quantity === 0 ? (
+          <button
+            onClick={handlePlus}
+            className="w-7 h-7 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 active:scale-95 transition-all"
+          >
+            <span className="text-xl leading-none font-light mb-0.5">+</span>
+          </button>
+        ) : (
+          <div className="flex items-center bg-white dark:bg-[#151522] rounded-full shadow-lg border border-orange-200 dark:border-orange-500/30 overflow-hidden h-7">
+            <button
+              onClick={handleMinus}
+              className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
+            >
+              −
+            </button>
+            <span className="text-[10px] font-black text-gray-800 dark:text-gray-100 w-3 text-center">{quantity}</span>
+            <button
+              onClick={handlePlus}
+              className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
+            >
+              +
+            </button>
           </div>
-          <p className="font-bold text-[14px] text-gray-900 dark:text-gray-100 leading-tight line-clamp-2">
+        )}
+      </div>
+
+      {/* Content Container (Bottom) */}
+      <div className="absolute bottom-0 left-0 w-full p-2 flex flex-col justify-end z-20">
+        {/* Name with Veg/NonVeg icon inline */}
+        <div className="mb-0.5 w-full">
+          <p className="font-bold text-[12px] text-white leading-tight line-clamp-2 drop-shadow-sm">
+            <span className={`inline-flex align-middle mr-1 w-2.5 h-2.5 border items-center justify-center rounded-sm relative -top-[1px] ${isVeg ? 'border-green-500 bg-black/30' : 'border-red-500 bg-black/30'}`}>
+              <span className={`w-1 h-1 rounded-full ${isVeg ? 'bg-green-500' : 'bg-red-500'}`}></span>
+            </span>
             {deal.name}
           </p>
         </div>
 
         {/* by Restaurant */}
-        <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-0.5 truncate">
+        <p className="text-[9px] text-gray-300 font-medium truncate drop-shadow-sm">
           by {deal.restaurantName}
         </p>
 
         {/* Rating and Time */}
-        <div className="flex items-center gap-1.5 text-[11px] text-gray-600 dark:text-gray-400 mt-1">
-          <span className="flex items-center gap-0.5 text-green-700 dark:text-green-400 font-bold">
-            <Star className="w-3 h-3 fill-current" /> {deal.rating}
+        <div className="flex items-center gap-1 text-[9px] text-gray-200 mt-0.5 drop-shadow-sm">
+          <span className="flex items-center gap-0.5 text-green-400 font-bold">
+            <Star className="w-2.5 h-2.5 fill-current" /> {deal.rating}
           </span>
-          <span className="text-gray-300 dark:text-gray-600">•</span>
+          <span className="text-gray-400">•</span>
           <span>{20 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5}-{30 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5} mins</span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <span className="text-[12px] text-gray-400 line-through font-medium">₹{deal.originalPrice}</span>
-          <span className="font-black text-[12px] text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded border border-orange-100 dark:border-orange-500/20">₹{deal.discountPrice}</span>
+        {/* Bottom Row: Price */}
+        <div className="mt-0.5 flex items-center justify-between w-full">
+          <div className="flex items-center gap-1">
+            <span className="font-black text-[13px] text-white drop-shadow-md">₹{deal.discountPrice}</span>
+            <span className="text-[9px] text-gray-400 line-through font-medium">₹{deal.originalPrice}</span>
+          </div>
+          {deal.originalPrice - deal.discountPrice > 0 && (
+            <span className="text-[9px] font-black text-green-400 drop-shadow-sm uppercase tracking-wider">
+              {discountPercent}% OFF
+            </span>
+          )}
         </div>
       </div>
     </div>
@@ -404,18 +423,29 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   return (
     <Link
       href={`/vendor/${r.id}`}
-      className={`group bg-white dark:bg-[#0D0D17] rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] transition-all duration-200 hover:shadow-[0_6px_24px_rgba(249,115,22,0.18)] hover:-translate-y-0.5 ${dim ? "opacity-70" : ""}`}
+      className={`group block w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:-translate-y-1 ${dim ? "opacity-70" : ""}`}
     >
-      {/* Image */}
-      <div className="relative h-40 bg-gray-100 dark:bg-[#1F1F2E] overflow-hidden">
+      <div className="relative w-full h-[260px] bg-gray-100 dark:bg-[#1F1F2E]">
+        {/* Image */}
         {r.image ? (
-          <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 100vw, 50vw" className={`object-cover transition-transform duration-500`} />
+          <Image src={r.image} alt={r.name} fill sizes="(max-width: 768px) 100vw, 50vw" className={`object-cover`} />
         ) : (
           <div className="w-full h-full bg-orange-50 flex items-center justify-center">
             <Utensils className="w-10 h-10 text-orange-200" />
           </div>
         )}
-        {/* Heart */}
+
+        {/* Gradient Overlay for Text */}
+        <div className="absolute bottom-0 left-0 w-full h-[60%] bg-gradient-to-t from-black/95 via-black/60 to-transparent pointer-events-none z-10" />
+
+        {/* Top Left Best Seller Tag */}
+        {(r.isBestSeller || (r.rating && parseFloat(r.rating) >= 4.0)) && (
+          <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+            Best Seller
+          </div>
+        )}
+
+        {/* Top Right Heart */}
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -430,13 +460,14 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               isClosed: dim,
             });
           }}
-          className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17]/90 shadow flex items-center justify-center active:scale-90 transition-transform"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md shadow flex items-center justify-center active:scale-90 transition-transform z-20"
         >
           <Heart
-            className={`w-4 h-4 ${wishlist.some((w: any) => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-gray-400"}`}
+            className={`w-4 h-4 ${wishlist.some((w: any) => w.id === r.id) ? "fill-rose-500 text-rose-500" : "text-white"}`}
           />
         </button>
-        {/* Share */}
+
+        {/* Top Right Share */}
         <button
           onClick={async (e) => {
             e.preventDefault();
@@ -460,7 +491,6 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                     url: shareUrl,
                   });
                 } else {
-                  // Fallback for desktop/unsupported browsers
                   await navigator.clipboard.writeText(
                     `Hii Get Your favourite Food From ${r.name} ${shareUrl}`,
                   );
@@ -471,79 +501,83 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               console.error("Error sharing:", err);
             }
           }}
-          className="absolute top-2.5 right-12 w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17]/90 shadow flex items-center justify-center active:scale-90 transition-transform"
+          className="absolute top-3 right-14 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md shadow flex items-center justify-center active:scale-90 transition-transform z-20"
         >
-          <Send className="w-4 h-4 text-orange-500 fill-orange-500" />
+          <Send className="w-4 h-4 text-white fill-white" />
         </button>
-        {/* Badge removed from Homepage as requested */}
-        {/* Veg dot */}
-        {r.veg && (
-          <span className="absolute bottom-2.5 left-2.5 w-4 h-4 rounded-sm border-2 border-green-600 bg-white dark:bg-[#0D0D17] flex items-center justify-center">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-600" />
-          </span>
-        )}
-        {/* Dim overlay */}
+
+        {/* Dim overlay for Closed/OOR */}
         {dim && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-t-2xl z-20 pointer-events-none">
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none">
             <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
               {closed ? "Closed Now" : "Out of Range"}
             </span>
           </div>
         )}
-      </div>
 
-      {/* Info */}
-      <div className="p-3">
-        {/* Name + rating */}
-        <div className="flex items-start justify-between gap-1.5 mb-0.5">
-          <div className="flex items-center gap-1.5 flex-1 min-w-0">
-            <p className="font-black text-[16px] text-gray-900 dark:text-gray-100 leading-tight truncate">
-              {r.name}
-            </p>
+        {/* Info Content Container */}
+        <div className="absolute bottom-0 left-0 w-full px-2 pb-1.5 pt-4 flex flex-col justify-end z-20">
+          {/* Row 1: Name and Rating */}
+          <div className="flex items-start justify-between gap-1.5 mb-0.5">
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              {r.veg && (
+                <span className="w-3 h-3 rounded-sm border-2 border-green-500 bg-black/20 flex items-center justify-center shrink-0">
+                  <span className="w-1 h-1 rounded-full bg-green-500" />
+                </span>
+              )}
+              <h3 className="font-black text-[17px] text-white leading-tight truncate drop-shadow-sm">
+                {r.name}
+              </h3>
+            </div>
+            <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm shrink-0 border border-green-500">
+              <Star className="w-2.5 h-2.5 fill-white" />
+              {r.rating || "4.0"}
+            </span>
+          </div>
+
+          {/* Row 2: Cuisine */}
+          <p className="text-[11px] text-gray-200 font-medium truncate drop-shadow-sm mb-0.5">
+            {r.cuisine}
+          </p>
+
+          {/* Row 3: Stats & Open Badge */}
+          <div className="flex items-center justify-between gap-1 mt-0.5">
+            <div className="flex items-center flex-wrap gap-1">
+              <span className="inline-flex items-center gap-1 text-[9px] font-semibold text-white bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                <Clock className="w-2.5 h-2.5 text-orange-400" />
+                {fmtTime(r)}
+              </span>
+              <span className="inline-flex items-center text-[9px] font-semibold text-white bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                Min ₹{r.minOrder || 0}
+              </span>
+              {dist && (
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-400 bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                  <MapPin className="w-2.5 h-2.5" />
+                  {dist}
+                </span>
+              )}
+            </div>
             {!closed ? (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-[8px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider shrink-0 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-500/20 border border-green-400/30 text-[8px] font-bold text-green-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                <span className="w-1 h-1 rounded-full bg-green-400 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
                 Open
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-[8px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider shrink-0 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[8px] font-bold text-red-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                <span className="w-1 h-1 rounded-full bg-red-400"></span>
                 Offline
               </span>
             )}
           </div>
-          <span className="inline-flex items-center gap-0.5 bg-green-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded shrink-0">
-            <Star className="w-2.5 h-2.5 fill-white" />
-            {r.rating || "4.0"}
-          </span>
-        </div>
-        {/* Cuisine */}
-        <p className="text-[13px] text-gray-500 dark:text-gray-400 font-medium truncate mb-2">
-          {r.cuisine}
-        </p>
-        {/* Stats */}
-        <div className="flex items-center flex-wrap gap-1.5">
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] px-2 py-0.5 rounded-full">
-            <Clock className="w-2.5 h-2.5 text-orange-400" />
-            {fmtTime(r)}
-          </span>
-          <span className="text-[10px] font-semibold text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] px-2 py-0.5 rounded-full">
-            Min ₹{r.minOrder || 0}
-          </span>
-          {dist && (
-            <span className="text-[10px] font-bold text-orange-500 bg-orange-50 border border-orange-100 px-2 py-0.5 rounded-full flex items-center gap-0.5">
-              <MapPin className="w-2.5 h-2.5" />
-              {dist}
-            </span>
+
+          {/* Offer */}
+          {r.offer && (
+            <div className="mt-1.5 pt-1.5 border-t border-white/20 border-dashed text-[9px] font-bold text-orange-400 flex items-center gap-1 drop-shadow-sm">
+              <span>🏷</span>
+              <span className="truncate">{r.offer}</span>
+            </div>
           )}
         </div>
-        {/* Offer */}
-        {r.offer && (
-          <div className="mt-2 pt-2 border-t border-dashed border-gray-100 dark:border-[#2A2A3A] text-[10px] font-bold text-orange-600 flex items-center gap-1">
-            <span>🏷</span>
-            {r.offer}
-          </div>
-        )}
       </div>
     </Link>
   );
@@ -571,8 +605,7 @@ export default function HomePage() {
   >(cachedState.foodPref);
 
   const [showFilters, setShowFilters] = useState(false);
-  const [reqModal, setReqModal] = useState(false);
-  const [reqType, setReqType] = useState<"student" | "vendor">("vendor");
+
 
   const {
     locationName,
@@ -595,7 +628,7 @@ export default function HomePage() {
 
   const [posters, setPosters] = useState<any[]>(cachedState.posters);
   const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
-  
+
   const [activePosterIndex, setActivePosterIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
@@ -606,6 +639,21 @@ export default function HomePage() {
   const [hotDealsUnder100, setHotDealsUnder100] = useState<any[]>([]);
   const [dealToConfirm, setDealToConfirm] = useState<any>(null);
   const { addItem, clearVendorCart } = useCart();
+
+  const SEARCH_PLACEHOLDERS = [
+    "Search for restaurants or cuisines...",
+    "Craving Biryani?",
+    "Find top rated spots...",
+    "Search 'Pizza'",
+    "What's for dinner?"
+  ];
+  const [searchPlaceholderIdx, setSearchPlaceholderIdx] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSearchPlaceholderIdx((prev) => (prev + 1) % SEARCH_PLACEHOLDERS.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleConfirmDeal = (action: "replace" | "add") => {
     if (!dealToConfirm) return;
@@ -648,7 +696,7 @@ export default function HomePage() {
     if (carouselRef.current) {
       const index = Math.round(carouselRef.current.scrollLeft / carouselRef.current.clientWidth);
       if (index !== activePosterIndex) setActivePosterIndex(index);
-      
+
       // Pause auto-scroll
       isUserScrolling.current = true;
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
@@ -679,7 +727,7 @@ export default function HomePage() {
       const API = (
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
       ).replace(/\/+$/, "");
-      
+
       const query = new URLSearchParams();
       if (latitude && longitude) {
         query.append("lat", latitude.toString());
@@ -841,9 +889,23 @@ export default function HomePage() {
     <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16">
       <Navbar />
 
-      <main className="flex-1 pb-8 md:pb-6">
+      <main className="flex-1 pb-8 md:pb-6 relative">
+        {/* Ambient Glowing Blobs */}
+        <div className="absolute top-0 left-0 w-full h-[600px] overflow-hidden pointer-events-none z-0">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15], x: [0, 50, 0], y: [0, -20, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-32 -left-20 w-[400px] h-[400px] bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-[100px]"
+          />
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [0.1, 0.25, 0.1], x: [0, -50, 0], y: [0, 30, 0] }}
+            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-20 -right-20 w-[350px] h-[350px] bg-rose-400/20 dark:bg-rose-500/10 rounded-full blur-[100px]"
+          />
+        </div>
+
         {/* ══ STICKY TOP BAR (below orange navbar) ════════════════════════════ */}
-        <div className="sticky top-16 z-40 bg-white dark:bg-[#0D0D17] border-b border-gray-100 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
+        <div className="sticky top-16 z-40 bg-white/90 dark:bg-[#0D0D17]/90 backdrop-blur-xl border-b border-gray-100 dark:border-[#2A2A3A] shadow-[0_2px_8px_rgba(0,0,0,0.06)]">
           <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0">
             {/* ─────────────────────────────────────────────────────────────
  ROW 1 — Location (full width, bordered)
@@ -887,8 +949,8 @@ export default function HomePage() {
                 <input
                   suppressHydrationWarning
                   type="text"
-                  placeholder="Search for restaurants or cuisines"
-                  className="flex-1 bg-transparent text-[14px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-500 dark:text-gray-400 font-semibold"
+                  placeholder={SEARCH_PLACEHOLDERS[searchPlaceholderIdx]}
+                  className="flex-1 bg-transparent text-[14px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-500 dark:text-gray-400 font-semibold transition-all duration-500"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -1084,22 +1146,28 @@ export default function HomePage() {
         {/* ══ PAGE CONTENT ════════════════════════════════════════════════════ */}
         <div className="max-w-7xl mx-auto">
           {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
-          <section className="pt-4 pb-2">
-            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pb-1">
-              {quickBites.map(({ label, image }) => (
-                <Link
+          <section className="pt-2 pb-1 relative z-10">
+            <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-3 pb-4">
+              {quickBites.map(({ label, image }, index) => (
+                <motion.div
                   key={label}
-                  href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  className="flex-shrink-0 flex flex-col items-center gap-1.5 group"
+                  initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: index * 0.04, duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
                 >
-                  <div className="relative w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-200 isolate">
-                    <Image src={image} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-200 dark:hidden" />
-                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-200 hidden dark:block" />
-                  </div>
-                  <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
-                    {label}
-                  </span>
-                </Link>
+                  <Link
+                    href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                    className="flex-shrink-0 flex flex-col items-center gap-1.5 group outline-none"
+                  >
+                    <div className="relative w-[62px] h-[62px] rounded-full overflow-hidden border-[2.5px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1.5 group-active:scale-90 isolate">
+                      <Image src={image} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 dark:hidden" />
+                      <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="62px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
+                    </div>
+                    <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
+                      {label}
+                    </span>
+                  </Link>
+                </motion.div>
               ))}
             </div>
           </section>
@@ -1180,7 +1248,7 @@ export default function HomePage() {
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹50"
-                onViewAll={() => {}}
+                onViewAll={() => { }}
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {hotDealsUnder50.map((deal) => (
@@ -1195,7 +1263,7 @@ export default function HomePage() {
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹100"
-                onViewAll={() => {}}
+                onViewAll={() => { }}
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {hotDealsUnder100.map((deal) => (
@@ -1310,92 +1378,19 @@ export default function HomePage() {
           </section>
         </div>
 
-        {/* ══ QUICK ACTION CARDS — below all restaurants, above footer ══════════ */}
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
-            {/* Card 1 — Register as Student */}
-            <button
-              onClick={() => {
-                setReqType("student");
-                setReqModal(true);
-              }}
-              className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-md
- p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
- hover:shadow-lg hover:-translate-y-0.5 hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]
- transition-all duration-200 active:scale-[0.98]"
-            >
-              <div className="flex items-start justify-between w-full">
-                {/* Orange icon */}
-                <div
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 to-orange-500 dark:from-orange-500 dark:to-orange-600"
-                >
-                  <GraduationCap className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D0D17]" />
-                </div>
-                {/* Arrow */}
-                <div
-                  className="w-7 h-7 rounded-full border border-gray-200 dark:border-[#2A2A3A] flex items-center justify-center
- group-hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] shrink-0"
-                >
-                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 group-hover:text-orange-600 transition-colors" />
-                </div>
-              </div>
-              <div className="w-full">
-                <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">
-                  Register as Student
-                </p>
-              </div>
-            </button>
 
-            {/* Card 2 — Register as a Vendor */}
-            <button
-              onClick={() => {
-                setReqType("vendor");
-                setReqModal(true);
-              }}
-              className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-md
- p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
- hover:shadow-lg hover:-translate-y-0.5 hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]
- transition-all duration-200 active:scale-[0.98]"
-            >
-              <div className="flex items-start justify-between w-full">
-                {/* Orange icon */}
-                <div
-                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br from-orange-400 to-orange-500 dark:from-orange-500 dark:to-orange-600"
-                >
-                  <Utensils className="w-5 h-5 sm:w-6 sm:h-6 text-[#0D0D17]" />
-                </div>
-                {/* Arrow */}
-                <div
-                  className="w-7 h-7 rounded-full border border-gray-200 dark:border-[#2A2A3A] flex items-center justify-center
- group-hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] shrink-0"
-                >
-                  <ChevronDown className="w-3.5 h-3.5 text-orange-500 group-hover:text-orange-600 transition-colors" />
-                </div>
-              </div>
-              <div className="w-full">
-                <p className="font-black text-[15px] sm:text-[16px] text-gray-900 dark:text-gray-100 leading-tight">
-                  Register as a Vendor
-                </p>
-              </div>
-            </button>
-          </div>
-        </div>
       </main>
 
       <Footer />
       <MobileBottomNav />
-      <BusinessRequestModal
-        isOpen={reqModal}
-        onClose={() => setReqModal(false)}
-        defaultType={reqType}
-      />
+
 
       {/* Confirmation Modal for Hot Deals */}
       {dealToConfirm && (
-        <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white dark:bg-[#151522] w-full max-w-sm rounded-3xl p-6 shadow-2xl animate-in slide-in-from-bottom-8 md:slide-in-from-bottom-0 md:zoom-in-95 duration-300">
-            <h3 className="text-xl font-black text-gray-900 dark:text-white mb-2">Existing Items in Cart</h3>
-            <p className="text-[13px] text-gray-600 dark:text-gray-400 mb-6 font-medium leading-relaxed">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-[#151522] w-full max-w-sm mx-auto rounded-3xl p-6 shadow-2xl animate-in zoom-in-95 duration-300">
+            <h3 className="text-xl font-black text-center text-gray-900 dark:text-white mb-2">Existing Items in Cart</h3>
+            <p className="text-[13px] text-center text-gray-600 dark:text-gray-400 mb-6 font-medium leading-relaxed">
               You already have items from <span className="font-bold text-gray-800 dark:text-gray-200">{dealToConfirm.restaurantName}</span> in your cart. Do you want to replace them with this deal, or append this deal to your existing cart?
             </p>
             <div className="flex flex-col gap-3">

@@ -19,7 +19,7 @@ export default function Footer() {
   const bgHover = isStore ? "hover:bg-blue-50" : "hover:bg-orange-50";
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType] = useState<"student" | "vendor">("vendor");
+  const [modalType, setModalType] = useState<"student" | "vendor">("vendor");
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRefundOpen, setIsRefundOpen] = useState(false);
@@ -37,6 +37,10 @@ export default function Footer() {
       { name: "Wishlist", href: isStore ? "/store/wishlist" : "/food/wishlist" },
       { name: "Your Orders", href: isStore ? "/store/orders" : "/food/orders?history=true" },
       isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "/signup" },
+    ],
+    Register: [
+      { name: "Register as Student", href: "#", onClick: (e: any) => { e.preventDefault(); setModalType("student"); setIsModalOpen(true); } },
+      { name: "Register as Restaurant", href: "#", onClick: (e: any) => { e.preventDefault(); setModalType("vendor"); setIsModalOpen(true); } },
     ],
     "Our Platforms": [
       { name: "Food", href: "/" },
@@ -85,8 +89,8 @@ export default function Footer() {
               </p>
             </div>
 
-            {/* Links Columns (NearBuy, Important Links, Restaurants, Legal) */}
-            <div className="md:col-span-7 lg:col-span-7 grid grid-cols-2 lg:grid-cols-4 gap-8">
+            {/* Links Columns */}
+            <div className="md:col-span-7 lg:col-span-7 grid grid-cols-2 lg:grid-cols-5 gap-8">
               {Object.entries(links).map(([category, items]) => (
                 <div key={category}>
                   <h4 className="text-[13px] font-black uppercase tracking-wider text-gray-900 dark:text-gray-100 mb-5">
