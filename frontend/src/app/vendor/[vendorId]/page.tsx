@@ -10,6 +10,69 @@ import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
 
+function VendorPageSkeleton() {
+  return (
+    <div className="flex-1 flex flex-col w-full animate-pulse">
+      {/* Banner Skeleton */}
+      <div className="w-full h-[250px] bg-gray-200 dark:bg-[#1F1F2E] relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-t from-white dark:from-[#0D0D17] to-transparent"></div>
+        <div className="absolute bottom-6 left-4 sm:left-6 flex gap-4 md:gap-6 items-start w-full max-w-4xl mx-auto">
+          <div className="flex-1 space-y-3">
+            <div className="h-8 w-64 bg-gray-300 dark:bg-[#2A2A3A] rounded-full"></div>
+            <div className="h-4 w-32 bg-gray-300 dark:bg-[#2A2A3A] rounded-full"></div>
+            <div className="h-4 w-48 bg-gray-300 dark:bg-[#2A2A3A] rounded-full"></div>
+            <div className="flex gap-3 pt-2">
+              <div className="h-8 w-24 bg-gray-300 dark:bg-[#2A2A3A] rounded-xl"></div>
+              <div className="h-8 w-24 bg-gray-300 dark:bg-[#2A2A3A] rounded-xl"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {/* Menu Skeleton */}
+      <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
+        <div className="h-6 w-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-4"></div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex gap-4">
+            <div className="flex-1 space-y-3">
+              <div className="h-5 w-3/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+              <div className="h-4 w-1/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+              <div className="h-3 w-5/6 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+            </div>
+            <div className="w-32 h-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-xl relative overflow-hidden">
+              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-gray-300 dark:bg-[#2A2A3A] rounded-lg shadow-sm"></div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MenuSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-6 w-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-4"></div>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} className="bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex gap-4">
+          <div className="flex-1 space-y-3">
+            <div className="h-5 w-3/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+            <div className="h-4 w-1/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+            <div className="flex gap-3 mb-4">
+              <div className="h-3 w-12 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+              <div className="h-3 w-16 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+            </div>
+            <div className="h-3 w-5/6 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+          </div>
+          <div className="w-32 h-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-xl relative overflow-hidden">
+            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-gray-300 dark:bg-[#2A2A3A] rounded-lg shadow-sm border border-gray-100 dark:border-[#3A3A4A]"></div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export default function VendorPage() {
   const params = useParams();
   const vendorId = params.vendorId as string;
@@ -77,6 +140,7 @@ export default function VendorPage() {
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const { addItem, itemQty } = useCart();
   const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [isMenuLoading, setIsMenuLoading] = useState(true);
 
   useEffect(() => {
     if (!vendorId) return;
@@ -90,6 +154,8 @@ export default function VendorPage() {
         }
       } catch (err) {
         console.error("Failed to load menu:", err);
+      } finally {
+        setIsMenuLoading(false);
       }
     };
     fetchMenu();
@@ -166,9 +232,7 @@ export default function VendorPage() {
       )}
 
       {isLoading ? (
-        <div className="flex-1 flex items-center justify-center">
-          <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-        </div>
+        <VendorPageSkeleton />
       ) : !vendor ? (
         <div className="flex-1 flex items-center justify-center">
           <p className="text-gray-500 dark:text-gray-400 font-bold">Restaurant not found.</p>
@@ -574,7 +638,9 @@ export default function VendorPage() {
                   </div>
                 ))}
 
-                {filteredDishes.length === 0 && (
+                {isMenuLoading ? (
+                  <MenuSkeleton />
+                ) : filteredDishes.length === 0 && (
                   <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
                     <span className="text-6xl mb-4">🍽️</span>
                     <p className="font-black text-gray-700 dark:text-gray-300 text-xl">No food available</p>

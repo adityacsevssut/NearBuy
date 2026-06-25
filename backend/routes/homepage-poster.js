@@ -15,14 +15,34 @@ const upload = multer({
   limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
 });
 
+// In-memory cache for posters to improve performance
+let postersCache = {};
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 // ── GET /api/homepage-poster?type=food|store  (public) ───────────────
 router.get("/", async (req, res) => {
   try {
     const type = (req.query.type || "food").toLowerCase();
+    
+    // Set Cache-Control header so the browser/CDN caches the response for 5 minutes
+    res.set("Cache-Control", "public, max-age=300");
+
+    // Return from in-memory cache if valid
+    if (postersCache[type] && postersCache[type].expiry > Date.now()) {
+      return res.json({ posters: postersCache[type].data });
+    }
+
     const { rows } = await pool.query(
       "SELECT * FROM homepage_carousel_posters WHERE type = $1 ORDER BY created_at ASC",
       [type]
     );
+    
+    // Update cache
+    postersCache[type] = {
+      data: rows,
+      expiry: Date.now() + CACHE_TTL
+    };
+
     // Even if no rows exist, return empty array
     return res.json({ posters: rows });
   } catch (err) {
@@ -112,6 +132,9 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
        return res.status(404).json({ error: "Poster not found or could not be updated." });
     }
 
+    // Clear cache to reflect updates
+    postersCache = {};
+
     return res.json({
       message: "Poster updated successfully!",
       poster: rows[0],
@@ -139,6 +162,9 @@ router.delete("/:id", authenticate, async (req, res) => {
     if (rows.length === 0) {
       return res.status(404).json({ error: "Poster not found" });
     }
+
+    // Clear cache to reflect updates
+    postersCache = {};
 
     return res.json({ message: "Poster deleted successfully!" });
   } catch (err) {

@@ -583,6 +583,18 @@ router.post("/refund-requests/:id/process-razorpay", authenticate, async (req, r
     await pool.query(`UPDATE orders SET adv_refund_processed = true WHERE id = $1`, [refundData.order_id]);
     await pool.query(`UPDATE refund_requests SET status = 'Completed' WHERE id = $1`, [id]);
 
+    try {
+      const { sendNotification } = require("../utils/notifications");
+      await sendNotification(
+        refundData.user_id,
+        "Refund Successful",
+        `Refund of ₹${Number(refundData.amount).toFixed(2)} has been successfully processed and will be credited to your account in the next 3-4 working days.`,
+        "refund"
+      );
+    } catch (notifErr) {
+      console.error("Failed to send refund notification:", notifErr);
+    }
+
     return res.json({ message: "Refund processed successfully via Razorpay." });
   } catch (err) {
     console.error("Process razorpay error:", err);
