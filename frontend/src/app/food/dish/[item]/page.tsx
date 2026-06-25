@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { motion } from "framer-motion";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send, ChevronDown, Utensils } from "lucide-react";
 import toast from "react-hot-toast";
 import Navbar from "@/components/Navbar";
@@ -19,6 +20,30 @@ function getDistance(lat1: number|null, lon1: number|null, lat2: number|null, lo
   const R = 6371, dLat = deg2rad(lat2-lat1), dLon = deg2rad(lon2-lon1);
   const a = Math.sin(dLat/2)**2 + Math.cos(deg2rad(lat1))*Math.cos(deg2rad(lat2))*Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function DishCardSkeleton() {
+  return (
+    <div className="bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex gap-4 animate-pulse">
+      <div className="flex-1 min-w-0 flex flex-col justify-between">
+        <div>
+          <div className="h-5 w-3/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-3"></div>
+          <div className="h-3 w-1/3 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-4"></div>
+          <div className="h-5 w-1/4 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-4"></div>
+          <div className="flex gap-3 mb-4">
+            <div className="h-3 w-12 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+            <div className="h-3 w-16 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+          </div>
+          <div className="h-2.5 w-full bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-2"></div>
+          <div className="h-2.5 w-5/6 bg-gray-200 dark:bg-[#1F1F2E] rounded-full"></div>
+        </div>
+      </div>
+      <div className="relative flex flex-col items-center justify-start w-32 flex-shrink-0 mb-8">
+        <div className="w-32 h-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-xl border border-gray-100 dark:border-[#2A2A3A]"></div>
+        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 h-8 bg-gray-300 dark:bg-[#2A2A3A] rounded-lg shadow-sm border border-gray-100 dark:border-[#3A3A4A]"></div>
+      </div>
+    </div>
+  );
 }
 
 export default function DishPage() {
@@ -420,15 +445,22 @@ export default function DishPage() {
             })}
 
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
-                <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p className="font-black text-gray-700 dark:text-gray-300 text-xl">Loading dishes...</p>
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map(i => <DishCardSkeleton key={i} />)}
               </div>
             ) : filteredDishes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
-                <span className="text-6xl mb-4">🍽️</span>
-                <p className="font-black text-gray-700 dark:text-gray-300 text-xl">No {itemName} found</p>
-                <p className="text-sm mt-2 font-medium">Try disabling the Veg Only filter or check back later.</p>
+                <motion.span 
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-6xl mb-4 inline-block"
+                >
+                  🍽️
+                </motion.span>
+                <p className="font-black text-gray-700 dark:text-gray-300 text-xl text-center">No {itemName} found</p>
+                <p className="text-sm mt-2 font-medium text-center px-6 max-w-xs leading-relaxed">
+                  Try disabling the Veg Only filter or check back later.
+                </p>
               </div>
             )}
             {/* Infinite Scroll Loader */}

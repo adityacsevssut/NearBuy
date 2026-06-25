@@ -231,7 +231,7 @@ export default function RefundsPage() {
                 {req.status === 'Completed' && (
                   <div className="mt-2 p-3 bg-gradient-to-r from-blue-50 to-emerald-50 dark:from-blue-500/10 dark:to-emerald-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl text-center">
                     <CheckCircle className="w-6 h-6 text-emerald-500 mx-auto mb-1" />
-                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Refund of ₹{Number(req.amount || 0).toFixed(2)} Process Successfully progressed and Done</p>
+                    <p className="text-sm font-bold text-emerald-700 dark:text-emerald-400">Refund of ₹{Number(req.amount || 0).toFixed(2)} has been successfully processed and will be credited to your account in the next 3-4 working days.</p>
                   </div>
                 )}
               </motion.div>

@@ -5,6 +5,10 @@ const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
 const { authenticate } = require("../middleware/auth");
 
+// In-memory cache for Vendors
+let vendorsCache = {};
+const VENDORS_TTL = 5 * 60 * 1000; // 5 minutes
+
 // GET /api/public/vendors
 router.get("/vendors", async (req, res) => {
   try {
@@ -13,6 +17,21 @@ router.get("/vendors", async (req, res) => {
     const offset = (page - 1) * limit;
 
     const { search, foodPref, lat, lon, pincode } = req.query;
+    
+    // Set Cache-Control header so the browser/CDN caches the response for 5 minutes
+    res.set("Cache-Control", "public, max-age=300");
+
+    // Round lat/lon to nearest 0.005 (~550m grid) to group very close requests
+    const cacheLat = lat && !isNaN(parseFloat(lat)) ? (Math.round(parseFloat(lat) * 200) / 200).toFixed(3) : '';
+    const cacheLon = lon && !isNaN(parseFloat(lon)) ? (Math.round(parseFloat(lon) * 200) / 200).toFixed(3) : '';
+
+    // Generate a unique cache key based on all filter parameters
+    const cacheKey = `${page}_${limit}_${search||''}_${foodPref||''}_${cacheLat}_${cacheLon}_${pincode||''}`;
+
+    // Return from in-memory cache if valid
+    if (vendorsCache[cacheKey] && vendorsCache[cacheKey].expiry > Date.now()) {
+      return res.json(vendorsCache[cacheKey].data);
+    }
 
     let whereClause = "WHERE v.is_active = TRUE AND u.is_active = TRUE AND u.role = 'vendor'";
     const queryParams = [];
@@ -108,7 +127,7 @@ router.get("/vendors", async (req, res) => {
       ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim()
     }));
 
-    return res.json({
+    const responseData = {
       data: formatted,
       pagination: {
         total,
@@ -116,7 +135,15 @@ router.get("/vendors", async (req, res) => {
         limit,
         totalPages: Math.ceil(total / limit)
       }
-    });
+    };
+
+    // Update cache
+    vendorsCache[cacheKey] = {
+      data: responseData,
+      expiry: Date.now() + VENDORS_TTL
+    };
+
+    return res.json(responseData);
   } catch (err) {
     console.error("GET /api/public/vendors error:", err);
     return res.status(500).json({ error: "Failed to load vendors" });
@@ -290,12 +317,27 @@ router.get("/dishes/:category", async (req, res) => {
   }
 });
 
+// In-memory cache for Hot Deals
+let hotDealsCache = {};
+const HOT_DEALS_TTL = 5 * 60 * 1000; // 5 minutes
+
 // GET /api/public/hot-deals
 router.get("/hot-deals", async (req, res) => {
   try {
     const { lat, lon, pincode } = req.query;
+    
+    // Set Cache-Control header so the browser/CDN caches the response for 5 minutes
+    res.set("Cache-Control", "public, max-age=300");
 
-    let whereClause = "WHERE m.price <= 100 AND m.price > 0 AND m.is_available = TRUE AND v.is_active = TRUE";
+    // Generate a cache key based on location
+    const cacheKey = `${lat || 'default'}_${lon || 'default'}_${pincode || 'default'}`;
+
+    // Return from in-memory cache if valid
+    if (hotDealsCache[cacheKey] && hotDealsCache[cacheKey].expiry > Date.now()) {
+      return res.json(hotDealsCache[cacheKey].data);
+    }
+
+    let whereClause = "WHERE m.price <= 130 AND m.price > 0 AND m.is_available = TRUE AND v.is_active = TRUE";
     const queryParams = [];
     let paramIndex = 1;
 
@@ -340,11 +382,19 @@ router.get("/hot-deals", async (req, res) => {
       rating: r.rating ? parseFloat(r.rating).toFixed(1) : "4.0",
     });
 
-    // Separate into two arrays, max 15 items each
-    const under50 = rows.filter(r => parseFloat(r.discountPrice) < 50).slice(0, 15).map(formatDeal);
-    const under100 = rows.filter(r => parseFloat(r.discountPrice) >= 50 && parseFloat(r.discountPrice) <= 100).slice(0, 15).map(formatDeal);
+    // Extract deals (up to 50 items for each category to allow up to 100 items total)
+    const under60 = rows.filter(r => parseFloat(r.discountPrice) <= 60).slice(0, 50).map(formatDeal);
+    const under130 = rows.filter(r => parseFloat(r.discountPrice) > 60 && parseFloat(r.discountPrice) <= 130).slice(0, 50).map(formatDeal);
 
-    return res.json({ under50, under100 });
+    const resultData = { under60, under130 };
+
+    // Update cache
+    hotDealsCache[cacheKey] = {
+      data: resultData,
+      expiry: Date.now() + HOT_DEALS_TTL
+    };
+
+    return res.json(resultData);
   } catch (err) {
     console.error("GET /api/public/hot-deals error:", err);
     return res.status(500).json({ error: "Failed to load hot deals" });
