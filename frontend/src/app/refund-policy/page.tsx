@@ -47,7 +47,7 @@ export default function RefundPolicyPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">1. Order Cancellations</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-4">
-              Because we deal in quickly prepared Food and fast-moving Daily Essentials, time is critical. Our cancellation policy is strictly enforced to protect our vendors.
+              Because we deal in {isStore ? "fast-moving Daily Essentials" : "quickly prepared Food"}, time is critical. Our cancellation policy is strictly enforced to protect our vendors.
             </p>
             
             <div className="space-y-6">
@@ -55,7 +55,7 @@ export default function RefundPolicyPage() {
               <div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Cash On Delivery (COD)</h3>
                 <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-                  <li><strong className="text-gray-900 dark:text-white">Food Orders:</strong> Food orders cannot be cancelled after they have been shipped by the vendor.</li>
+                  {!isStore && <li><strong className="text-gray-900 dark:text-white">Food Orders:</strong> Food orders cannot be cancelled after they have been shipped by the vendor.</li>}
                   <li><strong className="text-gray-900 dark:text-white">Platform Fee:</strong> The Platform Fee is strictly non-refundable for COD orders.</li>
                 </ul>
               </div>
@@ -93,12 +93,14 @@ export default function RefundPolicyPage() {
               </div>
 
               {/* Essentials Section */}
-              <div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Essentials Orders</h3>
-                <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-                  <li>Essentials can be cancelled prior to the store packing and dispatching the items. Once the delivery agent has picked up the package, cancellation is no longer possible.</li>
-                </ul>
-              </div>
+              {isStore && (
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Essentials Orders</h3>
+                  <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                    <li>Essentials can be cancelled prior to the store packing and dispatching the items. Once the delivery agent has picked up the package, cancellation is no longer possible.</li>
+                  </ul>
+                </div>
+              )}
             </div>
           </section>
 
@@ -123,7 +125,7 @@ export default function RefundPolicyPage() {
             <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
               <li>You were unreachable at the time of delivery or provided an incorrect delivery address.</li>
               <li>You rejected the order at your doorstep for reasons outside of food safety (e.g., "changed my mind").</li>
-              <li>The food order was successfully prepared and dispatched, but you attempted a late cancellation.</li>
+              <li>The {isStore ? "order" : "food order"} was successfully prepared and dispatched, but you attempted a late cancellation.</li>
             </ul>
 
             <div className="mt-5 p-4 bg-white/60 dark:bg-black/20 rounded-xl">

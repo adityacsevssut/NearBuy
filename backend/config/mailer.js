@@ -208,7 +208,9 @@ async function sendOrderDeliveredEmail(to, orderData, userDetails) {
           <div style="font-weight:bold;color:#111;">₹${item.price}</div>
         </div>
       `).join('');
-    } catch(e) { }
+    } catch (e) {
+      console.error("Failed to parse items json in email:", e);
+    }
   }
 
   const htmlContent = `
