@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">1. Information We Collect</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
-              To provide you with localized Food and Essentials delivery, NearBuy collects the following essential information:
+              To provide you with localized {isStore ? "Essentials" : "Food"} delivery, NearBuy collects the following essential information:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
               <li><strong className="text-gray-900 dark:text-white">Personal Identification:</strong> Your Name, Email Address, and Mobile Number for account creation and order tracking.</li>
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
               The data we collect is used strictly for the facilitation of our delivery services:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-              <li>To process your orders for Food and Daily Essentials.</li>
+              <li>To process your orders for {isStore ? "Daily Essentials" : "Food"}.</li>
               <li>To send you important OTPs, order updates, and delivery confirmations.</li>
               <li>To improve our localized search algorithms, ensuring you see the most relevant nearby stores and restaurants.</li>
             </ul>

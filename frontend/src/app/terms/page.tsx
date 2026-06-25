@@ -57,8 +57,8 @@ export default function TermsPage() {
               NearBuy operates as a localized hyper-delivery platform connecting users with local vendors. Please note our strict service limitations:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-              <li><strong className="text-gray-900 dark:text-white">Food Delivery:</strong> We facilitate the delivery of freshly prepared food from local partnered restaurants.</li>
-              <li><strong className="text-gray-900 dark:text-white">Daily Essentials:</strong> We support the delivery of general groceries, snacks, and daily household essentials from verified local stores.</li>
+              {!isStore && <li><strong className="text-gray-900 dark:text-white">Food Delivery:</strong> We facilitate the delivery of freshly prepared food from local partnered restaurants.</li>}
+              {isStore && <li><strong className="text-gray-900 dark:text-white">Daily Essentials:</strong> We support the delivery of general groceries, snacks, and daily household essentials from verified local stores.</li>}
             </ul>
           </section>
 
@@ -92,7 +92,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">5. Limitation of Liability</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              NearBuy acts as an intermediary platform. We do not prepare the food or manufacture the essentials sold. While we strictly vet our partners, NearBuy is not liable for the quality, safety, or exact representation of the items provided by the vendors. Any severe grievances regarding product quality will be mediated between you and the vendor directly.
+              NearBuy acts as an intermediary platform. We do not {isStore ? "manufacture the essentials" : "prepare the food"} sold. While we strictly vet our partners, NearBuy is not liable for the quality, safety, or exact representation of the items provided by the vendors. Any severe grievances regarding product quality will be mediated between you and the vendor directly.
             </p>
           </section>
 
