@@ -909,7 +909,6 @@ export default function HomePage() {
     }
   }
 
-  /* filter */
   const filtered = restaurants.filter((r: any) => {
     const raw = getDistance(
       latitude,
@@ -919,6 +918,30 @@ export default function HomePage() {
     );
     const isOor =
       raw != null && raw > (r.deliveryRange ? parseFloat(r.deliveryRange) : 5);
+    return !isOor;
+  });
+
+  const filteredDeals60 = hotDealsUnder60.filter((deal: any) => {
+    const raw = getDistance(
+      latitude,
+      longitude,
+      deal.latitude ? parseFloat(deal.latitude) : null,
+      deal.longitude ? parseFloat(deal.longitude) : null,
+    );
+    const isOor =
+      raw != null && raw > (deal.deliveryRange ? parseFloat(deal.deliveryRange) : 5);
+    return !isOor;
+  });
+
+  const filteredDeals130 = hotDealsUnder130.filter((deal: any) => {
+    const raw = getDistance(
+      latitude,
+      longitude,
+      deal.latitude ? parseFloat(deal.latitude) : null,
+      deal.longitude ? parseFloat(deal.longitude) : null,
+    );
+    const isOor =
+      raw != null && raw > (deal.deliveryRange ? parseFloat(deal.deliveryRange) : 5);
     return !isOor;
   });
 
@@ -1091,8 +1114,8 @@ export default function HomePage() {
           </div>
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
-            <section className="pt-2 pb-0 relative z-10">
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-2 pb-0">
+            <section className="pt-2 pb-2 relative z-10">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-2 pb-3">
                 {quickBites.map(({ label, image }, index) => (
                   <motion.div
                     key={label}
@@ -1294,7 +1317,7 @@ export default function HomePage() {
           </section>
 
           {/* ── Hot Deals Under 60 ────────────────────────────────────────── */}
-          {(hotDealsUnder60.length > 0 || isHotDealsLoading) && (
+          {(filteredDeals60.length > 0 || isHotDealsLoading) && (
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹60"
@@ -1303,7 +1326,7 @@ export default function HomePage() {
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : hotDealsUnder60.map((deal) => (
+                  : filteredDeals60.map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
               </div>
@@ -1311,7 +1334,7 @@ export default function HomePage() {
           )}
 
           {/* ── Hot Deals Under 130 ───────────────────────────────────────── */}
-          {(hotDealsUnder130.length > 0 || isHotDealsLoading) && (
+          {(filteredDeals130.length > 0 || isHotDealsLoading) && (
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹130"
@@ -1320,7 +1343,7 @@ export default function HomePage() {
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : hotDealsUnder130.map((deal) => (
+                  : filteredDeals130.map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
               </div>
@@ -1328,12 +1351,12 @@ export default function HomePage() {
           )}
 
           {/* ── 4. Top Cuisines ─────────────────────────────────────────────── */}
-          <section className="py-3">
+          <section className="py-3 overflow-hidden">
             <SectionHeader title="Top Cuisines" />
-            <div className="flex gap-2.5 overflow-x-auto scrollbar-hide px-4 pb-1">
-              {topCuisines.map(({ label, image, bg, border }) => (
+            <div className="flex w-max animate-marquee gap-2.5 px-4 pb-1">
+              {[...topCuisines, ...topCuisines].map(({ label, image, bg, border }, idx) => (
                 <div
-                  key={label}
+                  key={`${label}-${idx}`}
                   className={`group flex-shrink-0 flex items-center gap-2 pr-3.5 pl-1.5 py-1.5 rounded-full border ${bg} dark:bg-[#151522] ${border} dark:border-[#2A2A3A] hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 text-[12px] font-bold text-gray-800 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 cursor-default`}
                 >
                   <div className="relative w-8 h-8 rounded-full overflow-hidden shadow-sm shrink-0 transition-transform duration-300 ">

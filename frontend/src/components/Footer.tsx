@@ -47,9 +47,9 @@ export default function Footer() {
       { name: "Essentials", href: "#", onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
     ],
     Legal: [
-      { name: "Terms & Conditions", href: "#" },
-      { name: "Privacy Policy", href: "#" },
-      { name: "Sitemap", href: "#" },
+      { name: "Terms & Conditions", href: isStore ? "/terms?theme=store" : "/terms" },
+      { name: "Privacy Policy", href: isStore ? "/privacy?theme=store" : "/privacy" },
+      { name: "Refund Policy", href: isStore ? "/refund-policy?theme=store" : "/refund-policy" },
     ],
   };
 
