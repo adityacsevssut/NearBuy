@@ -11,7 +11,7 @@ const {
 } = require("../validators/auth.validators");
 
 const pool = require("../config/db");
-const { sendOtpEmail } = require("../config/mailer");
+const { sendOtpEmail, sendWelcomeEmail } = require("../config/mailer");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const { authenticate } = require("../middleware/auth");
 
@@ -216,6 +216,9 @@ router.post(
       const user = rows[0];
       const { accessToken, refreshToken } = await issueTokens(user);
 
+      // Trigger Welcome Email via ZeptoMail
+      sendWelcomeEmail(user.email, user.first_name);
+
       return res.status(201).json({
         message: "Account created successfully!",
         user: safeUser(user),
@@ -253,6 +256,9 @@ router.post(
 
       const user = rows[0];
       const { accessToken, refreshToken } = await issueTokens(user);
+
+      // Trigger Welcome Email via ZeptoMail
+      sendWelcomeEmail(user.email, user.first_name);
 
       return res.status(201).json({
         message: "Account created successfully!",

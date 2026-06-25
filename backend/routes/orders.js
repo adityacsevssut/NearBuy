@@ -5,6 +5,7 @@ const router = express.Router();
 const validate = require("../middleware/validate");
 const { createOrderSchema } = require("../validators/orders.validators");
 const pool = require("../config/db");
+const { sendOrderDeliveredEmail } = require("../config/mailer");
 
 // Generalized helper to auto-generate refund request
 async function handleAutomatedRefundRequest(pool, order) {
@@ -600,6 +601,16 @@ router.patch("/:id/status", authenticate, async (req, res) => {
     } else if (finalStatus.toLowerCase() === 'delivered') {
       notifTitle = "Order Delivered !!!";
       notifMessage = "Your order has been delivered successfully.";
+      
+      // Trigger ZeptoMail Delivered Email
+      try {
+        const userQ = await pool.query(`SELECT first_name, email FROM users WHERE id = $1`, [updatedOrder.user_id]);
+        if (userQ.rows.length && userQ.rows[0].email) {
+          sendOrderDeliveredEmail(userQ.rows[0].email, updatedOrder, userQ.rows[0]);
+        }
+      } catch(e) {
+        console.error("Failed to fetch user details for delivered email", e);
+      }
     } else if (finalStatus.toLowerCase() === 'cancelled') {
       notifTitle = "Order Cancelled !!!";
       notifMessage = "Your order has been cancelled.";

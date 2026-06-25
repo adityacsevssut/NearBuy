@@ -213,7 +213,7 @@ export default function LocationModal() {
         latitude: resolvedAddress.lat,
         longitude: resolvedAddress.lng,
       });
-      toast.success(`📍 Location saved: ${resolvedAddress.name}`);
+      toast.success(`Location saved: ${resolvedAddress.name}`, { icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> });
       handleClose();
     } finally {
       setIsSaving(false);
@@ -230,7 +230,7 @@ export default function LocationModal() {
       saved.latitude != null ? parseFloat(String(saved.latitude)) : undefined,
       saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined
     );
-    toast.success(`📍 Switched to ${saved.landmark ? saved.landmark : saved.name}`);
+    toast.success(`Switched to ${saved.landmark ? saved.landmark : saved.name}`, { icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> });
     handleClose();
   };
 
