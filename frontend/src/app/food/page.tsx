@@ -21,6 +21,7 @@ import {
   Send,
   Package,
   UtensilsCrossed,
+  ChevronRight,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -660,6 +661,7 @@ export default function HomePage() {
   >(cachedState.foodPref);
 
   const [showFilters, setShowFilters] = useState(false);
+  const [isQuickBitesDrawerOpen, setIsQuickBitesDrawerOpen] = useState(false);
 
 
   const {
@@ -678,6 +680,12 @@ export default function HomePage() {
   const [page, setPage] = useState(cachedState.page);
   const [hasMore, setHasMore] = useState(cachedState.hasMore);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [popularLimit, setPopularLimit] = useState(10);
+  const [isPopularLoading, setIsPopularLoading] = useState(false);
+  const [deals60Limit, setDeals60Limit] = useState(10);
+  const [isDeals60LoadingMore, setIsDeals60LoadingMore] = useState(false);
+  const [deals130Limit, setDeals130Limit] = useState(10);
+  const [isDeals130LoadingMore, setIsDeals130LoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
 
@@ -823,27 +831,7 @@ export default function HomePage() {
     fetchRestaurants(1, true);
   }, [debouncedSearch, foodPref, latitude, longitude, pincode]);
 
-  // Infinite Scroll Observer
-  useEffect(() => {
-    if (isLoading || loadingMore || !hasMore) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage((prev) => {
-            const next = prev + 1;
-            fetchRestaurants(next, false);
-            return next;
-          });
-        }
-      },
-      { threshold: 1.0 },
-    );
-    if (lastElementRef.current) observer.observe(lastElementRef.current);
-    observerRef.current = observer;
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
+  // Infinite Scroll Observer removed in favor of manual "Load More" button
 
   async function fetchFoodPoster() {
     try {
@@ -876,7 +864,7 @@ export default function HomePage() {
       ).replace(/\/+$/, "");
       const query = new URLSearchParams({
         page: pageNum.toString(),
-        limit: "20",
+        limit: "10",
       });
       if (debouncedSearch) query.append("search", debouncedSearch);
       if (foodPref !== "all") query.append("foodPref", foodPref);
@@ -891,8 +879,8 @@ export default function HomePage() {
       if (res.ok) {
         const result = await res.json();
         let data = result.data || [];
-
         const more = pageNum < (result.pagination?.totalPages || 1);
+        
         setHasMore(more);
         cachedState.hasMore = more;
         cachedState.page = pageNum;
@@ -947,7 +935,7 @@ export default function HomePage() {
     return !isOor;
   });
 
-  const popular = filtered.slice(0, 8);
+  const popular = filtered.slice(0, popularLimit);
   const cp = {
     lat: latitude,
     lon: longitude,
@@ -1120,7 +1108,7 @@ export default function HomePage() {
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
             <section className="pt-2 pb-2 relative z-10">
               <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-2 pb-3">
-                {quickBites.map(({ label, image }, index) => (
+                {quickBites.slice(0, 8).map(({ label, image }, index) => (
                   <motion.div
                     key={label}
                     initial={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -1141,6 +1129,27 @@ export default function HomePage() {
                     </Link>
                   </motion.div>
                 ))}
+                
+                {/* See All Button */}
+                {quickBites.length > 8 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 8 * 0.04, duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <button
+                      onClick={() => setIsQuickBitesDrawerOpen(true)}
+                      className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
+                    >
+                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-orange-50 dark:bg-orange-500/10 shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 flex items-center justify-center isolate">
+                        <ChevronDown className="w-6 h-6 text-orange-500 -rotate-90 group-hover:scale-110 transition-transform duration-300" />
+                      </div>
+                      <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
+                        See All
+                      </span>
+                    </button>
+                  </motion.div>
+                )}
               </div>
             </section>
           </div>
@@ -1232,6 +1241,49 @@ export default function HomePage() {
           </div>
         </div>
 
+        {/* Quick Bites Drawer */}
+        {isQuickBitesDrawerOpen && (
+          <div
+            className="fixed inset-0 z-[75] bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsQuickBitesDrawerOpen(false)}
+          />
+        )}
+        <div
+          className={`fixed inset-y-0 right-0 z-[80] w-80 max-w-full bg-white dark:bg-[#0D0D17] shadow-2xl flex flex-col transition-transform duration-300 ${isQuickBitesDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2A2A3A]">
+            <p className="font-black text-[17px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400 drop-shadow-sm flex items-center gap-2">
+              What are you craving?
+            </p>
+            <button
+              onClick={() => setIsQuickBitesDrawerOpen(false)}
+              className="group relative p-2 bg-gray-50 dark:bg-[#151522] hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full border border-gray-200 dark:border-[#2A2A3A] hover:border-red-200 dark:hover:border-red-500/30 transition-all duration-300 shadow-sm hover:shadow-md active:scale-90"
+            >
+              <X className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 transition-colors group-hover:rotate-90 duration-300" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-5 scrollbar-hide">
+            <div className="grid grid-cols-3 gap-y-6 gap-x-4">
+              {quickBites.map(({ label, image }) => (
+                <Link
+                  key={label}
+                  href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                  onClick={() => setIsQuickBitesDrawerOpen(false)}
+                  className="flex flex-col items-center gap-2 group outline-none"
+                >
+                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
+                    <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-cover transition-transform duration-500 group-hover:scale-110 dark:hidden" />
+                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-cover transition-transform duration-500 group-hover:scale-110 dark:block" />
+                  </div>
+                  <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* ══ PAGE CONTENT ════════════════════════════════════════════════════ */}
         <div className="max-w-7xl mx-auto">
 
@@ -1308,10 +1360,46 @@ export default function HomePage() {
                 ))}
               </div>
             ) : popular.length > 0 ? (
-              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1">
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-1 items-stretch">
                 {popular.map((r) => (
                   <PopCard key={r.id} r={r} {...cp} />
                 ))}
+                
+                {/* Skeletons while loading */}
+                {(isPopularLoading || loadingMore) && (
+                  <>
+                    <PopCardSkeleton />
+                    <PopCardSkeleton />
+                  </>
+                )}
+
+                {/* Load More Button */}
+                {!(isPopularLoading || loadingMore) && (popularLimit < filtered.length || hasMore) && (
+                  <button
+                    onClick={() => {
+                      setIsPopularLoading(true);
+                      setTimeout(() => {
+                        if (popularLimit >= filtered.length && hasMore) {
+                          setPage((prev) => {
+                            const next = prev + 1;
+                            fetchRestaurants(next, false);
+                            return next;
+                          });
+                        }
+                        setPopularLimit(prev => prev + 10);
+                        setIsPopularLoading(false);
+                      }, 800);
+                    }}
+                    className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
+                  >
+                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                       <ChevronRight className="w-8 h-8 text-orange-500" />
+                     </div>
+                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                       See All
+                     </span>
+                  </button>
+                )}
               </div>
             ) : (
               <p className="px-4 text-sm text-gray-400 font-medium">
@@ -1330,9 +1418,36 @@ export default function HomePage() {
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : filteredDeals60.map((deal) => (
+                  : filteredDeals60.slice(0, deals60Limit).map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
+                  
+                {!isHotDealsLoading && (isDeals60LoadingMore) && (
+                  <>
+                    <DealCardSkeleton />
+                    <DealCardSkeleton />
+                  </>
+                )}
+                  
+                {!isHotDealsLoading && !isDeals60LoadingMore && deals60Limit < filteredDeals60.length && (
+                  <button
+                    onClick={() => {
+                      setIsDeals60LoadingMore(true);
+                      setTimeout(() => {
+                        setDeals60Limit(prev => prev + 10);
+                        setIsDeals60LoadingMore(false);
+                      }, 800);
+                    }}
+                    className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
+                  >
+                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                       <ChevronRight className="w-8 h-8 text-orange-500" />
+                     </div>
+                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                       See All
+                     </span>
+                  </button>
+                )}
               </div>
             </section>
           )}
@@ -1347,9 +1462,36 @@ export default function HomePage() {
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : filteredDeals130.map((deal) => (
+                  : filteredDeals130.slice(0, deals130Limit).map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
+                  
+                {!isHotDealsLoading && (isDeals130LoadingMore) && (
+                  <>
+                    <DealCardSkeleton />
+                    <DealCardSkeleton />
+                  </>
+                )}
+                  
+                {!isHotDealsLoading && !isDeals130LoadingMore && deals130Limit < filteredDeals130.length && (
+                  <button
+                    onClick={() => {
+                      setIsDeals130LoadingMore(true);
+                      setTimeout(() => {
+                        setDeals130Limit(prev => prev + 10);
+                        setIsDeals130LoadingMore(false);
+                      }, 800);
+                    }}
+                    className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
+                  >
+                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                       <ChevronRight className="w-8 h-8 text-orange-500" />
+                     </div>
+                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                       See All
+                     </span>
+                  </button>
+                )}
               </div>
             </section>
           )}
@@ -1439,18 +1581,40 @@ export default function HomePage() {
                 {filtered.map((r) => (
                   <RestCard key={r.id} r={r} {...cp} />
                 ))}
+                {loadingMore && (
+                  <>
+                    {[1, 2, 3, 4].map(i => <RestCardSkeleton key={`skeleton-all-${i}`} />)}
+                  </>
+                )}
               </div>
             )}
 
-            {/* Infinite Scroll Loader */}
+            {/* Load More Button */}
             {hasMore && filtered.length > 0 && (
-              <div
-                ref={lastElementRef}
-                className="w-full h-16 flex items-center justify-center mt-6"
-              >
-                {loadingMore && (
-                  <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                )}
+              <div className="w-full flex justify-center mt-10 mb-6">
+                  <button
+                    onClick={() => {
+                      if (hasMore && !loadingMore) {
+                        setPage((prev) => {
+                          const next = prev + 1;
+                          fetchRestaurants(next, false);
+                          return next;
+                        });
+                      }
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 group outline-none"
+                  >
+                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                       {loadingMore ? (
+                         <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                       ) : (
+                         <ChevronDown className="w-8 h-8 text-orange-500" />
+                       )}
+                     </div>
+                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                       {loadingMore ? "Loading..." : "Load More"}
+                     </span>
+                  </button>
               </div>
             )}
           </section>

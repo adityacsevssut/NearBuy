@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, ArrowDown, Share2, Send, ChevronDown, Utensils } from "lucide-react";
 import toast from "react-hot-toast";
+import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
@@ -127,27 +128,7 @@ export default function DishPage() {
     }
   }
 
-  // Infinite Scroll Observer
-  useEffect(() => {
-    if (isLoading || loadingMore || !hasMore) return;
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMore) {
-          setPage(prev => {
-            const next = prev + 1;
-            fetchDishes(next, false);
-            return next;
-          });
-        }
-      },
-      { threshold: 1.0 }
-    );
-    if (lastElementRef.current) observer.observe(lastElementRef.current);
-    observerRef.current = observer;
-    return () => {
-      if (observerRef.current) observerRef.current.disconnect();
-    };
-  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
+  // Infinite Scroll Observer removed in favor of manual "Load More" button
 
   const filteredDishes = dishes;
 
@@ -444,9 +425,15 @@ export default function DishPage() {
               );
             })}
 
+            {loadingMore && filteredDishes.length > 0 && (
+              <>
+                {[1, 2, 3].map(i => <DishCardSkeleton key={`loading-more-${i}`} />)}
+              </>
+            )}
+
             {isLoading ? (
               <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map(i => <DishCardSkeleton key={i} />)}
+                {[1, 2, 3, 4, 5].map(i => <DishCardSkeleton key={`initial-${i}`} />)}
               </div>
             ) : filteredDishes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
@@ -463,10 +450,32 @@ export default function DishPage() {
                 </p>
               </div>
             )}
-            {/* Infinite Scroll Loader */}
+            {/* Load More Button */}
             {hasMore && filteredDishes.length > 0 && (
-              <div ref={lastElementRef} className="w-full h-16 flex items-center justify-center mt-6">
-                {loadingMore && <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>}
+              <div className="w-full flex justify-center mt-10 mb-6">
+                  <button
+                    onClick={() => {
+                      if (hasMore && !loadingMore) {
+                        setPage((prev) => {
+                          const next = prev + 1;
+                          fetchDishes(next, false);
+                          return next;
+                        });
+                      }
+                    }}
+                    className="flex flex-col items-center justify-center gap-2 group outline-none"
+                  >
+                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                       {loadingMore ? (
+                         <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                       ) : (
+                         <ChevronDown className="w-8 h-8 text-orange-500" />
+                       )}
+                     </div>
+                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                       {loadingMore ? "Loading..." : "Load More"}
+                     </span>
+                  </button>
               </div>
             )}
           </div>
