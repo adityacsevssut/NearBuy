@@ -69,24 +69,25 @@ export default function RefundPolicyPage() {
                 
                 <div className="space-y-4">
                   <div className="bg-white dark:bg-[#151522] p-4 rounded-xl shadow-sm border border-gray-100 dark:border-[#2A2A3A]">
-                    <strong className="block text-gray-900 dark:text-white text-lg mb-2">Cancelling BEFORE "Out for Delivery":</strong>
+                    <strong className="block text-gray-900 dark:text-white text-lg mb-2">Cancelling BEFORE <span className={accentColor}>Out for Delivery</span>:</strong>
                     <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
                       <li>If you have <strong className="text-gray-900 dark:text-white">paid in full</strong>: The Delivery Fee and Platform Fee will be deducted from your refund.</li>
-                      <li>If you paid an <strong className="text-gray-900 dark:text-white">Advance (Adv) Fee</strong>: Your refund will be the Advance Fee minus: <strong className={accentColor}>(Platform Fee + Delivery Fee + 10% of the Advance Fee)</strong>.</li>
+                      <li>If you paid an <strong className="text-gray-900 dark:text-white">Advance (Adv) Amount</strong>: The Platform Fee and Delivery Fee will be deducted, and the remaining Advance Amount will be refunded.</li>
                     </ul>
                   </div>
 
                   <div className="bg-white dark:bg-[#151522] p-4 rounded-xl shadow-sm border border-gray-100 dark:border-[#2A2A3A]">
-                    <strong className="block text-gray-900 dark:text-white text-lg mb-2">Cancelling AFTER "Out for Delivery":</strong>
+                    <strong className="block text-gray-900 dark:text-white text-lg mb-2">Cancelling AFTER <span className={accentColor}>Out for Delivery</span>:</strong>
                     <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
                       <li>If you paid the <strong className="text-gray-900 dark:text-white">full payment at once</strong> (e.g., due to vendor request), you will only receive <strong className={accentColor}>50% of the total order amount</strong> as a refund.</li>
+                      <li>If you paid an <strong className="text-gray-900 dark:text-white">Advance (Adv) Amount</strong>: Your refund will be the Advance Amount minus: <strong className={accentColor}>(Platform Fee + Delivery Fee + 10% of the Advance Amount)</strong>.</li>
                     </ul>
                   </div>
 
                   <div className="bg-white dark:bg-[#151522] p-4 rounded-xl shadow-sm border border-gray-100 dark:border-[#2A2A3A]">
                     <strong className="block text-gray-900 dark:text-white text-lg mb-2">If the Vendor Cancels:</strong>
                     <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
-                      <li>If a restaurant or store cancels your order (e.g., due to item unavailability), you will receive a <strong className={accentColor}>100% full refund</strong>, which includes a complete refund of the Platform Fee, Delivery Fee, and any Advance Fees paid.</li>
+                      <li>If a restaurant or store cancels your order (e.g., due to item unavailability), you will receive a <strong className={accentColor}>100% full refund</strong>, which includes a complete refund of the Platform Fee, Delivery Fee, and any Advance Amounts paid.</li>
                     </ul>
                   </div>
                 </div>
@@ -135,7 +136,7 @@ export default function RefundPolicyPage() {
               </p>
               <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300 text-sm">
                 <li>If you paid the <strong className="text-gray-900 dark:text-white">full payment online</strong>, you will receive a refund of <strong className={accentColor}>50% of the overall order amount</strong>.</li>
-                <li>If you paid an <strong className="text-gray-900 dark:text-white">Advance Fee</strong>, your refund will be the Advance Fee minus: <strong className={accentColor}>(Platform Fee + Delivery Fee + 10% of the Advance Fee)</strong>.</li>
+                <li>If you paid an <strong className="text-gray-900 dark:text-white">Advance Amount</strong>, your refund will be the Advance Amount minus: <strong className={accentColor}>(Platform Fee + Delivery Fee + 10% of the Advance Amount)</strong>.</li>
               </ul>
             </div>
           </section>

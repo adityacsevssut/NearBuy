@@ -434,7 +434,6 @@ export default function Navbar() {
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
-
             </div>
           </motion.div>
         )}
