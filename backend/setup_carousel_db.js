@@ -12,6 +12,8 @@ async function run() {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
+      CREATE INDEX IF NOT EXISTS idx_homepage_carousel_posters_type 
+      ON homepage_carousel_posters (type, created_at ASC);
     `;
     await pool.query(query);
     console.log('Created homepage_carousel_posters table successfully!');
