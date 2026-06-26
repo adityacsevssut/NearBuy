@@ -19,6 +19,8 @@ import {
   Share2,
   Navigation,
   Send,
+  Package,
+  UtensilsCrossed,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
@@ -959,6 +961,8 @@ export default function HomePage() {
       <Navbar />
 
       <main className="flex-1 pb-8 md:pb-6 relative">
+
+
 
 
         {/* ══ LOCATION (SCROLLS AWAY) ════════════════════════════ */}

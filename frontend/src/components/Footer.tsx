@@ -1,6 +1,6 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Zap, Heart } from "lucide-react";
 import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
@@ -9,10 +9,12 @@ import FeedbackModal from "./FeedbackModal";
 import SupportModal from "./SupportModal";
 import RefundModal from "./RefundModal";
 import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function Footer() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, openLoginModal } = useAuth();
   const pathname = usePathname() || "";
+  const router = useRouter();
   const isStore = pathname.startsWith('/store') || pathname.startsWith('/essentials');
   const accentColor = isStore ? "text-blue-600" : "text-orange-500";
   const hoverColor = isStore ? "hover:text-blue-600" : "hover:text-orange-600";
@@ -36,7 +38,7 @@ export default function Footer() {
       { name: isStore ? "Store Cart" : "Food Cart", href: isStore ? "/store/cart" : "/food/cart" },
       { name: "Wishlist", href: isStore ? "/store/wishlist" : "/food/wishlist" },
       { name: "Your Orders", href: isStore ? "/store/orders" : "/food/orders?history=true" },
-      isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "/signup" },
+      isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "#", onClick: (e: any) => { e.preventDefault(); openLoginModal(); } },
     ],
     Register: [
       { name: "Register as Student", href: "#", onClick: (e: any) => { e.preventDefault(); setModalType("student"); setIsModalOpen(true); } },
@@ -101,7 +103,17 @@ export default function Footer() {
                       <li key={item.name}>
                         <a
                           href={item.href}
-                          onClick={item.onClick}
+                          onClick={(e) => {
+                            if (!isLoggedIn && item.name !== "Login") {
+                              e.preventDefault();
+                              toast.error("Please login first");
+                              openLoginModal();
+                              return;
+                            }
+                            if (item.onClick) {
+                              item.onClick(e);
+                            }
+                          }}
                           className={`text-[13px] text-gray-500 dark:text-gray-400 font-medium ${hoverColor} transition-colors`}
                         >
                           {item.name}
