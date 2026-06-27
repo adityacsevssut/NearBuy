@@ -76,8 +76,9 @@ const { sendNotification } = require("../utils/notifications");
 router.post("/create-razorpay-order", authenticate, async (req, res) => {
   try {
     const { amount } = req.body;
-    if (amount < 1) {
-      return res.status(400).json({ error: "Minimum Amount is ₹1" });
+    const MAX_ORDER_AMOUNT = 50000; // ₹50,000 max per transaction
+    if (!amount || amount < 1 || amount > MAX_ORDER_AMOUNT) {
+      return res.status(400).json({ error: `Amount must be between ₹1 and ₹${MAX_ORDER_AMOUNT}` });
     }
     if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
       return res.status(500).json({ error: "Razorpay keys not configured" });
@@ -238,6 +239,21 @@ router.post(
     } = req.body;
 
     try {
+      // Verify order total server-side — prevents price manipulation from client
+      const settingsRes = await pool.query(
+        "SELECT platform_fee, gst FROM global_settings WHERE id = 1"
+      );
+      if (settingsRes.rows.length) {
+        const s = settingsRes.rows[0];
+        const serverGst = Math.round((subtotal * parseFloat(s.gst)) / 100 * 100) / 100;
+        const serverPlatformFee = parseFloat(s.platform_fee);
+        // Delivery charge is set by vendor after order placement, so exclude from check
+        const serverMinTotal = subtotal + serverGst + serverPlatformFee;
+        if (Math.abs(serverMinTotal - total_amount) > 2) { // ₹2 tolerance for rounding
+          return res.status(400).json({ error: "Order total mismatch. Please refresh and try again." });
+        }
+      }
+
       const payment_status = payment_method === 'cod' ? 'fees_paid' : 'pending';
       const { rows } = await pool.query(
         `INSERT INTO orders (
@@ -291,8 +307,8 @@ router.post(
 // Get my orders
 router.get("/me", authenticate, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query(
@@ -330,8 +346,8 @@ router.get("/me", authenticate, async (req, res) => {
 // Get orders for a specific vendor
 router.get("/vendor", authenticate, async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
     const offset = (page - 1) * limit;
 
     const countResult = await pool.query(
@@ -526,6 +542,12 @@ router.patch("/:id/status", authenticate, async (req, res) => {
   
   if (!status) {
     return res.status(400).json({ error: "Status is required." });
+  }
+
+  // Whitelist valid statuses to prevent arbitrary string injection
+  const VALID_STATUSES = ['confirmed', 'out for delivery', 'delivered', 'cancelled', 'pending'];
+  if (!VALID_STATUSES.includes(status.toLowerCase())) {
+    return res.status(400).json({ error: "Invalid order status." });
   }
 
   try {

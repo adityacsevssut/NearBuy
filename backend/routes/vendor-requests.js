@@ -26,11 +26,14 @@ router.post(
         return res.status(409).json({ error: "An account with this email already exists. Please log in." });
       }
       
+      // Hash the password BEFORE storing — never store plaintext credentials
+      const passwordHash = await bcrypt.hash(password, 10);
+
       const { rows } = await pool.query(
         `INSERT INTO vendor_requests (restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
          RETURNING id`,
-        [restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, requestType || 'vendor', collegeName]
+        [restaurantName, ownerName, ownerMobile, ownerEmail, passwordHash, vendorType, requestType || 'vendor', collegeName]
       );
 
       return res.status(201).json({ message: "Vendor request submitted successfully.", requestId: rows[0].id });
@@ -49,7 +52,8 @@ router.get("/", authenticate, async (req, res) => {
        return res.status(403).json({ error: "Access denied." });
     }
     
-    let queryStr = `SELECT id, restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name, status, created_at 
+    // Note: 'password' column intentionally excluded — never return credentials in API responses
+    let queryStr = `SELECT id, restaurant_name, owner_name, owner_mobile, owner_email, vendor_type, request_type, college_name, status, created_at 
                     FROM vendor_requests`;
     let queryParams = [];
 
@@ -102,7 +106,7 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
       
       if (userType !== targetType) {
         return res.status(403).json({ 
-          error: `Cannot approve request for a different vendor type. Manager is '${userType}', Request is '${targetType}'.` 
+          error: `Cannot approve request for a different vendor type.`
         });
       }
     }
@@ -119,7 +123,8 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     const firstName = parts[0];
     const lastName = parts.slice(1).join(' ') || (request.request_type === 'student' ? 'Student' : 'Vendor');
 
-    const passwordHash = await bcrypt.hash(request.password, 10);
+    // password is now a bcrypt hash (stored pre-hashed at submission) — use directly
+    const passwordHash = request.password;
 
     await pool.query(
       `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type, manager_type)
@@ -154,11 +159,6 @@ router.patch("/:id/reject", authenticate, async (req, res) => {
     if (!reqQuery.rows.length) return res.status(404).json({ error: "Request not found" });
     const request = reqQuery.rows[0];
 
-    console.log("Rejection check:", { 
-      userRole: req.user.role, 
-      userManagerType: req.user.manager_type, 
-      requestVendorType: request.vendor_type 
-    });
 
     if (req.user.role === "manager") {
       const userType = (req.user.manager_type || "").toLowerCase();

@@ -28,8 +28,8 @@ const createVendorAccountSchema = Joi.object({
   businessName: Joi.string().trim().min(1).max(150).required().messages({ "any.required": "Business name is required" }),
   ownerName:    Joi.string().trim().min(2).max(100).required().messages({ "any.required": "Owner name is required" }),
   email:        email.required().messages({ "any.required": "Email is required" }),
-  password:     Joi.string().min(6).max(128).required().messages({
-    "string.min": "Password must be at least 6 characters",
+  password:     Joi.string().min(8).max(128).required().messages({
+    "string.min": "Password must be at least 8 characters",
     "any.required": "Password is required"
   }),
   mobile: mobile10.optional().allow("", null)
@@ -41,7 +41,7 @@ const editVendorAccountSchema = Joi.object({
   lastName:  Joi.string().trim().max(50).optional().allow("", null),
   email:     email.optional(),
   mobile:    mobile10.optional().allow("", null),
-  password:  Joi.string().min(6).max(128).optional().messages({ "string.min": "Password must be at least 6 characters" })
+  password:  Joi.string().min(8).max(128).optional().messages({ "string.min": "Password must be at least 8 characters" })
 }).min(1).messages({ "object.min": "At least one field must be provided to update" });
 
 /* ── Update global settings (platform fee & GST) ─────────────────── */

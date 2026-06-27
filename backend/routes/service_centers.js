@@ -7,7 +7,8 @@ const { createServiceCenterSchema, patchServiceCenterSchema } = require("../vali
 
 // Only developer can access these
 const isDev = (req, res, next) => {
-  if (req.user && req.user.email === "nahakaditya344@gmail.com") {
+  const devEmail = process.env.DEV_ADMIN_EMAIL;
+  if (req.user && req.user.email === devEmail) {
     return next();
   }
   return res.status(403).json({ error: "Forbidden: Developer access only" });

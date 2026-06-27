@@ -12,7 +12,8 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
       "@typescript-eslint/no-require-imports": "warn",
       "react/no-unescaped-entities": "warn",
-      "prefer-const": "warn"
+      "prefer-const": "warn",
+      "react-compiler/react-compiler": "off"
     }
   },
   // Override default ignores of eslint-config-next.

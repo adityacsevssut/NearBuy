@@ -33,9 +33,9 @@ const GOOGLE_CLIENT_IDS = normalizeGoogleClientIds();
 const googleClient =
   GOOGLE_CLIENT_IDS.length > 0 ? new OAuth2Client(GOOGLE_CLIENT_IDS[0]) : null;
 
-// ── Helper: generate 6-digit OTP ──────────────────────────────────────────
+// ── Helper: generate 6-digit OTP (cryptographically secure) ──────────────
 function generateOtp() {
-  return String(Math.floor(100000 + Math.random() * 900000));
+  return String(crypto.randomInt(100000, 1000000));
 }
 
 // ── Helper: hash a value ──────────────────────────────────────────────────

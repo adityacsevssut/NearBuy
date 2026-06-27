@@ -8,10 +8,10 @@ const { upsertProfileSchema } = require("../validators/vendorProfile.validators"
 const { createClient } = require("@supabase/supabase-js");
 
 // Initialize Supabase Storage client
-// NOTE: These must be added to .env!
+// NOTE: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env
 const supabase = createClient(
-  process.env.SUPABASE_URL || "https://cwaiqkgimqdjsznrizgt.supabase.co", 
-  process.env.SUPABASE_ANON_KEY || "dummy_key"
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
 );
 
 // We use memory storage to buffer the file before pushing to the bucket
@@ -40,8 +40,6 @@ router.get("/", authenticate, async (req, res) => {
 // POST /api/vendor-profile
 router.post("/", authenticate, upload.single("image"), validate(upsertProfileSchema), async (req, res) => {
   try {
-    console.log("POST /api/vendor-profile body:", req.body);
-    
     // Fetch existing profile to prevent overwriting missing fields with empty values
     const existingRes = await pool.query(
       "SELECT * FROM vendor_profiles WHERE user_id = $1",

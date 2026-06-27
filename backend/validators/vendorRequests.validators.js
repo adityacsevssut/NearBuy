@@ -19,8 +19,8 @@ const createVendorRequestSchema = Joi.object({
     "string.email": "Enter a valid email address",
     "any.required": "Email is required"
   }),
-  password:    Joi.string().min(6).max(128).required().messages({
-    "string.min": "Password must be at least 6 characters",
+  password:    Joi.string().min(8).max(128).required().messages({
+    "string.min": "Password must be at least 8 characters",
     "any.required": "Password is required"
   }),
   vendorType:  Joi.string().valid("food", "store").required().messages({
