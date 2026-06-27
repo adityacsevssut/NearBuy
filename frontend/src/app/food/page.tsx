@@ -52,6 +52,12 @@ const quickBites = [
   { label: "Drinks", image: "/drinks_blue_mojito.png" },
   { label: "Chole Bhature", image: "/chole_bhature.png" },
   { label: "Samosa", image: "/samosa_gemini.png" },
+  { label: "Chicken", image: "/chicken_gemini.png" },
+  { label: "Paneer", image: "/paneer_gemini.png" },
+  { label: "Mutton", image: "/mutton_gemini.png" },
+  { label: "Rice", image: "/rice_gemini.png" },
+  { label: "Roti", image: "/roti_gemini.png" },
+  { label: "Naan", image: "/naan_gemini.png" },
   { label: "Others", image: "/others_gemini.png" },
 ];
 

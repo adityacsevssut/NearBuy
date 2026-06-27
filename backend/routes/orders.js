@@ -8,9 +8,14 @@ const pool = require("../config/db");
 const { sendOrderDeliveredEmail } = require("../config/mailer");
 
 // Generalized helper to auto-generate refund request
-async function handleAutomatedRefundRequest(pool, order) {
-  const isOwedRefund = order.advance_paid || order.payment_status === 'paid';
-  if (!isOwedRefund) return;
+async function handleAutomatedRefundRequest(pool, order, cancelledByVendor = false) {
+  const hasPaidFees = !!order.razorpay_payment_id;
+  if (!cancelledByVendor) {
+    const isOwedRefund = order.advance_paid || order.payment_status === 'paid' || hasPaidFees;
+    if (!isOwedRefund) return;
+  } else {
+    if (!order.advance_paid && order.payment_status !== 'paid' && !hasPaidFees) return;
+  }
 
   try {
     const userQ = await pool.query(`SELECT manager_type FROM users WHERE id = $1`, [order.vendor_id]);
@@ -18,6 +23,66 @@ async function handleAutomatedRefundRequest(pool, order) {
     const customerQ = await pool.query(`SELECT first_name, last_name, email FROM users WHERE id = $1`, [order.user_id]);
     const customer = customerQ.rows[0] || {};
     const userName = `${customer.first_name || ''} ${customer.last_name || ''}`.trim() || 'User';
+
+    if (cancelledByVendor) {
+      const instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
+      let refundsToProcess = [];
+      
+      // Determine what to refund for COD/OOD fees
+      if (order.razorpay_payment_id && (order.payment_method === 'cod' || order.payment_method === 'online_on_delivery')) {
+          let amountToRefund = Number(order.platform_fee || 0) + Number(order.gst || 0);
+          if (amountToRefund > 0 && amountToRefund < 1) amountToRefund = 1;
+          
+          if (amountToRefund > 0) {
+              refundsToProcess.push({
+                  amount: amountToRefund,
+                  paymentId: order.razorpay_payment_id
+              });
+          }
+      }
+      
+      // If there's also an advance payment, refund that too.
+      if (order.advance_paid && order.adv_payment_id) {
+          let advAmt = Number(order.platform_fee || 0) + Number(order.delivery_charge || 0) + Number(order.advance_fee || 0);
+          if (advAmt > 0) {
+              refundsToProcess.push({
+                  amount: advAmt,
+                  paymentId: order.adv_payment_id
+              });
+          }
+      }
+      
+      for (const refund of refundsToProcess) {
+          try {
+             const rzpRefundAmount = Math.round(refund.amount * 100);
+             await instance.payments.refund(refund.paymentId, { amount: rzpRefundAmount, speed: "normal" });
+             
+             // Insert Completed refund request
+             await pool.query(
+               `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount, payment_id) VALUES ($1, $2, $3, $4, $5, 'Completed', $6, $7)`,
+               [order.user_id, customer.email || '', order.id, userName, reqType, refund.amount, refund.paymentId]
+             );
+             
+             // Optionally send a notification
+             const { sendNotification } = require("../utils/notifications");
+             await sendNotification(
+                order.user_id,
+                "Refund Successful",
+                `Refund of ₹${refund.amount.toFixed(2)} has been successfully processed and will be credited to your account in the next 3-4 working days.`,
+                "refund"
+             );
+          } catch (err) {
+             console.error("Auto Razorpay refund failed for vendor cancel:", err);
+             // Fallback to Pending
+             await pool.query(
+               `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, status, amount, payment_id) VALUES ($1, $2, $3, $4, $5, 'Pending', $6, $7)`,
+               [order.user_id, customer.email || '', order.id, userName, reqType, refund.amount, refund.paymentId]
+             );
+          }
+      }
+      
+      return;
+    }
 
     let amount = 0;
     let paymentIdToRefund = null;
@@ -56,6 +121,8 @@ async function handleAutomatedRefundRequest(pool, order) {
       const platformFee = Number(order.platform_fee || 0);
       amount = totalAmount - deliveryCharge - platformFee;
       paymentIdToRefund = order.razorpay_payment_id;
+    } else if (order.razorpay_payment_id && (order.payment_method === 'cod' || order.payment_method === 'online_on_delivery')) {
+      amount = 0;
     }
 
     if (amount <= 0) return;
@@ -235,7 +302,10 @@ router.post(
       delivery_address,
       customer_mobile,
       alternate_mobile,
-      cooking_instructions
+      cooking_instructions,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature
     } = req.body;
 
     try {
@@ -258,8 +328,8 @@ router.post(
       const { rows } = await pool.query(
         `INSERT INTO orders (
           user_id, vendor_id, items, subtotal, gst, platform_fee, total_amount, payment_method, payment_status, delivery_address,
-          customer_mobile, alternate_mobile, cooking_instructions
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *`,
+          customer_mobile, alternate_mobile, cooking_instructions, razorpay_order_id, razorpay_payment_id
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
         [
           req.user.id,
           vendor_id,
@@ -273,7 +343,9 @@ router.post(
           JSON.stringify(delivery_address),
           customer_mobile,
           alternate_mobile || "",
-          cooking_instructions || ""
+          cooking_instructions || "",
+          razorpay_order_id || null,
+          razorpay_payment_id || null
         ]
       );
 
@@ -545,7 +617,7 @@ router.patch("/:id/status", authenticate, async (req, res) => {
   }
 
   // Whitelist valid statuses to prevent arbitrary string injection
-  const VALID_STATUSES = ['confirmed', 'out for delivery', 'delivered', 'cancelled', 'pending'];
+  const VALID_STATUSES = ['confirmed', 'shipment', 'out for delivery', 'delivered', 'cancelled', 'pending'];
   if (!VALID_STATUSES.includes(status.toLowerCase())) {
     return res.status(400).json({ error: "Invalid order status." });
   }
@@ -641,7 +713,7 @@ router.patch("/:id/status", authenticate, async (req, res) => {
     sendNotification(updatedOrder.user_id, notifTitle, notifMessage, "order_status");
     
     if (finalStatus.toLowerCase() === 'cancelled') {
-      await handleAutomatedRefundRequest(pool, updatedOrder);
+      await handleAutomatedRefundRequest(pool, updatedOrder, true);
     }
 
     return res.json({ message: "Status updated successfully", order: updatedOrder });
@@ -664,8 +736,13 @@ router.patch("/:id/cancel", authenticate, async (req, res) => {
     }
     
     const currentStatus = checkResult.rows[0].status.toLowerCase();
+    const paymentMethod = checkResult.rows[0].payment_method.toLowerCase();
     if (currentStatus === "delivered" || currentStatus === "cancelled") {
       return res.status(400).json({ error: "Order cannot be cancelled at this stage." });
+    }
+    
+    if (paymentMethod === "cod" && (currentStatus === "shipment" || currentStatus === "out for delivery")) {
+      return res.status(400).json({ error: "COD orders cannot be cancelled after they have been shipped." });
     }
 
     const { rows } = await pool.query(
@@ -715,8 +792,13 @@ router.post("/:id/cancel-request", authenticate, async (req, res) => {
     }
     
     const currentStatus = checkResult.rows[0].status.toLowerCase();
+    const paymentMethod = checkResult.rows[0].payment_method.toLowerCase();
     if (currentStatus === "delivered" || currentStatus === "cancelled") {
       return res.status(400).json({ error: "Order cannot be cancelled at this stage." });
+    }
+    
+    if (paymentMethod === "cod" && (currentStatus === "shipment" || currentStatus === "out for delivery")) {
+      return res.status(400).json({ error: "COD orders cannot be cancelled after they have been shipped." });
     }
 
     const { rows } = await pool.query(

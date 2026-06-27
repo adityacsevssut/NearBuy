@@ -159,12 +159,12 @@ export default function Navbar() {
 
               {/* Simple NB Logo */}
               <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${primaryText} tracking-tighter drop-shadow-sm`}>N</span>
-                <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-gray-900 dark:text-gray-100 tracking-tighter drop-shadow-sm -ml-0.5">B</span>
+                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] ${primaryText} tracking-tighter drop-shadow-sm`}>N</span>
+                <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] text-gray-900 dark:text-gray-100 tracking-tighter drop-shadow-sm -ml-0.5">B</span>
               </div>
 
               {/* Text */}
-              <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
+              <span className="font-black text-2xl sm:text-3xl md:text-3xl lg:text-2xl tracking-tight flex items-baseline">
                 <span className={`${primaryText} drop-shadow-sm`}>Near</span>
                 <span className="relative text-gray-900 dark:text-gray-100 drop-shadow-sm">
                   Buy
@@ -176,62 +176,64 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* ── App Mode Toggle (Desktop only) ── */}
-          <div className="hidden md:flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl flex-shrink-0 border border-gray-200 dark:border-[#2A2A3A]/50">
-            <button
-              onClick={() => enableFood ? router.push("/") : setShowEssentialsModal(true)}
-              className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
-                ? `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
-                }`}
-            >
-              <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Food Delivery{!enableFood && " (Soon)"}</span>
-              <span className="sm:hidden">Food</span>
-            </button>
-            <button
-              onClick={() => enableStore ? router.push("/store") : setShowEssentialsModal(true)}
-              className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
-                ? `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
-                : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
-                }`}
-            >
-              <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden sm:block">Essentials{!enableStore && " (Soon)"}</span>
-              <span className="sm:hidden">Store</span>
-            </button>
+          {/* ── Desktop Navigation Group ── */}
+          <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-auto mr-2 lg:mr-4">
+            {/* ── App Mode Toggle ── */}
+            <div className="flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl flex-shrink-0 border border-gray-200 dark:border-[#2A2A3A]/50">
+              <button
+                onClick={() => enableFood ? router.push("/") : setShowEssentialsModal(true)}
+                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
+                  ? `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
+                  }`}
+              >
+                <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:block">Food Delivery{!enableFood && " (Soon)"}</span>
+                <span className="sm:hidden">Food</span>
+              </button>
+              <button
+                onClick={() => enableStore ? router.push("/store") : setShowEssentialsModal(true)}
+                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
+                  ? `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
+                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
+                  }`}
+              >
+                <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+                <span className="hidden sm:block">Essentials{!enableStore && " (Soon)"}</span>
+                <span className="sm:hidden">Store</span>
+              </button>
+            </div>
 
-          </div>
-
-          {/* ── Desktop Quick Links ── */}
-          <div className="hidden md:flex items-center gap-3 ml-6">
-            <Link
-              href={`${baseUrl}/wishlist`}
-              onClick={(e) => {
-                if (!isLoggedIn) {
-                  e.preventDefault();
-                  openLoginModal();
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
-            >
-              <Heart className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span>Wishlist</span>
-            </Link>
-            <button
-              onClick={(e) => {
-                if (!isLoggedIn) {
-                  e.preventDefault();
-                  openLoginModal();
-                } else {
-                  router.push(`${baseUrl}/orders`);
-                }
-              }}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
-            >
-              <ShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-              <span>My Orders</span>
-            </button>
+            {/* ── Desktop Quick Links ── */}
+            <div className="flex items-center gap-3">
+              <Link
+                href={`${baseUrl}/wishlist`}
+                onClick={(e) => {
+                  if (!isLoggedIn) {
+                    e.preventDefault();
+                    openLoginModal();
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
+              >
+                <Heart className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span>Wishlist</span>
+              </Link>
+              <button
+                onClick={(e) => {
+                  if (!isLoggedIn) {
+                    e.preventDefault();
+                    openLoginModal();
+                  } else {
+                    router.push(`${baseUrl}/orders`);
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
+              >
+                <ShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <span>My Orders</span>
+              </button>
+            </div>
           </div>
 
           {/* ── Action Icons ── */}

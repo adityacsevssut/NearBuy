@@ -235,18 +235,12 @@ router.get("/dishes/:category", async (req, res) => {
     
     const { foodPref, lat, lon, pincode, sortOrder } = req.query;
 
-    let whereClause = "WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE";
+    let baseWhereClause = "WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE";
     const queryParams = [req.params.category];
     let paramIndex = 2;
 
-    if (foodPref === 'veg') {
-      whereClause += ` AND m.type = 'veg'`;
-    } else if (foodPref === 'non-veg') {
-      whereClause += ` AND m.type = 'non-veg'`;
-    }
-
     if (lat && lon) {
-      whereClause += ` AND (
+      baseWhereClause += ` AND (
         v.latitude IS NOT NULL AND v.longitude IS NOT NULL AND
         (6371 * acos(
           LEAST(1.0, GREATEST(-1.0,
@@ -259,9 +253,27 @@ router.get("/dishes/:category", async (req, res) => {
       queryParams.push(parseFloat(lat), parseFloat(lon));
       paramIndex += 2;
     } else if (pincode) {
-      whereClause += ` AND v.pincode = $${paramIndex}`;
+      baseWhereClause += ` AND v.pincode = $${paramIndex}`;
       queryParams.push(pincode);
       paramIndex++;
+    }
+
+    // Query available types BEFORE food preference filter is applied
+    const typesQuery = `
+      SELECT DISTINCT m.type
+      FROM vendor_menu_items m
+      JOIN vendor_profiles v ON m.vendor_id = v.user_id
+      ${baseWhereClause}
+    `;
+    const typesResult = await pool.query(typesQuery, queryParams);
+    const availableTypes = typesResult.rows.map(r => r.type);
+
+    let whereClause = baseWhereClause;
+
+    if (foodPref === 'veg') {
+      whereClause += ` AND m.type = 'veg'`;
+    } else if (foodPref === 'non-veg') {
+      whereClause += ` AND m.type = 'non-veg'`;
     }
 
     const countQuery = `
@@ -308,7 +320,8 @@ router.get("/dishes/:category", async (req, res) => {
         page,
         limit,
         totalPages: Math.ceil(total / limit)
-      }
+      },
+      availableTypes
     });
   } catch (err) {
     console.error("GET /api/public/dishes/:category error:", err);
