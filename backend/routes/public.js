@@ -376,11 +376,12 @@ router.get("/hot-deals", async (req, res) => {
       SELECT 
          m.id, m.name, m.price as "discountPrice", m.actual_price as "originalPrice", m.type, m.image_url as image, m.rating,
          v.restaurant_name as "restaurantName", v.user_id as "restaurantId",
-         v.latitude, v.longitude, v.delivery_range as "deliveryRange"
+         v.latitude, v.longitude, v.delivery_range as "deliveryRange",
+         v.is_open as "isOpen"
       FROM vendor_menu_items m
       JOIN vendor_profiles v ON m.vendor_id = v.user_id
       ${whereClause}
-      ORDER BY RANDOM()
+      ORDER BY v.is_open DESC, RANDOM()
       LIMIT 150
     `;
 

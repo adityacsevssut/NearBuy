@@ -114,7 +114,7 @@ export default function DishPage() {
         query.append("pincode", pincode);
       }
 
-      const res = await fetch(`${API}/api/public/dishes/${encodeURIComponent(searchCategory)}?${query.toString()}`);
+      const res = await fetch(`${API}/api/public/dishes/${encodeURIComponent(searchCategory)}?${query.toString()}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         const newDishes = data.dishes || [];
