@@ -64,6 +64,7 @@ export default function DishPage() {
   const { addItem, itemQty } = useCart();
   const [quantities, setQuantities] = useState<Record<number, number>>({});
   const [selectedFood, setSelectedFood] = useState<any>(null);
+  const [availableTypes, setAvailableTypes] = useState<string[]>(['veg', 'non-veg']);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -119,6 +120,9 @@ export default function DishPage() {
         const newDishes = data.dishes || [];
         setHasMore(pageNum < (data.pagination?.totalPages || 1));
         setDishes(prev => isReset ? newDishes : [...prev, ...newDishes]);
+        if (data.availableTypes) {
+          setAvailableTypes(data.availableTypes);
+        }
       }
     } catch (err) {
       console.error("Failed to fetch dishes", err);
@@ -173,7 +177,9 @@ export default function DishPage() {
                         { id: "all", label: "View All" },
                         { id: "veg", label: "Veg Only" },
                         { id: "non-veg", label: "Non Veg Only" },
-                      ].map((pref) => (
+                      ]
+                      .filter(pref => pref.id === "all" || availableTypes.includes(pref.id))
+                      .map((pref) => (
                         <button
                           key={pref.id}
                           onClick={() => { setFoodPref(pref.id as any); setShowFilterDropdown(false); }}

@@ -907,6 +907,12 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                   <option value="Drinks">Drinks</option>
                                   <option value="Chole Bhature">Chole Bhature</option>
                                   <option value="Samosa">Samosa</option>
+                                  <option value="Chicken">Chicken</option>
+                                  <option value="Paneer">Paneer</option>
+                                  <option value="Mutton">Mutton</option>
+                                  <option value="Rice">Rice</option>
+                                  <option value="Roti">Roti</option>
+                                  <option value="Naan">Naan</option>
                                   <option value="Others">Others</option>
                                 </select>
                               </div>
