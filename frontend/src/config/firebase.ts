@@ -2,7 +2,7 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getMessaging, isSupported } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: "nearbuy-d7daf.firebaseapp.com",
   projectId: "nearbuy-d7daf",
   storageBucket: "nearbuy-d7daf.firebasestorage.app",

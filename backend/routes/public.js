@@ -12,8 +12,8 @@ const VENDORS_TTL = 5 * 60 * 1000; // 5 minutes
 // GET /api/public/vendors
 router.get("/vendors", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100); // max 100, min 1
     const offset = (page - 1) * limit;
 
     const { search, foodPref, lat, lon, pincode } = req.query;
@@ -172,7 +172,6 @@ router.get("/vendors/:id", async (req, res) => {
         v.gps_address as "gpsAddress",
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
-        v.owner_number,
         u.manager_type
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
@@ -230,8 +229,8 @@ router.get("/service-centers", async (req, res) => {
 // GET /api/public/dishes/:category
 router.get("/dishes/:category", async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 20;
+    const page = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 20, 1), 100);
     const offset = (page - 1) * limit;
     
     const { foodPref, lat, lon, pincode, sortOrder } = req.query;
@@ -448,8 +447,12 @@ router.get("/settings", async (req, res) => {
 });
 
 // POST /api/public/settings
-router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
+// Update global settings — restricted to managers and admins
+router.post("/settings", authenticate, validate(updateSettingsSchema), async (req, res) => {
   try {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+      return res.status(403).json({ error: "Access denied. Managers and admins only." });
+    }
     const { platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store } = req.body;
     
     await pool.query(`
@@ -495,8 +498,11 @@ router.post("/settings", validate(updateSettingsSchema), async (req, res) => {
 router.post("/feedback", authenticate, async (req, res) => {
   try {
     const { email, message, type } = req.body;
-    if (!message || message.trim() === '') {
+    if (!message || message.trim().length === 0) {
       return res.status(400).json({ error: "Message is required." });
+    }
+    if (message.length > 2000) {
+      return res.status(400).json({ error: "Message must be 2000 characters or less." });
     }
     const feedbackType = type || 'general';
     await pool.query(
@@ -514,8 +520,11 @@ router.post("/feedback", authenticate, async (req, res) => {
 router.post("/support", authenticate, async (req, res) => {
   try {
     const { email, issue, contact_method, contact_number, type } = req.body;
-    if (!issue || issue.trim() === '') {
+    if (!issue || issue.trim().length === 0) {
       return res.status(400).json({ error: "Issue description is required." });
+    }
+    if (issue.length > 2000) {
+      return res.status(400).json({ error: "Issue description must be 2000 characters or less." });
     }
     if (!contact_method || !contact_number) {
       return res.status(400).json({ error: "Contact method and number are required." });
@@ -540,9 +549,22 @@ router.post("/refund", authenticate, async (req, res) => {
     if (!email || !order_id || !user_name) {
       return res.status(400).json({ error: "Email, Order ID, and User Name are required." });
     }
-    
+
+    // Fetch refund amount server-side from the actual order — never trust client-supplied amounts
+    const orderRes = await pool.query(
+      "SELECT total_amount, delivery_charge, platform_fee FROM orders WHERE id = $1 AND user_id = $2",
+      [order_id, req.user.id]
+    );
+    if (!orderRes.rows.length) {
+      return res.status(404).json({ error: "Order not found or does not belong to you." });
+    }
+    const o = orderRes.rows[0];
+    const refundAmount = Math.max(
+      0,
+      Number(o.total_amount) - Number(o.delivery_charge || 0) - Number(o.platform_fee || 0)
+    );
+
     const requestType = type || 'general';
-    const refundAmount = req.body.amount ? Number(req.body.amount) : 0;
     await pool.query(
       `INSERT INTO refund_requests (user_id, email, order_id, user_name, type, amount) VALUES ($1, $2, $3, $4, $5, $6)`,
       [req.user.id, email, order_id, user_name, requestType, refundAmount]

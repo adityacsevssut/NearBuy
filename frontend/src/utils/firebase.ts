@@ -1,9 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 
-// TODO: Replace with your actual Firebase config from Firebase Console
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "",
   authDomain: "nearbuy-d7daf.firebaseapp.com",
   projectId: "nearbuy-d7daf",
   storageBucket: "nearbuy-d7daf.firebasestorage.app",

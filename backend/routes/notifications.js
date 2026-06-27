@@ -74,7 +74,13 @@ router.delete("/:id", authenticate, async (req, res) => {
 router.post("/fcm-token", authenticate, async (req, res) => {
   try {
     const { token, device_type = 'web' } = req.body;
-    if (!token) return res.status(400).json({ error: "Token is required" });
+    if (!token || typeof token !== 'string' || token.length > 500) {
+      return res.status(400).json({ error: "Invalid FCM token." });
+    }
+    const allowedDeviceTypes = ['web', 'android', 'ios'];
+    if (!allowedDeviceTypes.includes(device_type)) {
+      return res.status(400).json({ error: "Invalid device_type. Must be web, android, or ios." });
+    }
 
     await pool.query(
       `INSERT INTO fcm_tokens (user_id, token, device_type)

@@ -7,7 +7,8 @@ const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 const Razorpay = require("razorpay");
 
-const DEV_EMAIL = "nahakaditya344@gmail.com";
+// Developer-only admin email — loaded from env, never hardcoded in source
+const DEV_EMAIL = process.env.DEV_ADMIN_EMAIL;
 
 // Middleware: only allow the developer
 function devOnly(req, res, next) {
@@ -650,6 +651,17 @@ router.get("/vendors/:vendorId/daily-stats", authenticate, async (req, res) => {
     const { vendorId } = req.params;
     const date = req.query.date || new Date().toISOString().split('T')[0];
 
+    // Managers can only view stats for vendors under their own type
+    if (req.user.role === "manager") {
+      const vendorCheck = await pool.query(
+        "SELECT manager_type FROM users WHERE id = $1 AND role = 'vendor'", [vendorId]
+      );
+      if (!vendorCheck.rows.length) return res.status(404).json({ error: "Vendor not found." });
+      const mType = (req.user.manager_type || "").toLowerCase();
+      const vType = (vendorCheck.rows[0].manager_type || "").toLowerCase();
+      if (mType !== vType) return res.status(403).json({ error: "Access denied. Vendor belongs to a different division." });
+    }
+
     const { rows } = await pool.query(
       `SELECT 
         COALESCE(SUM(CASE WHEN (LOWER(payment_method) LIKE '%cash%' OR LOWER(payment_method) = 'cod') AND LOWER(status) != 'cancelled' THEN total_amount ELSE 0 END), 0) as cod_amount,
@@ -682,6 +694,17 @@ router.get("/vendors/:vendorId/orders", authenticate, async (req, res) => {
     const { vendorId } = req.params;
     const date = req.query.date || new Date().toISOString().split('T')[0];
     const status = req.query.status ? req.query.status.toLowerCase() : null;
+
+    // Managers can only view orders for vendors under their own type
+    if (req.user.role === "manager") {
+      const vendorCheck = await pool.query(
+        "SELECT manager_type FROM users WHERE id = $1 AND role = 'vendor'", [vendorId]
+      );
+      if (!vendorCheck.rows.length) return res.status(404).json({ error: "Vendor not found." });
+      const mType = (req.user.manager_type || "").toLowerCase();
+      const vType = (vendorCheck.rows[0].manager_type || "").toLowerCase();
+      if (mType !== vType) return res.status(403).json({ error: "Access denied. Vendor belongs to a different division." });
+    }
 
     let query = `
       SELECT o.id, o.status, o.total_amount, o.payment_method, o.payment_status, o.advance_paid, o.advance_fee, o.adv_refund_processed, u.first_name, u.last_name, o.created_at
@@ -775,6 +798,23 @@ router.patch("/orders/:id/adv-refund", authenticate, async (req, res) => {
 
     if (rows.length === 0) {
       return res.status(404).json({ error: "Order not found." });
+    }
+
+    // Managers can only modify orders for their own vendor type
+    if (req.user.role === "manager") {
+      const vendorQ = await pool.query(
+        "SELECT manager_type FROM users WHERE id = $1", [rows[0].vendor_id]
+      );
+      const mType = (req.user.manager_type || "").toLowerCase();
+      const vType = (vendorQ.rows[0]?.manager_type || "").toLowerCase();
+      if (mType !== vType) {
+        // Rollback the update by restoring original value
+        await pool.query(
+          `UPDATE orders SET adv_refund_processed = $1, updated_at = NOW() WHERE id = $2`,
+          [!adv_refund_processed, id]
+        );
+        return res.status(403).json({ error: "Access denied. Order belongs to a different division." });
+      }
     }
 
     return res.json({ message: "Refund status updated", order: rows[0] });
