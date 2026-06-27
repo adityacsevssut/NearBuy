@@ -291,6 +291,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
 
   const quantity = itemQty(numericId, deal.restaurantId);
   const discountPercent = Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100);
+  const closed = deal.isOpen === false;
 
   const handlePlus = (e: any) => {
     e.preventDefault();
@@ -325,7 +326,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
   };
 
   return (
-    <div className="group flex-shrink-0 w-[140px] h-[200px] relative rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E] cursor-pointer border border-gray-200 dark:border-[#2A2A3A]">
+    <div className={`group flex-shrink-0 w-[140px] h-[200px] relative rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E] cursor-pointer border border-gray-200 dark:border-[#2A2A3A] ${closed ? "opacity-60" : ""}`}>
       {/* Background Image */}
       {deal.image ? (
         <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover z-0" />
@@ -343,9 +344,19 @@ function DealCard({ deal, onConfirmNeeded }: any) {
         {discountPercent}% OFF
       </div>
 
+      {/* Closed Overlay */}
+      {closed && (
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 pointer-events-none">
+          <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+            Closed Now
+          </span>
+        </div>
+      )}
+
       {/* Add Button (Top Right) */}
-      <div className="absolute top-2 right-2 z-30">
-        {quantity === 0 ? (
+      {!closed && (
+        <div className="absolute top-2 right-2 z-30">
+          {quantity === 0 ? (
           <button
             onClick={handlePlus}
             className="w-7 h-7 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 active:scale-95 transition-all"
@@ -370,6 +381,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
           </div>
         )}
       </div>
+      )}
 
       {/* Content Container (Bottom) */}
       <div className="absolute bottom-0 left-0 w-full p-2 flex flex-col justify-end z-20">
