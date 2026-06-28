@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -282,7 +282,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
   const { items, addItem, updateQty, itemQty } = useCart();
 
   // Create a numeric ID from string for CartContext
-  const numericId = parseInt(deal.id.toString().replace(/[^0-9]/g, '')) || Math.floor(Math.random() * 1000);
+  const [numericId] = useState(() => parseInt(deal.id.toString().replace(/[^0-9]/g, '')) || Math.floor(Math.random() * 1000));
 
   // Determine if item is veg based on backend data (type, veg flag, or name)
   const isVeg = deal.type ? deal.type.toLowerCase() === 'veg' :

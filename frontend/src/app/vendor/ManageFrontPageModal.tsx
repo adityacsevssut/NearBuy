@@ -47,12 +47,6 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
   // Theme accents
   const tColor = vendorType === "store" ? "blue" : "orange";
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchProfile();
-    }
-  }, [isOpen]);
-
   const fetchProfile = async () => {
     try {
       setIsLoading(true);
@@ -89,6 +83,13 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchProfile();
+    }
+  }, [isOpen]);
+
 
   // We removed handleDelete, hasProfile, isDeleting state parameters, so we can clean it up.
 

@@ -210,16 +210,6 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // ── On open: check if vendor has a Front Page profile ────────────────────
-  useEffect(() => {
-    if (!isOpen) return;
-    setStep("checking");
-    setItems([]);
-    setShowForm(false);
-    setEditingItem(null);
-    checkProfile();
-  }, [isOpen]);
-
   const checkProfile = async () => {
     try {
       const res = await fetch(`${API}/api/vendor-profile`, {
@@ -276,6 +266,17 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
       setLoadingItems(false);
     }
   };
+
+  // ── On open: check if vendor has a Front Page profile ────────────────────
+  useEffect(() => {
+    if (!isOpen) return;
+    setStep("checking");
+    setItems([]);
+    setShowForm(false);
+    setEditingItem(null);
+    checkProfile();
+  }, [isOpen]);
+
 
   const fetchItems = async () => {
     setLoadingItems(true);

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import html2canvas from "html2canvas";
@@ -83,12 +83,6 @@ function OrdersPageContent() {
     }
   }, [mounted, isLoggedIn, router]);
 
-  useEffect(() => {
-    if (isLoggedIn && accessToken) {
-      fetchOrders();
-    }
-  }, [isLoggedIn, accessToken]);
-
   const fetchOrders = async (pageNum = 1) => {
     if (pageNum === 1) setIsLoading(true);
     else setLoadingMore(true);
@@ -116,6 +110,13 @@ function OrdersPageContent() {
   };
 
   useEffect(() => {
+    if (isLoggedIn && accessToken) {
+      fetchOrders();
+    }
+  }, [isLoggedIn, accessToken]);
+
+
+  useEffect(() => {
     if (isLoading || loadingMore || !hasMore) return;
     const observer = new IntersectionObserver(
       entries => {
@@ -134,7 +135,7 @@ function OrdersPageContent() {
     return () => {
       if (observerRef.current) observerRef.current.disconnect();
     };
-  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
+  }, [isLoading, loadingMore, hasMore]);
 
   useEffect(() => {
     if (orderToDownload) {
@@ -182,6 +183,8 @@ function OrdersPageContent() {
     }
   };
 
+  const [now] = useState(() => Date.now());
+
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   const displayedOrders = orders.filter((order) => {
@@ -189,7 +192,7 @@ function OrdersPageContent() {
     
     // Calculate if it has been 1 hour since update
     const lastUpdate = new Date(order.updated_at || order.created_at).getTime();
-    const isOlderThanOneHour = (Date.now() - lastUpdate) > 60 * 60 * 1000;
+    const isOlderThanOneHour = (now - lastUpdate) > 60 * 60 * 1000;
     
     const shouldBeInHistory = isDeliveredOrCancelled && isOlderThanOneHour;
 

@@ -122,7 +122,7 @@ export default function VendorOrdersPage() {
     return () => {
       if (observerRef.current) observerRef.current.disconnect();
     };
-  }, [isLoading, loadingMore, hasMore, lastElementRef.current]);
+  }, [isLoading, loadingMore, hasMore]);
 
   const updateOrderStatus = async (orderId: string, newStatus: string) => {
     setStatusLoading(true);

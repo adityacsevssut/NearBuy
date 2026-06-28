@@ -965,10 +965,10 @@ export default function PartnerDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col md:flex-row-reverse">
-      <ManagerSidebar />
+      {ManagerSidebar()}
       <div className="flex-1 flex flex-col min-w-0">
         <div>
-          <ManagerNavbar />
+          {ManagerNavbar()}
         </div>
         <main className="flex-1 w-full px-4 sm:px-8 py-8 max-w-5xl mx-auto">
         

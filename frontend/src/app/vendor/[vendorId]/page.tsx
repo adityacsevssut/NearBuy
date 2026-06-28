@@ -28,7 +28,7 @@ function VendorPageSkeleton() {
           </div>
         </div>
       </div>
-      
+
       {/* Menu Skeleton */}
       <div className="max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 space-y-6">
         <div className="h-6 w-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-full mb-4"></div>
@@ -700,7 +700,7 @@ export default function VendorPage() {
                         if (navigator.share) await navigator.share({ title: 'NearBuy', text: `Check out ${selectedFood.name}`, url: shareUrl });
                         else { await navigator.clipboard.writeText(shareUrl); alert("Link copied!"); }
                       }
-                    } catch (err) {}
+                    } catch (err) { }
                   }}
                   className="w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors shadow-sm"
                 >
