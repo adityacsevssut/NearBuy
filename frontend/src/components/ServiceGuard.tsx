@@ -52,11 +52,6 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   const bypassedPaths = ["/dev", "/manager", "/vendor", "/account", "/food/wishlist", "/food/orders", "/food/cart", "/wishlist", "/orders", "/cart"];
   const isBypassed = bypassedPaths.some(path => pathname?.startsWith(path));
 
-  useEffect(() => {
-    if (isBypassed) return;
-    fetchCenters();
-  }, [isBypassed]);
-
   async function fetchCenters() {
     try {
       const res = await fetch(`${API}/api/public/service-centers`, { cache: 'no-store' });
@@ -70,6 +65,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (isBypassed) return;
+    fetchCenters();
+  }, [isBypassed]);
+
 
   useEffect(() => {
     if (isBypassed || loading) return;

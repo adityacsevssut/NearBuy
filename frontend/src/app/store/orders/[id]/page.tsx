@@ -90,12 +90,6 @@ export default function OrderStatusPage() {
     }
   }, [mounted, isLoggedIn, router]);
 
-  useEffect(() => {
-    if (isLoggedIn && accessToken && id) {
-      fetchOrderDetails();
-    }
-  }, [isLoggedIn, accessToken, id]);
-
   const fetchOrderDetails = async () => {
     setIsLoading(true);
     try {
@@ -116,6 +110,13 @@ export default function OrderStatusPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoggedIn && accessToken && id) {
+      fetchOrderDetails();
+    }
+  }, [isLoggedIn, accessToken, id]);
+
 
   const handleCancelOrder = () => {
     toast((t) => (
