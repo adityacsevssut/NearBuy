@@ -154,8 +154,8 @@ function SectionHeader({
   return (
     <div className="flex items-center justify-between mb-3 px-4">
       <h2 className={`text-[17px] font-black tracking-tight drop-shadow-sm ${title.includes('Hot Deals') || title.includes('Popular')
-          ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400'
-          : 'text-gray-900 dark:text-gray-100'
+        ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400'
+        : 'text-gray-900 dark:text-gray-100'
         }`}>
         {title}
       </h2>
@@ -357,30 +357,30 @@ function DealCard({ deal, onConfirmNeeded }: any) {
       {!closed && (
         <div className="absolute top-2 right-2 z-30">
           {quantity === 0 ? (
-          <button
-            onClick={handlePlus}
-            className="w-7 h-7 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 active:scale-95 transition-all"
-          >
-            <span className="text-xl leading-none font-light mb-0.5">+</span>
-          </button>
-        ) : (
-          <div className="flex items-center bg-white dark:bg-[#151522] rounded-full shadow-lg border border-orange-200 dark:border-orange-500/30 overflow-hidden h-7">
-            <button
-              onClick={handleMinus}
-              className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
-            >
-              −
-            </button>
-            <span className="text-[10px] font-black text-gray-800 dark:text-gray-100 w-3 text-center">{quantity}</span>
             <button
               onClick={handlePlus}
-              className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
+              className="w-7 h-7 bg-white dark:bg-[#151522] text-orange-500 dark:text-orange-400 rounded-full flex items-center justify-center shadow-lg border border-orange-100 dark:border-orange-500/30 active:scale-95 transition-all"
             >
-              +
+              <span className="text-xl leading-none font-light mb-0.5">+</span>
             </button>
-          </div>
-        )}
-      </div>
+          ) : (
+            <div className="flex items-center bg-white dark:bg-[#151522] rounded-full shadow-lg border border-orange-200 dark:border-orange-500/30 overflow-hidden h-7">
+              <button
+                onClick={handleMinus}
+                className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
+              >
+                −
+              </button>
+              <span className="text-[10px] font-black text-gray-800 dark:text-gray-100 w-3 text-center">{quantity}</span>
+              <button
+                onClick={handlePlus}
+                className="w-6 h-full flex items-center justify-center text-orange-600 dark:text-orange-400 hover:bg-orange-50 font-bold text-sm"
+              >
+                +
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Content Container (Bottom) */}
@@ -599,6 +599,32 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           )}
         </div>
       </div>
+
+      {/* Matched Items */}
+      {r.matched_items && r.matched_items.length > 0 && (
+        <div className="bg-white dark:bg-[#151522] border-t border-gray-100 dark:border-[#2A2A3A] p-2.5 flex flex-col gap-2">
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Available items matching search</p>
+          <div className="flex flex-col gap-1.5">
+            {r.matched_items.map((item: any) => (
+              <div key={item.id} className="flex items-center gap-2 bg-gray-50 dark:bg-[#0D0D17] rounded-lg p-1.5 border border-gray-100 dark:border-[#2A2A3A]">
+                {item.image ? (
+                  <div className="w-8 h-8 rounded-md overflow-hidden shrink-0 relative bg-gray-200 dark:bg-[#1F1F2E]">
+                    <Image src={item.image} alt={item.name} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-md shrink-0 bg-orange-50 dark:bg-orange-900/20 flex items-center justify-center">
+                    <Utensils className="w-3.5 h-3.5 text-orange-300" />
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200 truncate">{item.name}</p>
+                  <p className="text-[10px] font-black text-orange-500">₹{item.price}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </Link>
   );
 }
@@ -706,6 +732,7 @@ export default function HomePage() {
   const [isDeals130LoadingMore, setIsDeals130LoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useRef<HTMLDivElement | null>(null);
+  const requestRef = useRef(0);
 
   const [posters, setPosters] = useState<any[]>(cachedState.posters);
   const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
@@ -778,7 +805,6 @@ export default function HomePage() {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(searchQuery);
-      cachedState.searchQuery = searchQuery;
     }, 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
@@ -872,9 +898,11 @@ export default function HomePage() {
     }
   }
 
-  async function fetchRestaurants(pageNum = 1, isReset = false) {
+  async function fetchRestaurants(pageNum = 1, isReset = false, searchTerm = debouncedSearch) {
     if (pageNum === 1) setIsLoading(true);
     else setLoadingMore(true);
+
+    const requestId = ++requestRef.current;
 
     try {
       const API = (
@@ -884,7 +912,7 @@ export default function HomePage() {
         page: pageNum.toString(),
         limit: "10",
       });
-      if (debouncedSearch) query.append("search", debouncedSearch);
+      if (searchTerm) query.append("search", searchTerm);
       if (foodPref !== "all") query.append("foodPref", foodPref);
       if (latitude && longitude) {
         query.append("lat", latitude.toString());
@@ -896,9 +924,12 @@ export default function HomePage() {
       const res = await fetch(`${API}/api/public/vendors?${query.toString()}`);
       if (res.ok) {
         const result = await res.json();
+
+        if (requestId !== requestRef.current) return;
+
         let data = result.data || [];
         const more = pageNum < (result.pagination?.totalPages || 1);
-        
+
         setHasMore(more);
         cachedState.hasMore = more;
         cachedState.page = pageNum;
@@ -912,8 +943,10 @@ export default function HomePage() {
     } catch {
       /* silent */
     } finally {
-      setIsLoading(false);
-      setLoadingMore(false);
+      if (requestId === requestRef.current) {
+        setIsLoading(false);
+        setLoadingMore(false);
+      }
     }
   }
 
@@ -1011,24 +1044,22 @@ export default function HomePage() {
  ROW 1 — Search bar + Filter (full width)
  ───────────────────────────────────────────────────────────── */}
             <div className="w-full flex items-center gap-3 pt-2 pb-4">
-              <div className="flex-1 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 dark:focus-within:border-orange-500 shadow-sm focus-within:shadow-md transition-all duration-300">
+              <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 dark:focus-within:border-orange-500 shadow-sm focus-within:shadow-md transition-all duration-300">
                 <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
                 <input
                   suppressHydrationWarning
                   type="text"
                   placeholder="Search Restaurants..."
-                  className="flex-1 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 font-medium"
+                  className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 font-medium"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className="w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2"
-                  >
-                    <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                  </button>
-                )}
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                >
+                  <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                </button>
               </div>
 
               {/* Filter */}
@@ -1147,7 +1178,7 @@ export default function HomePage() {
                     </Link>
                   </motion.div>
                 ))}
-                
+
                 {/* See All Button */}
                 {quickBites.length > 8 && (
                   <motion.div
@@ -1382,7 +1413,7 @@ export default function HomePage() {
                 {popular.map((r) => (
                   <PopCard key={r.id} r={r} {...cp} />
                 ))}
-                
+
                 {/* Skeletons while loading */}
                 {(isPopularLoading || loadingMore) && (
                   <>
@@ -1410,12 +1441,12 @@ export default function HomePage() {
                     }}
                     className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
                   >
-                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                       <ChevronRight className="w-8 h-8 text-orange-500" />
-                     </div>
-                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
-                       See All
-                     </span>
+                    <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                      See All
+                    </span>
                   </button>
                 )}
               </div>
@@ -1439,14 +1470,14 @@ export default function HomePage() {
                   : filteredDeals60.slice(0, deals60Limit).map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
-                  
+
                 {!isHotDealsLoading && (isDeals60LoadingMore) && (
                   <>
                     <DealCardSkeleton />
                     <DealCardSkeleton />
                   </>
                 )}
-                  
+
                 {!isHotDealsLoading && !isDeals60LoadingMore && deals60Limit < filteredDeals60.length && (
                   <button
                     onClick={() => {
@@ -1458,12 +1489,12 @@ export default function HomePage() {
                     }}
                     className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
                   >
-                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                       <ChevronRight className="w-8 h-8 text-orange-500" />
-                     </div>
-                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
-                       See All
-                     </span>
+                    <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                      See All
+                    </span>
                   </button>
                 )}
               </div>
@@ -1483,14 +1514,14 @@ export default function HomePage() {
                   : filteredDeals130.slice(0, deals130Limit).map((deal) => (
                     <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
-                  
+
                 {!isHotDealsLoading && (isDeals130LoadingMore) && (
                   <>
                     <DealCardSkeleton />
                     <DealCardSkeleton />
                   </>
                 )}
-                  
+
                 {!isHotDealsLoading && !isDeals130LoadingMore && deals130Limit < filteredDeals130.length && (
                   <button
                     onClick={() => {
@@ -1502,12 +1533,12 @@ export default function HomePage() {
                     }}
                     className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
                   >
-                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                       <ChevronRight className="w-8 h-8 text-orange-500" />
-                     </div>
-                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
-                       See All
-                     </span>
+                    <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                      See All
+                    </span>
                   </button>
                 )}
               </div>
@@ -1586,7 +1617,7 @@ export default function HomePage() {
               </div>
             ) : filtered.length === 0 ? (
               <div className="mx-4 flex flex-col items-center py-20 bg-gray-50 dark:bg-[#151522] rounded-3xl border border-gray-100 dark:border-[#2A2A3A]">
-                <span className="text-5xl mb-4">🍽️</span>
+                <span className="text-5xl mb-4 float-anim inline-block">🍽️</span>
                 <p className="font-bold text-gray-700 dark:text-gray-300 text-lg">
                   No restaurants found
                 </p>
@@ -1610,29 +1641,29 @@ export default function HomePage() {
             {/* Load More Button */}
             {hasMore && filtered.length > 0 && (
               <div className="w-full flex justify-center mt-10 mb-6">
-                  <button
-                    onClick={() => {
-                      if (hasMore && !loadingMore) {
-                        setPage((prev) => {
-                          const next = prev + 1;
-                          fetchRestaurants(next, false);
-                          return next;
-                        });
-                      }
-                    }}
-                    className="flex flex-col items-center justify-center gap-2 group outline-none"
-                  >
-                     <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                       {loadingMore ? (
-                         <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-                       ) : (
-                         <ChevronDown className="w-8 h-8 text-orange-500" />
-                       )}
-                     </div>
-                     <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
-                       {loadingMore ? "Loading..." : "Load More"}
-                     </span>
-                  </button>
+                <button
+                  onClick={() => {
+                    if (hasMore && !loadingMore) {
+                      setPage((prev) => {
+                        const next = prev + 1;
+                        fetchRestaurants(next, false);
+                        return next;
+                      });
+                    }
+                  }}
+                  className="flex flex-col items-center justify-center gap-2 group outline-none"
+                >
+                  <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    {loadingMore ? (
+                      <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+                    ) : (
+                      <ChevronDown className="w-8 h-8 text-orange-500" />
+                    )}
+                  </div>
+                  <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                    {loadingMore ? "Loading..." : "Load More"}
+                  </span>
+                </button>
               </div>
             )}
           </section>
