@@ -39,7 +39,14 @@ router.get("/vendors", async (req, res) => {
 
     // Search filter
     if (search) {
-      whereClause += ` AND (v.restaurant_name ILIKE $${paramIndex} OR v.cuisine ILIKE $${paramIndex})`;
+      whereClause += ` AND (
+        v.restaurant_name ILIKE $${paramIndex} 
+        OR v.cuisine ILIKE $${paramIndex}
+        OR EXISTS (
+          SELECT 1 FROM vendor_menu_items m 
+          WHERE m.vendor_id = v.user_id AND (m.name ILIKE $${paramIndex} OR m.category ILIKE $${paramIndex})
+        )
+      )`;
       queryParams.push(`%${search}%`);
       paramIndex++;
     }
@@ -111,6 +118,15 @@ router.get("/vendors", async (req, res) => {
         u.manager_type,
         u.first_name,
         u.last_name
+        ${search ? `, (
+          SELECT json_agg(json_build_object('id', m.id, 'name', m.name, 'price', m.price, 'image', m.image_url))
+          FROM (
+            SELECT id, name, price, image_url
+            FROM vendor_menu_items
+            WHERE vendor_id = v.user_id AND (name ILIKE $1 OR category ILIKE $1)
+            LIMIT 2
+          ) m
+        ) as matched_items` : ""}
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
       ${whereClause}
