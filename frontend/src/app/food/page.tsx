@@ -1168,7 +1168,7 @@ export default function HomePage() {
                       href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
-                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
+                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-200 dark:bg-[#1F1F2E] animate-pulse shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
                         <Image src={image} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 dark:hidden" />
                         <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
                       </div>
@@ -1320,7 +1320,7 @@ export default function HomePage() {
                   onClick={() => setIsQuickBitesDrawerOpen(false)}
                   className="flex flex-col items-center gap-2 group outline-none"
                 >
-                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
+                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-200 dark:bg-[#1F1F2E] animate-pulse shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
                     <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-cover transition-transform duration-500 group-hover:scale-110 dark:hidden" />
                     <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-cover transition-transform duration-500 group-hover:scale-110 dark:block" />
                   </div>
