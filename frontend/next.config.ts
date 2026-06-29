@@ -67,7 +67,7 @@ const config = {
     ];
   },
   images: {
-    unoptimized: true,
+    minimumCacheTTL: 604800, // Cache optimized images for 1 week
     remotePatterns: [
       {
         protocol: "https",

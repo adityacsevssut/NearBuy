@@ -5,9 +5,9 @@ const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
 const { authenticate } = require("../middleware/auth");
 
-// In-memory cache for Vendors
-let vendorsCache = {};
-const VENDORS_TTL = 5 * 60 * 1000; // 5 minutes
+// Redis cache integration
+const redis = require("../config/redis");
+const VENDORS_TTL = 300; // 5 minutes in seconds
 
 // GET /api/public/vendors
 router.get("/vendors", async (req, res) => {
@@ -28,9 +28,18 @@ router.get("/vendors", async (req, res) => {
     // Generate a unique cache key based on all filter parameters
     const cacheKey = `${page}_${limit}_${search||''}_${foodPref||''}_${cacheLat}_${cacheLon}_${pincode||''}`;
 
-    // Return from in-memory cache if valid
-    if (vendorsCache[cacheKey] && vendorsCache[cacheKey].expiry > Date.now()) {
-      return res.json(vendorsCache[cacheKey].data);
+    // Return from Redis cache if valid
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          // Upstash redis automatically parses JSON if possible, but just in case:
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json(data);
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
     }
 
     let whereClause = "WHERE v.is_active = TRUE AND u.is_active = TRUE AND u.role = 'vendor'";
@@ -154,10 +163,13 @@ router.get("/vendors", async (req, res) => {
     };
 
     // Update cache
-    vendorsCache[cacheKey] = {
-      data: responseData,
-      expiry: Date.now() + VENDORS_TTL
-    };
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, VENDORS_TTL, JSON.stringify(responseData));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
 
     return res.json(responseData);
   } catch (err) {
@@ -169,6 +181,19 @@ router.get("/vendors", async (req, res) => {
 // GET /api/public/vendors/:id
 router.get("/vendors/:id", async (req, res) => {
   try {
+    const cacheKey = `vendor_${req.params.id}`;
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json(data);
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
+    }
+
     const { rows } = await pool.query(`
       SELECT 
         v.user_id as id,
@@ -203,6 +228,14 @@ router.get("/vendors/:id", async (req, res) => {
       reviews: 120
     };
 
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, VENDORS_TTL, JSON.stringify(vendor));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
+
     return res.json(vendor);
   } catch (err) {
     console.error("GET /api/public/vendors/:id error:", err);
@@ -213,6 +246,19 @@ router.get("/vendors/:id", async (req, res) => {
 // GET /api/public/vendors/:id/menu  →  public menu items for a vendor
 router.get("/vendors/:id/menu", async (req, res) => {
   try {
+    const cacheKey = `vendor_menu_${req.params.id}`;
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json(data);
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
+    }
+
     const { rows } = await pool.query(
       `SELECT id, category, name, description, price, actual_price, type, badge, image_url, is_available, sort_order, rating, prep_time, reviews
        FROM vendor_menu_items
@@ -220,8 +266,17 @@ router.get("/vendors/:id/menu", async (req, res) => {
        ORDER BY category, sort_order, created_at`,
       [req.params.id]
     );
+    const responseData = { items: rows };
     
-    return res.json({ items: rows });
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, VENDORS_TTL, JSON.stringify(responseData));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
+    
+    return res.json(responseData);
   } catch (err) {
     console.error("GET /api/public/vendors/:id/menu error:", err);
     return res.status(500).json({ error: "Failed to load menu" });
@@ -250,6 +305,19 @@ router.get("/dishes/:category", async (req, res) => {
     const offset = (page - 1) * limit;
     
     const { foodPref, lat, lon, pincode, sortOrder } = req.query;
+
+    const cacheKey = `dishes_${req.params.category}_${page}_${limit}_${foodPref||''}_${lat||''}_${lon||''}_${pincode||''}_${sortOrder||''}`;
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json(data);
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
+    }
 
     let baseWhereClause = "WHERE m.front_page_category ILIKE $1 AND m.is_available = TRUE AND v.is_active = TRUE";
     const queryParams = [req.params.category];
@@ -329,7 +397,7 @@ router.get("/dishes/:category", async (req, res) => {
       emoji: r.image_url ? "" : "🍽️", // Fallback emoji if no image
     }));
 
-    return res.json({ 
+    const responseData = { 
       dishes: formatted,
       pagination: {
         total,
@@ -338,7 +406,17 @@ router.get("/dishes/:category", async (req, res) => {
         totalPages: Math.ceil(total / limit)
       },
       availableTypes
-    });
+    };
+
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, VENDORS_TTL, JSON.stringify(responseData));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
+
+    return res.json(responseData);
   } catch (err) {
     console.error("GET /api/public/dishes/:category error:", err);
     return res.status(500).json({ error: "Failed to load dishes" });
@@ -360,9 +438,17 @@ router.get("/hot-deals", async (req, res) => {
     // Generate a cache key based on location
     const cacheKey = `${lat || 'default'}_${lon || 'default'}_${pincode || 'default'}`;
 
-    // Return from in-memory cache if valid
-    if (hotDealsCache[cacheKey] && hotDealsCache[cacheKey].expiry > Date.now()) {
-      return res.json(hotDealsCache[cacheKey].data);
+    // Return from Redis cache if valid
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json(data);
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
     }
 
     let whereClause = "WHERE m.price <= 130 AND m.price > 0 AND m.is_available = TRUE AND v.is_active = TRUE";
@@ -419,10 +505,13 @@ router.get("/hot-deals", async (req, res) => {
     const resultData = { under60, under130 };
 
     // Update cache
-    hotDealsCache[cacheKey] = {
-      data: resultData,
-      expiry: Date.now() + HOT_DEALS_TTL
-    };
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, VENDORS_TTL, JSON.stringify(resultData));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
 
     return res.json(resultData);
   } catch (err) {

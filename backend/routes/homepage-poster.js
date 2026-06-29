@@ -15,9 +15,9 @@ const upload = multer({
   limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
 });
 
-// In-memory cache for posters to improve performance
-let postersCache = {};
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+// Redis cache integration
+const redis = require("../config/redis");
+const CACHE_TTL = 300; // 5 minutes in seconds
 
 // ── GET /api/homepage-poster?type=food|store  (public) ───────────────
 router.get("/", async (req, res) => {
@@ -27,9 +27,19 @@ router.get("/", async (req, res) => {
     // Set Cache-Control header so the browser/CDN caches the response for 5 minutes
     res.set("Cache-Control", "public, max-age=300");
 
-    // Return from in-memory cache if valid
-    if (postersCache[type] && postersCache[type].expiry > Date.now()) {
-      return res.json({ posters: postersCache[type].data });
+    const cacheKey = `posters_${type}`;
+
+    // Return from Redis cache if valid
+    if (redis) {
+      try {
+        const cachedData = await redis.get(cacheKey);
+        if (cachedData) {
+          const data = typeof cachedData === 'string' ? JSON.parse(cachedData) : cachedData;
+          return res.json({ posters: data });
+        }
+      } catch (err) {
+        console.error("Redis get error:", err.message);
+      }
     }
 
     const { rows } = await pool.query(
@@ -38,10 +48,13 @@ router.get("/", async (req, res) => {
     );
     
     // Update cache
-    postersCache[type] = {
-      data: rows,
-      expiry: Date.now() + CACHE_TTL
-    };
+    if (redis) {
+      try {
+        await redis.setex(cacheKey, CACHE_TTL, JSON.stringify(rows));
+      } catch (err) {
+        console.error("Redis set error:", err.message);
+      }
+    }
 
     // Even if no rows exist, return empty array
     return res.json({ posters: rows });
@@ -133,7 +146,13 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
     }
 
     // Clear cache to reflect updates
-    postersCache = {};
+    if (redis) {
+      try {
+        await redis.del(`posters_${managerType}`);
+      } catch (err) {
+        console.error("Redis del error:", err.message);
+      }
+    }
 
     return res.json({
       message: "Poster updated successfully!",
@@ -164,7 +183,13 @@ router.delete("/:id", authenticate, async (req, res) => {
     }
 
     // Clear cache to reflect updates
-    postersCache = {};
+    if (redis) {
+      try {
+        await redis.del(`posters_${managerType}`);
+      } catch (err) {
+        console.error("Redis del error:", err.message);
+      }
+    }
 
     return res.json({ message: "Poster deleted successfully!" });
   } catch (err) {
