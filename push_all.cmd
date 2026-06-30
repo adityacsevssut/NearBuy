@@ -3,7 +3,7 @@ set CURRENT_BRANCH=capacitor-mobile-app
 
 echo Committing on %CURRENT_BRANCH%...
 git add .
-git commit -m "Refine hero layout, extract promo content, and update image sizing"
+git commit -m "UI updates: Refine hero gradient, fix navbar scrolling transitions, add typewriter animation to promo text, and update branding colors"
 git push origin %CURRENT_BRANCH%
 
 echo Merging into developer...
