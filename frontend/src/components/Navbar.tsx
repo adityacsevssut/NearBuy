@@ -133,7 +133,7 @@ export default function Navbar() {
     : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400";
 
   const isHeroTransparent = false; // Disabled for light background
-  const isHeroMatching = isFood && !isScrolled;
+  const isHeroMatching = isFood && !isScrolled && pathname === '/food' && !mobileMenuOpen;
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -161,11 +161,11 @@ export default function Navbar() {
               id="hamburger-btn"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               aria-label="Open menu"
-              className={`flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl border shadow-sm transition-all duration-300 active:scale-95 group ${isHeroTransparent ? 'bg-white/10 border-white/20' : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A]/60'}`}
+              className={`flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl border shadow-sm transition-all duration-300 active:scale-95 group ${isHeroTransparent ? 'bg-white/10 border-white/20' : isHeroMatching ? 'bg-orange-400/20 border-orange-400/50 hover:bg-orange-400/40' : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A]/60'}`}
             >
               {mobileMenuOpen
-                ? <X className={`w-6 h-6 group-hover:rotate-90 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`} />
-                : <Menu className={`w-6 h-6 group-hover:scale-110 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`} />
+                ? <X className={`w-6 h-6 group-hover:rotate-90 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : isHeroMatching ? 'text-gray-900' : 'text-gray-700 dark:text-gray-300'}`} />
+                : <Menu className={`w-6 h-6 group-hover:scale-110 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : isHeroMatching ? 'text-gray-900' : 'text-gray-700 dark:text-gray-300'}`} />
               }
             </button>
           </div>
