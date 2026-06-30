@@ -132,7 +132,7 @@ export default function Navbar() {
     ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"
     : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400";
 
-  const isHeroTransparent = false; // Disabled for light background
+  const isHeroTransparent = isFood && !isScrolled && pathname === '/food' && !mobileMenuOpen;
   const isHeroMatching = isFood && !isScrolled && pathname === '/food' && !mobileMenuOpen;
 
   const suggestions = [
@@ -152,7 +152,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isHeroMatching ? 'bg-orange-300 dark:bg-[#0D0D17]' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95 shadow-sm'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95 shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -176,16 +176,16 @@ export default function Navbar() {
 
               {/* Simple NB Logo */}
               <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm ${isHeroTransparent ? 'text-white' : logoGradient}`}>N</span>
-                <span className={`relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm -ml-0.5 text-gray-900 dark:text-gray-100`}>B</span>
+                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm ${logoGradient}`}>N</span>
+                <span className={`relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm -ml-0.5 ${isHeroTransparent ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>B</span>
               </div>
 
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-3xl lg:text-2xl tracking-tight flex items-baseline">
-                <span className={`drop-shadow-sm ${isHeroTransparent ? 'text-white' : logoGradient}`}>Near</span>
-                <span className={`relative drop-shadow-sm text-gray-900 dark:text-gray-100`}>
+                <span className={`drop-shadow-sm ${logoGradient}`}>Near</span>
+                <span className={`relative drop-shadow-sm ${isHeroTransparent ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
                   Buy
-                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${isHeroTransparent ? 'text-[#ffcb05]' : primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
                     <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
                   </svg>
                 </span>

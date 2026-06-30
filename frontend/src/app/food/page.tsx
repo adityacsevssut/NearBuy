@@ -745,6 +745,54 @@ function PromoImages() {
   );
 }
 
+function SequentialTypewriter({ line1, line2 }: { line1: string, line2: string }) {
+  const [text1, setText1] = useState("");
+  const [text2, setText2] = useState("");
+  const [typing1, setTyping1] = useState(true);
+  const [typing2, setTyping2] = useState(false);
+
+  useEffect(() => {
+    let i = 0;
+    const interval = setInterval(() => {
+      setText1(line1.slice(0, i + 1));
+      i++;
+      if (i >= line1.length) {
+        clearInterval(interval);
+        setTyping1(false);
+        setTimeout(() => setTyping2(true), 400); // 400ms pause between lines
+      }
+    }, 120);
+    return () => clearInterval(interval);
+  }, [line1]);
+
+  useEffect(() => {
+    if (!typing2) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      setText2(line2.slice(0, i + 1));
+      i++;
+      if (i >= line2.length) {
+        clearInterval(interval);
+        setTyping2(false);
+      }
+    }, 120);
+    return () => clearInterval(interval);
+  }, [line2, typing2]);
+
+  return (
+    <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
+      <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-red-600 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10 drop-shadow-sm" style={{ fontWeight: 900, WebkitTextStroke: "1px red" }}>
+        {text1}<span className={`font-light transition-opacity duration-300 ${typing1 ? 'opacity-100 animate-pulse' : 'opacity-0 hidden'}`}>|</span>
+      </span>
+      <div className="relative z-20 origin-left mt-2.5 min-h-[30px]">
+        <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-red-600 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block drop-shadow-sm" style={{ fontWeight: 900, WebkitTextStroke: "1px red" }}>
+          {text2}{text2.length > 0 && <span className={`font-light transition-opacity duration-300 ${typing2 ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>|</span>}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
   useEffect(() => {
     document.title = "Home Food Essential";
@@ -1056,15 +1104,22 @@ export default function HomePage() {
 
 
         {/* ══ HERO SECTION (Location, Search, Promo) ════════════════════════════ */}
-        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-orange-300 dark:bg-[#0D0D17] shadow-sm mb-4 pt-[68px] pb-3">
+        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-gradient-to-br from-[#0D0D17] via-[#1A1A2E] to-[#0D0D17] shadow-sm mb-[10px] pt-[68px] pb-3">
 
 
 
           {/* decorative wave blob */}
-          <div className="absolute -right-10 -bottom-10 w-[240px] h-[160px] pointer-events-none opacity-90">
+          <div className="absolute -right-10 -bottom-10 w-[240px] h-[160px] pointer-events-none opacity-90 z-0">
             <svg viewBox="0 0 240 160" preserveAspectRatio="none" className="w-full h-full">
               <path d="M240,160 L240,40 C200,10 150,60 110,90 C70,120 30,100 0,160 Z" fill="#ea580c" opacity="0.1"/>
             </svg>
+          </div>
+
+          {/* Animated background blobs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+            <div className="absolute top-[-50%] left-[-20%] w-[70%] h-[150%] bg-white/30 dark:bg-white/5 blur-[90px] rounded-full mix-blend-overlay animate-[spin_25s_linear_infinite]" />
+            <div className="absolute bottom-[-50%] right-[-20%] w-[80%] h-[120%] bg-orange-600/20 dark:bg-orange-600/10 blur-[100px] rounded-full mix-blend-overlay animate-[spin_30s_linear_infinite_reverse]" />
+            <div className="absolute top-[10%] left-[30%] w-[40%] h-[80%] bg-yellow-300/30 dark:bg-yellow-300/10 blur-[70px] rounded-full mix-blend-overlay animate-[pulse_8s_ease-in-out_infinite]" />
           </div>
 
           <div className="relative z-10">
@@ -1074,25 +1129,14 @@ export default function HomePage() {
             <div className="max-w-7xl mx-auto px-6 mt-6 relative">
               <div className="flex items-center justify-between relative min-h-[160px]">
                 <div className="w-[calc(100%-170px)] md:w-[calc(100%-280px)] relative z-20">
-                  <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
-                    <span className="uppercase italic font-extrabold text-[20px] text-red-600 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10">
-                      GET FOOD AT
-                    </span>
-                    <motion.div 
-                      animate={{ scale: [1, 1.05, 1] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                      className="relative z-20 origin-left mt-2.5"
-                    >
-                      <span className="uppercase italic font-black text-[18px] text-red-600 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block">
-                        LOWEST PRICE
-                      </span>
-                    </motion.div>
-                  </div>
-                  <p className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 mb-4 font-medium">
-                    Get Upto <b className="text-orange-600 font-extrabold">30-40% off</b><br />on your first order
+                  <SequentialTypewriter line1="GET FOOD AT" line2="LOWEST PRICE" />
+                  <p className="text-[15px] leading-relaxed text-gray-300 mb-4 font-medium">
+                    Get Upto <b className="text-orange-500 font-extrabold">30-40% off</b><br />on your first order
                   </p>
-                  <button className="bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-600/30 hover:-translate-y-1 hover:scale-105 active:scale-95">
-                    ORDER NOW
+                  <button className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">
+                      ORDER NOW
+                    </span>
                   </button>
                 </div>
                 <PromoImages />
@@ -1102,7 +1146,7 @@ export default function HomePage() {
         </div>
 
         {/* Moved Location & Search */}
-        <div className="pt-2 pb-0 z-40 relative bg-gray-50 dark:bg-[#0D0D17]">
+        <div className="pt-0 pb-0 z-40 relative bg-gray-50 dark:bg-[#0D0D17]">
                 {/* ══ LOCATION ════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-4 pb-1">
               <div className="w-full">
