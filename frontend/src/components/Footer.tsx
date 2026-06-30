@@ -19,6 +19,9 @@ export default function Footer() {
   const accentColor = isStore ? "text-blue-600" : "text-orange-500";
   const hoverColor = isStore ? "hover:text-blue-600" : "hover:text-orange-600";
   const bgHover = isStore ? "hover:bg-blue-50" : "hover:bg-orange-50";
+  const logoGradient = isStore
+    ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"
+    : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400";
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<"student" | "vendor">("vendor");
@@ -71,12 +74,12 @@ export default function Footer() {
 
                 {/* Simple NB Logo */}
                 <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${accentColor} tracking-tighter drop-shadow-sm`}>N</span>
+                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${logoGradient} tracking-tighter drop-shadow-sm`}>N</span>
                   <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black dark:text-white tracking-tighter drop-shadow-sm -ml-0.5">B</span>
                 </div>
 
                 <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
-                  <span className={`${accentColor} drop-shadow-sm`}>Near</span>
+                  <span className={`${logoGradient} drop-shadow-sm`}>Near</span>
                   <span className="relative text-black dark:text-white drop-shadow-sm">
                     Buy
                     <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${accentColor}`} viewBox="0 0 100 20" preserveAspectRatio="none">
@@ -145,7 +148,7 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
             {/* Copyright */}
             <div className="text-[12px] text-gray-400 font-medium text-center">
-              Copyright {new Date().getFullYear()} © <span className={accentColor}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br />
+              Copyright {new Date().getFullYear()} © <span className={logoGradient}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br />
               Platform by Students Of VSSUT Burla
             </div>
           </div>
