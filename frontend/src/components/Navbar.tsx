@@ -40,6 +40,17 @@ export default function Navbar() {
   const [enableFood, setEnableFood] = useState(true);
   const [enableStore, setEnableStore] = useState(true); // Force enabled for this branch
 
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    // Initial check
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     async function fetchSettings() {
       try {
@@ -118,6 +129,9 @@ export default function Navbar() {
   const primaryText = theme.textPrimary;
   const primaryBg = isStore ? "bg-blue-500" : "bg-orange-500";
 
+  const isHeroTransparent = false; // Disabled for light background
+  const isHeroMatching = isFood && !isScrolled;
+
   const suggestions = [
     "🍛 Biryani near VSSUT",
     "📄 Lab Manual printing",
@@ -135,7 +149,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 backdrop-blur-md bg-white dark:bg-[#0D0D17]`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isHeroMatching ? 'bg-orange-50 dark:bg-[#0D0D17]' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95 shadow-sm'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -144,11 +158,11 @@ export default function Navbar() {
               id="hamburger-btn"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A]/60 shadow-sm transition-all duration-300 active:scale-95 group"
+              className={`flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl border shadow-sm transition-all duration-300 active:scale-95 group ${isHeroTransparent ? 'bg-white/10 border-white/20' : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A]/60'}`}
             >
               {mobileMenuOpen
-                ? <X className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:rotate-90 transition-transform duration-300" />
-                : <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:scale-110 transition-transform duration-300" />
+                ? <X className={`w-6 h-6 group-hover:rotate-90 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`} />
+                : <Menu className={`w-6 h-6 group-hover:scale-110 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`} />
               }
             </button>
           </div>
@@ -159,16 +173,16 @@ export default function Navbar() {
 
               {/* Simple NB Logo */}
               <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] ${primaryText} tracking-tighter drop-shadow-sm`}>N</span>
-                <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] text-gray-900 dark:text-gray-100 tracking-tighter drop-shadow-sm -ml-0.5">B</span>
+                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm ${isHeroTransparent ? 'text-white' : primaryText}`}>N</span>
+                <span className={`relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm -ml-0.5 text-gray-900 dark:text-gray-100`}>B</span>
               </div>
 
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-3xl lg:text-2xl tracking-tight flex items-baseline">
-                <span className={`${primaryText} drop-shadow-sm`}>Near</span>
-                <span className="relative text-gray-900 dark:text-gray-100 drop-shadow-sm">
+                <span className={`drop-shadow-sm ${isHeroTransparent ? 'text-white' : primaryText}`}>Near</span>
+                <span className={`relative drop-shadow-sm text-gray-900 dark:text-gray-100`}>
                   Buy
-                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
+                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${isHeroTransparent ? 'text-[#ffcb05]' : primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
                     <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
                   </svg>
                 </span>
@@ -179,12 +193,12 @@ export default function Navbar() {
           {/* ── Desktop Navigation Group ── */}
           <div className="hidden md:flex items-center gap-4 lg:gap-6 ml-auto mr-2 lg:mr-4">
             {/* ── App Mode Toggle ── */}
-            <div className="flex bg-gray-100 dark:bg-[#1F1F2E] p-1 rounded-xl flex-shrink-0 border border-gray-200 dark:border-[#2A2A3A]/50">
+            <div className={`flex p-1 rounded-xl flex-shrink-0 border ${isHeroTransparent ? 'bg-black/20 border-white/20' : 'bg-gray-100 dark:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/50'}`}>
               <button
                 onClick={() => enableFood ? router.push("/") : setShowEssentialsModal(true)}
                 className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
-                  ? `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
+                  ? isHeroTransparent ? `bg-white/20 text-white shadow-sm` : `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
+                  : isHeroTransparent ? "text-white/70 hover:text-white hover:bg-white/10" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                   }`}
               >
                 <Store className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -194,8 +208,8 @@ export default function Navbar() {
               <button
                 onClick={() => enableStore ? router.push("/store") : setShowEssentialsModal(true)}
                 className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
-                  ? `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
-                  : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
+                  ? isHeroTransparent ? `bg-white/20 text-white shadow-sm` : `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
+                  : isHeroTransparent ? "text-white/70 hover:text-white hover:bg-white/10" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                   }`}
               >
                 <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
@@ -214,9 +228,9 @@ export default function Navbar() {
                     openLoginModal();
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
               >
-                <Heart className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <Heart className={`w-4 h-4 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
                 <span>Wishlist</span>
               </Link>
               <button
@@ -228,9 +242,9 @@ export default function Navbar() {
                     router.push(`${baseUrl}/orders`);
                   }
                 }}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300 transition-all text-sm font-bold shadow-sm active:scale-95 duration-200"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
               >
-                <ShoppingBag className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                <ShoppingBag className={`w-4 h-4 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
                 <span>My Orders</span>
               </button>
             </div>
@@ -251,7 +265,7 @@ export default function Navbar() {
               }}
               className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group hidden md:flex"
             >
-              <ShoppingCart className="w-[22px] h-[22px] text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 transition-colors" />
+              <ShoppingCart className={`w-[22px] h-[22px] transition-colors ${isHeroTransparent ? 'text-white hover:text-gray-200' : 'text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100'}`} />
               {cartCount > 0 && (
                 <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full
                 ${primaryBg} text-white text-[10px] font-black flex items-center justify-center shadow-sm`}>
@@ -268,7 +282,7 @@ export default function Navbar() {
                 aria-label="Notifications"
                 className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group"
               >
-                <Bell className="w-[22px] h-[22px] text-gray-800 dark:text-gray-200 group-hover:text-black dark:text-white transition-colors fill-current" />
+                <Bell className={`w-[22px] h-[22px] transition-colors fill-current ${isHeroTransparent ? 'text-white hover:text-gray-200' : 'text-gray-800 dark:text-gray-200 group-hover:text-black dark:text-white'}`} />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-sm">
                     {unreadCount}
@@ -364,12 +378,12 @@ export default function Navbar() {
                     router.push(`/account${themeQuery}`);
                   }
                 }}
-                className="hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522] transition-all duration-200 group"
+                className={`hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border transition-all duration-200 group ${isHeroTransparent ? 'border-white/20 hover:border-white/40 hover:bg-white/10' : 'border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]'}`}
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center bg-gray-100 dark:bg-[#1F1F2E] group-hover:bg-gray-200 transition-colors`}>
-                  <UserIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${isHeroTransparent ? 'bg-white/20 group-hover:bg-white/30' : 'bg-gray-100 dark:bg-[#1F1F2E] group-hover:bg-gray-200'}`}>
+                  <UserIcon className={`w-4 h-4 ${isHeroTransparent ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`} />
                 </div>
-                <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Account</span>
+                <span className={`text-sm font-bold ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>Account</span>
               </button>
             ) : (
               <button
