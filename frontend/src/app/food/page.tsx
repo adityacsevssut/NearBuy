@@ -1074,14 +1074,14 @@ export default function HomePage() {
             <div className="max-w-7xl mx-auto px-6 mt-6 relative">
               <div className="flex items-center justify-between relative min-h-[160px]">
                 <div className="w-[calc(100%-170px)] md:w-[calc(100%-280px)] relative z-20">
-                  <div className="flex flex-col mb-2.5 float-anim w-max group cursor-default relative">
+                  <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
                     <span className="uppercase italic font-extrabold text-[20px] text-red-600 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10">
                       GET FOOD AT
                     </span>
                     <motion.div 
                       animate={{ scale: [1, 1.05, 1] }}
                       transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-                      className="relative z-20 origin-left mt-1"
+                      className="relative z-20 origin-left mt-2.5"
                     >
                       <span className="uppercase italic font-black text-[18px] text-red-600 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block">
                         LOWEST PRICE
