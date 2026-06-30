@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Star,
@@ -697,6 +697,54 @@ let cachedState = {
   hotDealsLoaded: false
 };
 
+function PromoImages() {
+  const [index, setIndex] = useState(0);
+  const items = [
+    { img: "promo_pizza", name: "Hot Pizza" },
+    { img: "promo_burger", name: "Juicy Burger" },
+    { img: "promo_biryani", name: "Chicken Biryani" },
+    { img: "promo_roll", name: "Kathi Roll" },
+    { img: "promo_momo", name: "Steamed Momos" },
+    { img: "promo_sandwich", name: "Club Sandwich" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex(prev => (prev + 1) % items.length);
+    }, 4000); // 4 seconds loop
+    return () => clearInterval(interval);
+  }, [items.length]);
+
+  return (
+    <div className="absolute -right-4 md:-right-4 top-1/2 -translate-y-1/2 w-[170px] h-[220px] md:w-[300px] md:h-[380px] pointer-events-none flex items-center justify-center z-10">
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, scale: 0.6, y: 30, rotate: -10 }}
+          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+          exit={{ opacity: 0, scale: 0.8, y: -30, rotate: 10 }}
+          transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
+          className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
+        >
+          {/* Item Name Pop-up */}
+          <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-600 dark:text-orange-400 z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
+            {items[index].name}
+          </div>
+          {/* Transparent Theme-Agnostic Image */}
+          <Image 
+            src={`/${items[index].img}_transparent.png`} 
+            alt={items[index].name} 
+            fill 
+            className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
+            sizes="(max-width: 768px) 180px, 320px"
+            priority
+          />
+        </motion.div>
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function HomePage() {
   useEffect(() => {
     document.title = "Home Food Essential";
@@ -1008,7 +1056,7 @@ export default function HomePage() {
 
 
         {/* ══ HERO SECTION (Location, Search, Promo) ════════════════════════════ */}
-        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-orange-50 dark:bg-[#0D0D17] shadow-sm mb-4 pt-[68px] pb-3">
+        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-orange-300 dark:bg-[#0D0D17] shadow-sm mb-4 pt-[68px] pb-3">
 
 
 
@@ -1020,7 +1068,42 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10">
-            {/* ══ LOCATION ════════════════════════════ */}
+
+
+            {/* ══ PROMO CONTENT ════════════════════════════ */}
+            <div className="max-w-7xl mx-auto px-6 mt-6 relative">
+              <div className="flex items-center justify-between relative min-h-[160px]">
+                <div className="w-[calc(100%-170px)] md:w-[calc(100%-280px)] relative z-20">
+                  <div className="flex flex-col mb-2.5 float-anim w-max group cursor-default relative">
+                    <span className="uppercase italic font-extrabold text-[20px] text-red-600 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10">
+                      GET FOOD AT
+                    </span>
+                    <motion.div 
+                      animate={{ scale: [1, 1.05, 1] }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                      className="relative z-20 origin-left mt-1"
+                    >
+                      <span className="uppercase italic font-black text-[18px] text-red-600 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block">
+                        LOWEST PRICE
+                      </span>
+                    </motion.div>
+                  </div>
+                  <p className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 mb-4 font-medium">
+                    Get Upto <b className="text-orange-600 font-extrabold">30-40% off</b><br />on your first order
+                  </p>
+                  <button className="bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-600/30 hover:-translate-y-1 hover:scale-105 active:scale-95">
+                    ORDER NOW
+                  </button>
+                </div>
+                <PromoImages />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Moved Location & Search */}
+        <div className="pt-2 pb-0 z-40 relative bg-gray-50 dark:bg-[#0D0D17]">
+                {/* ══ LOCATION ════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-4 pb-1">
               <div className="w-full">
                 <button
@@ -1161,22 +1244,8 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-
-            {/* ══ PROMO CONTENT ════════════════════════════ */}
-            <div className="max-w-7xl mx-auto px-6 mt-6">
-              <div className="flex flex-col mb-2.5 float-anim w-max">
-                <span className="font-extrabold text-[26px] text-orange-600 tracking-wider leading-none font-[Poppins]">Get Food At</span>
-                <span className="font-black text-[30px] text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400 tracking-wide leading-tight mt-1 font-[Poppins] drop-shadow-sm">Lowest Price</span>
-              </div>
-              <p className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 mb-4 font-medium">
-                Get Upto <b className="text-orange-600 font-extrabold">30-40% off</b><br />on your first order
-              </p>
-              <button className="bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-600/30 hover:-translate-y-1 hover:scale-105 active:scale-95">
-                ORDER NOW
-              </button>
-            </div>
-          </div>
         </div>
+
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
             <section className="pt-2 pb-2 relative z-10">
