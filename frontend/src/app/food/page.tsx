@@ -716,32 +716,39 @@ function PromoImages() {
   }, [items.length]);
 
   return (
-    <div className="absolute -right-4 md:-right-4 top-1/2 -translate-y-1/2 w-[170px] h-[220px] md:w-[300px] md:h-[380px] pointer-events-none flex items-center justify-center z-10">
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={index}
-          initial={{ opacity: 0, scale: 0.6, y: 30, rotate: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
-          exit={{ opacity: 0, scale: 0.8, y: -30, rotate: 10 }}
-          transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
-          className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
-        >
-          {/* Item Name Pop-up */}
-          <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-600 dark:text-orange-400 z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
-            {items[index].name}
-          </div>
-          {/* Transparent Theme-Agnostic Image */}
-          <Image 
-            src={`/${items[index].img}_transparent.png`} 
-            alt={items[index].name} 
-            fill 
-            className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
-            sizes="(max-width: 768px) 180px, 320px"
-            priority
-          />
-        </motion.div>
-      </AnimatePresence>
-    </div>
+    <>
+      <div className="hidden">
+        {items.map((item, i) => (
+          <Image key={i} src={`/${item.img}_transparent.png`} alt="preload" width={10} height={10} priority />
+        ))}
+      </div>
+      <div className="absolute -right-4 md:-right-4 top-1/2 -translate-y-1/2 w-[170px] h-[220px] md:w-[300px] md:h-[380px] pointer-events-none flex items-center justify-center z-10">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0.6, y: 30, rotate: -10 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -30, rotate: 10 }}
+            transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
+            className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
+          >
+            {/* Item Name Pop-up */}
+            <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-600 dark:text-orange-400 z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
+              {items[index].name}
+            </div>
+            {/* Transparent Theme-Agnostic Image */}
+            <Image 
+              src={`/${items[index].img}_transparent.png`} 
+              alt={items[index].name} 
+              fill 
+              className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
+              sizes="(max-width: 768px) 180px, 320px"
+              priority
+            />
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </>
   );
 }
 
@@ -781,12 +788,12 @@ function SequentialTypewriter({ line1, line2 }: { line1: string, line2: string }
 
   return (
     <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
-      <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-red-600 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10 drop-shadow-sm" style={{ fontWeight: 900, WebkitTextStroke: "1px red" }}>
-        {text1}<span className={`font-light transition-opacity duration-300 ${typing1 ? 'opacity-100 animate-pulse' : 'opacity-0 hidden'}`}>|</span>
+      <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10 drop-shadow-sm" style={{ fontWeight: 900 }}>
+        {text1}<span className={`font-light text-yellow-500 transition-opacity duration-300 ${typing1 ? 'opacity-100 animate-pulse' : 'opacity-0 hidden'}`}>|</span>
       </span>
       <div className="relative z-20 origin-left mt-2.5 min-h-[30px]">
-        <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-red-600 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block drop-shadow-sm" style={{ fontWeight: 900, WebkitTextStroke: "1px red" }}>
-          {text2}{text2.length > 0 && <span className={`font-light transition-opacity duration-300 ${typing2 ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>|</span>}
+        <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block drop-shadow-sm" style={{ fontWeight: 900 }}>
+          {text2}{text2.length > 0 && <span className={`font-light text-yellow-500 transition-opacity duration-300 ${typing2 ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>|</span>}
         </span>
       </div>
     </div>
@@ -1104,7 +1111,7 @@ export default function HomePage() {
 
 
         {/* ══ HERO SECTION (Location, Search, Promo) ════════════════════════════ */}
-        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-gradient-to-br from-[#0D0D17] via-[#1A1A2E] to-[#0D0D17] shadow-sm mb-[10px] pt-[68px] pb-3">
+        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black shadow-sm mb-[10px] pt-[68px] pb-3">
 
 
 
@@ -1117,9 +1124,9 @@ export default function HomePage() {
 
           {/* Animated background blobs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-            <div className="absolute top-[-50%] left-[-20%] w-[70%] h-[150%] bg-white/30 dark:bg-white/5 blur-[90px] rounded-full mix-blend-overlay animate-[spin_25s_linear_infinite]" />
-            <div className="absolute bottom-[-50%] right-[-20%] w-[80%] h-[120%] bg-orange-600/20 dark:bg-orange-600/10 blur-[100px] rounded-full mix-blend-overlay animate-[spin_30s_linear_infinite_reverse]" />
-            <div className="absolute top-[10%] left-[30%] w-[40%] h-[80%] bg-yellow-300/30 dark:bg-yellow-300/10 blur-[70px] rounded-full mix-blend-overlay animate-[pulse_8s_ease-in-out_infinite]" />
+            <div className="absolute top-[-50%] left-[-20%] w-[70%] h-[150%] bg-white/5 blur-[90px] rounded-full mix-blend-overlay animate-[spin_25s_linear_infinite]" />
+            <div className="absolute bottom-[-50%] right-[-20%] w-[80%] h-[120%] bg-orange-600/10 blur-[100px] rounded-full mix-blend-overlay animate-[spin_30s_linear_infinite_reverse]" />
+            <div className="absolute top-[10%] left-[30%] w-[40%] h-[80%] bg-yellow-600/10 dark:bg-yellow-600/5 blur-[70px] rounded-full mix-blend-overlay animate-[pulse_8s_ease-in-out_infinite]" />
           </div>
 
           <div className="relative z-10">
@@ -1131,9 +1138,9 @@ export default function HomePage() {
                 <div className="w-[calc(100%-170px)] md:w-[calc(100%-280px)] relative z-20">
                   <SequentialTypewriter line1="GET FOOD AT" line2="LOWEST PRICE" />
                   <p className="text-[15px] leading-relaxed text-gray-300 mb-4 font-medium">
-                    Get Upto <b className="text-orange-500 font-extrabold">30-40% off</b><br />on your first order
+                    Get Upto <b className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 dark:from-red-500 dark:to-orange-400 font-extrabold">30-40% off</b><br />on your first order
                   </p>
-                  <button className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95">
+                  <button className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">
                       ORDER NOW
                     </span>

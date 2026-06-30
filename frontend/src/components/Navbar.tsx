@@ -185,9 +185,7 @@ export default function Navbar() {
                 <span className={`drop-shadow-sm ${logoGradient}`}>Near</span>
                 <span className={`relative drop-shadow-sm ${isHeroTransparent ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>
                   Buy
-                  <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${primaryText}`} viewBox="0 0 100 20" preserveAspectRatio="none">
-                    <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
-                  </svg>
+                  <div className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${isStore ? "bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300" : "bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}`} style={{ WebkitMaskImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 20' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z' fill='black'/%3E%3C/svg%3E\")", WebkitMaskSize: "100% 100%", WebkitMaskRepeat: "no-repeat", maskImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 100 20' preserveAspectRatio='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z' fill='black'/%3E%3C/svg%3E\")", maskSize: "100% 100%", maskRepeat: "no-repeat" }}></div>
                 </span>
               </span>
             </Link>
