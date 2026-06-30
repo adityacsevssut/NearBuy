@@ -23,6 +23,9 @@ import {
   UtensilsCrossed,
   ChevronRight,
 } from "lucide-react";
+import { Caveat } from "next/font/google";
+
+const caveat = Caveat({ subsets: ["latin"] });
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
@@ -996,7 +999,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-0">
       <Navbar />
 
       <main className="flex-1 pb-8 md:pb-6 relative">
@@ -1004,155 +1007,176 @@ export default function HomePage() {
 
 
 
-        {/* ══ LOCATION (SCROLLS AWAY) ════════════════════════════ */}
-        <div className="max-w-7xl mx-auto px-4 pt-4 pb-3">
-          <div className="w-full">
-            <button
-              suppressHydrationWarning
-              onClick={() => setIsLocationModalOpen(true)}
-              className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#151522] rounded-2xl border border-transparent hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 shadow-sm hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] active:scale-[0.99]"
-            >
-              <div className="w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
-                <MapPin className="w-4 h-4 text-orange-500" />
-              </div>
-              {/* Location name + chevron */}
-              <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
-                <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
-                  Deliver to
-                </span>
-                <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
-                  <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                    {landmark ? `${landmark}, ${locationName}` : locationName}
-                  </span>
-                  <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
-                </span>
-              </div>
-              {/* Pincode pushed to far right */}
-              {pincode && (
-                <span className="ml-auto shrink-0 text-[12px] font-black text-orange-600 bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
-                  📍 {pincode}
-                </span>
-              )}
-            </button>
+        {/* ══ HERO SECTION (Location, Search, Promo) ════════════════════════════ */}
+        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-orange-50 dark:bg-[#0D0D17] shadow-sm mb-4 pt-[68px] pb-3">
+
+
+
+          {/* decorative wave blob */}
+          <div className="absolute -right-10 -bottom-10 w-[240px] h-[160px] pointer-events-none opacity-90">
+            <svg viewBox="0 0 240 160" preserveAspectRatio="none" className="w-full h-full">
+              <path d="M240,160 L240,40 C200,10 150,60 110,90 C70,120 30,100 0,160 Z" fill="#ea580c" opacity="0.1"/>
+            </svg>
           </div>
-        </div>
 
-        {/* ══ STICKY TOP BAR (Search + Categories) ════════════════════════════ */}
-        <div className="sticky top-16 z-40 bg-white/90 dark:bg-[#0D0D17]/90 backdrop-blur-xl z-[45]">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0">
-            {/* ─────────────────────────────────────────────────────────────
- ROW 1 — Search bar + Filter (full width)
- ───────────────────────────────────────────────────────────── */}
-            <div className="w-full flex items-center gap-3 pt-2 pb-4">
-              <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 dark:focus-within:border-orange-500 shadow-sm focus-within:shadow-md transition-all duration-300">
-                <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
-                <input
+          <div className="relative z-10">
+            {/* ══ LOCATION ════════════════════════════ */}
+            <div className="max-w-7xl mx-auto px-4 pb-1">
+              <div className="w-full">
+                <button
                   suppressHydrationWarning
-                  type="text"
-                  placeholder="Search Restaurants..."
-                  className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 dark:placeholder:text-gray-500 font-medium"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                  onClick={() => setIsLocationModalOpen(true)}
+                  className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#151522] rounded-2xl border border-transparent hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 shadow-sm active:scale-[0.99]"
                 >
-                  <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                </button>
-              </div>
-
-              {/* Filter */}
-              <div className="relative shrink-0">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || foodPref !== "all"
-                    ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
-                    : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] hover:text-orange-600"
-                    }`}
-                >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filter</span>
-                  {foodPref !== "all" && (
-                    <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
+                  <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
+                    <MapPin className="w-4 h-4 text-orange-500" />
+                  </div>
+                  <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
+                    <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
+                      Deliver to
+                    </span>
+                    <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
+                      <span className="truncate max-w-[120px] sm:max-w-[200px]">
+                        {landmark ? `${landmark}, ${locationName}` : locationName}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
+                    </span>
+                  </div>
+                  {pincode && (
+                    <span className="ml-auto shrink-0 text-[12px] font-black text-orange-600 bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+                      📍 {pincode}
+                    </span>
                   )}
                 </button>
-
-                {/* Desktop dropdown */}
-                {showFilters && (
-                  <div className="hidden md:block absolute right-0 top-full mt-2 z-[80] w-52 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden">
-                    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A]">
-                      <Utensils className="w-4 h-4 text-orange-500" />
-                      <p className="font-black text-sm text-gray-900 dark:text-gray-100">
-                        Dietary Preference
-                      </p>
-                    </div>
-                    <div className="p-2 space-y-1">
-                      {(
-                        [
-                          "all",
-                          "veg",
-                          "non-veg",
-                          "avail-all",
-                          "avail-veg",
-                          "avail-non-veg",
-                        ] as const
-                      ).map((p) => {
-                        const active = foodPref === p;
-                        const label =
-                          p === "all"
-                            ? "View All"
-                            : p === "veg"
-                              ? "Pure Veg"
-                              : p === "non-veg"
-                                ? "Non-Veg Only"
-                                : p === "avail-all"
-                                  ? "Available (ALL)"
-                                  : p === "avail-veg"
-                                    ? "Available Veg"
-                                    : "Available Non-Veg";
-                        const activeBg =
-                          p === "all" || p === "avail-all"
-                            ? "bg-orange-500"
-                            : p === "veg" || p === "avail-veg"
-                              ? "bg-green-600"
-                              : "bg-red-600";
-                        return (
-                          <button
-                            key={p}
-                            onClick={() => {
-                              setFoodPref(p);
-                              setShowFilters(false);
-                            }}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
-                              ? `${activeBg} text-white`
-                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
-                              }`}
-                          >
-                            <span>{label}</span>
-                            {/* Pill toggle */}
-                            <div
-                              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
-                                ? "bg-black/20 dark:bg-black/40"
-                                : "bg-gray-200"
-                                }`}
-                            >
-                              <span
-                                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
-                                  ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                                  : "translate-x-0 bg-gray-400"
-                                  }`}
-                              />
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
+
+            {/* ══ SEARCH ════════════════════════════ */}
+            <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
+              <div className="w-full flex items-center gap-3 pt-1 pb-1">
+                <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300">
+                  <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
+                  <input
+                    suppressHydrationWarning
+                    type="text"
+                    placeholder="Search Restaurants..."
+                    className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 font-medium"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                  >
+                    <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                  </button>
+                </div>
+
+                <div className="relative shrink-0">
+                  <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || foodPref !== "all"
+                      ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
+                      : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-transparent hover:bg-gray-50 dark:hover:bg-[#0D0D17] hover:border-orange-300 transition-all duration-300 hover:text-orange-600"
+                      }`}
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    <span className="hidden sm:inline">Filter</span>
+                    {foodPref !== "all" && (
+                      <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
+                    )}
+                  </button>
+                  {/* Desktop dropdown */}
+                  {showFilters && (
+                    <div className="hidden md:block absolute right-0 top-full mt-2 z-[80] w-52 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden">
+                      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A]">
+                        <Utensils className="w-4 h-4 text-orange-500" />
+                        <p className="font-black text-sm text-gray-900 dark:text-gray-100">
+                          Dietary Preference
+                        </p>
+                      </div>
+                      <div className="p-2 space-y-1">
+                        {(
+                          [
+                            "all",
+                            "veg",
+                            "non-veg",
+                            "avail-all",
+                            "avail-veg",
+                            "avail-non-veg",
+                          ] as const
+                        ).map((p) => {
+                          const active = foodPref === p;
+                          const label =
+                            p === "all"
+                              ? "View All"
+                              : p === "veg"
+                                ? "Pure Veg"
+                                : p === "non-veg"
+                                  ? "Non-Veg Only"
+                                  : p === "avail-all"
+                                    ? "Available (ALL)"
+                                    : p === "avail-veg"
+                                      ? "Available Veg"
+                                      : "Available Non-Veg";
+                          const activeBg =
+                            p === "all" || p === "avail-all"
+                              ? "bg-orange-500"
+                              : p === "veg" || p === "avail-veg"
+                                ? "bg-green-600"
+                                : "bg-red-600";
+                          return (
+                            <button
+                              key={p}
+                              onClick={() => {
+                                setFoodPref(p);
+                                setShowFilters(false);
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
+                                ? `${activeBg} text-white`
+                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
+                                }`}
+                            >
+                              <span>{label}</span>
+                              {/* Pill toggle */}
+                              <div
+                                className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
+                                  ? "bg-black/20 dark:bg-black/40"
+                                  : "bg-gray-200"
+                                  }`}
+                              >
+                                <span
+                                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
+                                    ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
+                                    : "translate-x-0 bg-gray-400"
+                                    }`}
+                                />
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ══ PROMO CONTENT ════════════════════════════ */}
+            <div className="max-w-7xl mx-auto px-6 mt-6">
+              <div className="flex flex-col mb-2.5 float-anim w-max">
+                <span className="font-extrabold text-[26px] text-orange-600 tracking-wider leading-none font-[Poppins]">Get Food At</span>
+                <span className="font-black text-[30px] text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400 tracking-wide leading-tight mt-1 font-[Poppins] drop-shadow-sm">Lowest Price</span>
+              </div>
+              <p className="text-[15px] leading-relaxed text-gray-700 dark:text-gray-300 mb-4 font-medium">
+                Get Upto <b className="text-orange-600 font-extrabold">30-40% off</b><br />on your first order
+              </p>
+              <button className="bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-[13px] tracking-wide px-6 py-2.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-600/30 hover:-translate-y-1 hover:scale-105 active:scale-95">
+                ORDER NOW
+              </button>
+            </div>
           </div>
+        </div>
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
             <section className="pt-2 pb-2 relative z-10">
@@ -1168,7 +1192,7 @@ export default function HomePage() {
                       href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
-                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-200 dark:bg-[#1F1F2E] animate-pulse shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
+                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
                         <Image src={image} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 dark:hidden" />
                         <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
                       </div>
@@ -1202,7 +1226,6 @@ export default function HomePage() {
               </div>
             </section>
           </div>
-        </div>
 
         {/* Mobile filter drawer */}
         {showFilters && (
@@ -1320,7 +1343,7 @@ export default function HomePage() {
                   onClick={() => setIsQuickBitesDrawerOpen(false)}
                   className="flex flex-col items-center gap-2 group outline-none"
                 >
-                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-200 dark:bg-[#1F1F2E] animate-pulse shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
+                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
                     <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-cover transition-transform duration-500 group-hover:scale-110 dark:hidden" />
                     <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-cover transition-transform duration-500 group-hover:scale-110 dark:block" />
                   </div>
@@ -1336,61 +1359,6 @@ export default function HomePage() {
         {/* ══ PAGE CONTENT ════════════════════════════════════════════════════ */}
         <div className="max-w-7xl mx-auto">
 
-
-          {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
-          <section className="w-full pt-0 pb-2 relative px-[2px] md:px-0">
-            {posterLoading ? (
-              <div className="w-full aspect-[2/1] md:aspect-[21/9] relative rounded-2xl md:rounded-3xl overflow-hidden bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex items-center justify-center isolate">
-
-                {/* Central Placeholder Content */}
-                <div className="flex flex-col items-center justify-center gap-3 md:gap-4 z-10">
-                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-[1rem] bg-gray-200 dark:bg-[#1F1F2E] flex items-center justify-center shadow-sm animate-pulse">
-                    <Utensils className="w-6 h-6 md:w-8 md:h-8 text-gray-400 dark:text-gray-500" />
-                  </div>
-                  <div className="flex flex-col items-center gap-2 md:gap-2.5">
-                    <div className="h-2.5 md:h-3 w-32 md:w-48 bg-gray-200 dark:bg-[#1F1F2E] rounded-full animate-pulse" />
-                    <div className="h-2 md:h-2.5 w-20 md:w-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-full animate-pulse" />
-                  </div>
-                </div>
-
-                {/* Abstract glowing blobs for premium aesthetic */}
-                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
-                <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-400/20 dark:bg-rose-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-              </div>
-            ) : posters.length > 0 ? (
-              <div className="relative group overflow-hidden rounded-2xl md:rounded-3xl bg-transparent">
-                <div
-                  ref={carouselRef}
-                  onScroll={handleCarouselScroll}
-                  onTouchStart={handleCarouselScroll}
-                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full"
-                >
-                  {posters.map((poster, index) => (
-                    <div key={poster.id || index} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
-                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
-                    </div>
-                  ))}
-                </div>
-                {/* Dots indicator */}
-                {posters.length > 1 && (
-                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
-                    {posters.map((_, i) => (
-                      <span
-                        key={i}
-                        className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activePosterIndex ? "bg-white scale-125 shadow-sm" : "bg-white/50"}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="block relative w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl md:rounded-3xl overflow-hidden group bg-transparent">
-                <Image src="/1000242984.png" alt="NearBuy Special Offer" fill priority={true} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" fill priority={true} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
-              </div>
-            )}
-          </section>
 
           {/* ── 3. Popular Near You ─────────────────────────────────────────── */}
           <section className="py-3">
@@ -1500,6 +1468,61 @@ export default function HomePage() {
               </div>
             </section>
           )}
+
+          {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
+          <section className="w-full pt-0 pb-4 relative px-[2px] md:px-0">
+            {posterLoading ? (
+              <div className="w-full aspect-[2/1] md:aspect-[21/9] relative rounded-2xl md:rounded-3xl overflow-hidden bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] shadow-sm flex items-center justify-center isolate">
+
+                {/* Central Placeholder Content */}
+                <div className="flex flex-col items-center justify-center gap-3 md:gap-4 z-10">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-[1rem] bg-gray-200 dark:bg-[#1F1F2E] flex items-center justify-center shadow-sm animate-pulse">
+                    <Utensils className="w-6 h-6 md:w-8 md:h-8 text-gray-400 dark:text-gray-500" />
+                  </div>
+                  <div className="flex flex-col items-center gap-2 md:gap-2.5">
+                    <div className="h-2.5 md:h-3 w-32 md:w-48 bg-gray-200 dark:bg-[#1F1F2E] rounded-full animate-pulse" />
+                    <div className="h-2 md:h-2.5 w-20 md:w-32 bg-gray-200 dark:bg-[#1F1F2E] rounded-full animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Abstract glowing blobs for premium aesthetic */}
+                <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-orange-400/20 dark:bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
+                <div className="absolute -top-10 -right-10 w-40 h-40 bg-rose-400/20 dark:bg-rose-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+              </div>
+            ) : posters.length > 0 ? (
+              <div className="relative group overflow-hidden rounded-2xl md:rounded-3xl bg-transparent">
+                <div
+                  ref={carouselRef}
+                  onScroll={handleCarouselScroll}
+                  onTouchStart={handleCarouselScroll}
+                  className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full"
+                >
+                  {posters.map((poster, index) => (
+                    <div key={poster.id || index} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
+                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+                    </div>
+                  ))}
+                </div>
+                {/* Dots indicator */}
+                {posters.length > 1 && (
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+                    {posters.map((_, i) => (
+                      <span
+                        key={i}
+                        className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === activePosterIndex ? "bg-white scale-125 shadow-sm" : "bg-white/50"}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="block relative w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl md:rounded-3xl overflow-hidden group bg-transparent">
+                <Image src="/1000242984.png" alt="NearBuy Special Offer" fill priority={true} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" fill priority={true} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+              </div>
+            )}
+          </section>
 
           {/* ── Hot Deals Under 130 ───────────────────────────────────────── */}
           {(filteredDeals130.length > 0 || isHotDealsLoading) && (
