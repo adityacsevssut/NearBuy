@@ -410,7 +410,7 @@ export default function DevDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] font-sans flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-[#151522] font-sans flex flex-col">
       {/* ══════════════════ NAVBAR ══════════════════ */}
       <nav className="sticky top-0 z-50 bg-gradient-to-r from-violet-600 to-purple-700 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">

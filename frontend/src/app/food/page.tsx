@@ -166,7 +166,7 @@ function SectionHeader({
       {onViewAll && (
         <button
           onClick={onViewAll}
-          className="text-[13px] font-bold text-orange-500 active:opacity-70"
+          className="text-[13px] font-bold text-orange-gradient active:opacity-70"
         >
           View All
         </button>
@@ -271,7 +271,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
         {/* Distance */}
         {dist && (
-          <p className="text-[10px] text-orange-400 font-bold mt-1 flex items-center gap-0.5 drop-shadow-sm">
+          <p className="text-[10px] text-orange-gradient font-bold mt-1 flex items-center gap-0.5 drop-shadow-sm">
             <MapPin className="w-2.5 h-2.5" />
             {dist}
           </p>
@@ -344,7 +344,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
       <div className="absolute bottom-0 left-0 w-full h-[65%] bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
 
       {/* Discount Pill (Top Left) */}
-      <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+      <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-gradient dark:text-orange-gradient text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
         {discountPercent}% OFF
       </div>
 
@@ -464,7 +464,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
         {/* Top Left Best Seller Tag */}
         {(r.isBestSeller || (r.rating && parseFloat(r.rating) >= 4.0)) && (
-          <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+          <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-gradient dark:text-orange-gradient text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
             Best Seller
           </div>
         )}
@@ -575,7 +575,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 Min ₹{r.minOrder || 0}
               </span>
               {dist && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-400 bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-gradient bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
                   <MapPin className="w-2.5 h-2.5" />
                   {dist}
                 </span>
@@ -596,7 +596,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
           {/* Offer */}
           {r.offer && (
-            <div className="mt-1.5 pt-1.5 border-t border-white/20 border-dashed text-[9px] font-bold text-orange-400 flex items-center gap-1 drop-shadow-sm">
+            <div className="mt-1.5 pt-1.5 border-t border-white/20 border-dashed text-[9px] font-bold text-orange-gradient flex items-center gap-1 drop-shadow-sm">
               <span>🏷</span>
               <span className="truncate">{r.offer}</span>
             </div>
@@ -622,7 +622,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-[11px] font-bold text-gray-800 dark:text-gray-200 truncate">{item.name}</p>
-                  <p className="text-[10px] font-black text-orange-500">₹{item.price}</p>
+                  <p className="text-[10px] font-black text-orange-gradient">₹{item.price}</p>
                 </div>
               </div>
             ))}
@@ -734,7 +734,7 @@ function PromoImages() {
             className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
           >
             {/* Item Name Pop-up */}
-            <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-600 dark:text-orange-400 z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
+            <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-gradient dark:text-orange-gradient z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
               {items[index].name}
             </div>
             {/* Transparent Theme-Agnostic Image */}
@@ -1146,7 +1146,7 @@ export default function HomePage() {
                     Get Upto <b className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 dark:from-red-500 dark:to-orange-400 font-extrabold">30-40% off</b><br />on your first order
                   </p>
                   <button className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-orange-600">
+                    <span className="text-orange-gradient">
                       ORDER NOW
                     </span>
                   </button>
@@ -1158,7 +1158,7 @@ export default function HomePage() {
         </div>
 
         {/* Moved Location & Search */}
-        <div className="pt-0 pb-0 z-40 relative bg-gray-50 dark:bg-[#0D0D17]">
+        <div className="pt-0 pb-0 z-40 relative bg-white dark:bg-[#0D0D17]">
                 {/* ══ LOCATION ════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-4 pb-1">
               <div className="w-full">
@@ -1182,7 +1182,7 @@ export default function HomePage() {
                     </span>
                   </div>
                   {pincode && (
-                    <span className="ml-auto shrink-0 text-[12px] font-black text-orange-600 bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+                    <span className="ml-auto shrink-0 text-[12px] font-black text-orange-gradient bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
                       📍 {pincode}
                     </span>
                   )}

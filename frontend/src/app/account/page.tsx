@@ -498,7 +498,7 @@ function AccountContent() {
                   <div className="text-left">
                     <span className="text-[14.5px] font-bold text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-gray-100">Saved Addresses</span>
                     {savedAddresses.length > 0 && (
-                      <span className={`ml-2 text-[11px] font-black px-1.5 py-0.5 rounded-full ${isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-600"}`}>
+                      <span className={`ml-2 text-[11px] font-black px-1.5 py-0.5 rounded-full ${isBlue ? "bg-blue-100 text-blue-600" : "bg-orange-100 text-orange-gradient"}`}>
                         {savedAddresses.length}
                       </span>
                     )}
@@ -547,7 +547,7 @@ function AccountContent() {
                           </p>
                           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                             {addr.pincode && (
-                              <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-600 border-orange-100"}`}>
+                              <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-gradient border-orange-100"}`}>
                                 PIN {addr.pincode}
                               </span>
                             )}

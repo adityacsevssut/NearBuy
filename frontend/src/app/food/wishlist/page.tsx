@@ -46,7 +46,7 @@ export default function WishlistPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0D0D17] flex flex-col pt-16 pb-24 md:pb-8">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16 pb-24 md:pb-8">
       <Navbar />
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6">
@@ -125,7 +125,7 @@ export default function WishlistPage() {
                       
                       <div className="flex items-center gap-2 text-[10px] font-medium text-gray-500 dark:text-gray-400">
                         {r.distance && (
-                          <span className="bg-orange-50 border border-orange-100 px-2 py-1 rounded-md shadow-sm text-orange-600 font-bold flex items-center gap-0.5">
+                          <span className="bg-orange-50 border border-orange-100 px-2 py-1 rounded-md shadow-sm text-orange-gradient font-bold flex items-center gap-0.5">
                             📍 {r.distance}
                           </span>
                         )}
@@ -157,7 +157,7 @@ export default function WishlistPage() {
                           <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
                         </span>
                         {dish.badge && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
                             {dish.badge}
                           </span>
                         )}

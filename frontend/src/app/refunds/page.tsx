@@ -107,7 +107,7 @@ export default function RefundsPage() {
         );
       case "awaiting upi":
         return (
-          <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-400 rounded-full text-xs font-bold tracking-wide">
+          <span className="flex items-center gap-1.5 px-3 py-1 bg-orange-100 text-orange-gradient dark:bg-orange-500/20 dark:text-orange-gradient rounded-full text-xs font-bold tracking-wide">
             <Clock className="w-3.5 h-3.5" /> Action Required
           </span>
         );

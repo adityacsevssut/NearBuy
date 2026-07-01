@@ -137,7 +137,7 @@ export default function DishPage() {
   const filteredDishes = dishes;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] flex flex-col pt-16">
+    <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col pt-16">
       <Navbar />
 
       {/* Sticky Header */}
@@ -262,7 +262,7 @@ export default function DishPage() {
                         </h3>
                         {dish.badge && (
                           <div className="mb-1.5 mt-1">
-                            <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
+                            <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
                               {dish.badge}
                             </span>
                           </div>
@@ -271,7 +271,7 @@ export default function DishPage() {
                       
                       {/* Vendor name with location pin styling */}
                       <p className="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-2">
-                        by <span className="text-orange-700">{dish.vendor}</span>
+                        by <span className="text-orange-gradient">{dish.vendor}</span>
                       </p>
 
                       <div className="flex items-baseline gap-1.5 mb-2">

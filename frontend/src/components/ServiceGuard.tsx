@@ -198,20 +198,20 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         <div className="max-w-md w-full bg-white dark:bg-[#0D0D17] rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col items-center">
           {/* Logo */}
           <div className="flex items-center -skew-x-6 pr-1 mb-6">
-            <span className={`font-black text-4xl tracking-tighter drop-shadow-sm ${isStore ? "text-blue-600" : "text-orange-500"}`}>
+            <span className={`font-black text-4xl tracking-tighter drop-shadow-sm ${isStore ? "text-blue-600" : "text-orange-gradient"}`}>
               N
             </span>
             <span className="text-black dark:text-white font-black text-4xl tracking-tighter drop-shadow-sm">
               B
             </span>
             <span className="font-black text-2xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
-              <span className={isStore ? "text-blue-600" : "text-orange-500"}>Near</span>Buy
+              <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Near</span>Buy
             </span>
           </div>
 
           {/* Texts */}
           <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight leading-tight">
-            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-500"}>Near</span>Buy
+            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Near</span>Buy
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-tight mb-8">
             Explore Your Nearest Market

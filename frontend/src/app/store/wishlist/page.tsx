@@ -46,7 +46,7 @@ export default function WishlistPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0D0D17] flex flex-col pt-16 pb-24 md:pb-8">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16 pb-24 md:pb-8">
       <Navbar />
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6">

@@ -85,7 +85,7 @@ function FoodItemPreviewCard({
               <span className={`w-1.5 h-1.5 rounded-full ${item.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
             </span>
             {item.badge && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
+              <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
                 {item.badge}
               </span>
             )}
@@ -99,7 +99,7 @@ function FoodItemPreviewCard({
           {/* By shop */}
           {shopName && (
             <p className="text-xs font-semibold text-gray-400 mb-1">
-              by <span className="text-orange-500 font-bold">{shopName}</span>
+              by <span className="text-orange-gradient font-bold">{shopName}</span>
             </p>
           )}
 
@@ -172,7 +172,7 @@ function FoodItemPreviewCard({
             <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">1</span>
             <span className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 font-bold text-xs select-none">+</span>
           </div>
-          <div className="w-full py-1 border border-gray-200 dark:border-[#2A2A3A] font-black text-xs rounded-lg shadow-sm bg-white dark:bg-[#0D0D17] text-orange-600 text-center uppercase tracking-wide">
+          <div className="w-full py-1 border border-gray-200 dark:border-[#2A2A3A] font-black text-xs rounded-lg shadow-sm bg-white dark:bg-[#0D0D17] text-orange-gradient text-center uppercase tracking-wide">
             ADD
           </div>
         </div>

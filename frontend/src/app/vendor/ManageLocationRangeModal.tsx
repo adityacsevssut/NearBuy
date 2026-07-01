@@ -113,10 +113,10 @@ export default function ManageLocationRangeModal({
           {/* Delivery Range Slider */}
           <div className="bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-2xl p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <label className="text-xs font-bold text-orange-950 dark:text-orange-400 uppercase tracking-wider flex items-center gap-1.5">
+              <label className="text-xs font-bold text-orange-950 dark:text-orange-gradient uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles className="w-3.5 h-3.5 text-orange-500 animate-pulse" /> Max Delivery Range
               </label>
-              <span className="text-sm font-black text-orange-600 bg-white dark:bg-[#0D0D17] border border-orange-100 dark:border-orange-500/20 px-2.5 py-0.5 rounded-full shadow-sm">
+              <span className="text-sm font-black text-orange-gradient bg-white dark:bg-[#0D0D17] border border-orange-100 dark:border-orange-500/20 px-2.5 py-0.5 rounded-full shadow-sm">
                 {formData.delivery_range} km
               </span>
             </div>
@@ -131,13 +131,13 @@ export default function ManageLocationRangeModal({
               className="w-full h-1.5 bg-orange-100 dark:bg-orange-500/30 rounded-lg appearance-none cursor-pointer accent-orange-500"
             />
             
-            <div className="flex justify-between text-[10px] font-bold text-orange-400/80 uppercase">
+            <div className="flex justify-between text-[10px] font-bold text-orange-gradient/80 uppercase">
               <span>0.5 km</span>
               <span>12.5 km</span>
               <span>25 km</span>
             </div>
             
-            <p className="text-xs text-orange-800/80 dark:text-orange-400/80 leading-normal">
+            <p className="text-xs text-orange-800/80 dark:text-orange-gradient/80 leading-normal">
               Customers outside of a <span className="font-bold">{formData.delivery_range} km</span> radius from your store coordinates will see your restaurant marked as <span className="font-bold text-red-600 dark:text-red-500">"Not available in your location"</span>.
             </p>
           </div>
@@ -184,7 +184,7 @@ export default function ManageLocationRangeModal({
                 </div>
               ) : (
                 <div className="p-4 bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-xl text-center">
-                  <p className="text-xs text-orange-800 dark:text-orange-400">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
+                  <p className="text-xs text-orange-800 dark:text-orange-gradient">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
                 </div>
               )}
             </div>

@@ -841,7 +841,7 @@ export default function CartPage() {
             {/* Notice about independent delivery */}
             <div className="flex items-start gap-2.5 bg-orange-50 dark:bg-[#0D0D17] border border-orange-100 dark:border-orange-500/20 rounded-xl px-4 py-3">
               <Store className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-orange-700 dark:text-orange-400 font-medium leading-relaxed">
+              <p className="text-xs text-orange-gradient dark:text-orange-gradient font-medium leading-relaxed">
                 Each restaurant handles its own delivery. Place separate orders below for each restaurant.
               </p>
             </div>

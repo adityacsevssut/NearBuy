@@ -777,7 +777,7 @@ export default function PartnerDashboard() {
   }, [isLoggedIn, user, router, isInitializing]);
 
   if (isInitializing || !isLoggedIn || (user?.role !== "manager" && user?.role !== "admin")) {
-    return <div className="min-h-screen bg-gray-50 dark:bg-[#151522]" />;
+    return <div className="min-h-screen bg-white dark:bg-[#151522]" />;
   }
 
   // Determine dynamic theme colors based on manager type
@@ -1588,7 +1588,7 @@ export default function PartnerDashboard() {
                           <td className="p-4 text-sm font-bold text-gray-900 dark:text-gray-100">{order.vendor_first_name} {order.vendor_last_name}</td>
                           <td className="p-4 text-sm font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
                           <td className="p-4">
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-gradient'}`}>
                               {order.status}
                             </span>
                           </td>
@@ -1857,7 +1857,7 @@ export default function PartnerDashboard() {
                   </div>
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">PF (Cancelled)</h3>
-                    <p className="text-3xl font-black text-orange-600 dark:text-orange-500">₹{Number(nearbuyPaymentsData?.cancelled_platform_fee || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-black text-orange-gradient dark:text-orange-gradient">₹{Number(nearbuyPaymentsData?.cancelled_platform_fee || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">GST (Cancelled)</h3>
