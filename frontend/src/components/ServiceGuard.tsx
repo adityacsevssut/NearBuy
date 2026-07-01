@@ -233,7 +233,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   if (status === "denied") {
     return (
       <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16 font-sans">
-        <Navbar />
+        <Navbar forceSolid />
         <main className="flex-1 flex flex-col items-center p-6 mt-4 text-center">
           
           {/* Main Hero Image */}

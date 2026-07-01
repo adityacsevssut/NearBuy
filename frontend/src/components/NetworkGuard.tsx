@@ -57,7 +57,7 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
         className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col font-sans overflow-y-auto ${isOffline ? 'flex' : 'hidden'}`}
       >
         <div className="flex-none w-full">
-          <Navbar />
+          <Navbar forceSolid />
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center p-4 text-center mt-20 mb-20 md:mb-0">
