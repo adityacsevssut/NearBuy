@@ -15,7 +15,7 @@ export default function PrivacyPage() {
     }
   }, []);
 
-  const accentColor = isStore ? "text-blue-500" : "text-orange-500";
+  const accentColor = isStore ? "text-blue-500" : "text-orange-gradient";
   const hoverColor = isStore ? "hover:text-blue-500 dark:hover:text-blue-400" : "hover:text-orange-500 dark:hover:text-orange-400";
   const bgGradient = isStore ? "from-blue-50/80 dark:from-blue-900/20" : "from-orange-50/80 dark:from-orange-900/20";
   const selectionBg = isStore ? "selection:bg-blue-500/30" : "selection:bg-orange-500/30";

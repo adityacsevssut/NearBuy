@@ -42,7 +42,7 @@ export default function AboutUsPage() {
           {/* Box 1: Food */}
           <div className="bg-orange-50 dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="text-orange-500">
+              <div className="text-orange-gradient">
                 <Utensils className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Food</h3>
@@ -55,7 +55,7 @@ export default function AboutUsPage() {
           {/* Box 2: Essentials */}
           <div className="bg-white dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] shadow-sm rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="text-orange-500">
+              <div className="text-orange-gradient">
                 <ShoppingBag className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Essentials</h3>

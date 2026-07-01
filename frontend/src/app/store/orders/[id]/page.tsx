@@ -599,8 +599,8 @@ export default function OrderStatusPage() {
             <div className="mb-6 p-4 bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 rounded-2xl flex items-start gap-3">
               <Clock className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
               <div>
-                <h4 className="text-sm font-black text-orange-700 dark:text-orange-400">Cancellation Requested</h4>
-                <p className="text-xs text-orange-600 dark:text-orange-500/80 mt-1 font-medium">Awaiting vendor approval. Reason: {order.cancel_request_reason}</p>
+                <h4 className="text-sm font-black text-orange-gradient dark:text-orange-gradient">Cancellation Requested</h4>
+                <p className="text-xs text-orange-gradient dark:text-orange-gradient/80 mt-1 font-medium">Awaiting vendor approval. Reason: {order.cancel_request_reason}</p>
               </div>
             </div>
           )}
@@ -638,7 +638,7 @@ export default function OrderStatusPage() {
                         </div>
                       </div>
                       <div className={`pt-2 transition-opacity duration-500 ${isCompleted ? 'opacity-100' : 'opacity-40'}`}>
-                        <p className={`font-black uppercase tracking-wider text-sm ${isCurrent ? 'text-orange-600' : 'text-gray-900 dark:text-gray-100'}`}>
+                        <p className={`font-black uppercase tracking-wider text-sm ${isCurrent ? 'text-orange-gradient' : 'text-gray-900 dark:text-gray-100'}`}>
                           {step}
                         </p>
                         {isCurrent && (
@@ -699,7 +699,7 @@ export default function OrderStatusPage() {
             </div>
             
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 text-orange-500">
+              <div className="w-10 h-10 rounded-full bg-orange-50 flex items-center justify-center shrink-0 text-orange-gradient">
                 <MapPin className="w-5 h-5" />
               </div>
               <div>
@@ -822,7 +822,7 @@ export default function OrderStatusPage() {
                     </div>
                   )}
                   {order.delivery_charge && parseFloat(order.delivery_charge) > 0 && (
-                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                    <div className="flex justify-between text-sm font-bold text-orange-gradient">
                       <span>Delivery Charge</span>
                       <span>+ ₹{order.delivery_charge}</span>
                     </div>

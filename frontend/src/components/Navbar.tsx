@@ -152,7 +152,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95 shadow-sm'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}

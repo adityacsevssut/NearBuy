@@ -267,7 +267,7 @@ function OrdersPageContent() {
                   <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1 mb-1">
                     {new Date(order.created_at).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
                   </p>
-                  <p className="text-[9px] font-bold text-orange-500 uppercase tracking-widest bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded inline-block border border-orange-200/50 dark:border-orange-500/20">
+                  <p className="text-[9px] font-bold text-orange-gradient uppercase tracking-widest bg-orange-50 dark:bg-orange-500/10 px-1.5 py-0.5 rounded inline-block border border-orange-200/50 dark:border-orange-500/20">
                     {order.payment_method || "COD"}
                   </p>
                 </div>
@@ -347,7 +347,7 @@ function OrdersPageContent() {
             >
               <div className="px-6 py-5 border-b border-gray-100 dark:border-[#2A2A3A] flex items-center justify-between sticky top-0 bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] z-10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-600">
+                  <div className="w-10 h-10 bg-orange-100 rounded-xl flex items-center justify-center text-orange-gradient">
                     <FileText className="w-5 h-5" />
                   </div>
                   <div>
@@ -401,7 +401,7 @@ function OrdersPageContent() {
                     </div>
                   )}
                   {selectedOrderForItems.delivery_charge && parseFloat(selectedOrderForItems.delivery_charge) > 0 && (
-                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                    <div className="flex justify-between text-sm font-bold text-orange-gradient">
                       <span>Delivery Charge</span>
                       <span>+ ₹{selectedOrderForItems.delivery_charge}</span>
                     </div>
@@ -412,7 +412,7 @@ function OrdersPageContent() {
                   </div>
                   <div className="flex justify-between text-sm font-bold text-gray-500 dark:text-gray-400 pt-1">
                     <span>Payment Method</span>
-                    <span className="uppercase text-orange-600">{selectedOrderForItems.payment_method || "COD"}</span>
+                    <span className="uppercase text-orange-gradient">{selectedOrderForItems.payment_method || "COD"}</span>
                   </div>
                 </div>
               </div>
@@ -561,7 +561,7 @@ function OrdersPageContent() {
 
 export default function OrdersPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-orange-500" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-orange-gradient" /></div>}>
       <OrdersPageContent />
     </Suspense>
   );

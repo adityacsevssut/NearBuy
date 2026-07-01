@@ -219,7 +219,7 @@ export default function VendorPage() {
     .filter((cat) => selectedCategory === null || cat === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#151522] flex flex-col pt-16">
+    <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col pt-16">
       <Navbar />
 
       {/* Warning Banner */}
@@ -261,7 +261,7 @@ export default function VendorPage() {
                     <h1 className="font-black text-3xl md:text-4xl text-gray-900 dark:text-gray-100 tracking-tight">
                       {vendor.name}
                     </h1>
-                    <span className={`text-[10px] md:text-xs px-2.5 py-1 rounded-full font-black shadow-sm uppercase tracking-wider ${vendor.badgeColor || 'bg-orange-100 text-orange-700'}`}>
+                    <span className={`text-[10px] md:text-xs px-2.5 py-1 rounded-full font-black shadow-sm uppercase tracking-wider ${vendor.badgeColor || 'bg-orange-100 text-orange-gradient'}`}>
                       {vendor.badge || 'Bestseller'}
                     </span>
                   </div>
@@ -453,7 +453,7 @@ export default function VendorPage() {
                                   </h3>
                                   {dish.badge && (
                                     <div className="mb-1.5 mt-1">
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-700 bg-orange-100 font-bold uppercase tracking-wider">
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
                                         {dish.badge}
                                       </span>
                                     </div>

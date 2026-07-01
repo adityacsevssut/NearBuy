@@ -258,7 +258,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
                     {/* Top Left Badge */}
                     {formData.badge && (
-                      <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-600 dark:text-orange-500 text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+                      <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-gradient dark:text-orange-gradient text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
                         {formData.badge}
                       </div>
                     )}
@@ -306,7 +306,7 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                           <span className="inline-flex items-center text-[9px] font-semibold text-white bg-black/40 border border-white/10 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
                             Min ₹{formData.min_order || "0"}
                           </span>
-                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-400 bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-gradient bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
                             <MapPin className="w-2.5 h-2.5" />
                             2.5 km
                           </span>

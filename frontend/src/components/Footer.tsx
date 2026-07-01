@@ -55,14 +55,15 @@ export default function Footer() {
       { name: "Terms & Conditions", href: isStore ? "/terms?theme=store" : "/terms" },
       { name: "Privacy Policy", href: isStore ? "/privacy?theme=store" : "/privacy" },
       { name: "Refund Policy", href: isStore ? "/refund-policy?theme=store" : "/refund-policy" },
+      { name: "Sitemap", href: "/sitemap" },
     ],
   };
 
   return (
     <>
-      <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 border-t border-gray-100 dark:border-[#2A2A3A] relative overflow-hidden">
+      <footer className="bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 pt-12 md:pt-16 pb-24 md:pb-8 relative overflow-hidden">
         {/* Subtle Background Glow */}
-        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isStore ? 'from-blue-50/50' : 'from-orange-50/80'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
+        <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-b ${isStore ? 'from-blue-50/30' : 'from-transparent'} dark:hidden to-transparent blur-[80px] pointer-events-none`} />
 
         <div className="max-w-[1400px] mx-auto px-6 sm:px-8 relative z-10">
 

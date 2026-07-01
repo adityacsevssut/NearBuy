@@ -515,7 +515,7 @@ export default function VendorOrdersPage() {
                     <span>₹{selectedOrderForItems.subtotal}</span>
                   </div>
                   {selectedOrderForItems.delivery_charge && parseFloat(selectedOrderForItems.delivery_charge) > 0 && (
-                    <div className="flex justify-between text-sm font-bold text-orange-600">
+                    <div className="flex justify-between text-sm font-bold text-orange-gradient">
                       <span>Delivery Charge</span>
                       <span>+ ₹{selectedOrderForItems.delivery_charge}</span>
                     </div>

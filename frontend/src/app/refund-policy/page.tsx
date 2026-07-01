@@ -15,7 +15,7 @@ export default function RefundPolicyPage() {
     }
   }, []);
 
-  const accentColor = isStore ? "text-blue-500" : "text-orange-500";
+  const accentColor = isStore ? "text-blue-500" : "text-orange-gradient";
   const hoverColor = isStore ? "hover:text-blue-500 dark:hover:text-blue-400" : "hover:text-orange-500 dark:hover:text-orange-400";
   const bgGradient = isStore ? "from-blue-50/80 dark:from-blue-900/20" : "from-orange-50/80 dark:from-orange-900/20";
   const selectionBg = isStore ? "selection:bg-blue-500/30" : "selection:bg-orange-500/30";
@@ -119,7 +119,7 @@ export default function RefundPolicyPage() {
           </section>
 
           <section className={`mb-10 ${isStore ? 'bg-blue-50 dark:bg-blue-900/10 border-blue-100 dark:border-blue-900/30' : 'bg-orange-50 dark:bg-orange-900/10 border-orange-100 dark:border-orange-900/30'} p-6 rounded-2xl border`}>
-            <h2 className={`text-2xl font-black italic mb-4 ${isStore ? 'text-blue-600 dark:text-blue-500' : 'text-orange-600 dark:text-orange-500'}`}>3. When Refunds Are Denied</h2>
+            <h2 className={`text-2xl font-black italic mb-4 ${isStore ? 'text-blue-600 dark:text-blue-500' : 'text-orange-600 dark:text-orange-gradient'}`}>3. When Refunds Are Denied</h2>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
               We reserve the right to deny refunds under the following circumstances:
             </p>

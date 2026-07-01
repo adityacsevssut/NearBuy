@@ -120,7 +120,7 @@ export default function FeedbackModal({ isOpen, onClose, type }: FeedbackModalPr
             <div className="p-6">
               {!isLoggedIn ? (
                 <div className="text-center py-8">
-                  <div className="w-16 h-16 bg-orange-100 dark:bg-orange-500/20 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-orange-100 dark:bg-orange-500/20 text-orange-gradient rounded-full flex items-center justify-center mx-auto mb-4">
                     <Send className="w-8 h-8" />
                   </div>
                   <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Login Required</h4>
