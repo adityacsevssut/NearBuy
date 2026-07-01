@@ -23,9 +23,10 @@ import {
   UtensilsCrossed,
   ChevronRight,
 } from "lucide-react";
-import { Caveat } from "next/font/google";
+import { Caveat, Playfair_Display } from "next/font/google";
 
 const caveat = Caveat({ subsets: ["latin"] });
+const playfair = Playfair_Display({ subsets: ["latin"], style: ["normal", "italic"], weight: ["400", "500", "600", "700", "800", "900"] });
 import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
@@ -788,13 +789,17 @@ function SequentialTypewriter({ line1, line2 }: { line1: string, line2: string }
 
   return (
     <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
-      <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none font-[Poppins] transition-all duration-500 relative z-10 drop-shadow-sm" style={{ fontWeight: 900 }}>
-        {text1}<span className={`font-light text-yellow-500 transition-opacity duration-300 ${typing1 ? 'opacity-100 animate-pulse' : 'opacity-0 hidden'}`}>|</span>
-      </span>
-      <div className="relative z-20 origin-left mt-2.5 min-h-[30px]">
-        <span className="uppercase italic font-black text-xl sm:text-2xl md:text-2xl lg:text-xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-normal leading-tight font-[Poppins] whitespace-nowrap block drop-shadow-sm" style={{ fontWeight: 900 }}>
-          {text2}{text2.length > 0 && <span className={`font-light text-yellow-500 transition-opacity duration-300 ${typing2 ? 'opacity-100 animate-pulse' : 'opacity-0'}`}>|</span>}
+      <div className="relative z-10 flex items-center">
+        <span className={`uppercase italic font-black text-lg sm:text-xl md:text-xl lg:text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none transition-all duration-500 ${playfair.className}`} style={{ fontWeight: 900 }}>
+          {text1}
         </span>
+        <span className={`uppercase italic font-light text-lg sm:text-xl md:text-xl lg:text-lg text-yellow-500 transition-opacity duration-300 leading-none ${playfair.className} ${typing1 ? 'opacity-100 animate-[pulse_1s_ease-in-out_infinite]' : 'opacity-0 hidden'}`}>|</span>
+      </div>
+      <div className="relative z-20 origin-left mt-2.5 min-h-[30px] flex items-center">
+        <span className={`uppercase italic font-black text-lg sm:text-xl md:text-xl lg:text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-normal leading-tight whitespace-nowrap block ${playfair.className}`} style={{ fontWeight: 900 }}>
+          {text2}
+        </span>
+        {text2.length > 0 && <span className={`uppercase italic font-light text-lg sm:text-xl md:text-xl lg:text-lg text-yellow-500 transition-opacity duration-300 leading-tight block ${playfair.className} ${typing2 ? 'opacity-100 animate-[pulse_1s_ease-in-out_infinite]' : 'opacity-0'}`}>|</span>}
       </div>
     </div>
   );
