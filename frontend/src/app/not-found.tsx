@@ -12,7 +12,7 @@ export default function NotFound() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
-      <Navbar />
+      <Navbar forceSolid />
 
       <main className="flex-1 max-w-2xl mx-auto w-full p-4 flex flex-col items-center justify-center text-center">
         
