@@ -264,9 +264,9 @@ export default function Navbar() {
                   openLoginModal();
                 }
               }}
-              className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group hidden md:flex"
+              className={`relative p-2 rounded-xl transition-colors group hidden md:flex ${isHeroTransparent ? 'hover:bg-white/10' : 'hover:bg-gray-100 dark:hover:bg-[#1F1F2E]'}`}
             >
-              <ShoppingCart className={`w-[22px] h-[22px] transition-colors ${isHeroTransparent ? 'text-white hover:text-gray-200' : 'text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100'}`} />
+              <ShoppingCart className={`w-[22px] h-[22px] transition-colors ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:text-gray-100'}`} />
               {cartCount > 0 && (
                 <span className={`absolute -top-1 -right-1 w-4 h-4 rounded-full
                 ${primaryBg} text-white text-[10px] font-black flex items-center justify-center shadow-sm`}>
@@ -281,9 +281,9 @@ export default function Navbar() {
                 id="notification-btn"
                 onClick={() => setNotifOpen(prev => !prev)}
                 aria-label="Notifications"
-                className="relative p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors group"
+                className={`relative p-2 rounded-xl transition-colors group ${isHeroTransparent ? 'hover:bg-white/10' : 'hover:bg-gray-100 dark:hover:bg-[#1F1F2E]'}`}
               >
-                <Bell className={`w-[22px] h-[22px] transition-colors fill-current ${isHeroTransparent ? 'text-white hover:text-gray-200' : 'text-gray-800 dark:text-gray-200 group-hover:text-black dark:text-white'}`} />
+                <Bell className={`w-[22px] h-[22px] transition-colors fill-current ${isHeroTransparent ? 'text-white' : 'text-gray-800 dark:text-gray-200 group-hover:text-black dark:text-white'}`} />
                 {unreadCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-black flex items-center justify-center shadow-sm">
                     {unreadCount}
