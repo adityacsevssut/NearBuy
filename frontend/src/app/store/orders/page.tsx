@@ -110,7 +110,8 @@ function OrdersPageContent() {
       const data = await res.json();
       if (res.ok) {
         setHasMore(pageNum < (data.pagination?.totalPages || 1));
-        setOrders(prev => pageNum === 1 ? (data.orders || []) : [...prev, ...(data.orders || [])]);
+        const filteredOrders = (data.orders || []).filter((o: any) => o.manager_type === 'store');
+        setOrders(prev => pageNum === 1 ? filteredOrders : [...prev, ...filteredOrders]);
       } else {
         toast.error(data.error || "Failed to fetch orders", blueToastStyle);
       }

@@ -125,21 +125,25 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
 
         const registerToken = async () => {
-          const currentToken = await getToken(messaging, { 
-            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-            serviceWorkerRegistration: registration 
-          });
-          if (currentToken) {
-            const token = localStorage.getItem("nb_access");
-            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {
-              method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}` 
-              },
-              body: JSON.stringify({ token: currentToken, device_type: 'web' })
+          try {
+            const currentToken = await getToken(messaging, { 
+              vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+              serviceWorkerRegistration: registration 
             });
-            console.log("FCM token registered");
+            if (currentToken) {
+              const token = localStorage.getItem("nb_access");
+              await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/notifications/fcm-token`, {
+                method: 'POST',
+                headers: { 
+                  'Content-Type': 'application/json',
+                  Authorization: `Bearer ${token}` 
+                },
+                body: JSON.stringify({ token: currentToken, device_type: 'web' })
+              });
+              console.log("FCM token registered");
+            }
+          } catch (error: any) {
+            console.warn("FCM Token Registration Failed. Please check your Firebase API Key in .env:", error.message);
           }
         };
 

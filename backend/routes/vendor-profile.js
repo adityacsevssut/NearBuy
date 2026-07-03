@@ -6,6 +6,7 @@ const { authenticate } = require("../middleware/auth");
 const validate = require("../middleware/validate");
 const { upsertProfileSchema } = require("../validators/vendorProfile.validators");
 const { createClient } = require("@supabase/supabase-js");
+const redis = require("../config/redis");
 
 // Initialize Supabase Storage client
 // NOTE: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env
@@ -180,6 +181,15 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
         delivery_range_val,
       ]
     );
+
+    // Clear cache so frontend sees updated "Closed Now" status immediately
+    if (redis) {
+      try {
+        await redis.flushdb();
+      } catch (err) {
+        console.error("Redis flushdb error:", err.message);
+      }
+    }
 
     return res.json({
       message: "Profile updated successfully!",

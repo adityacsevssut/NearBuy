@@ -739,4 +739,38 @@ router.patch("/refunds/:id/upi", authenticate, async (req, res) => {
   }
 });
 
+// POST /api/public/wishlist-sync
+router.post("/wishlist-sync", async (req, res) => {
+  try {
+    const { restaurantIds = [], foodIds = [] } = req.body;
+    
+    let restaurants = {};
+    let foods = {};
+
+    if (restaurantIds.length > 0) {
+      const { rows } = await pool.query(
+        `SELECT user_id, is_open FROM vendor_profiles WHERE user_id = ANY($1::uuid[])`,
+        [restaurantIds]
+      );
+      rows.forEach(r => { restaurants[r.user_id] = { is_open: r.is_open }; });
+    }
+
+    if (foodIds.length > 0) {
+      const { rows } = await pool.query(
+        `SELECT m.id, m.is_available, v.is_open 
+         FROM vendor_menu_items m 
+         JOIN vendor_profiles v ON m.vendor_id = v.user_id 
+         WHERE m.id = ANY($1::int[])`,
+        [foodIds]
+      );
+      rows.forEach(r => { foods[r.id] = { is_available: r.is_available, is_open: r.is_open }; });
+    }
+
+    return res.json({ restaurants, foods });
+  } catch (err) {
+    console.error("POST /api/public/wishlist-sync error:", err);
+    return res.status(500).json({ error: "Failed to sync wishlist" });
+  }
+});
+
 module.exports = router;

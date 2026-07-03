@@ -271,9 +271,9 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
         {/* Distance */}
         {dist && (
-          <p className="text-[10px] text-orange-gradient font-bold mt-1 flex items-center gap-0.5 drop-shadow-sm">
-            <MapPin className="w-2.5 h-2.5" />
-            {dist}
+          <p className="text-[10px] font-bold mt-1 flex items-center gap-0.5 drop-shadow-sm">
+            <MapPin className="w-2.5 h-2.5 text-orange-500" />
+            <span className="text-orange-gradient">{dist}</span>
           </p>
         )}
       </div>
@@ -344,8 +344,8 @@ function DealCard({ deal, onConfirmNeeded }: any) {
       <div className="absolute bottom-0 left-0 w-full h-[65%] bg-gradient-to-t from-black/95 via-black/70 to-transparent pointer-events-none z-10" />
 
       {/* Discount Pill (Top Left) */}
-      <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-orange-gradient dark:text-orange-gradient text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
-        {discountPercent}% OFF
+      <div className="absolute top-2 left-2 bg-white dark:bg-[#151522] text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+        <span className="text-orange-gradient">{discountPercent}% OFF</span>
       </div>
 
       {/* Closed Overlay */}
@@ -464,8 +464,8 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
         {/* Top Left Best Seller Tag */}
         {(r.isBestSeller || (r.rating && parseFloat(r.rating) >= 4.0)) && (
-          <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-orange-gradient dark:text-orange-gradient text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
-            Best Seller
+          <div className="absolute top-3 left-3 bg-white dark:bg-[#151522] text-[10px] font-black px-2 py-0.5 rounded shadow-sm border border-orange-100 dark:border-orange-500/20 z-20 uppercase">
+            <span className="text-orange-gradient">Best Seller</span>
           </div>
         )}
 
@@ -575,9 +575,9 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 Min ₹{r.minOrder || 0}
               </span>
               {dist && (
-                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-orange-gradient bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
-                  <MapPin className="w-2.5 h-2.5" />
-                  {dist}
+                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-orange-900/40 border border-orange-500/30 px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                  <MapPin className="w-2.5 h-2.5 text-orange-500" />
+                  <span className="text-orange-gradient">{dist}</span>
                 </span>
               )}
             </div>
@@ -701,12 +701,12 @@ let cachedState = {
 function PromoImages() {
   const [index, setIndex] = useState(0);
   const items = [
-    { img: "promo_pizza", name: "Hot Pizza" },
-    { img: "promo_burger", name: "Juicy Burger" },
-    { img: "promo_biryani", name: "Chicken Biryani" },
-    { img: "promo_roll", name: "Kathi Roll" },
-    { img: "promo_momo", name: "Steamed Momos" },
-    { img: "promo_sandwich", name: "Club Sandwich" }
+    { img: "promo_pizza", name: "Hot Pizza", route: "pizza" },
+    { img: "promo_burger", name: "Juicy Burger", route: "burger" },
+    { img: "promo_biryani", name: "Chicken Biryani", route: "biryani" },
+    { img: "promo_roll", name: "Kathi Roll", route: "roll" },
+    { img: "promo_momo", name: "Steamed Momos", route: "momo" },
+    { img: "promo_sandwich", name: "Club Sandwich", route: "sandwich" }
   ];
 
   useEffect(() => {
@@ -733,19 +733,21 @@ function PromoImages() {
             transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
             className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
           >
-            {/* Item Name Pop-up */}
-            <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide text-orange-gradient dark:text-orange-gradient z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
-              {items[index].name}
-            </div>
-            {/* Transparent Theme-Agnostic Image */}
-            <Image 
-              src={`/${items[index].img}_transparent.png`} 
-              alt={items[index].name} 
-              fill 
-              className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
-              sizes="(max-width: 768px) 180px, 320px"
-              priority
-            />
+            <Link href={`/food/dish/${items[index].route}`} className="block absolute inset-0 pointer-events-auto">
+              {/* Item Name Pop-up */}
+              <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
+                <span className="text-orange-gradient">{items[index].name}</span>
+              </div>
+              {/* Transparent Theme-Agnostic Image */}
+              <Image 
+                src={`/${items[index].img}_transparent.png`} 
+                alt={items[index].name} 
+                fill 
+                className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
+                sizes="(max-width: 768px) 180px, 320px"
+                priority
+              />
+            </Link>
           </motion.div>
         </AnimatePresence>
       </div>
@@ -1145,7 +1147,10 @@ export default function HomePage() {
                   <p className="text-[15px] leading-relaxed text-gray-300 mb-4 font-medium">
                     Get Upto <b className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 dark:from-red-500 dark:to-orange-400 font-extrabold">30-40% off</b><br />on your first order
                   </p>
-                  <button className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95">
+                  <button 
+                    onClick={() => document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
+                  >
                     <span className="text-orange-gradient">
                       ORDER NOW
                     </span>
@@ -1622,12 +1627,15 @@ export default function HomePage() {
                   onTouchStart={handleCarouselScroll}
                   className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth scrollbar-hide w-full"
                 >
-                  {posters.map((poster, index) => (
-                    <div key={poster.id || index} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
-                      <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                      <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
-                    </div>
-                  ))}
+                  {posters.map((poster, index) => {
+                    const Wrapper = poster.link ? Link : 'div';
+                    return (
+                      <Wrapper key={poster.id || index} href={poster.link || ""} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
+                        <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                        <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+                      </Wrapper>
+                    );
+                  })}
                 </div>
                 {/* Dots indicator */}
                 {posters.length > 1 && (

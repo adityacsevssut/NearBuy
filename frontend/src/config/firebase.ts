@@ -16,9 +16,18 @@ const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 
 // Initialize Cloud Messaging and get a reference to the service
 export const getMessagingInstance = async () => {
-  const supported = await isSupported();
-  if (!supported) return null;
-  return getMessaging(app);
+  if (!firebaseConfig.apiKey) {
+    console.warn("Firebase API Key is missing. Push notifications are disabled.");
+    return null;
+  }
+  try {
+    const supported = await isSupported();
+    if (!supported) return null;
+    return getMessaging(app);
+  } catch (err) {
+    console.warn("Firebase messaging not supported:", err);
+    return null;
+  }
 };
 
 export default app;

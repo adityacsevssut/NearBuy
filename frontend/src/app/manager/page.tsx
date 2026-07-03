@@ -207,6 +207,7 @@ export default function PartnerDashboard() {
   const [loadingPoster, setLoadingPoster] = useState(false);
   const [savingPoster, setSavingPoster] = useState(false);
   const [posterSaved, setPosterSaved] = useState(false);
+  const [posterLink, setPosterLink] = useState("");
 
   const fetchCurrentPosters = async () => {
     setLoadingPoster(true);
@@ -273,6 +274,12 @@ export default function PartnerDashboard() {
       if (editingPosterId) {
         form.append("id", String(editingPosterId));
       }
+      if (posterLink.trim()) {
+        const mType = (user?.manager_type || "food").toLowerCase();
+        const path = posterLink.trim().toLowerCase().replace(/\s+/g, '-');
+        const prefix = mType === "store" ? "/store/category/" : "/food/dish/";
+        form.append("link", `${prefix}${path}`);
+      }
       const res = await fetch(`${API}/api/homepage-poster`, {
         method: "POST",
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -315,6 +322,7 @@ export default function PartnerDashboard() {
     setPosterPreview({ light: null, dark: null });
     setPosterFile({ light: null, dark: null });
     setPosterSaved(false);
+    setPosterLink("");
   };
 
   const handleEditPoster = (poster: any) => {
@@ -322,6 +330,11 @@ export default function PartnerDashboard() {
     setPosterPreview({ light: poster.image_url, dark: poster.dark_image_url });
     setPosterFile({ light: null, dark: null });
     setPosterSaved(false);
+    let rawLink = "";
+    if (poster.link && poster.link.includes("/food/dish/")) {
+      rawLink = poster.link.split("/food/dish/")[1].replace(/-/g, " ");
+    }
+    setPosterLink(rawLink);
   };
 
   const fetchRequests = async () => {
@@ -1512,6 +1525,18 @@ export default function PartnerDashboard() {
                     onChange={handlePosterFileChange}
                   />
                 </label>
+
+                {/* Dish Link Input */}
+                <div className="mt-4">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Target Dish Name (e.g. Chicken, Pizza)</label>
+                  <input
+                    type="text"
+                    placeholder="Enter dish name..."
+                    value={posterLink}
+                    onChange={(e) => setPosterLink(e.target.value)}
+                    className={`w-full border ${theme.border} rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-opacity-100 ${theme.bg} ${theme.textDark} transition-all`}
+                  />
+                </div>
 
                 {/* Info / status row */}
                 {posterFile[posterTheme] && (

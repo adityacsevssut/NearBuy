@@ -25,28 +25,36 @@ export default function SitemapPage() {
 
   const isVendor = user?.role === "manager" || user?.role === "admin";
 
-  const sitemapData = [
+  const sitemapData: any[] = [
     {
-      category: "Main Platforms",
-      icon: <Map className="w-6 h-6" strokeWidth={2.5} />,
+      category: "Food Delivery",
+      icon: <Utensils className="w-6 h-6" strokeWidth={2.5} />,
       show: true,
       links: [
-        { name: "Food Delivery", href: "/", icon: <Utensils className="w-4 h-4" /> },
-        { name: "Store & Essentials", href: "/store", icon: <ShoppingBag className="w-4 h-4" /> },
-        { name: "Global Search", href: "/search", icon: <Search className="w-4 h-4" /> },
+        { name: "Food Home", href: "/", icon: <Map className="w-4 h-4" /> },
+        { name: "Active Orders", href: "/food/orders", icon: <Clock className="w-4 h-4" /> },
+        { name: "Order History", href: "/food/orders?history=true", icon: <Clock className="w-4 h-4" /> },
+        { name: "Food Cart", href: "/food/cart", icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: "Food Wishlist", href: "/food/wishlist", icon: <Heart className="w-4 h-4" /> },
       ]
     },
     {
-      category: "Your Account",
+      category: "Store & Essentials",
+      icon: <ShoppingBag className="w-6 h-6" strokeWidth={2.5} />,
+      show: true,
+      links: [
+        { name: "Store Home", href: "#", icon: <Map className="w-4 h-4" />, onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
+        { name: "Store Orders", href: "#", icon: <Clock className="w-4 h-4" />, onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
+        { name: "Store Cart", href: "#", icon: <ShoppingCart className="w-4 h-4" />, onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
+        { name: "Store Wishlist", href: "#", icon: <Heart className="w-4 h-4" />, onClick: (e: any) => { e.preventDefault(); window.dispatchEvent(new Event('openEssentialsModal')); } },
+      ]
+    },
+    {
+      category: "Your Account & General",
       icon: <User className="w-6 h-6" strokeWidth={2.5} />,
       show: isLoggedIn,
       links: [
         { name: "My Profile", href: "/account", icon: <User className="w-4 h-4" /> },
-        { name: "Order History", href: "/food/orders?history=true", icon: <Clock className="w-4 h-4" /> },
-        { name: "Active Orders", href: "/food/orders", icon: <Clock className="w-4 h-4" /> },
-        { name: "Food Cart", href: "/food/cart", icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: "Store Cart", href: "/store/cart", icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: "Saved Wishlist", href: "/food/wishlist", icon: <Heart className="w-4 h-4" /> },
       ]
     },
     {
@@ -108,10 +116,11 @@ export default function SitemapPage() {
               </div>
               
               <ul className="space-y-4">
-                {section.links.map((link, linkIdx) => (
+                {section.links.map((link: any, linkIdx: number) => (
                   <li key={linkIdx}>
                     <Link 
                       href={link.href}
+                      onClick={link.onClick}
                       className="group flex items-center gap-3 text-sm md:text-base font-medium text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
                     >
                       <span className="w-8 h-8 rounded-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] flex items-center justify-center text-gray-400 group-hover:text-orange-500 group-hover:border-orange-200 dark:group-hover:border-orange-500/30 transition-all shadow-sm group-hover:scale-105">

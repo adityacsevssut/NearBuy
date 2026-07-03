@@ -510,11 +510,19 @@ function RestaurantOrderCard({
           {paymentMethod === 'cod' && (
             !feesPaid ? (
               <button
-              disabled={outOfRange}
+              disabled={outOfRange || !isMobileValid || !customerMobile || Boolean(alternateMobile && !isAltMobileValid)}
               onClick={async () => {
                 if (outOfRange) return;
                 if (!meetsMinOrder && minOrder > 0) {
                   toast.error(`Minimum order amount is ₹${minOrder}`);
+                  return;
+                }
+                if (!isMobileValid || !customerMobile) {
+                  toast.error("Please enter a valid mobile number");
+                  return;
+                }
+                if (alternateMobile && !isAltMobileValid) {
+                  toast.error("Please enter a valid alternate mobile number");
                   return;
                 }
                 setIsPayingTaxes(true);
@@ -569,6 +577,9 @@ function RestaurantOrderCard({
                         localStorage.setItem(`fees_${restId}`, JSON.stringify({ amount: totalFees, razorpayData: rzpData }));
                         toast.success("Fees paid and verified successfully!");
                         setFeesPaid(true);
+                        
+                        // Automatically place order
+                        onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod, rzpData);
                       } catch (err: any) {
                         toast.error(err.message || "Payment verification failed");
                       } finally {
@@ -608,12 +619,12 @@ function RestaurantOrderCard({
                   setIsPayingTaxes(false);
                 }
               }}
-              className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${outOfRange
+              className={`w-full mt-4 py-3 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 ${outOfRange || !isMobileValid || !customerMobile || Boolean(alternateMobile && !isAltMobileValid)
                   ? "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
                   : "bg-gray-900 dark:bg-green-600 text-white hover:bg-black dark:hover:bg-green-700 active:scale-[0.98]"
                 }`}
             >
-              Pay Taxes & Fees (₹{totalFees.toFixed(2)})
+              Pay Fees & Place Order (₹{totalFees.toFixed(2)})
             </button>
           ) : (
             <div className="mt-4 py-3 bg-green-50 border border-green-200 rounded-xl flex items-center justify-center gap-2">
@@ -647,30 +658,32 @@ function RestaurantOrderCard({
           </div>
         ) : null}
 
-        <button
-          disabled={!finalCanPlaceOrder}
-          onClick={() => {
-            if (finalCanPlaceOrder) {
-              onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod, razorpayData);
-            }
-          }}
-          className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${finalCanPlaceOrder
-              ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/30 active:scale-[0.98]"
-              : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
-            }`}
-        >
-          {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
-          <CreditCard className="w-4 h-4" />
-          {outOfRange
-            ? "Out of Delivery Range"
-            : finalCanPlaceOrder
-              ? `Place Order · ₹${mainOrderTotal}`
-              : !(feesPaid || totalFees === 0 || paymentMethod !== 'cod') && meetsMinOrder
-                ? "Pay Fees to Place Order"
-                : !meetsMinOrder && minOrder > 0
-                  ? `Minimum Amount is ₹${minOrder}`
-                  : missingFieldsText}
-        </button>
+        {!(paymentMethod === 'cod' && totalFees > 0) && (
+          <button
+            disabled={!finalCanPlaceOrder}
+            onClick={() => {
+              if (finalCanPlaceOrder) {
+                onPlaceOrder(restId, restItems, subtotal, calculatedGst, calculatedPlatformFee, grandTotal, customerMobile, alternateMobile, cookingInstructions, paymentMethod, razorpayData);
+              }
+            }}
+            className={`w-full py-4 font-black rounded-2xl text-[15px] shadow-xl transition-all flex items-center justify-center gap-2 group relative overflow-hidden ${finalCanPlaceOrder
+                ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-orange-500/30 active:scale-[0.98]"
+                : "bg-gray-200 dark:bg-[#1F1F2E] text-gray-400 dark:text-gray-500 cursor-not-allowed"
+              }`}
+          >
+            {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
+            <CreditCard className="w-4 h-4" />
+            {outOfRange
+              ? "Out of Delivery Range"
+              : finalCanPlaceOrder
+                ? `Place Order · ₹${mainOrderTotal}`
+                : !(feesPaid || totalFees === 0 || paymentMethod !== 'cod') && meetsMinOrder
+                  ? "Pay Fees to Place Order"
+                  : !meetsMinOrder && minOrder > 0
+                    ? `Minimum Amount is ₹${minOrder}`
+                    : missingFieldsText}
+          </button>
+        )}
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">
           Delivered by {restName} · Est. 15–25 min
         </p>

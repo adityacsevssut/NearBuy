@@ -1,7 +1,8 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import MobileBottomNav from "@/components/MobileBottomNav";
-import { Utensils, ShoppingBag, HeartPulse } from "lucide-react";
+import { Utensils, ShoppingBag, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export const metadata = {
   title: "About Us – NearBuy",
@@ -15,6 +16,14 @@ export default function AboutUsPage() {
 
       <main className="flex-1 max-w-[1200px] mx-auto w-full px-6 py-12 md:py-20 text-gray-800 dark:text-gray-200">
         
+        {/* Back Button */}
+        <div className="mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-orange-600 dark:text-gray-400 dark:hover:text-orange-400 transition-colors bg-gray-50 dark:bg-[#151522] px-4 py-2 rounded-full border border-gray-100 dark:border-[#2A2A3A]">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Home Page
+          </Link>
+        </div>
+
         {/* Header Section */}
         <div className="flex items-center gap-4 mb-8 md:mb-10">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#0f172a] dark:text-white tracking-widest uppercase shrink-0">
@@ -42,7 +51,7 @@ export default function AboutUsPage() {
           {/* Box 1: Food */}
           <div className="bg-orange-50 dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="text-orange-gradient">
+              <div className="text-orange-500 dark:text-orange-400">
                 <Utensils className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Food</h3>
@@ -55,7 +64,7 @@ export default function AboutUsPage() {
           {/* Box 2: Essentials */}
           <div className="bg-white dark:bg-[#0D0D17] border border-orange-50 dark:border-[#2A2A3A] shadow-sm rounded-[2rem] p-8 md:p-10 transition-all hover:-translate-y-1 hover:shadow-xl hover:border-orange-100 dark:hover:border-orange-500/30 duration-300">
             <div className="flex items-center gap-3 mb-5">
-              <div className="text-orange-gradient">
+              <div className="text-orange-500 dark:text-orange-400">
                 <ShoppingBag className="w-8 h-8 md:w-10 md:h-10" strokeWidth={2.5} />
               </div>
               <h3 className="text-xl md:text-2xl font-black text-gray-900 dark:text-gray-100 tracking-tight">Essentials</h3>
