@@ -10,9 +10,19 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY || "dummy_key"
 );
 
+// Only allow image MIME types — prevents non-image file uploads
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024 }, // 8 MB
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (JPEG, PNG, WebP, GIF) are allowed."));
+    }
+  },
 });
 
 // Redis cache integration
@@ -196,6 +206,41 @@ router.delete("/:id", authenticate, async (req, res) => {
   } catch (err) {
     console.error("DELETE /api/homepage-poster error:", err);
     return res.status(500).json({ error: "Failed to delete poster." });
+  }
+});
+
+// ── PATCH /api/homepage-poster/:id/link (manager / admin only) ────────────────
+router.patch("/:id/link", authenticate, async (req, res) => {
+  try {
+    if (req.user.role !== "manager" && req.user.role !== "admin") {
+      return res.status(403).json({ error: "Access denied." });
+    }
+    
+    const { id } = req.params;
+    const { link } = req.body;
+    const managerType = (req.user.manager_type || "food").toLowerCase();
+
+    const { rows } = await pool.query(
+      "UPDATE homepage_carousel_posters SET link = $1, updated_at = NOW() WHERE id = $2 AND type = $3 RETURNING *",
+      [link, id, managerType]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Poster not found or could not be updated." });
+    }
+
+    if (redis) {
+      try {
+        await redis.del(`posters_${managerType}`);
+      } catch (err) {
+        console.error("Redis del error:", err.message);
+      }
+    }
+
+    return res.json({ message: "Poster link updated successfully!", poster: rows[0] });
+  } catch (err) {
+    console.error("PATCH /api/homepage-poster/:id/link error:", err);
+    return res.status(500).json({ error: "Failed to update poster link." });
   }
 });
 

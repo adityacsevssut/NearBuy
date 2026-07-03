@@ -41,6 +41,7 @@ export default function RefundPolicyPage() {
       <div className="max-w-[800px] mx-auto px-6 sm:px-8 pb-16">
         <div 
           className="bg-white dark:bg-[#151522] rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-[#2A2A3A]"
+          style={{ fontFamily: '"Times New Roman", Times, serif' }}
         >
           
           <section className="mb-10">

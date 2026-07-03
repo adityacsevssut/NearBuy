@@ -3,11 +3,12 @@
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2, Mail, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
+import { quickBites, storeSubcategories } from "@/config/categories";
 
 const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
@@ -138,6 +139,7 @@ export default function PartnerDashboard() {
   // Search states
   const [vendorSearchQuery, setVendorSearchQuery] = useState("");
   const [cancelSearchQuery, setCancelSearchQuery] = useState("");
+  const [orderSearchQuery, setOrderSearchQuery] = useState("");
 
   // Nearbuy Payments State
   const [nearbuyPaymentsDate, setNearbuyPaymentsDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -331,10 +333,62 @@ export default function PartnerDashboard() {
     setPosterFile({ light: null, dark: null });
     setPosterSaved(false);
     let rawLink = "";
-    if (poster.link && poster.link.includes("/food/dish/")) {
-      rawLink = poster.link.split("/food/dish/")[1].replace(/-/g, " ");
+    if (poster.link) {
+      if (poster.link.includes("/food/dish/")) {
+        rawLink = poster.link.split("/food/dish/")[1].replace(/-/g, " ");
+      } else if (poster.link.includes("/store/category/")) {
+        rawLink = poster.link.split("/store/category/")[1];
+      }
     }
     setPosterLink(rawLink);
+  };
+
+  const availableOptions = useMemo(() => {
+    const mType = (user?.manager_type || "food").toLowerCase();
+    let allOptions: { value: string, label: string }[] = [];
+    if (mType === "store") {
+      Object.values(storeSubcategories).forEach(subList => {
+        subList.forEach(s => allOptions.push({ value: s.id, label: s.label }));
+      });
+    } else {
+      quickBites.forEach(q => allOptions.push({ value: q.label.toLowerCase(), label: q.label }));
+    }
+    
+    const usedPaths = currentPosters.filter(p => p.id !== editingPosterId).map(p => {
+      if (p.link) {
+        if (mType === "store") return p.link.replace("/store/category/", "");
+        return p.link.replace("/food/dish/", "");
+      }
+      return "";
+    });
+
+    return allOptions.filter(opt => !usedPaths.includes(opt.value.replace(/\s+/g, '-')));
+  }, [user?.manager_type, currentPosters, editingPosterId]);
+
+  const [updatingLink, setUpdatingLink] = useState(false);
+  const handleUpdateLinkOnly = async () => {
+    if (!editingPosterId) return;
+    if (!posterLink.trim()) { toast.error("Please select a target routing"); return; }
+    setUpdatingLink(true);
+    try {
+      const mType = (user?.manager_type || "food").toLowerCase();
+      const path = posterLink.trim().toLowerCase().replace(/\s+/g, '-');
+      const prefix = mType === "store" ? "/store/category/" : "/food/dish/";
+      const link = `${prefix}${path}`;
+
+      const res = await fetch(`${API}/api/homepage-poster/${editingPosterId}/link`, {
+        method: "PATCH",
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ link }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to update link");
+      toast.success("Poster routing updated successfully!");
+      fetchCurrentPosters();
+    } catch (err: any) {
+      toast.error(err.message);
+    }
+    setUpdatingLink(false);
   };
 
   const fetchRequests = async () => {
@@ -1528,14 +1582,28 @@ export default function PartnerDashboard() {
 
                 {/* Dish Link Input */}
                 <div className="mt-4">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Target Dish Name (e.g. Chicken, Pizza)</label>
-                  <input
-                    type="text"
-                    placeholder="Enter dish name..."
-                    value={posterLink}
-                    onChange={(e) => setPosterLink(e.target.value)}
-                    className={`w-full border ${theme.border} rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-opacity-100 ${theme.bg} ${theme.textDark} transition-all`}
-                  />
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Target Routing / Category</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={posterLink}
+                      onChange={(e) => setPosterLink(e.target.value)}
+                      className={`flex-1 border ${theme.border} rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-opacity-100 ${theme.bg} ${theme.textDark} transition-all`}
+                    >
+                      <option value="">-- Select Routing --</option>
+                      {availableOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                    {editingPosterId && (
+                      <button
+                        onClick={handleUpdateLinkOnly}
+                        disabled={updatingLink || !posterLink}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold text-white shadow-sm transition-all flex items-center justify-center gap-2 ${updatingLink || !posterLink ? "opacity-50 cursor-not-allowed" : ""} bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90`}
+                      >
+                        {updatingLink ? <RefreshCw className="w-4 h-4 animate-spin" /> : "Update Link Only"}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Info / status row */}
@@ -1578,14 +1646,23 @@ export default function PartnerDashboard() {
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Orders & Payments</h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Recent orders from {user?.manager_type} vendors</p>
                 </div>
-                <button onClick={fetchOrders} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingOrders ? "opacity-50 pointer-events-none" : ""}`}>
-                  {loadingOrders ? "Loading..." : "Refresh"}
-                </button>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <input
+                    type="text"
+                    placeholder="Search Order ID..."
+                    value={orderSearchQuery}
+                    onChange={(e) => setOrderSearchQuery(e.target.value)}
+                    className="w-full sm:w-64 px-4 py-2.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm placeholder:text-gray-400"
+                  />
+                  <button onClick={fetchOrders} className={`px-4 py-2.5 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm whitespace-nowrap ${loadingOrders ? "opacity-50 pointer-events-none" : ""}`}>
+                    {loadingOrders ? "Loading..." : "Refresh"}
+                  </button>
+                </div>
               </div>
 
               {orders.length === 0 && !loadingOrders ? (
@@ -1606,14 +1683,14 @@ export default function PartnerDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
-                      {orders.map((order: any) => (
+                      {orders.filter((order: any) => (order.id || "").toLowerCase().includes(orderSearchQuery.toLowerCase())).map((order: any) => (
                         <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50 transition-colors">
                           <td className="p-4 font-mono text-sm text-gray-900 dark:text-gray-100 font-bold">#{order.id.slice(0, 8).toUpperCase()}</td>
                           <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{new Date(order.created_at).toLocaleString()}</td>
                           <td className="p-4 text-sm font-bold text-gray-900 dark:text-gray-100">{order.vendor_first_name} {order.vendor_last_name}</td>
                           <td className="p-4 text-sm font-black text-gray-900 dark:text-gray-100">₹{order.total_amount}</td>
                           <td className="p-4">
-                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${order.status === 'completed' || order.status === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-gradient'}`}>
+                            <span className={`text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider ${order.status.toLowerCase() === 'completed' || order.status.toLowerCase() === 'delivered' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-gradient'}`}>
                               {order.status}
                             </span>
                           </td>

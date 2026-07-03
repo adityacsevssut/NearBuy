@@ -520,7 +520,7 @@ export default function VendorPage() {
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    toggleFood({ ...dish, restaurantId: vendor.id, restaurantName: vendor.name });
+                                    toggleFood({ ...dish, restaurantId: vendor.id, restaurantName: vendor.name, isClosed: isClosed });
                                   }}
                                   className="absolute top-2 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm hover:scale-110 transition-transform"
                                 >
@@ -678,7 +678,7 @@ export default function VendorPage() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    toggleFood({ ...selectedFood, restaurantId: vendor.id, restaurantName: vendor.name });
+                    toggleFood({ ...selectedFood, restaurantId: vendor.id, restaurantName: vendor.name, isClosed: isClosed });
                   }}
                   className="w-8 h-8 flex items-center justify-center bg-black/50 text-white rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors shadow-sm"
                 >

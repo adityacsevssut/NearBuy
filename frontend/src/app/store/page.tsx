@@ -13,66 +13,9 @@ import Footer from "@/components/Footer";
 import { useLocationContext } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 
-const categories = [
-  { id: "all", label: "All", emoji: "🛒" },
-  { id: "stationery", label: "Student Stationary", emoji: "✏️" },
-  { id: "tech", label: "Electronic Gadgets", emoji: "🔌" },
-  { id: "snacks", label: "Snacks & Beverages", emoji: "🍫" },
-  { id: "hostel", label: "Hostel Essentials", emoji: "🛏️" },
-  { id: "personal_care", label: "Daily Need", emoji: "🧴" },
-];
+import { storeCategories as categories, storeSubcategories as subcategories } from "@/config/categories";
 
 const sortOptions = ["Relevance", "Price: Low to High", "Price: High to Low"];
-
-const subcategories: Record<string, { id: string, label: string }[]> = {
-  stationery: [
-    { id: "basic_stationery", label: "Basic Stationary" },
-    { id: "notebook", label: "Note Book" },
-    { id: "lab_record", label: "Lab Record" },
-    { id: "lab_apron", label: "Lab Apron" },
-    { id: "calc", label: "Scientific calculator" },
-    { id: "art_craft", label: "Art and Craft" },
-    { id: "study_acc", label: "Study Accesories" },
-    { id: "printing", label: "Printing And Project Supplies" },
-    { id: "others", label: "Others" }
-  ],
-  tech: [
-    { id: "charger", label: "Charger" },
-    { id: "extension_board", label: "Extension Board" },
-    { id: "small_fans", label: "Wired Small fans" },
-    { id: "study_lamp", label: "Study lamp" },
-    { id: "other", label: "Other Devices" }
-  ],
-  snacks: [
-    { id: "biscuit", label: "Biscuit" },
-    { id: "namkeen", label: "Namkeen Mix" },
-    { id: "chatua", label: "Chatua" },
-    { id: "chips", label: "Snacks And Chips" },
-    { id: "sprite", label: "Sprite" },
-    { id: "pepsi", label: "Pepsi" },
-    { id: "thumsup", label: "Thumsup" },
-    { id: "other_drinks", label: "Other Drinks" },
-    { id: "other_snacks", label: "Other Snacks" }
-  ],
-  hostel: [
-    { id: "bedsheet", label: "Bedsheet" },
-    { id: "pillow_cover", label: "Pillow Cover" },
-    { id: "bolster_pillow", label: "Bolster Pillow" },
-    { id: "bucket", label: "Bucket" },
-    { id: "mug", label: "Mug" },
-    { id: "umbrella", label: "Umbrella" },
-    { id: "hanger", label: "Hanger" },
-    { id: "lock_key", label: "Lock and Key" },
-    { id: "others", label: "Others" }
-  ],
-  personal_care: [
-    { id: "handwash", label: "Handwash" },
-    { id: "perfume", label: "Perfume" },
-    { id: "daily_needs", label: "Daily Needs" },
-    { id: "good_knight", label: "Good knight stick" },
-    { id: "others", label: "Others" }
-  ]
-};
 
 const products = [
   { id: "p1", name: "USB-C Charger 65W GaN", cat: "tech", price: 349, mrp: 599, rating: 4.6, reviews: 128, emoji: "🔌", img: "/products/charger_real.png", badge: "Best Seller", inStock: true, express: true },

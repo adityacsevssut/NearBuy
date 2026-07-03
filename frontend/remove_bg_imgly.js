@@ -16,11 +16,21 @@ async function processImage(inputPath, outputPath) {
 }
 
 async function main() {
-    const images = ['promo_pizza', 'promo_burger', 'promo_biryani', 'promo_roll', 'promo_momo', 'promo_sandwich'];
+    const images = [
+        'images/404_store_light.png',
+        'images/404_error_light.png',
+        'images/404_store_dark.png',
+        'images/404_error_dark.png',
+        'images/network_error_store.png',
+        'images/network_error_food.png',
+        'images/network_error_store_dark.png',
+        'images/network_error_food_dark.png'
+    ];
     
     for (const name of images) {
-        const inputPath = path.join(__dirname, 'public', `${name}.png`);
-        const outputPath = path.join(__dirname, 'public', `${name}_transparent.png`);
+        const inputPath = path.join(__dirname, 'public', name);
+        // Overwrite the same image with transparent one
+        const outputPath = path.join(__dirname, 'public', name);
         
         if (fs.existsSync(inputPath)) {
             await processImage(inputPath, outputPath);

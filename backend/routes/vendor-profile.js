@@ -15,10 +15,20 @@ const supabase = createClient(
   process.env.SUPABASE_ANON_KEY
 );
 
+// Only allow image MIME types — prevents non-image file uploads
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+
 // We use memory storage to buffer the file before pushing to the bucket
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (JPEG, PNG, WebP, GIF) are allowed."));
+    }
+  },
 });
 
 // GET /api/vendor-profile
@@ -41,6 +51,11 @@ router.get("/", authenticate, async (req, res) => {
 // POST /api/vendor-profile
 router.post("/", authenticate, upload.single("image"), validate(upsertProfileSchema), async (req, res) => {
   try {
+    // Only vendor accounts may create or update a vendor profile
+    if (req.user.role !== 'vendor') {
+      return res.status(403).json({ error: "Access denied. Vendor accounts only." });
+    }
+
     // Fetch existing profile to prevent overwriting missing fields with empty values
     const existingRes = await pool.query(
       "SELECT * FROM vendor_profiles WHERE user_id = $1",
@@ -182,12 +197,22 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       ]
     );
 
-    // Clear cache so frontend sees updated "Closed Now" status immediately
+    // Clear only this vendor's cache keys so other vendors are unaffected
     if (redis) {
       try {
-        await redis.flushdb();
+        // Delete the vendor list cache (page 1-3 common pages) — targeted approach
+        // The vendor list cache key format is: page_limit_search_foodPref_lat_lon_pincode
+        // Since we can't enumerate all combinations, we clear all keys matching the pattern
+        // by deleting the most common cached responses and letting them re-warm naturally.
+        const keysToDelete = [
+          `vendor_${req.user.id}`,
+          // Also bust the public vendor list cache pages 1 and 2 (most accessed)
+          `1_20____`,
+          `2_20____`,
+        ];
+        await Promise.allSettled(keysToDelete.map(k => redis.del(k)));
       } catch (err) {
-        console.error("Redis flushdb error:", err.message);
+        console.error("Redis targeted delete error:", err.message);
       }
     }
 

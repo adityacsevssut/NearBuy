@@ -57,6 +57,7 @@ export default function TermsPage() {
               NearBuy operates as a localized hyper-delivery platform connecting users with local vendors. Please note our strict service limitations:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+              <li className="bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-900/30"><strong className="text-red-600 dark:text-red-500">Delivery System:</strong> <span className="text-red-700 dark:text-red-400 font-medium">Our delivery system is not centralized. Each vendor is responsible for delivering their own items directly to you.</span></li>
               {!isStore && <li><strong className="text-gray-900 dark:text-white">Food Delivery:</strong> We facilitate the delivery of freshly prepared food from local partnered restaurants.</li>}
               {isStore && <li><strong className="text-gray-900 dark:text-white">Daily Essentials:</strong> We support the delivery of general groceries, snacks, and daily household essentials from verified local stores.</li>}
             </ul>

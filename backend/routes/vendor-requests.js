@@ -94,11 +94,6 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     const request = reqQuery.rows[0];
 
     // Check manager type permission
-    console.log("Approval check:", { 
-      userRole: req.user.role, 
-      userManagerType: req.user.manager_type, 
-      requestVendorType: request.vendor_type 
-    });
 
     if (req.user.role === "manager") {
       const userType = (req.user.manager_type || "").toLowerCase();

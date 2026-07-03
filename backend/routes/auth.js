@@ -7,7 +7,7 @@ const validate = require("../middleware/validate");
 const {
   sendOtpSchema, verifyOtpSchema, signupSchema, signupFirebaseSchema,
   loginSchema, typedLoginSchema, resetPasswordSchema,
-  updateLocationSchema, saveAddressSchema
+  updateLocationSchema, saveAddressSchema, updateProfileSchema
 } = require("../validators/auth.validators");
 
 const pool = require("../config/db");
