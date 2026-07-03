@@ -12,7 +12,7 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function WishlistPage() {
-  const { restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood } = useWishlist();
+  const { restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood, syncWishlist } = useWishlist();
   const { addItem, itemQty } = useCart();
   const { latitude, longitude } = useLocationContext();
   const { isLoggedIn } = useAuth();
@@ -22,6 +22,7 @@ export default function WishlistPage() {
 
   useEffect(() => {
     setMounted(true);
+    syncWishlist();
   }, []);
 
   useEffect(() => {
@@ -145,10 +146,15 @@ export default function WishlistPage() {
               <Utensils className="w-5 h-5 text-blue-500" /> Saved Dishes
             </h2>
             <div className="space-y-4">
-              {foodWishlist.map((dish) => (
+              {foodWishlist.map((dish) => {
+                const isUnavailable = dish.is_available === false;
+                const isClosed = dish.isClosed === true;
+                const isDisabled = isUnavailable || isClosed;
+
+                return (
                 <div
                   key={dish.id}
-                  className={`relative bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${dish.is_available === false ? "opacity-75 grayscale-[0.2]" : "hover:border-blue-300 hover:shadow-md"}`}
+                  className={`relative bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 ${isDisabled ? "opacity-75 grayscale-[0.2]" : "hover:border-blue-300 hover:shadow-md"}`}
                 >
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
                     <div>
@@ -217,9 +223,11 @@ export default function WishlistPage() {
                         <Utensils className="w-8 h-8 text-gray-300" />
                       )}
                       
-                      {dish.is_available === false && (
+                      {isDisabled && (
                         <div className="absolute inset-0 bg-white/60 dark:bg-[#0D0D17]/60 backdrop-blur-[1px] flex items-center justify-center z-10">
-                          <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">Out of<br/>Stock</span>
+                          <span className="bg-red-600 text-white font-black text-[10px] px-2 py-1 rounded shadow-sm uppercase tracking-widest text-center">
+                            {isClosed ? <>Closed<br/>Now</> : <>Out of<br/>Stock</>}
+                          </span>
                         </div>
                       )}
                       
@@ -233,9 +241,9 @@ export default function WishlistPage() {
                     
                     {/* Add Button */}
                     <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-24 flex flex-col gap-1.5 items-center z-10">
-                      {dish.is_available === false ? (
+                      {isDisabled ? (
                         <div className="w-full py-1.5 border border-red-200 font-black text-[10px] rounded-lg shadow-sm bg-red-50 text-red-600 text-center uppercase tracking-wider">
-                          Out of Stock
+                          {isClosed ? "Closed" : "Out of Stock"}
                         </div>
                       ) : (
                           <button 
@@ -264,7 +272,7 @@ export default function WishlistPage() {
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         )}

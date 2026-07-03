@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   Search, Star, SlidersHorizontal, ChevronDown,
   ShoppingCart, Heart, Zap, BadgePercent, Package, X, MapPin
@@ -102,6 +103,7 @@ let cachedState = {
   searchQuery: "",
   priceRange: null as string | null,
   posterUrl: null as string | null,
+  posterLink: null as string | null,
   posterLoaded: false
 };
 
@@ -123,6 +125,7 @@ export default function EssentialsPage() {
   const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, openLoginModal } = useAuth();
   const [posterUrl, setPosterUrl] = useState<string | null>(cachedState.posterUrl);
+  const [posterLink, setPosterLink] = useState<string | null>(cachedState.posterLink);
   const [posterLoading, setPosterLoading] = useState(!cachedState.posterLoaded);
   const [previewProduct, setPreviewProduct] = useState<any>(null);
   const [previewQuantity, setPreviewQuantity] = useState(1);
@@ -148,7 +151,14 @@ export default function EssentialsPage() {
           const data = await res.json();
           if (data.poster?.image_url) {
             setPosterUrl(data.poster.image_url);
+            setPosterLink(data.poster.link || null);
             cachedState.posterUrl = data.poster.image_url;
+            cachedState.posterLink = data.poster.link || null;
+          } else if (data.posters && data.posters.length > 0) {
+            setPosterUrl(data.posters[0].image_url);
+            setPosterLink(data.posters[0].link || null);
+            cachedState.posterUrl = data.posters[0].image_url;
+            cachedState.posterLink = data.posters[0].link || null;
           }
         }
       } catch { /* silent */ } finally {
@@ -303,7 +313,13 @@ export default function EssentialsPage() {
               {posterLoading ? (
                 <div className="w-full h-full bg-blue-100/50 dark:bg-[#2A2A3A]/50 animate-pulse"></div>
               ) : posterUrl ? (
-                <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
+                posterLink ? (
+                  <Link href={posterLink} className="block w-full h-full">
+                    <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
+                  </Link>
+                ) : (
+                  <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
+                )
               ) : (
                 <>
                   <Image

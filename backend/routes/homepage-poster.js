@@ -83,6 +83,7 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
 
     const theme = req.body.theme === "dark" ? "dark" : "light";
     const posterId = req.body.id; // Optional: if editing an existing poster
+    const link = req.body.link || null;
 
     // Upload image to the 'homepage-posters' Supabase Storage bucket
     const fileExt = req.file.mimetype.split("/")[1] || "jpeg";
@@ -112,31 +113,31 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
       if (theme === "dark") {
         query = `
           UPDATE homepage_carousel_posters 
-          SET dark_image_url = $1, updated_at = NOW() 
-          WHERE id = $2 AND type = $3 
+          SET dark_image_url = $1, link = COALESCE($2, link), updated_at = NOW() 
+          WHERE id = $3 AND type = $4 
           RETURNING *`;
       } else {
         query = `
           UPDATE homepage_carousel_posters 
-          SET image_url = $1, updated_at = NOW() 
-          WHERE id = $2 AND type = $3 
+          SET image_url = $1, link = COALESCE($2, link), updated_at = NOW() 
+          WHERE id = $3 AND type = $4 
           RETURNING *`;
       }
-      params = [imageUrl, posterId, managerType];
+      params = [imageUrl, link, posterId, managerType];
     } else {
       // Create new poster
       if (theme === "dark") {
         query = `
-          INSERT INTO homepage_carousel_posters (type, dark_image_url, created_at, updated_at)
-          VALUES ($1, $2, NOW(), NOW())
+          INSERT INTO homepage_carousel_posters (type, dark_image_url, link, created_at, updated_at)
+          VALUES ($1, $2, $3, NOW(), NOW())
           RETURNING *`;
       } else {
         query = `
-          INSERT INTO homepage_carousel_posters (type, image_url, created_at, updated_at)
-          VALUES ($1, $2, NOW(), NOW())
+          INSERT INTO homepage_carousel_posters (type, image_url, link, created_at, updated_at)
+          VALUES ($1, $2, $3, NOW(), NOW())
           RETURNING *`;
       }
-      params = [managerType, imageUrl];
+      params = [managerType, imageUrl, link];
     }
 
     const { rows } = await pool.query(query, params);

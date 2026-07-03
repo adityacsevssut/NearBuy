@@ -28,6 +28,7 @@ export type WishlistedFood = {
   restaurantId: string;
   restaurantName: string;
   is_available?: boolean;
+  isClosed?: boolean;
 };
 
 type WishlistContextType = {
@@ -37,6 +38,7 @@ type WishlistContextType = {
   toggleFood: (food: WishlistedFood) => void;
   isRestaurantWished: (id: string) => boolean;
   isFoodWished: (id: string) => boolean;
+  syncWishlist: () => Promise<void>;
 };
 
 const WishlistContext = createContext<WishlistContextType | null>(null);
@@ -85,12 +87,70 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const syncWishlist = async () => {
+    if (restaurantWishlist.length === 0 && foodWishlist.length === 0) return;
+    
+    try {
+      const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const res = await fetch(`${API}/api/public/wishlist-sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          restaurantIds: restaurantWishlist.map(r => r.id),
+          foodIds: foodWishlist.map(f => f.id)
+        })
+      });
+
+      if (res.ok) {
+        const { restaurants, foods } = await res.json();
+        
+        let restsChanged = false;
+        const newRests = restaurantWishlist.map(r => {
+          const fresh = restaurants[r.id];
+          if (fresh && fresh.is_open === r.isClosed) {
+            restsChanged = true;
+            return { ...r, isClosed: !fresh.is_open };
+          }
+          return r;
+        });
+        if (restsChanged) setRestaurantWishlist(newRests);
+
+        let foodsChanged = false;
+        const newFoods = foodWishlist.map(f => {
+          const fresh = foods[f.id];
+          if (fresh) {
+            let updatedF = { ...f };
+            let changed = false;
+            
+            if (fresh.is_available !== (f.is_available !== false)) {
+              updatedF.is_available = fresh.is_available;
+              changed = true;
+            }
+            if (!fresh.is_open !== (f.isClosed === true)) {
+              updatedF.isClosed = !fresh.is_open;
+              changed = true;
+            }
+            
+            if (changed) {
+              foodsChanged = true;
+              return updatedF;
+            }
+          }
+          return f;
+        });
+        if (foodsChanged) setFoodWishlist(newFoods);
+      }
+    } catch (err) {
+      console.error("Failed to sync wishlist", err);
+    }
+  };
+
   const isRestaurantWished = (id: string) => restaurantWishlist.some(r => r.id === id);
   const isFoodWished = (id: string) => foodWishlist.some(f => f.id === id);
 
   return (
     <WishlistContext.Provider value={{
-      restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood, isRestaurantWished, isFoodWished
+      restaurantWishlist, foodWishlist, toggleRestaurant, toggleFood, isRestaurantWished, isFoodWished, syncWishlist
     }}>
       {children}
     </WishlistContext.Provider>

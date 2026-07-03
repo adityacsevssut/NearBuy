@@ -390,9 +390,10 @@ router.get("/me", authenticate, async (req, res) => {
     const total = parseInt(countResult.rows[0].count);
 
     const { rows } = await pool.query(
-      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode
+      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode, u.manager_type
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
+       JOIN users u ON v.user_id = u.id
        WHERE o.user_id = $1 
        ORDER BY o.created_at DESC
        LIMIT $2 OFFSET $3`,
