@@ -56,11 +56,12 @@ const signupSchema = Joi.object({
 
 /* ── signup-firebase ──────────────────────────────────────────────── */
 const signupFirebaseSchema = Joi.object({
-  firstName: Joi.string().trim().min(1).max(50).required(),
-  lastName:  Joi.string().trim().min(1).max(50).required(),
-  email:     email.required(),
-  mobile:    mobile10.required(),
-  password:  password(8).required().messages({ "string.min": "Password must be at least 8 characters" })
+  firstName:       Joi.string().trim().min(1).max(50).required(),
+  lastName:        Joi.string().trim().min(0).max(50).allow("", null).optional(),
+  email:           email.required(),
+  mobile:          mobile10.required(),
+  password:        password(8).required().messages({ "string.min": "Password must be at least 8 characters" }),
+  firebaseIdToken: Joi.string().required().messages({ "any.required": "Firebase ID token is required" })
 });
 
 /* ── login ────────────────────────────────────────────────────────── */
@@ -97,6 +98,16 @@ const updateLocationSchema = Joi.object({
   longitude: Joi.number().min(-180).max(180).optional().allow(null)
 });
 
+/* ── update profile ──────────────────────────────────────────────── */
+const updateProfileSchema = Joi.object({
+  firstName: Joi.string().trim().min(1).max(50).required().messages({
+    "any.required": "First name is required",
+    "string.empty": "First name is required",
+    "string.max": "First name must be 50 characters or fewer"
+  }),
+  lastName: Joi.string().trim().min(0).max(50).allow("", null).optional()
+});
+
 /* ── save address ─────────────────────────────────────────────────── */
 const saveAddressSchema = Joi.object({
   name:        Joi.string().trim().min(1).required().messages({ "any.required": "Address name is required" }),
@@ -116,5 +127,6 @@ module.exports = {
   typedLoginSchema,
   resetPasswordSchema,
   updateLocationSchema,
-  saveAddressSchema
+  saveAddressSchema,
+  updateProfileSchema
 };

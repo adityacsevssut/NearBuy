@@ -760,7 +760,7 @@ router.post("/wishlist-sync", async (req, res) => {
         `SELECT m.id, m.is_available, v.is_open 
          FROM vendor_menu_items m 
          JOIN vendor_profiles v ON m.vendor_id = v.user_id 
-         WHERE m.id = ANY($1::int[])`,
+         WHERE m.id = ANY($1::uuid[])`,
         [foodIds]
       );
       rows.forEach(r => { foods[r.id] = { is_available: r.is_available, is_open: r.is_open }; });

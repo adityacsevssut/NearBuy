@@ -38,32 +38,7 @@ import { useCart } from "@/context/CartContext";
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
-const quickBites = [
-  { label: "Biryani", image: "/biryani_gemini.png" },
-  { label: "Roll", image: "/roll.png" },
-  { label: "Dosa", image: "/dosa.png" },
-  { label: "Chowmin", image: "/chowmin_gemini.png" },
-  { label: "Momo", image: "/momo_gemini.png" },
-  { label: "Pizza", image: "/pizza_gemini.png" },
-  { label: "Burger", image: "/burger_gemini.png" },
-  { label: "Chicken Kabab", image: "/chicken_kabab.png" },
-  { label: "Pasta", image: "/pasta.png" },
-  { label: "Sandwich", image: "/sandwich.png" },
-  { label: "Chicken Pokoda", image: "/chicken_pakoda.png" },
-  { label: "Vada", image: "/vada.png" },
-  { label: "Manchurrian", image: "/manchurian.png" },
-  { label: "Bakery", image: "/bakery_cake_and_hotdog.png" },
-  { label: "Drinks", image: "/drinks_blue_mojito.png" },
-  { label: "Chole Bhature", image: "/chole_bhature.png" },
-  { label: "Samosa", image: "/samosa_gemini.png" },
-  { label: "Chicken", image: "/chicken_gemini.png" },
-  { label: "Paneer", image: "/paneer_gemini.png" },
-  { label: "Mutton", image: "/mutton_gemini.png" },
-  { label: "Rice", image: "/rice_gemini.png" },
-  { label: "Roti", image: "/roti_gemini.png" },
-  { label: "Naan", image: "/naan_gemini.png" },
-  { label: "Others", image: "/others_gemini.png" },
-];
+import { quickBites } from "@/config/categories";
 
 const topCuisines = [
   {
@@ -155,13 +130,38 @@ function SectionHeader({
   title: string;
   onViewAll?: () => void;
 }) {
+  const isSpecial = title.includes('Hot Deals') || title.includes('Popular');
+
+  const renderTitle = (text: string) => {
+    const parts = text.split(/(₹\d+)/);
+    return parts.map((part, index) =>
+      part.startsWith('₹') ? (
+        <span 
+          key={index} 
+          className="relative inline-flex items-center justify-center px-4 py-0.5 mx-2 text-[15px] font-black tracking-widest text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-md shadow-[0_4px_12px_rgba(239,68,68,0.35)] transform -rotate-2 hover:rotate-0 hover:scale-110 active:scale-95 transition-all duration-300 overflow-hidden cursor-default"
+        >
+          {/* Inner Dashed Border Overlay */}
+          <span className="absolute inset-[3px] border-[1.5px] border-dashed border-white/50 rounded-[3px] pointer-events-none"></span>
+
+          {/* Left Notch */}
+          <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-r-full shadow-[inset_-2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
+          {/* Right Notch */}
+          <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-l-full shadow-[inset_2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
+          
+          <span className="relative z-20 drop-shadow-md">{part}</span>
+        </span>
+      ) : (
+        <span key={index} className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400' : 'text-gray-900 dark:text-gray-100'}>
+          {part}
+        </span>
+      )
+    );
+  };
+
   return (
     <div className="flex items-center justify-between mb-3 px-4">
-      <h2 className={`text-[17px] font-black tracking-tight drop-shadow-sm ${title.includes('Hot Deals') || title.includes('Popular')
-        ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400'
-        : 'text-gray-900 dark:text-gray-100'
-        }`}>
-        {title}
+      <h2 className="text-[17px] font-black tracking-tight drop-shadow-sm flex items-center">
+        {renderTitle(title)}
       </h2>
       {onViewAll && (
         <button
@@ -735,7 +735,7 @@ function PromoImages() {
           >
             <Link href={`/food/dish/${items[index].route}`} className="block absolute inset-0 pointer-events-auto">
               {/* Item Name Pop-up */}
-              <div className="absolute top-[21px] md:top-[37px] left-1/2 -translate-x-1/2 bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 rounded-full text-[9px] md:text-[11px] font-black tracking-wide z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase">
+              <div className="absolute top-[21px] left-1/2 -translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:left-[-15px] md:-translate-x-full bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[12px] font-black tracking-wide z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase transition-all duration-500">
                 <span className="text-orange-gradient">{items[index].name}</span>
               </div>
               {/* Transparent Theme-Agnostic Image */}
@@ -1630,7 +1630,7 @@ export default function HomePage() {
                   {posters.map((poster, index) => {
                     const Wrapper = poster.link ? Link : 'div';
                     return (
-                      <Wrapper key={poster.id || index} href={poster.link || ""} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
+                      <Wrapper key={poster.id || index} href={poster.link || undefined} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
                         <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
                         <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
                       </Wrapper>

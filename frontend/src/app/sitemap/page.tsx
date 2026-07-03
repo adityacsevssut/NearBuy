@@ -17,7 +17,8 @@ import {
   Phone,
   LayoutDashboard,
   Search,
-  ShoppingCart
+  ShoppingCart,
+  ArrowLeft
 } from "lucide-react";
 
 export default function SitemapPage() {
@@ -87,6 +88,15 @@ export default function SitemapPage() {
 
       <main className="flex-1 max-w-[1000px] mx-auto w-full px-6 py-12 md:py-20 text-gray-800 dark:text-gray-200">
         
+        {/* Back Button */}
+        <Link 
+          href="/" 
+          className="inline-flex items-center gap-2 px-4 py-2 mb-8 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:border-gray-300 dark:hover:border-gray-600 transition-all shadow-sm active:scale-95"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Home
+        </Link>
+
         {/* Header Section */}
         <div className="flex items-center gap-4 mb-8 md:mb-12">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-[#0f172a] dark:text-white tracking-widest uppercase shrink-0">

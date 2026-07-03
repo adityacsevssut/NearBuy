@@ -231,8 +231,14 @@ router.post("/verify-payment", authenticate, async (req, res) => {
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest("hex");
-      
-    if (expectedSignature === razorpay_signature) {
+
+    // Use timingSafeEqual to prevent timing attacks on HMAC comparison
+    const sigBuffer      = Buffer.from(razorpay_signature, 'hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    const isValid = sigBuffer.length === expectedBuffer.length &&
+                    crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+
+    if (isValid) {
       if (order_id) {
         await pool.query(
           `UPDATE orders SET payment_status = 'paid', razorpay_order_id = $1, razorpay_payment_id = $2, updated_at = NOW() WHERE id = $3 AND user_id = $4`,
@@ -261,8 +267,14 @@ router.post("/verify-advance", authenticate, async (req, res) => {
       .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest("hex");
-      
-    if (expectedSignature === razorpay_signature) {
+
+    // Use timingSafeEqual to prevent timing attacks on HMAC comparison
+    const sigBuffer      = Buffer.from(razorpay_signature, 'hex');
+    const expectedBuffer = Buffer.from(expectedSignature, 'hex');
+    const isValid = sigBuffer.length === expectedBuffer.length &&
+                    crypto.timingSafeEqual(sigBuffer, expectedBuffer);
+
+    if (isValid) {
       if (order_id) {
         const { rows } = await pool.query(
           `UPDATE orders SET advance_paid = true, adv_payment_id = $1, status = 'Confirmed', updated_at = NOW() WHERE id = $2 AND user_id = $3 RETURNING vendor_id`,
