@@ -197,22 +197,12 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       ]
     );
 
-    // Clear only this vendor's cache keys so other vendors are unaffected
+    // Flush all cache to ensure the new/updated vendor shows up for all public users instantly
     if (redis) {
       try {
-        // Delete the vendor list cache (page 1-3 common pages) — targeted approach
-        // The vendor list cache key format is: page_limit_search_foodPref_lat_lon_pincode
-        // Since we can't enumerate all combinations, we clear all keys matching the pattern
-        // by deleting the most common cached responses and letting them re-warm naturally.
-        const keysToDelete = [
-          `vendor_${req.user.id}`,
-          // Also bust the public vendor list cache pages 1 and 2 (most accessed)
-          `1_20____`,
-          `2_20____`,
-        ];
-        await Promise.allSettled(keysToDelete.map(k => redis.del(k)));
+        await redis.flushdb();
       } catch (err) {
-        console.error("Redis targeted delete error:", err.message);
+        console.error("Redis flushdb error:", err.message);
       }
     }
 
