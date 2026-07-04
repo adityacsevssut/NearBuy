@@ -149,11 +149,9 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         const addresses: SavedAddress[] = data.addresses || [];
         setSavedAddresses(addresses);
-        lsSetSavedAddresses(addresses); // keep local cache in sync
       }
     } catch {
-      // fall back to localStorage cache
-      setSavedAddresses(lsGetSavedAddresses());
+      console.error("Failed to fetch saved addresses from DB");
     }
   }, [isLoggedIn, accessToken, apiBase]);
 
@@ -238,20 +236,22 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // ── Add a saved address (DB + localStorage) ─────────────────────────────────
   const addSavedAddress = useCallback(
     async (addr: Omit<SavedAddress, "id" | "created_at">) => {
-      // Optimistic local update
-      const tempEntry: SavedAddress = {
-        ...addr,
-        id: `temp_${Date.now()}`,
-        created_at: new Date().toISOString(),
-      };
-      const optimistic = [tempEntry, ...savedAddresses.filter(
-        (a) => !(a.name === addr.name && (a.pincode || "") === (addr.pincode || "") && (a.landmark || "") === (addr.landmark || ""))
-      )].slice(0, 10);
-      setSavedAddresses(optimistic);
-      lsSetSavedAddresses(optimistic);
+      if (!isLoggedIn || !accessToken) {
+        // Optimistic local update for guests
+        const tempEntry: SavedAddress = {
+          ...addr,
+          id: `temp_${Date.now()}`,
+          created_at: new Date().toISOString(),
+        };
+        const optimistic = [tempEntry, ...savedAddresses.filter(
+          (a) => !(a.name === addr.name && (a.pincode || "") === (addr.pincode || "") && (a.landmark || "") === (addr.landmark || ""))
+        )].slice(0, 10);
+        setSavedAddresses(optimistic);
+        lsSetSavedAddresses(optimistic);
+        return;
+      }
 
-      if (!isLoggedIn || !accessToken) return; // localStorage only for guests
-
+      // Logged in user: Save strictly to DB
       try {
         const res = await fetch(`${apiBase}/api/auth/me/saved-addresses`, {
           method: "POST",
@@ -274,7 +274,6 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         }
       } catch (err) {
         console.error("[LocationContext] Network or fetch error in addSavedAddress:", err);
-        // keep local optimistic state
       }
     },
     [isLoggedIn, accessToken, apiBase, savedAddresses, refreshSavedAddresses]
@@ -283,23 +282,28 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // ── Remove a saved address (DB + localStorage) ──────────────────────────────
   const removeSavedAddress = useCallback(
     async (id: string) => {
-      // Optimistic remove
-      const updated = savedAddresses.filter((a) => a.id !== id);
-      setSavedAddresses(updated);
-      lsSetSavedAddresses(updated);
+      if (!isLoggedIn || !accessToken || id.startsWith("temp_")) {
+        // Optimistic remove for guests
+        const updated = savedAddresses.filter((a) => a.id !== id);
+        setSavedAddresses(updated);
+        lsSetSavedAddresses(updated);
+        return;
+      }
 
-      if (!isLoggedIn || !accessToken || id.startsWith("temp_")) return;
-
+      // Logged in user: delete directly from DB
       try {
-        await fetch(`${apiBase}/api/auth/me/saved-addresses/${id}`, {
+        const res = await fetch(`${apiBase}/api/auth/me/saved-addresses/${id}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${accessToken}` },
         });
-      } catch {
-        // local state already updated
+        if (res.ok) {
+          await refreshSavedAddresses();
+        }
+      } catch (err) {
+        console.error("Failed to delete saved address", err);
       }
     },
-    [isLoggedIn, accessToken, apiBase, savedAddresses]
+    [isLoggedIn, accessToken, apiBase, savedAddresses, refreshSavedAddresses]
   );
 
   const [isFetchingLocation, setIsFetchingLocation] = useState(false);
