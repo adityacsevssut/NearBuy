@@ -214,7 +214,8 @@ export default function LocationModal() {
         resolvedAddress.pincode,
         resolvedAddress.landmark || "",
         resolvedAddress.lat,
-        resolvedAddress.lng
+        resolvedAddress.lng,
+        resolvedAddress.fullAddress
       );
       await addSavedAddress({
         name: resolvedAddress.name,
@@ -241,7 +242,8 @@ export default function LocationModal() {
       saved.pincode || "",
       saved.landmark || "",
       saved.latitude != null ? parseFloat(String(saved.latitude)) : undefined,
-      saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined
+      saved.longitude != null ? parseFloat(String(saved.longitude)) : undefined,
+      saved.full_address || ""
     );
     toast.success(`Switched to ${saved.landmark ? saved.landmark : saved.name}`, { icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> });
     handleClose();

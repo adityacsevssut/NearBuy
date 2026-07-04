@@ -104,9 +104,9 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               const data = await res.json();
               const pin = data.address?.postcode || "";
               const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-              setLocation(name, pin, "", lat, lon);
+              setLocation(name, pin, "", lat, lon, data.display_name || "");
             } catch {
-              setLocation("Current Location", "", "", lat, lon);
+              setLocation("Current Location", "", "", lat, lon, "");
             }
           } catch (err) {
             console.warn("Geolocation error or denied:", err);
@@ -170,10 +170,10 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         const data = await res.json();
         const pin = data.address?.postcode || "";
         const name = data.address?.city || data.address?.town || data.address?.suburb || "Current Location";
-        setLocation(name, pin, "", lat, lon);
+        setLocation(name, pin, "", lat, lon, data.display_name || "");
         toast.success("Location detected!", { id: toastId });
       } catch {
-        setLocation("Current Location", "", "", lat, lon);
+        setLocation("Current Location", "", "", lat, lon, "");
         toast.success("Location detected!", { id: toastId });
       }
     } catch (err) {
