@@ -143,6 +143,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch(`${apiBase}/api/auth/me/saved-addresses`, {
         headers: { Authorization: `Bearer ${accessToken}` },
+        cache: "no-store",
       });
       if (res.ok) {
         const data = await res.json();
