@@ -243,18 +243,18 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // ── Add a saved address (DB + localStorage) ─────────────────────────────────
   const addSavedAddress = useCallback(
     async (addr: Omit<SavedAddress, "id" | "created_at">) => {
+      const tempEntry: SavedAddress = {
+        ...addr,
+        id: `temp_${Date.now()}`,
+        created_at: new Date().toISOString(),
+      };
+      const optimistic = [tempEntry, ...savedAddresses.filter(
+        (a) => !(a.name === addr.name && (a.pincode || "") === (addr.pincode || "") && (a.landmark || "") === (addr.landmark || ""))
+      )].slice(0, 10);
+      setSavedAddresses(optimistic);
+      lsSetSavedAddresses(optimistic);
+
       if (!isLoggedIn || !accessToken) {
-        // Optimistic local update for guests
-        const tempEntry: SavedAddress = {
-          ...addr,
-          id: `temp_${Date.now()}`,
-          created_at: new Date().toISOString(),
-        };
-        const optimistic = [tempEntry, ...savedAddresses.filter(
-          (a) => !(a.name === addr.name && (a.pincode || "") === (addr.pincode || "") && (a.landmark || "") === (addr.landmark || ""))
-        )].slice(0, 10);
-        setSavedAddresses(optimistic);
-        lsSetSavedAddresses(optimistic);
         return;
       }
 
