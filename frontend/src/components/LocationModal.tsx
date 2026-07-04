@@ -99,6 +99,10 @@ export default function LocationModal() {
             }
           }
           
+          if (name === "My Location" && result.name) {
+             name = result.name;
+          }
+          
           let pincode = "";
           for (const comp of result.address_components) {
             if (comp.types.includes("postal_code")) {
