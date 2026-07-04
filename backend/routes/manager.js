@@ -146,12 +146,16 @@ router.get("/vendors", authenticate, async (req, res) => {
     const mType = (req.user.manager_type || "").toLowerCase();
     let query, params;
     if (req.user.role === "admin") {
-      query = `SELECT id, first_name, last_name, email, mobile, manager_type, is_active, created_at
-               FROM users WHERE role='vendor' ORDER BY created_at DESC`;
+      query = `SELECT u.id, u.first_name, u.last_name, u.email, u.mobile, u.manager_type, u.is_active, u.created_at, v.restaurant_name AS business_name
+               FROM users u
+               LEFT JOIN vendor_profiles v ON u.id = v.user_id
+               WHERE u.role='vendor' ORDER BY u.created_at DESC`;
       params = [];
     } else {
-      query = `SELECT id, first_name, last_name, email, mobile, manager_type, is_active, created_at
-               FROM users WHERE role='vendor' AND LOWER(manager_type)=$1 ORDER BY created_at DESC`;
+      query = `SELECT u.id, u.first_name, u.last_name, u.email, u.mobile, u.manager_type, u.is_active, u.created_at, v.restaurant_name AS business_name
+               FROM users u
+               LEFT JOIN vendor_profiles v ON u.id = v.user_id
+               WHERE u.role='vendor' AND LOWER(u.manager_type)=$1 ORDER BY u.created_at DESC`;
       params = [mType];
     }
     const { rows } = await pool.query(query, params);

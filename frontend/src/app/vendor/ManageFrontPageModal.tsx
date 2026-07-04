@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag, Heart, Send } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
+import { useLocationContext } from "@/context/LocationContext";
 import imageCompression from 'browser-image-compression';
 import { Geolocation } from '@capacitor/geolocation';
 import { Capacitor } from '@capacitor/core';
@@ -18,6 +19,7 @@ interface ManageFrontPageModalProps {
 
 export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: ManageFrontPageModalProps) {
   const { accessToken } = useAuth();
+  const { locationName, pincode: ctxPincode, landmark: ctxLandmark, latitude: ctxLat, longitude: ctxLng } = useLocationContext();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,12 +65,12 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
           min_order: data.profile.min_order?.toString() || "",
           offer: data.profile.offer || "",
           badge: data.profile.badge || "",
-          gps_address: data.profile.gps_address || "",
+          gps_address: data.profile.gps_address || (!data.profile.latitude && locationName ? locationName : ""),
           manual_address: data.profile.manual_address || "",
-          latitude: data.profile.latitude?.toString() || "",
-          longitude: data.profile.longitude?.toString() || "",
-          pincode: data.profile.pincode || "",
-          landmark: data.profile.landmark || "",
+          latitude: data.profile.latitude?.toString() || (ctxLat ? ctxLat.toString() : ""),
+          longitude: data.profile.longitude?.toString() || (ctxLng ? ctxLng.toString() : ""),
+          pincode: data.profile.pincode || (!data.profile.latitude && ctxPincode ? ctxPincode : ""),
+          landmark: data.profile.landmark || (!data.profile.latitude && ctxLandmark ? ctxLandmark : ""),
           rating: data.profile.rating?.toString() || "0.0",
         });
         // Preserve the current open/closed state so saving this modal never resets it
@@ -76,6 +78,16 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
         if (data.profile.image_url) {
           setImagePreview(data.profile.image_url);
         }
+      } else {
+        // Brand new profile
+        setFormData(prev => ({
+          ...prev,
+          gps_address: locationName || "",
+          latitude: ctxLat ? ctxLat.toString() : "",
+          longitude: ctxLng ? ctxLng.toString() : "",
+          pincode: ctxPincode || "",
+          landmark: ctxLandmark || "",
+        }));
       }
     } catch (err) {
       toast.error("Failed to load profile");
@@ -155,6 +167,22 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
       toast.error(err.message === "Permission denied" ? "Location permission denied" : "Please Turn On Location.");
     } finally {
       setIsGpsLoading(false);
+    }
+  };
+
+  const handleUseAppLocation = () => {
+    if (ctxLat && ctxLng) {
+      setFormData((prev) => ({
+        ...prev,
+        latitude: ctxLat.toString(),
+        longitude: ctxLng.toString(),
+        gps_address: locationName || "App Location",
+        pincode: ctxPincode || prev.pincode,
+        landmark: ctxLandmark || prev.landmark,
+      }));
+      toast.success("Location auto-filled from Homepage");
+    } else {
+      toast.error("No location set on homepage yet");
     }
   };
 
@@ -444,22 +472,32 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
                   <div className="space-y-3">
                     <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">GPS Auto-Fetch Address</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input 
                         readOnly
                         value={formData.gps_address}
                         className="flex-1 px-4 py-3 bg-gray-100 dark:bg-[#1F1F2E] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 outline-none"
                         placeholder="Click button to auto-fetch GPS..."
                       />
-                      <button 
-                        type="button"
-                        onClick={fetchGpsLocation}
-                        disabled={isGpsLoading}
-                        className={`px-4 py-3 bg-${tColor}-500 hover:bg-${tColor}-600 text-white rounded-xl font-bold shadow-md transition-all disabled:opacity-50 flex items-center gap-2`}
-                      >
-                        {isGpsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
-                        <span className="hidden sm:inline">Fetch GPS</span>
-                      </button>
+                      <div className="flex gap-2">
+                        <button 
+                          type="button"
+                          onClick={handleUseAppLocation}
+                          className="px-3 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-[#2A2A3A] dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-bold transition-all shadow-sm flex items-center gap-2 whitespace-nowrap"
+                        >
+                          <MapPin className="w-4 h-4" />
+                          <span className="hidden sm:inline">Use Homepage Loc</span>
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={fetchGpsLocation}
+                          disabled={isGpsLoading}
+                          className={`px-4 py-3 bg-${tColor}-500 hover:bg-${tColor}-600 text-white rounded-xl font-bold shadow-md transition-all disabled:opacity-50 flex items-center gap-2 whitespace-nowrap`}
+                        >
+                          {isGpsLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Navigation className="w-5 h-5" />}
+                          <span className="hidden sm:inline">Fetch GPS</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
 

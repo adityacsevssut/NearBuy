@@ -266,10 +266,9 @@ export default function VendorPage() {
                     </span>
                   </div>
                   <p className="text-sm md:text-base font-semibold text-gray-500 dark:text-gray-400 mb-3">{vendor.cuisine}</p>
-
                   {(vendor.landmark || vendor.manualAddress || vendor.gpsAddress) && (
-                    <p className="text-xs md:text-sm font-medium text-gray-400 mb-4 flex items-center gap-1.5 line-clamp-1">
-                      <span className="text-sm shrink-0">📍</span> {vendor.landmark ? `${vendor.landmark}, ` : ""}{vendor.manualAddress || vendor.gpsAddress}
+                    <p className="flex items-start text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 leading-snug">
+                      <span className="text-sm shrink-0">📍</span> {vendor.landmark || vendor.manualAddress || vendor.gpsAddress}
                     </p>
                   )}
 

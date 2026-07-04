@@ -149,7 +149,7 @@ export default function ManageLocationRangeModal({
               {savedAddresses.length > 0 ? (
                 <div className="space-y-2 mt-2">
                   {savedAddresses.map((addr) => {
-                    const isSelected = formData.pincode === addr.pincode && formData.manual_address === addr.full_address;
+                    const isSelected = (formData.pincode || "") === (addr.pincode || "") && (formData.manual_address || "") === (addr.full_address || "");
                     return (
                       <button
                         key={addr.id}

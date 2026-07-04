@@ -121,9 +121,9 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     // password is now a bcrypt hash (stored pre-hashed at submission) — use directly
     const passwordHash = request.password;
 
-    await pool.query(
+    const newUser = await pool.query(
       `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type, manager_type)
-       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9)`,
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9) RETURNING id`,
       [
         firstName, lastName, request.owner_email, request.owner_mobile, 
         passwordHash, request.request_type || 'vendor', 
@@ -131,7 +131,16 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
       ]
     );
 
-    // 4. Update request status
+    const userId = newUser.rows[0].id;
+
+    // 4. Create initial vendor_profile with the restaurant name
+    await pool.query(
+      `INSERT INTO vendor_profiles (user_id, restaurant_name, owner_number)
+       VALUES ($1, $2, $3)`,
+      [userId, request.restaurant_name, request.owner_mobile]
+    );
+
+    // 5. Update request status
     await pool.query("UPDATE vendor_requests SET status='approved' WHERE id=$1", [id]);
 
     return res.json({ message: "Vendor approved successfully." });

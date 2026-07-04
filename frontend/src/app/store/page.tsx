@@ -170,7 +170,7 @@ export default function EssentialsPage() {
                   </span>
                   <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
                     <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                      {landmark ? `${landmark}, ${locationName}` : locationName}
+                      {landmark || locationName}
                     </span>
                     <ChevronDown className="w-4 h-4 text-blue-600 shrink-0" />
                   </span>
