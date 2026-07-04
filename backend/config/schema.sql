@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS user_saved_addresses (
   name         TEXT NOT NULL,
   full_address TEXT,
   pincode      TEXT,
+  landmark     TEXT,
   latitude     DECIMAL(10, 7),
   longitude    DECIMAL(10, 7),
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()

@@ -67,13 +67,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }
 
   useEffect(() => {
-    if (isBypassed) return;
     fetchCenters();
-  }, [isBypassed]);
+  }, []);
 
 
   useEffect(() => {
-    if (isBypassed || loading) return;
+    if (loading) return;
 
     if (latitude === null || longitude === null) {
       // If user typed/selected a location but coordinates are unresolved, they are out of range.
@@ -134,7 +133,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     } else {
       setStatus("denied");
     }
-  }, [latitude, longitude, centers, loading, isBypassed, permissionPrompted, setLocation, setIsLocationModalOpen]);
+  }, [latitude, longitude, centers, loading, permissionPrompted, setLocation, setIsLocationModalOpen]);
 
   useEffect(() => {
     if (status !== "checking") {

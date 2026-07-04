@@ -66,7 +66,7 @@ const THEMES = {
 // ─────────────────────────────────────────────────────────────────────────────
 export default function VendorDashboard() {
   const { user, logout, isLoggedIn, accessToken, isInitializing } = useAuth();
-  const { locationName, pincode, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, landmark, pincode, setIsLocationModalOpen } = useLocationContext();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isFrontPageOpen, setIsFrontPageOpen] = useState(false);
@@ -306,7 +306,7 @@ export default function VendorDashboard() {
                   <ChevronDown className="w-3.5 h-3.5 text-gray-400 shrink-0 group-hover:text-gray-600 dark:text-gray-400 transition-colors" />
                 </div>
                 <span className="text-xs text-gray-500 dark:text-gray-400 font-medium leading-tight truncate mt-0.5">
-                  {locationName}{pincode ? ` · ${pincode}` : ''}
+                  {landmark || locationName}{pincode ? ` · ${pincode}` : ''}
                 </span>
               </div>
             </div>

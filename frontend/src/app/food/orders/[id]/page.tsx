@@ -787,7 +787,7 @@ export default function OrderStatusPage() {
               </div>
               <div>
                 <p className="font-black text-gray-900 dark:text-gray-100 leading-tight">
-                  {order.delivery_address?.landmark ? `${order.delivery_address.landmark}, ` : ''}{order.delivery_address?.locationName || 'Saved Location'}
+                  {order.delivery_address?.landmark || order.delivery_address?.locationName || 'Saved Location'}
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-1">PIN: {order.delivery_address?.pincode || 'N/A'}</p>
                 <div className="mt-2 inline-block px-2 py-0.5 bg-gray-100 dark:bg-[#1F1F2E] text-gray-600 dark:text-gray-400 text-[10px] font-bold uppercase tracking-widest rounded">

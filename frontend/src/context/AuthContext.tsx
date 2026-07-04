@@ -130,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("nb_refresh", refresh);
     scheduleRefresh();
     toast.success("Welcome to NearBuy!", {
-      duration: 3000,
+      duration: 2000,
       style: {
         border: `1px solid ${isEssentials ? '#3b82f6' : '#f97316'}`,
         padding: "16px",
@@ -160,7 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("nb_refresh");
     toast("Logged out. See you soon! 👋", {
       icon: "👋",
-      duration: 3000,
+      duration: 2000,
       style: {
         border: "1px solid #e5e7eb",
         padding: "16px",

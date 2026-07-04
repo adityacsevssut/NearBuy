@@ -92,7 +92,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
             </button>
           </div>
         </div>
-      ), { duration: 1000, position: 'top-center' });
+      ), { duration: 2000, position: 'top-center' });
     });
 
     return () => {
@@ -110,7 +110,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
           const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
           if (isIOS) {
             if (!sessionStorage.getItem('ios_pwa_prompt')) {
-              toast('To receive notifications on iOS, tap Share and "Add to Home Screen".', { duration: 8000, icon: '📱' });
+              toast('To receive notifications on iOS, tap Share and "Add to Home Screen".', { duration: 2000, icon: '📱' });
               sessionStorage.setItem('ios_pwa_prompt', 'true');
             }
           }
@@ -173,7 +173,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 Enable
               </button>
             </div>
-          ), { duration: 10000, id: 'push-permission', position: 'top-center' });
+          ), { duration: 2000, id: 'push-permission', position: 'top-center' });
         }
       } catch (error) {
         console.error("FCM Setup failed:", error);

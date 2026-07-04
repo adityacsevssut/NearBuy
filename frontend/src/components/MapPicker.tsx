@@ -38,7 +38,7 @@ function LeafletMapEventsHandler({
       timeoutRef.current = setTimeout(() => {
         const center = map.getCenter();
         const dist = Math.sqrt(Math.pow(center.lat - lat, 2) + Math.pow(center.lng - lng, 2));
-        if (dist > 0.00005) {
+        if (dist > 0.0005) {
           onLocationChange(center.lat, center.lng);
         }
       }, 400);
@@ -74,7 +74,7 @@ export default function MapPicker({ lat, lng, onLocationChange }: MapPickerProps
   const handleMapboxMoveEnd = (e: any) => {
     const viewState = e.viewState;
     const dist = Math.sqrt(Math.pow(viewState.latitude - lat, 2) + Math.pow(viewState.longitude - lng, 2));
-    if (dist > 0.00005) {
+    if (dist > 0.0005) {
       onLocationChange(viewState.latitude, viewState.longitude);
     }
   };

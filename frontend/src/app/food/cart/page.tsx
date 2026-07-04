@@ -372,7 +372,7 @@ function RestaurantOrderCard({
           <div className="flex-1 min-w-0">
             <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Delivery Address <span className="text-red-500 text-xs">*</span></p>
             <p className="text-sm font-black text-gray-900 dark:text-gray-100 truncate">
-              {landmark ? `${landmark}, ${locationName}` : locationName}
+              {landmark || locationName}
             </p>
           </div>
           <ChevronRight className="w-4 h-4 text-gray-400 shrink-0" />

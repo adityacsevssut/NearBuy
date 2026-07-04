@@ -50,7 +50,7 @@ export default function RootLayout({
                       position="top-center" 
                       reverseOrder={false} 
                       toastOptions={{
-                        duration: 1000,
+                        duration: 2000,
                         style: {
                           transition: 'all 0.3s ease-out'
                         }
