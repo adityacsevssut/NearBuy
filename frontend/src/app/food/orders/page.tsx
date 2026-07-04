@@ -259,7 +259,7 @@ function OrdersPageContent() {
                   </h3>
                   <div className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                     <MapPin className="w-3.5 h-3.5 shrink-0" />
-                    <span className="truncate">{order.delivery_address?.locationName || "Unknown Location"}</span>
+                    <span className="truncate">{order.delivery_address?.fullAddress || order.delivery_address?.locationName || "Unknown Location"}</span>
                   </div>
                 </div>
                 <div className="shrink-0 text-right">

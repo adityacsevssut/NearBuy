@@ -696,7 +696,7 @@ function RestaurantOrderCard({
 export default function CartPage() {
   const router = useRouter();
   const { items, updateQty, removeItem, clearCart, restaurantCount } = useCart();
-  const { locationName, landmark, pincode, latitude, longitude, setIsLocationModalOpen } = useLocationContext();
+  const { locationName, landmark, pincode, latitude, longitude, fullAddress, setIsLocationModalOpen } = useLocationContext();
   const { isLoggedIn, accessToken, openLoginModal } = useAuth();
 
   const [mounted, setMounted] = useState(false);
@@ -746,7 +746,7 @@ export default function CartPage() {
 
     setIsPlacingOrder(true);
     const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
-    const addressDetails = { locationName, landmark, pincode, latitude, longitude };
+    const addressDetails = { locationName, landmark, pincode, latitude, longitude, fullAddress };
 
     try {
       const res = await fetch(`${API}/api/orders`, {

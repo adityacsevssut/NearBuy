@@ -25,7 +25,8 @@ interface LocationContextType {
   landmark: string;
   latitude: number | null;
   longitude: number | null;
-  setLocation: (name: string, pin: string, landmark?: string, lat?: number, lon?: number) => void;
+  fullAddress: string;
+  setLocation: (name: string, pin: string, landmark?: string, lat?: number, lon?: number, fullAddr?: string) => void;
   fetchExactLocation: () => Promise<void>; // kept for interface compat
   isFetchingLocation: boolean;
   isLocationModalOpen: boolean;
@@ -75,6 +76,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   const [locationName, setLocationName] = useState("Select Location");
   const [pincode, setPincode] = useState("");
   const [landmark, setLandmark] = useState("");
+  const [fullAddress, setFullAddress] = useState("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
@@ -92,9 +94,11 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     const savedLandmark = localStorage.getItem("nearbuy_landmark");
     const savedLat = localStorage.getItem("nearbuy_latitude");
     const savedLon = localStorage.getItem("nearbuy_longitude");
+    const savedFullAddress = localStorage.getItem("nearbuy_fullAddress");
     if (savedName) setLocationName(savedName);
     if (savedPin) setPincode(savedPin);
     if (savedLandmark) setLandmark(savedLandmark);
+    if (savedFullAddress) setFullAddress(savedFullAddress);
     if (savedLat) setLatitude(parseFloat(savedLat));
     if (savedLon) setLongitude(parseFloat(savedLon));
     // Load saved addresses from localStorage (offline/pre-login cache)
@@ -149,6 +153,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         const addresses: SavedAddress[] = data.addresses || [];
         setSavedAddresses(addresses);
+        lsSetSavedAddresses(addresses);
       }
     } catch {
       console.error("Failed to fetch saved addresses from DB");
@@ -199,13 +204,15 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const setLocation = (name: string, pin: string, lmk?: string, lat?: number, lon?: number) => {
+  const setLocation = (name: string, pin: string, lmk?: string, lat?: number, lon?: number, fullAddr?: string) => {
     setLocationName(name);
     setPincode(pin);
     setLandmark(lmk || "");
+    setFullAddress(fullAddr || "");
     localStorage.setItem("nearbuy_locationName", name);
     localStorage.setItem("nearbuy_pincode", pin);
     localStorage.setItem("nearbuy_landmark", lmk || "");
+    localStorage.setItem("nearbuy_fullAddress", fullAddr || "");
     if (lat !== undefined && lat !== null) {
       setLatitude(lat);
       localStorage.setItem("nearbuy_latitude", lat.toString());
@@ -282,11 +289,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   // ── Remove a saved address (DB + localStorage) ──────────────────────────────
   const removeSavedAddress = useCallback(
     async (id: string) => {
+      // Optimistic remove for all users
+      const updated = savedAddresses.filter((a) => a.id !== id);
+      setSavedAddresses(updated);
+      lsSetSavedAddresses(updated);
+
       if (!isLoggedIn || !accessToken || id.startsWith("temp_")) {
-        // Optimistic remove for guests
-        const updated = savedAddresses.filter((a) => a.id !== id);
-        setSavedAddresses(updated);
-        lsSetSavedAddresses(updated);
         return;
       }
 
@@ -350,6 +358,7 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         locationName,
         pincode,
         landmark,
+        fullAddress,
         latitude,
         longitude,
         setLocation,

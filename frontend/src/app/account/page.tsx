@@ -534,7 +534,8 @@ function AccountContent() {
                             addr.pincode || "",
                             addr.landmark || "",
                             addr.latitude != null ? parseFloat(String(addr.latitude)) : undefined,
-                            addr.longitude != null ? parseFloat(String(addr.longitude)) : undefined
+                            addr.longitude != null ? parseFloat(String(addr.longitude)) : undefined,
+                            addr.full_address || ""
                           );
                           toast.success(`📍 Switched to ${addr.landmark ? addr.landmark : addr.name}`);
                           router.push("/");
