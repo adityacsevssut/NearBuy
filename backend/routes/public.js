@@ -520,10 +520,9 @@ router.get("/hot-deals", async (req, res) => {
   }
 });
 
-// GET /api/public/settings
-router.get("/settings", async (req, res) => {
+// ── Initialize Global Settings Table ───────────────────────────────────────
+(async () => {
   try {
-    // Create table if not exists
     await pool.query(`
       CREATE TABLE IF NOT EXISTS global_settings (
         id INT PRIMARY KEY DEFAULT 1,
@@ -535,20 +534,27 @@ router.get("/settings", async (req, res) => {
       );
     `);
     
-    // Insert default if empty
     await pool.query(`
       INSERT INTO global_settings (id, platform_fee, gst)
       VALUES (1, 5.00, 10.00)
       ON CONFLICT (id) DO NOTHING;
     `);
 
-    // Ensure columns exist (for migration)
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_food BOOLEAN DEFAULT TRUE;`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_store BOOLEAN DEFAULT FALSE;`);
+    
+    console.log("✅ Global settings table initialized.");
+  } catch (err) {
+    console.error("❌ Failed to initialize global settings table:", err);
+  }
+})();
 
+// GET /api/public/settings
+router.get("/settings", async (req, res) => {
+  try {
     const { rows } = await pool.query("SELECT platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store FROM global_settings WHERE id = 1");
     return res.json({
       platform_fee: parseFloat(rows[0].platform_fee),
@@ -573,23 +579,6 @@ router.post("/settings", authenticate, validate(updateSettingsSchema), async (re
       return res.status(403).json({ error: "Access denied. Managers and admins only." });
     }
     const { platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store } = req.body;
-    
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS global_settings (
-        id INT PRIMARY KEY DEFAULT 1,
-        platform_fee DECIMAL(10,2) NOT NULL DEFAULT 5.00,
-        gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
-        instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
-        food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
-        store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
-      );
-    `);
-
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_food BOOLEAN DEFAULT TRUE;`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_store BOOLEAN DEFAULT FALSE;`);
     
     await pool.query(`
       INSERT INTO global_settings (id, platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store)
