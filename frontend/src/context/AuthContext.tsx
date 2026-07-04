@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const newToken = data.accessToken;
       setAccessToken(newToken);
       localStorage.setItem("nb_access", newToken);
+      localStorage.setItem("nb_last_refresh", Date.now().toString());
       return newToken;
     } catch {
       return null;
@@ -105,9 +106,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       });
     }
+    
     setIsInitializing(false);
+
+    // Refresh token when app comes back to foreground (Capacitor background freezing fix)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        const refresh = localStorage.getItem("nb_refresh");
+        const lastRefresh = parseInt(localStorage.getItem("nb_last_refresh") || "0");
+        // Only refresh if more than 5 minutes have passed since last refresh to avoid spam
+        if (refresh && Date.now() - lastRefresh > 5 * 60 * 1000) {
+          refreshAccessToken().then(newToken => {
+             if (newToken) scheduleRefresh();
+          });
+        }
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
     return () => {
       if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

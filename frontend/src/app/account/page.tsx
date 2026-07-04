@@ -81,7 +81,8 @@ function AccountContent() {
       try {
         const apiBase = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
         const res = await fetch(`${apiBase}/api/orders/stats`, {
-          headers: { Authorization: `Bearer ${accessToken}` }
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: "no-store",
         });
         if (res.ok) {
           const data = await res.json();

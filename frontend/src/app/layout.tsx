@@ -33,6 +33,8 @@ import { Toaster } from 'react-hot-toast';
 import LocationModal from "@/components/LocationModal";
 import CapacitorHardwareBackButton from "@/components/CapacitorHardwareBackButton";
 
+import ToastFix from "@/components/ToastFix";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -52,10 +54,12 @@ export default function RootLayout({
                       toastOptions={{
                         duration: 2000,
                         style: {
-                          transition: 'all 0.3s ease-out'
+                          transition: 'all 0.3s ease-out',
+                          pointerEvents: 'none'
                         }
                       }}
                     />
+                    <ToastFix />
                     <CapacitorHardwareBackButton />
                     <NetworkGuard>
                       <ServiceGuard>
