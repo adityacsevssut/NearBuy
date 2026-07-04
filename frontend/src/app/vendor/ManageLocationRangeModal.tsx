@@ -6,6 +6,9 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { Geolocation } from '@capacitor/geolocation';
+import { Capacitor } from '@capacitor/core';
+import { requestGpsActivation } from '@/utils/locationHelper';
 
 interface ManageLocationRangeModalProps {
   isOpen: boolean;
@@ -19,8 +22,9 @@ export default function ManageLocationRangeModal({
   profile,
 }: ManageLocationRangeModalProps) {
   const { accessToken } = useAuth();
-  const { savedAddresses } = useLocationContext();
+  const { savedAddresses, addSavedAddress } = useLocationContext();
   const [isSaving, setIsSaving] = useState(false);
+  const [isFetchingGps, setIsFetchingGps] = useState(false);
 
   const [formData, setFormData] = useState({
     delivery_range: 5,
@@ -48,7 +52,61 @@ export default function ManageLocationRangeModal({
 
   if (!isOpen) return null;
 
+  const handleFetchCurrentLocation = async () => {
+    setIsFetchingGps(true);
+    try {
+      if (Capacitor.isNativePlatform()) {
+        await requestGpsActivation();
+      }
+      const position = await Geolocation.getCurrentPosition({ enableHighAccuracy: true, timeout: 15000 });
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
 
+      const res = await fetch(`/api/geocode-reverse?lat=${lat}&lng=${lon}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+          const address = data.results[0];
+          const name = address.name || "Current Location";
+          let pin = "";
+          for (const comp of address.address_components || []) {
+            if (comp.types.includes("postal_code")) {
+              pin = comp.long_name;
+              break;
+            }
+          }
+          setFormData(prev => ({
+            ...prev,
+            latitude: lat.toString(),
+            longitude: lon.toString(),
+            gps_address: name,
+            manual_address: address.formatted_address || name,
+            pincode: pin,
+            landmark: "",
+          }));
+          toast.success("Store location retrieved successfully!");
+        } else {
+          setFormData(prev => ({
+             ...prev,
+             latitude: lat.toString(),
+             longitude: lon.toString(),
+             gps_address: "Current Location",
+             manual_address: "Current Location",
+             pincode: "",
+             landmark: ""
+          }));
+          toast.success("Coordinates retrieved, but exact address not found.");
+        }
+      } else {
+        toast.error("Failed to lookup address details");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to get location. Please check your GPS permissions.");
+    } finally {
+      setIsFetchingGps(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +133,19 @@ export default function ManageLocationRangeModal({
 
       if (res.ok) {
         toast.success("Location & range limits saved!");
+        
+        // Also save this address to their savedAddresses list so they can easily switch to it later
+        if (formData.manual_address) {
+          addSavedAddress({
+            name: formData.gps_address || "Store Location",
+            full_address: formData.manual_address,
+            pincode: formData.pincode || "",
+            landmark: formData.landmark || "",
+            latitude: formData.latitude ? parseFloat(formData.latitude) : null,
+            longitude: formData.longitude ? parseFloat(formData.longitude) : null,
+          });
+        }
+        
         onClose();
       } else {
         throw new Error("Failed to save");
@@ -144,8 +215,43 @@ export default function ManageLocationRangeModal({
 
           <div className="space-y-4 pt-4 border-t border-gray-100 dark:border-[#2A2A3A]">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Select Store Location</label>
+              <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Store Location</label>
               
+              {/* CURRENT SELECTED ADDRESS DISPLAY */}
+              {formData.manual_address && (
+                <div className="mb-4 p-4 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl relative">
+                  <div className="absolute top-3 right-3 text-green-500">
+                    <Check className="w-5 h-5" />
+                  </div>
+                  <h4 className="font-bold text-green-900 dark:text-green-400 text-sm flex items-center gap-2">
+                    <MapPin className="w-4 h-4" /> Current Store Address
+                  </h4>
+                  <p className="text-xs text-green-800 dark:text-green-300 mt-1 font-medium">{formData.manual_address}</p>
+                  {formData.pincode && <p className="text-[10px] text-green-700/80 dark:text-green-400/80 mt-1">Pincode: {formData.pincode}</p>}
+                </div>
+              )}
+
+              {/* FETCH GPS BUTTON */}
+              <button
+                type="button"
+                onClick={handleFetchCurrentLocation}
+                disabled={isFetchingGps}
+                className="w-full flex items-center justify-center gap-2 py-3.5 bg-gray-900 hover:bg-black dark:bg-white dark:hover:bg-gray-100 text-white dark:text-black rounded-xl font-bold transition-all shadow-md active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mb-4"
+              >
+                {isFetchingGps ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Navigation className="w-4 h-4" />
+                )}
+                {isFetchingGps ? "Locating Store..." : "Use Current GPS Location"}
+              </button>
+
+              <div className="flex items-center gap-3 my-3">
+                <div className="h-px flex-1 bg-gray-200 dark:bg-[#2A2A3A]"></div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase">Or select from saved</span>
+                <div className="h-px flex-1 bg-gray-200 dark:bg-[#2A2A3A]"></div>
+              </div>
+
               {savedAddresses.length > 0 ? (
                 <div className="space-y-2 mt-2">
                   {savedAddresses.map((addr) => {
@@ -183,8 +289,8 @@ export default function ManageLocationRangeModal({
                   })}
                 </div>
               ) : (
-                <div className="p-4 bg-orange-50/50 dark:bg-orange-500/10 border border-orange-100 dark:border-orange-500/20 rounded-xl text-center">
-                  <p className="text-xs text-orange-800 dark:text-orange-gradient">You don't have any saved addresses. Please add an address from the home page first to set your store location.</p>
+                <div className="p-4 bg-gray-50 dark:bg-[#1F1F2E] border border-gray-100 dark:border-[#2A2A3A] rounded-xl text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">No saved addresses found. Use the GPS button above to set your store location.</p>
                 </div>
               )}
             </div>
