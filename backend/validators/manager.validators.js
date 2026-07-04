@@ -13,14 +13,16 @@ const createManagerSchema = Joi.object({
   managerType: Joi.string().valid("food", "store").required().messages({
     "any.only": "Manager type must be food or store",
     "any.required": "Manager type is required"
-  })
+  }),
+  service_center_id: Joi.string().uuid().allow("", null).optional()
 });
 
 /* ── Update manager ───────────────────────────────────────────────── */
 const updateManagerSchema = Joi.object({
   email:       email.optional(),
   password:    Joi.string().min(8).max(128).optional().messages({ "string.min": "Password must be at least 8 characters" }),
-  managerType: Joi.string().valid("food", "store").optional()
+  managerType: Joi.string().valid("food", "store").optional(),
+  service_center_id: Joi.string().uuid().allow("", null).optional()
 }).min(1).messages({ "object.min": "At least one field must be provided to update" });
 
 /* ── Create vendor account (by manager) ───────────────────────────── */

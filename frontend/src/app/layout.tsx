@@ -55,7 +55,6 @@ export default function RootLayout({
                         duration: 2000,
                         style: {
                           transition: 'all 0.3s ease-out',
-                          pointerEvents: 'none'
                         }
                       }}
                     />

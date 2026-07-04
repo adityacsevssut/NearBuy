@@ -65,6 +65,7 @@ function safeUser(u) {
     id: u.id, firstName: u.first_name, lastName: u.last_name,
     email: u.email, mobile: u.mobile, avatar: u.avatar_url, role: u.role,
     manager_type: u.manager_type,
+    service_center_id: u.service_center_id || null,
     locationName: u.location_name,
     pincode: u.pincode,
     landmark: u.landmark,
@@ -669,6 +670,12 @@ router.put(
     `);
     await pool.query(`
       CREATE INDEX IF NOT EXISTS idx_user_saved_addresses_user ON user_saved_addresses(user_id)
+    `);
+
+    // Add service_center_id to users if not exists (idempotent)
+    await pool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS service_center_id UUID
+        REFERENCES service_centers(id) ON DELETE SET NULL
     `);
 
     await pool.query(`

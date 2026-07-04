@@ -34,6 +34,7 @@ interface Manager {
   email: string;
   role: string;
   manager_type: string;
+  service_center_id?: string | null;
   is_active: boolean;
   created_at: string;
 }
@@ -54,6 +55,7 @@ interface ManagerFormData {
   email: string;
   password: string;
   managerType: "food" | "store" | "";
+  serviceCenterId?: string;
 }
 
 export default function DevDashboard() {
@@ -148,14 +150,14 @@ export default function DevDashboard() {
 
   // ---- Manager Logic ----
   function openAdd() {
-    setForm({ email: "", password: "", managerType: "" });
+    setForm({ email: "", password: "", managerType: "", serviceCenterId: "" });
     setEditTarget(null);
     setModalMode("add");
     setShowPass(false);
   }
 
   function openEdit(m: Manager) {
-    setForm({ email: m.email, password: "", managerType: (m.manager_type as any) || "" });
+    setForm({ email: m.email, password: "", managerType: (m.manager_type as any) || "", serviceCenterId: m.service_center_id || "" });
     setEditTarget(m);
     setModalMode("edit");
     setShowPass(false);
@@ -174,6 +176,7 @@ export default function DevDashboard() {
     const payload: any = { email: form.email, managerType: form.managerType };
     if (form.password) payload.password = form.password;
     if (modalMode === "add") payload.password = form.password;
+    if (form.serviceCenterId) payload.service_center_id = form.serviceCenterId;
 
     const url = modalMode === "add" ? `${API}/api/managers` : `${API}/api/managers/${editTarget?.id}`;
     const method = modalMode === "add" ? "POST" : "PATCH";
@@ -1156,6 +1159,23 @@ export default function DevDashboard() {
                     <option value="" disabled>Select manager type…</option>
                     <option value="food">🍽️  Food</option>
                     <option value="store">🛍️  Store</option>
+                  </select>
+                </div>
+
+                {/* Service Center Assignment */}
+                <div className="relative">
+                  <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 z-10 pointer-events-none" />
+                  <select
+                    value={form.serviceCenterId || ""}
+                    onChange={(e) => setForm({ ...form, serviceCenterId: e.target.value })}
+                    className="w-full bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] focus:border-violet-500 focus:ring-4 focus:ring-violet-500/10 rounded-xl px-4 py-3.5 pl-11 text-sm text-gray-900 dark:text-gray-100 outline-none transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="">No service center assigned</option>
+                    {centers.map(c => (
+                      <option key={c.id} value={c.id}>
+                        {c.landmark || c.name} (PIN: {c.pincode})
+                      </option>
+                    ))}
                   </select>
                 </div>
 

@@ -16,6 +16,7 @@ interface AuthUser {
   avatar?: string;
   role: string;
   manager_type?: string;
+  service_center_id?: string | null;
   locationName?: string;
   pincode?: string;
   landmark?: string;

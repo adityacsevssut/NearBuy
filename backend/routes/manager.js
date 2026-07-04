@@ -24,7 +24,7 @@ function devOnly(req, res, next) {
 router.get("/", authenticate, devOnly, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT id, first_name, last_name, email, mobile, role, manager_type, is_active, created_at
+      `SELECT id, first_name, last_name, email, mobile, role, manager_type, service_center_id, is_active, created_at
        FROM users
        WHERE role IN ('manager','admin') AND email != $1
        ORDER BY created_at DESC`,
@@ -46,7 +46,7 @@ router.post(
   devOnly,
   validate(createManagerSchema),
   async (req, res) => {
-    const { email, password, managerType } = req.body;
+    const { email, password, managerType, service_center_id } = req.body;
     try {
       // Check if email already exists
       const existing = await pool.query("SELECT id FROM users WHERE email=$1", [email]);
@@ -56,10 +56,10 @@ router.post(
 
       const passwordHash = await bcrypt.hash(password, 10);
       const { rows } = await pool.query(
-        `INSERT INTO users (first_name, last_name, email, password_hash, role, manager_type, is_verified, is_active)
-         VALUES ('Manager', $2, $1, $3, 'manager', $4, TRUE, TRUE)
-         RETURNING id, first_name, last_name, email, role, manager_type, is_active, created_at`,
-        [email, managerType.charAt(0).toUpperCase() + managerType.slice(1), passwordHash, managerType]
+        `INSERT INTO users (first_name, last_name, email, password_hash, role, manager_type, service_center_id, is_verified, is_active)
+         VALUES ('Manager', $2, $1, $3, 'manager', $4, $5, TRUE, TRUE)
+         RETURNING id, first_name, last_name, email, role, manager_type, service_center_id, is_active, created_at`,
+        [email, managerType.charAt(0).toUpperCase() + managerType.slice(1), passwordHash, managerType, service_center_id || null]
       );
 
       return res.status(201).json({ message: "Manager created successfully.", manager: rows[0] });
@@ -80,7 +80,7 @@ router.patch(
   validate(updateManagerSchema),
   async (req, res) => {
     const { id } = req.params;
-    const { email, password, managerType } = req.body;
+    const { email, password, managerType, service_center_id } = req.body;
 
     try {
       // Fetch the manager first
@@ -98,6 +98,10 @@ router.patch(
         updates.push(`last_name=$${idx++}`);
         values.push(managerType);
         values.push(managerType.charAt(0).toUpperCase() + managerType.slice(1));
+      }
+      if (service_center_id !== undefined) {
+        updates.push(`service_center_id=$${idx++}`);
+        values.push(service_center_id || null);
       }
 
       if (!updates.length) return res.status(400).json({ error: "No fields to update." });

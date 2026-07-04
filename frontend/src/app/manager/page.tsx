@@ -4,7 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useMemo } from "react";
-import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2, Mail, Phone } from "lucide-react";
+import { LogOut, LayoutTemplate, ClipboardList, Store as StoreIcon, Building2, UserCircle, ShieldCheck, Pencil, Trash2, Plus, Eye, EyeOff, CheckCircle2, Upload, Image as ImageIcon, RefreshCw, CheckCircle, AlertCircle, AlertTriangle, LayoutDashboard, Receipt, MessageSquare, Menu, X, IndianRupee, XCircle, Calendar, ArrowLeft, Sun, Moon, LifeBuoy, Undo2, Mail, Phone, MapPin, Navigation } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import imageCompression from 'browser-image-compression';
@@ -135,6 +135,51 @@ export default function PartnerDashboard() {
 
   // Mobile sidebar state
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // ── Service Center ──────────────────────────────────────────────────────
+  const [assignedCenter, setAssignedCenter] = useState<any>(null);
+  const [gpsStatus, setGpsStatus] = useState<"idle" | "checking" | "inside" | "outside">("idle");
+  const [allCenters, setAllCenters] = useState<any[]>([]);
+
+  function haversine(lat1: number, lon1: number, lat2: number, lon2: number) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * (Math.PI / 180);
+    const dLon = (lon2 - lon1) * (Math.PI / 180);
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  async function checkGpsStatus() {
+    if (allCenters.length === 0) return;
+    setGpsStatus("checking");
+    try {
+      const pos = await new Promise<GeolocationPosition>((resolve, reject) =>
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 15000 })
+      );
+      const { latitude: lat, longitude: lon } = pos.coords;
+      const isInAny = allCenters.some((c) =>
+        haversine(lat, lon, parseFloat(String(c.latitude)), parseFloat(String(c.longitude))) <= parseFloat(String(c.radius_km))
+      );
+      setGpsStatus(isInAny ? "inside" : "outside");
+    } catch {
+      setGpsStatus("idle");
+      toast.error("GPS unavailable. Please check permissions.");
+    }
+  }
+
+  useEffect(() => {
+    fetch(`${API}/api/public/service-centers`)
+      .then((r) => r.json())
+      .then((data) => {
+        const centers = data.centers || [];
+        setAllCenters(centers);
+        if (user?.service_center_id) {
+          const found = centers.find((c: any) => c.id === user.service_center_id);
+          if (found) setAssignedCenter(found);
+        }
+      })
+      .catch(() => {});
+  }, [user?.service_center_id]);
 
   // Search states
   const [vendorSearchQuery, setVendorSearchQuery] = useState("");
@@ -1110,6 +1155,95 @@ export default function PartnerDashboard() {
                   </div>
                 )}
               </div>
+
+              {/* ── Service Center Status Widget ────────────────────────── */}
+              <div className={`rounded-2xl border p-4 transition-all ${
+                gpsStatus === "outside"
+                  ? "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30"
+                  : gpsStatus === "inside"
+                  ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30"
+                  : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A]"
+              }`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                      gpsStatus === "outside" ? "bg-red-100 dark:bg-red-500/20"
+                      : gpsStatus === "inside" ? "bg-green-100 dark:bg-green-500/20"
+                      : theme.bg
+                    }`}>
+                      <Building2 className={`w-4 h-4 ${
+                        gpsStatus === "outside" ? "text-red-500"
+                        : gpsStatus === "inside" ? "text-green-500"
+                        : theme.text
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Your Service Center</p>
+                      {assignedCenter ? (
+                        <>
+                          <p className="font-black text-gray-900 dark:text-gray-100 text-[15px] leading-tight line-clamp-1">
+                            {assignedCenter.landmark || assignedCenter.name}
+                          </p>
+                          {assignedCenter.landmark && (
+                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{assignedCenter.name}</p>
+                          )}
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {assignedCenter.pincode && (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${theme.text} ${theme.bg} ${theme.border}`}>
+                                PIN {assignedCenter.pincode}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 dark:bg-[#1F1F2E] px-2 py-0.5 rounded-full border border-gray-100 dark:border-[#2A2A3A]">
+                              {parseFloat(String(assignedCenter.radius_km)).toFixed(1)} km radius
+                            </span>
+                            {gpsStatus === "inside" && (
+                              <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-500/20">✅ In service area</span>
+                            )}
+                            {gpsStatus === "outside" && (
+                              <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded-full border border-red-100 dark:border-red-500/20">⚠️ Outside service area</span>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                          No service center assigned yet. Set one up to get started.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2 shrink-0">
+                    {assignedCenter && (
+                      <button
+                        onClick={checkGpsStatus}
+                        disabled={gpsStatus === "checking"}
+                        className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-600 dark:text-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-60 flex items-center gap-1 justify-center whitespace-nowrap"
+                      >
+                        {gpsStatus === "checking"
+                          ? <RefreshCw className="w-3 h-3 animate-spin" />
+                          : <Navigation className="w-3 h-3" />}
+                        GPS Check
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {gpsStatus === "outside" && (
+                  <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-500/30">
+                    <div className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-bold text-red-700 dark:text-red-400">
+                          Not Available At Your Location
+                        </p>
+                        <p className="text-xs text-red-600/80 dark:text-red-400/70 font-medium mt-0.5">
+                          Your GPS is outside all active service areas. Users in your current location see this service as unavailable. Move to your assigned area or update your service center.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
             </motion.div>
           ) : view === "vendors" ? (
             <motion.div
