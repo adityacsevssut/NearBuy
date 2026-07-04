@@ -166,8 +166,8 @@ export default function VendorDashboard() {
   const t = THEMES[vType] ?? THEMES.food;
   const TypeIcon = t.typeIcon;
 
-  // Restaurant display name (firstName = owner, lastName = business name at creation)
-  const restaurantName = `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "My Shop";
+  // Restaurant display name
+  const restaurantName = profile?.restaurant_name || `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() || "My Shop";
 
   // ── 4 Feature Cards ──────────────────────────────────────────────────────
   const cards = [

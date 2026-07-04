@@ -268,8 +268,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         if (res.ok) {
           // Refresh the real list from DB to get the correct UUID
           await refreshSavedAddresses();
+        } else {
+          const errText = await res.text();
+          console.error("[LocationContext] Failed to save address to DB:", res.status, errText);
         }
-      } catch {
+      } catch (err) {
+        console.error("[LocationContext] Network or fetch error in addSavedAddress:", err);
         // keep local optimistic state
       }
     },
