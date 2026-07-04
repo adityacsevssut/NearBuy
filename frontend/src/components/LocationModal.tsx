@@ -200,16 +200,23 @@ export default function LocationModal() {
 
   /* ── Save address (DB + context) ─────────────────────── */
 
-  const handleSaveAddress = () => {
+  const handleSaveAddress = async () => {
     if (!resolvedAddress) return;
+    // Both pincode and landmark are required
     if (!resolvedAddress.pincode?.trim() || !resolvedAddress.landmark?.trim()) {
       toast.error("Please fill in both PIN code and Landmark");
       return;
     }
     setIsSaving(true);
     try {
-      setLocation(resolvedAddress.name, resolvedAddress.pincode, resolvedAddress.landmark || "", resolvedAddress.lat, resolvedAddress.lng);
-      addSavedAddress({
+      setLocation(
+        resolvedAddress.name,
+        resolvedAddress.pincode,
+        resolvedAddress.landmark || "",
+        resolvedAddress.lat,
+        resolvedAddress.lng
+      );
+      await addSavedAddress({
         name: resolvedAddress.name,
         full_address: resolvedAddress.fullAddress,
         pincode: resolvedAddress.pincode,
@@ -217,8 +224,10 @@ export default function LocationModal() {
         latitude: resolvedAddress.lat,
         longitude: resolvedAddress.lng,
       });
-      toast.success(`Location saved: ${resolvedAddress.name}`, { icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> });
+      toast.success(`📍 Location saved: ${resolvedAddress.name}`);
       handleClose();
+    } catch (err) {
+      toast.error("Failed to save address. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -348,18 +357,28 @@ export default function LocationModal() {
                               <MapPin className={`w-4 h-4 ${c.text}`} />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className={`text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2 group-hover:${c.textDark} dark:group-hover:${c.textIconHover}`}>
-                                {addr.landmark ? addr.landmark : addr.name}
+                              {/* Primary: Landmark */}
+                              <p className={`text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-1 group-hover:${c.textDark} dark:group-hover:${c.textIconHover}`}>
+                                {addr.landmark || addr.name}
                               </p>
+                              {/* Secondary: Area name */}
+                              {addr.landmark && (
+                                <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 leading-tight mt-0.5 line-clamp-1">
+                                  {addr.name}
+                                </p>
+                              )}
+                              {/* PIN + street */}
                               <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                                 {addr.pincode && (
                                   <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold ${c.textBadge} ${c.bgLight} px-2 py-0.5 rounded-full border ${c.borderLight}`}>
                                     PIN {addr.pincode}
                                   </span>
                                 )}
-                                <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[120px]">
-                                  {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
-                                </p>
+                                {addr.full_address && (
+                                  <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[80px]">
+                                    {addr.full_address.split(",").slice(0, 2).join(",")}
+                                  </p>
+                                )}
                               </div>
                             </div>
                             <button

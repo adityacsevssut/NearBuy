@@ -136,7 +136,7 @@ export default function ManageLocationRangeModal({
         
         // Also save this address to their savedAddresses list so they can easily switch to it later
         if (formData.manual_address) {
-          addSavedAddress({
+          await addSavedAddress({
             name: formData.gps_address || "Store Location",
             full_address: formData.manual_address,
             pincode: formData.pincode || "",
@@ -278,12 +278,30 @@ export default function ManageLocationRangeModal({
                             : 'bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)]'
                         }`}
                       >
-                        <div className="flex justify-between items-center w-full">
-                          <span className="text-sm font-black text-gray-800 dark:text-gray-200">{addr.name}</span>
-                          {isSelected && <Check className="w-4 h-4 text-orange-500" />}
+                      <div className="flex items-start gap-3 w-full">
+                          <div className="flex-1 min-w-0 text-left">
+                            {/* Primary: Landmark */}
+                            <p className="text-sm font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-1">
+                              {addr.landmark || addr.name}
+                            </p>
+                            {/* Secondary: Area name (only if landmark exists) */}
+                            {addr.landmark && (
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 leading-tight mt-0.5 line-clamp-1">
+                                {addr.name}
+                              </p>
+                            )}
+                            {/* Full address + PIN */}
+                            <p className="text-[11px] text-gray-400 truncate mt-1">
+                              {addr.full_address}
+                            </p>
+                            {addr.pincode && (
+                              <span className="text-[10px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-500/10 px-2 py-0.5 rounded-full border border-orange-100 dark:border-orange-500/20 mt-1 inline-block">
+                                PIN {addr.pincode}
+                              </span>
+                            )}
+                          </div>
+                          {isSelected && <Check className="w-4 h-4 text-orange-500 shrink-0 mt-0.5" />}
                         </div>
-                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{addr.full_address}</span>
-                        {addr.landmark && <span className="text-[10px] text-gray-400 mt-1">Landmark: {addr.landmark}</span>}
                       </button>
                     );
                   })}

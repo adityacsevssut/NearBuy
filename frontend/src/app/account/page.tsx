@@ -29,6 +29,7 @@ function AccountContent() {
   const isPurple = themeParam === 'purple';
   const domain = isBlue ? 'store' : isPurple ? 'hotels' : 'food';
   const [showAddresses, setShowAddresses] = useState(false);
+  const [deletingAddressId, setDeletingAddressId] = useState<string | null>(null);
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
   const [supportEmail, setSupportEmail] = useState("manager@nearbuy.com");
   
@@ -190,7 +191,8 @@ function AccountContent() {
         padding: "16px",
         borderRadius: "16px",
         background: "#fff",
-        maxWidth: "340px"
+        maxWidth: "340px",
+        pointerEvents: "auto",
       },
     });
   };
@@ -543,32 +545,88 @@ function AccountContent() {
                           <MapPin className={`w-4 h-4 ${theme.textPrimary}`} />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-2 pr-2">
-                            {addr.landmark ? addr.landmark : addr.name}
+                          {/* Primary: Landmark */}
+                          <p className="text-[14px] font-black text-gray-800 dark:text-gray-200 leading-tight line-clamp-1">
+                            {addr.landmark || addr.name}
                           </p>
+                          {/* Secondary: Area name (if landmark exists) */}
+                          {addr.landmark && (
+                            <p className="text-[12px] font-semibold text-gray-500 dark:text-gray-400 leading-tight mt-0.5 line-clamp-1">
+                              {addr.name}
+                            </p>
+                          )}
+                          {/* PIN + street */}
                           <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                             {addr.pincode && (
                               <span className={`shrink-0 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full border ${isBlue ? "bg-blue-50 text-blue-600 border-blue-100" : "bg-orange-50 text-orange-gradient border-orange-100"}`}>
                                 PIN {addr.pincode}
                               </span>
                             )}
-                            {(addr.full_address || addr.landmark) && (
-                              <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[120px]">
-                                {addr.landmark ? `${addr.name}, ` : ""}{(addr.full_address || "").split(",").slice(0, 2).join(",")}
+                            {addr.full_address && (
+                              <p className="text-[11px] text-gray-400 line-clamp-1 flex-1 min-w-[80px]">
+                                {addr.full_address.split(",").slice(0, 2).join(",")}
                               </p>
                             )}
                           </div>
                         </div>
                         <button
-                          onClick={async (e) => {
+                          onClick={(e) => {
                             e.stopPropagation();
-                            await removeSavedAddress(addr.id);
-                            toast.success("Address removed");
+                            const addrId = addr.id;
+                            const addrLabel = addr.landmark ? addr.landmark : addr.name;
+                            toast((t) => (
+                              <div className="flex flex-col gap-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 bg-red-100 rounded-full shrink-0">
+                                    <Trash2 className="w-4 h-4 text-red-600" />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-black text-gray-900 text-[15px]">Remove Address?</h3>
+                                    <p className="text-sm text-gray-500 font-medium leading-tight mt-0.5 line-clamp-2">
+                                      &ldquo;{addrLabel}&rdquo; will be permanently removed.
+                                    </p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-2 justify-end mt-1">
+                                  <button
+                                    onClick={() => toast.dismiss(t.id)}
+                                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-sm font-bold transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={async () => {
+                                      toast.dismiss(t.id);
+                                      setDeletingAddressId(addrId);
+                                      await removeSavedAddress(addrId);
+                                      setDeletingAddressId(null);
+                                      toast.success("Address removed");
+                                    }}
+                                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-bold shadow-sm shadow-red-500/20 transition-colors"
+                                  >
+                                    Yes, Delete
+                                  </button>
+                                </div>
+                              </div>
+                            ), {
+                              duration: Infinity,
+                              style: {
+                                border: "1px solid #fee2e2",
+                                padding: "16px",
+                                borderRadius: "16px",
+                                background: "#fff",
+                                maxWidth: "340px",
+                                pointerEvents: "auto",
+                              },
+                            });
                           }}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 active:scale-90 shrink-0"
+                          disabled={deletingAddressId === addr.id}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 active:scale-90 shrink-0 disabled:opacity-40"
                           title="Delete address"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          {deletingAddressId === addr.id
+                            ? <span className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin block" />
+                            : <Trash2 className="w-4 h-4" />}
                         </button>
                       </div>
                     ))

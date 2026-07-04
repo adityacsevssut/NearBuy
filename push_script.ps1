@@ -1,5 +1,5 @@
 git add .
-git commit -m "Fix vendor location storage and sync"
+git commit -m "Implemented Admin assigned Service Centers for Managers"
 git push origin capacitor-mobile-app
 git checkout developer
 git pull origin developer
