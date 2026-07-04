@@ -124,10 +124,6 @@ export default function PartnerDashboard() {
   const [dashboardDate, setDashboardDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [vendors, setVendors] = useState<any[]>([]);
   const [loadingVendors, setLoadingVendors] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [vendorForm, setVendorForm] = useState({ businessName: "", ownerName: "", email: "", password: "", mobile: "" });
-  const [submittingVendor, setSubmittingVendor] = useState(false);
-  const [vendorCreated, setVendorCreated] = useState<any | null>(null);
   const [editingVendor, setEditingVendor] = useState<any | null>(null);
   const [editVendorForm, setEditVendorForm] = useState({ firstName: "", lastName: "", email: "", mobile: "", newPassword: "" });
   const [showEditPassword, setShowEditPassword] = useState(false);
@@ -464,27 +460,6 @@ export default function PartnerDashboard() {
       toast.error("Failed to load vendors");
     }
     setLoadingVendors(false);
-  };
-
-  const handleCreateVendor = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmittingVendor(true);
-    try {
-      const res = await fetch(`${API}/api/managers/vendor`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-        body: JSON.stringify(vendorForm)
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create vendor");
-      toast.success("Vendor account created!");
-      setVendorCreated({ ...data.vendor, password: vendorForm.password });
-      setVendorForm({ businessName: "", ownerName: "", email: "", password: "", mobile: "" });
-      fetchVendors();
-    } catch (err: any) {
-      toast.error(err.message);
-    }
-    setSubmittingVendor(false);
   };
 
   const handleDeleteVendor = (id: string) => {
@@ -1251,128 +1226,6 @@ export default function PartnerDashboard() {
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
               className="space-y-6"
             >
-              {/* Create Vendor Form */}
-              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-3xl p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Create Vendor Account</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Vendor will log in using these credentials via the <span className={`font-bold ${theme.textDark}`}>{user?.manager_type} Vendor Login</span></p>
-                  </div>
-                  <div className={`w-10 h-10 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border}`}>
-                    <Plus className={`w-5 h-5 ${theme.text}`} />
-                  </div>
-                </div>
-
-                {/* Success card after creation */}
-                {vendorCreated && (
-                  <div className="mb-6 bg-green-50 border border-green-200 rounded-2xl p-4">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                      <div className="flex-1">
-                        <p className="font-black text-green-800 text-sm">Vendor Created Successfully!</p>
-                        <p className="text-xs text-green-700 mt-1">Share these credentials with the vendor:</p>
-                        <div className="mt-2 bg-white dark:bg-[#0D0D17] rounded-xl border border-green-200 p-3 space-y-1">
-                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Email:</span> <span className="font-bold text-gray-900 dark:text-gray-100">{vendorCreated.email}</span></p>
-                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Password:</span> <span className="font-bold text-gray-900 dark:text-gray-100">{vendorCreated.password}</span></p>
-                          <p className="text-xs font-mono"><span className="text-gray-500 dark:text-gray-400">Type:</span> <span className={`font-bold ${theme.textDark} capitalize`}>{vendorCreated.manager_type}</span></p>
-                        </div>
-                      </div>
-                      <button onClick={() => setVendorCreated(null)} className="text-green-400 hover:text-green-600 text-lg leading-none">&times;</button>
-                    </div>
-                  </div>
-                )}
-
-                <form onSubmit={handleCreateVendor} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Business Name */}
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Business / Shop Name *</label>
-                    <input
-                      required
-                      placeholder="e.g. Sharma Dhaba"
-                      value={vendorForm.businessName}
-                      onChange={e => setVendorForm(f => ({ ...f, businessName: e.target.value }))}
-                      className={`w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-${type === 'store' ? 'blue' : 'orange'}-400 focus:ring-2 focus:ring-${type === 'store' ? 'blue' : 'orange'}-100 transition-all`}
-                    />
-                  </div>
-
-                  {/* Owner Name */}
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Owner / Contact Name *</label>
-                    <input
-                      required
-                      placeholder="e.g. Ramesh Sharma"
-                      value={vendorForm.ownerName}
-                      onChange={e => setVendorForm(f => ({ ...f, ownerName: e.target.value }))}
-                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
-                    />
-                  </div>
-
-                  {/* Email */}
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Login Email *</label>
-                    <input
-                      required
-                      type="email"
-                      placeholder="vendor@example.com"
-                      value={vendorForm.email}
-                      onChange={e => setVendorForm(f => ({ ...f, email: e.target.value }))}
-                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
-                    />
-                  </div>
-
-                  {/* Mobile */}
-                  <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Mobile (Optional)</label>
-                    <input
-                      type="tel"
-                      placeholder="10-digit mobile number"
-                      value={vendorForm.mobile}
-                      onChange={e => setVendorForm(f => ({ ...f, mobile: e.target.value }))}
-                      className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
-                    />
-                  </div>
-
-                  {/* Password */}
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Login Password *</label>
-                    <div className="relative">
-                      <input
-                        required
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Min. 6 characters"
-                        value={vendorForm.password}
-                        onChange={e => setVendorForm(f => ({ ...f, password: e.target.value }))}
-                        className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 pr-11 text-sm font-semibold outline-none focus:border-gray-400 focus:ring-2 focus:ring-gray-100 transition-all"
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-gray-400 transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Business Type (locked) */}
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1.5 block">Business Type (Auto-assigned)</label>
-                    <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border ${theme.border} ${theme.bg}`}>
-                      <StoreIcon className={`w-4 h-4 ${theme.text}`} />
-                      <span className={`text-sm font-black ${theme.textDark} capitalize`}>{user?.manager_type || "food"}</span>
-                      <span className="text-xs text-gray-400 font-medium ml-auto">Locked to your division</span>
-                    </div>
-                  </div>
-
-                  {/* Submit */}
-                  <div className="md:col-span-2 pt-2">
-                    <button
-                      type="submit"
-                      disabled={submittingVendor}
-                      className={`w-full py-3 bg-gradient-to-r ${theme.from} ${theme.to} text-white font-black rounded-xl shadow-lg transition-all hover:opacity-90 active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
-                    >
-                      {submittingVendor ? "Creating Account..." : <><Plus className="w-4 h-4" /> Create Vendor Account</>}
-                    </button>
-                  </div>
-                </form>
-              </div>
-
               {/* Existing Vendors List */}
               <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-3xl p-6">
                 <div className="flex items-center justify-between mb-5">
