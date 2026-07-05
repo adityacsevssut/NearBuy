@@ -452,7 +452,7 @@ export default function VendorPage() {
                                   </h3>
                                   {dish.badge && (
                                     <div className="mb-1.5 mt-1">
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
+                                      <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-500 border border-orange-500 bg-transparent font-bold uppercase tracking-wider">
                                         {dish.badge}
                                       </span>
                                     </div>
@@ -490,7 +490,7 @@ export default function VendorPage() {
                                   )}
                                 </div>
 
-                                <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed max-w-md mt-2">
+                                <p className="text-[10px] font-bold uppercase text-gray-400 line-clamp-2 leading-relaxed max-w-md mt-4">
                                   {dish.description}
                                 </p>
                               </div>

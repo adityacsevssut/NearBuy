@@ -163,7 +163,7 @@ export default function WishlistPage() {
                           <span className={`w-1.5 h-1.5 rounded-full ${dish.type === "veg" ? "bg-green-600" : "bg-red-600"}`} />
                         </span>
                         {dish.badge && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-gradient bg-orange-100 font-bold uppercase tracking-wider">
+                          <span className="text-[10px] px-1.5 py-0.5 rounded text-orange-500 border border-orange-500 bg-transparent font-bold uppercase tracking-wider">
                             {dish.badge}
                           </span>
                         )}
@@ -208,7 +208,7 @@ export default function WishlistPage() {
                         )}
                       </div>
                       
-                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed max-w-md mt-2">
+                      <p className="text-[10px] font-bold uppercase text-gray-400 line-clamp-2 leading-relaxed max-w-md mt-4">
                         {dish.description}
                       </p>
                     </div>
