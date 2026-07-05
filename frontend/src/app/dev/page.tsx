@@ -381,7 +381,10 @@ export default function DevDashboard() {
     try {
       const res = await fetch(`${API}/api/public/settings`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
+        },
         body: JSON.stringify({ 
           platform_fee: platformFee, 
           gst,
@@ -737,24 +740,24 @@ export default function DevDashboard() {
 
               <div className="grid sm:grid-cols-2 gap-6 max-w-2xl mt-6">
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Platform Fee (₹)</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Platform Fee (%)</label>
                   <input
                     type="number"
                     value={platformFee}
                     onChange={(e) => setPlatformFee(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed amount charged per order</p>
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Percentage of total amount charged per order</p>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">GST (₹)</label>
+                  <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">GST (%)</label>
                   <input
                     type="number"
                     value={gst}
                     onChange={(e) => setGst(parseFloat(e.target.value) || 0)}
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-[#2A2A3A] focus:border-amber-500 focus:ring-4 focus:ring-amber-500/10 font-black text-gray-900 dark:text-gray-100 outline-none transition-all"
                   />
-                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Fixed GST applied to all orders instead of Delivery Fee</p>
+                  <p className="text-[10px] text-gray-400 mt-1.5 font-medium">Percentage of total amount applied to all orders instead of Delivery Fee</p>
                 </div>
               </div>
 

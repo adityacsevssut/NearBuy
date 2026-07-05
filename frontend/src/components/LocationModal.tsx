@@ -225,7 +225,7 @@ export default function LocationModal() {
         latitude: resolvedAddress.lat,
         longitude: resolvedAddress.lng,
       });
-      toast.success(`📍 Location saved: ${resolvedAddress.name}`);
+      toast.success("Address saved!");
       handleClose();
     } catch (err) {
       toast.error("Failed to save address. Please try again.");
