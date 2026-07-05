@@ -151,7 +151,7 @@ function OrdersPageContent() {
             const pdfWidth = pdf.internal.pageSize.getWidth();
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
             pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-            pdf.save(`Receipt_NearBuy_${orderToDownload.id}.pdf`);
+            pdf.save(`Receipt_ZyphCart_${orderToDownload.id}.pdf`);
           } catch (err) {
             console.error("Failed to generate PDF", err);
           } finally {
@@ -437,7 +437,7 @@ function OrdersPageContent() {
             <div className="flex justify-between items-start pb-8 mb-8" style={{ borderBottom: "2px solid #f3f4f6" }}>
               <div>
                 <h1 className="text-4xl font-black mb-1">
-                  <span style={{ color: "#f97316" }}>Near</span><span style={{ color: "#000000" }}>Buy</span>
+                  <span style={{ color: "#f97316" }}>Zyph</span><span style={{ color: "#000000" }}>Cart</span>
                 </h1>
                 <p className="font-medium" style={{ color: "#6b7280" }}>Official Order Receipt</p>
               </div>
@@ -518,7 +518,7 @@ function OrdersPageContent() {
             </div>
 
             <div className="mt-12 text-center font-medium text-xs" style={{ color: "#9ca3af" }}>
-              <p>Thank you for shopping with NearBuy!</p>
+              <p>Thank you for shopping with ZyphCart!</p>
               <p className="mt-1">This is a computer generated invoice and does not require a signature.</p>
             </div>
           </div>

@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">NearBuy</string>
-    <string name="title_activity_main">NearBuy</string>
-    <string name="package_name">com.aditya.nearbuy</string>
-    <string name="custom_url_scheme">com.aditya.nearbuy</string>
+    <string name="app_name">ZyphCart</string>
+    <string name="title_activity_main">ZyphCart</string>
+    <string name="package_name">com.aditya.Zyphcart</string>
+    <string name="custom_url_scheme">com.aditya.Zyphcart</string>
     <string name="server_client_id">301370621443-q2b5mgd8pc92h2mevr38nm8fhu3ua48g.apps.googleusercontent.com</string>
 </resources>

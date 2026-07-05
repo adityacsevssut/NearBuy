@@ -510,7 +510,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 const shareUrl = `${window.location.origin}/s/${id}`;
                 if (navigator.share) {
                   await navigator.share({
-                    title: "NearBuy",
+                    title: "ZyphCart",
                     text: `Hii Get Your favourite Food From ${r.name}`,
                     url: shareUrl,
                   });
@@ -1631,8 +1631,8 @@ export default function HomePage() {
                     const Wrapper = poster.link ? Link : 'div';
                     return (
                       <Wrapper key={poster.id || index} href={poster.link || undefined} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
-                        <Image src={poster.image_url || "/1000242984.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                        <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="NearBuy Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+                        <Image src={poster.image_url || "/1000242984.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                        <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
                       </Wrapper>
                     );
                   })}
@@ -1651,8 +1651,8 @@ export default function HomePage() {
               </div>
             ) : (
               <div className="block relative w-full aspect-[2/1] md:aspect-[21/9] rounded-2xl md:rounded-3xl overflow-hidden group bg-transparent">
-                <Image src="/1000242984.png" alt="NearBuy Special Offer" fill priority={true} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                <Image src="/1000242984_dark.png" alt="NearBuy Special Offer" fill priority={true} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+                <Image src="/1000242984.png" alt="ZyphCart Special Offer" fill priority={true} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                <Image src="/1000242984_dark.png" alt="ZyphCart Special Offer" fill priority={true} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
               </div>
             )}
           </section>

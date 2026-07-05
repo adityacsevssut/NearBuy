@@ -32,7 +32,7 @@ export default function RefundPolicyPage() {
             Refund & <span className={accentColor}>Cancellation</span> Policy
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
-            Understanding how cancellations and refunds work on NearBuy.
+            Understanding how cancellations and refunds work on ZyphCart.
           </p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function RefundPolicyPage() {
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
               <li><strong className="text-gray-900 dark:text-white">Online Payments:</strong> If you paid online via Razorpay, the refunded amount will automatically be credited back to your original payment method. Please allow 5-7 business days for the amount to reflect in your bank account.</li>
               <li>
-                <strong className="text-gray-900 dark:text-white">Cash on Delivery (COD):</strong> Since no money was collected upfront, no general monetary refund is required. <strong className="text-red-500 dark:text-red-400">Please Note:</strong> NearBuy is <strong className="text-gray-900 dark:text-white">only responsible</strong> to pay a refund of the Platform Fee if the order is explicitly cancelled by the vendor/owner. NearBuy is not responsible for any other refund amount under COD. Please make sure before ordering.
+                <strong className="text-gray-900 dark:text-white">Cash on Delivery (COD):</strong> Since no money was collected upfront, no general monetary refund is required. <strong className="text-red-500 dark:text-red-400">Please Note:</strong> ZyphCart is <strong className="text-gray-900 dark:text-white">only responsible</strong> to pay a refund of the Platform Fee if the order is explicitly cancelled by the vendor/owner. ZyphCart is not responsible for any other refund amount under COD. Please make sure before ordering.
               </li>
             </ul>
           </section>
@@ -144,7 +144,7 @@ export default function RefundPolicyPage() {
           <section>
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">4. Disputed Orders</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              If you receive the wrong items, missing items, or items with severe quality issues, please contact NearBuy Support immediately through the app. We will investigate the issue directly with the vendor. Partial or full refunds in these specific cases are granted at the sole discretion of the NearBuy administration team.
+              If you receive the wrong items, missing items, or items with severe quality issues, please contact ZyphCart Support immediately through the app. We will investigate the issue directly with the vendor. Partial or full refunds in these specific cases are granted at the sole discretion of the ZyphCart administration team.
             </p>
           </section>
 

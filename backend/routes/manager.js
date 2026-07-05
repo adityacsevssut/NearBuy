@@ -738,10 +738,10 @@ router.get("/vendors/:vendorId/orders", authenticate, async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-// GET /api/managers/nearbuy-payments
+// GET /api/managers/zyphcart-payments
 // Returns day-wise total platform fee and gst collected by all vendors
 // ════════════════════════════════════════════════════════════════════
-router.get("/nearbuy-payments", authenticate, async (req, res) => {
+router.get("/zyphcart-payments", authenticate, async (req, res) => {
   try {
     if (req.user.role !== "manager" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied." });
@@ -782,8 +782,8 @@ router.get("/nearbuy-payments", authenticate, async (req, res) => {
     const { rows } = await pool.query(query, params);
     return res.json({ payments: rows[0] });
   } catch (err) {
-    console.error("nearbuy payments error:", err);
-    return res.status(500).json({ error: "Failed to fetch nearbuy payments." });
+    console.error("zyphcart payments error:", err);
+    return res.status(500).json({ error: "Failed to fetch zyphcart payments." });
   }
 });
 

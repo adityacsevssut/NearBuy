@@ -1,6 +1,6 @@
 {
-  "appId": "com.aditya.nearbuy",
-  "appName": "NearBuy",
+  "appId": "com.aditya.Zyphcart",
+  "appName": "ZyphCart",
   "webDir": "www",
   "server": {
     "url": "https://near-buy-nine.vercel.app/",

@@ -30,7 +30,7 @@ export default function Footer() {
   const [isRefundOpen, setIsRefundOpen] = useState(false);
 
   const links: Record<string, { name: string, href: string, onClick?: (e: any) => void }[]> = {
-    NearBuy: [
+    ZyphCart: [
       { name: "Home", href: "/" },
       { name: "About Us", href: "/about" },
       { name: "Need Support", href: "#", onClick: (e: any) => { e.preventDefault(); setIsSupportOpen(true); } },
@@ -75,14 +75,14 @@ export default function Footer() {
 
                 {/* Simple NB Logo */}
                 <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${logoGradient} tracking-tighter drop-shadow-sm`}>N</span>
-                  <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black dark:text-white tracking-tighter drop-shadow-sm -ml-0.5">B</span>
+                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${logoGradient} tracking-tighter drop-shadow-sm`}>Z</span>
+                  <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black dark:text-white tracking-tighter drop-shadow-sm -ml-0.5">C</span>
                 </div>
 
                 <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
-                  <span className={`${logoGradient} drop-shadow-sm`}>Near</span>
+                  <span className={`${logoGradient} drop-shadow-sm`}>Zyph</span>
                   <span className="relative text-black dark:text-white drop-shadow-sm">
-                    Buy
+                    Cart
                     <svg className={`absolute -bottom-3 sm:-bottom-3.5 -left-1 w-[120%] h-3 sm:h-3.5 ${accentColor}`} viewBox="0 0 100 20" preserveAspectRatio="none">
                       <path d="M 4,8 Q 40,-2 100,12 Q 40,6 4,16 A 4,4 0 0,1 4,8 Z" fill="currentColor" />
                     </svg>
@@ -90,7 +90,7 @@ export default function Footer() {
                 </span>
               </div>
               <p className="text-gray-500 dark:text-gray-400 text-[13px] font-medium leading-relaxed mb-6 max-w-[250px]">
-                NearBuy HQ, 123 University Road<br />
+                ZyphCart HQ, 123 University Road<br />
                 VSSUT Campus, Burla 768018, India
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
             {/* Copyright */}
             <div className="text-[12px] text-gray-400 font-medium text-center">
-              Copyright {new Date().getFullYear()} © <span className={logoGradient}>Near</span><span className="text-black dark:text-white">Buy</span> Interactive<br />
+              Copyright {new Date().getFullYear()} © <span className={logoGradient}>Zyph</span><span className="text-black dark:text-white">Cart</span> Interactive<br />
               Platform by Students Of VSSUT Burla
             </div>
           </div>

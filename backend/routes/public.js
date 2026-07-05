@@ -529,8 +529,8 @@ router.get("/hot-deals", async (req, res) => {
         platform_fee DECIMAL(10,2) NOT NULL DEFAULT 5.00,
         gst DECIMAL(10,2) NOT NULL DEFAULT 10.00,
         instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/',
-        food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com',
-        store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com'
+        food_email VARCHAR(255) DEFAULT 'manager@zyphcart.com',
+        store_email VARCHAR(255) DEFAULT 'manager@zyphcart.com'
       );
     `);
     
@@ -541,8 +541,8 @@ router.get("/hot-deals", async (req, res) => {
     `);
 
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS instagram_link VARCHAR(255) DEFAULT 'https://instagram.com/';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
-    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@nearbuy.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS food_email VARCHAR(255) DEFAULT 'manager@zyphcart.com';`);
+    await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS store_email VARCHAR(255) DEFAULT 'manager@zyphcart.com';`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_food BOOLEAN DEFAULT TRUE;`);
     await pool.query(`ALTER TABLE global_settings ADD COLUMN IF NOT EXISTS enable_store BOOLEAN DEFAULT FALSE;`);
     

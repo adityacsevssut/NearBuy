@@ -47,7 +47,7 @@ export default function PrivacyPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">1. Information We Collect</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
-              To provide you with localized {isStore ? "Essentials" : "Food"} delivery, NearBuy collects the following essential information:
+              To provide you with localized {isStore ? "Essentials" : "Food"} delivery, ZyphCart collects the following essential information:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
               <li><strong className="text-gray-900 dark:text-white">Personal Identification:</strong> Your Name, Email Address, and Mobile Number for account creation and order tracking.</li>
@@ -70,7 +70,7 @@ export default function PrivacyPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">3. Data Sharing & Vendors</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              NearBuy <strong className="text-gray-900 dark:text-white">does not</strong> sell your personal data to third-party marketers. We only share the strictly necessary details (your first name, delivery address, and a masked or direct contact number) with the specific Restaurant or Store you placed an order from, and the delivery partner assigned to your order. This is required to physically deliver your items.
+              ZyphCart <strong className="text-gray-900 dark:text-white">does not</strong> sell your personal data to third-party marketers. We only share the strictly necessary details (your first name, delivery address, and a masked or direct contact number) with the specific Restaurant or Store you placed an order from, and the delivery partner assigned to your order. This is required to physically deliver your items.
             </p>
           </section>
 

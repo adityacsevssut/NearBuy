@@ -34,7 +34,7 @@ interface CartContextType {
 }
 
 const CartContext = createContext<CartContextType | null>(null);
-const STORAGE_KEY = "nearbuy_cart_v2";
+const STORAGE_KEY = "zyphcart_cart_v2";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const { isLoggedIn, openLoginModal, accessToken } = useAuth();

@@ -258,16 +258,16 @@ export default function EssentialsPage() {
               ) : posterUrl ? (
                 posterLink ? (
                   <Link href={posterLink} className="block w-full h-full">
-                    <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
+                    <Image src={posterUrl} alt="ZyphCart Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
                   </Link>
                 ) : (
-                  <Image src={posterUrl} alt="NearBuy Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
+                  <Image src={posterUrl} alt="ZyphCart Store Banner" fill priority={true} className="block object-cover object-center w-full h-full" style={{ display: 'block' }} />
                 )
               ) : (
                 <>
                   <Image
                     src="/store_hero_v5.png"
-                    alt="NearBuy Store Banner"
+                    alt="ZyphCart Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
                     className="block object-cover object-center w-full h-full dark:hidden"
@@ -276,7 +276,7 @@ export default function EssentialsPage() {
                   />
                   <Image
                     src="/store_hero_16x9_dark.png"
-                    alt="NearBuy Store Banner"
+                    alt="ZyphCart Store Banner"
                     fill
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1280px"
                     className="hidden object-cover object-center w-full h-full dark:block"
@@ -610,7 +610,7 @@ export default function EssentialsPage() {
                     <Star className="w-3.5 h-3.5 fill-white" />
                     {previewProduct.rating}
                   </span>
-                  <span className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 px-2 py-0.5 rounded shadow-sm">{previewProduct.company || "NearBuy Essentials"}</span>
+                  <span className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 px-2 py-0.5 rounded shadow-sm">{previewProduct.company || "ZyphCart Essentials"}</span>
                   {previewProduct.cat === "stationery" && (
                     <span className="text-blue-600 dark:text-blue-400 font-bold bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/30 px-2 py-0.5 rounded shadow-sm">Pages: {previewProduct.pages || "N/A"}</span>
                   )}
@@ -619,7 +619,7 @@ export default function EssentialsPage() {
 
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                  {previewProduct.description || "High quality product brought to you by NearBuy. Enjoy fast delivery and the best prices on all campus essentials. Carefully curated to meet student needs perfectly."}
+                  {previewProduct.description || "High quality product brought to you by ZyphCart. Enjoy fast delivery and the best prices on all campus essentials. Carefully curated to meet student needs perfectly."}
                 </p>
               </div>
 

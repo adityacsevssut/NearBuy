@@ -545,7 +545,7 @@ export default function VendorPage() {
                                         const shareUrl = `${window.location.origin}/s/${id}`;
                                         if (navigator.share) {
                                           await navigator.share({
-                                            title: 'NearBuy',
+                                            title: 'ZyphCart',
                                             text: `Hii get Your favourite ${dish.name} at just ₹${dish.price} grab it before it goes out of stock`,
                                             url: shareUrl
                                           });
@@ -696,7 +696,7 @@ export default function VendorPage() {
                       if (res.ok) {
                         const { id } = await res.json();
                         const shareUrl = `${window.location.origin}/s/${id}`;
-                        if (navigator.share) await navigator.share({ title: 'NearBuy', text: `Check out ${selectedFood.name}`, url: shareUrl });
+                        if (navigator.share) await navigator.share({ title: 'ZyphCart', text: `Check out ${selectedFood.name}`, url: shareUrl });
                         else { await navigator.clipboard.writeText(shareUrl); alert("Link copied!"); }
                       }
                     } catch (err) { }

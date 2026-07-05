@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
     const nomRes = await fetch(nominatimUrl.toString(), { 
       cache: "no-store",
-      headers: { "User-Agent": "NearBuyApp/1.0 (Reverse Geocoding)" }
+      headers: { "User-Agent": "ZyphCartApp/1.0 (Reverse Geocoding)" }
     });
 
     if (nomRes.ok) {

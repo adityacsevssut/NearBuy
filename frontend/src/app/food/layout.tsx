@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Food Essentials – NearBuy",
+  title: "Food Essentials – ZyphCart",
   description: "Get your favourite food delivered to your campus.",
 };
 

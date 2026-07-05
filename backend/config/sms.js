@@ -16,7 +16,7 @@ async function sendOtpSms(mobile, otp) {
     },
     body: JSON.stringify({
       route: "q",
-      message: `Your NearBuy login OTP is ${otp}. Valid for 10 minutes.`,
+      message: `Your ZyphCart login OTP is ${otp}. Valid for 10 minutes.`,
       language: "english",
       flash: 0,
       numbers: mobile,

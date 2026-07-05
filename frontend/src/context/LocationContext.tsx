@@ -55,7 +55,7 @@ function getDistance(lat1: number, lon1: number, lat2: number, lon2: number) {
   return R * c;
 }
 
-const SAVED_ADDRESSES_LS = "nearbuy_saved_addresses";
+const SAVED_ADDRESSES_LS = "zyphcart_saved_addresses";
 
 function lsGetSavedAddresses(): SavedAddress[] {
   if (typeof window === "undefined") return [];
@@ -89,12 +89,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
 
   // ── Restore from localStorage on boot ──────────────────────────────────────
   useEffect(() => {
-    const savedName = localStorage.getItem("nearbuy_locationName");
-    const savedPin = localStorage.getItem("nearbuy_pincode");
-    const savedLandmark = localStorage.getItem("nearbuy_landmark");
-    const savedLat = localStorage.getItem("nearbuy_latitude");
-    const savedLon = localStorage.getItem("nearbuy_longitude");
-    const savedFullAddress = localStorage.getItem("nearbuy_fullAddress");
+    const savedName = localStorage.getItem("zyphcart_locationName");
+    const savedPin = localStorage.getItem("zyphcart_pincode");
+    const savedLandmark = localStorage.getItem("zyphcart_landmark");
+    const savedLat = localStorage.getItem("zyphcart_latitude");
+    const savedLon = localStorage.getItem("zyphcart_longitude");
+    const savedFullAddress = localStorage.getItem("zyphcart_fullAddress");
     if (savedName) setLocationName(savedName);
     if (savedPin) setPincode(savedPin);
     if (savedLandmark) setLandmark(savedLandmark);
@@ -109,12 +109,12 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoggedIn && user) {
       if (user.locationName || user.latitude) {
-        const localTimestamp = localStorage.getItem("nearbuy_location_ts");
-        const dbTimestamp = localStorage.getItem("nearbuy_location_db_ts");
+        const localTimestamp = localStorage.getItem("zyphcart_location_ts");
+        const dbTimestamp = localStorage.getItem("zyphcart_location_db_ts");
         // If the user has set a location locally after the last DB sync, keep it
         if (localTimestamp && dbTimestamp && localTimestamp >= dbTimestamp) {
           // Mark that we've acknowledged the DB sync without overwriting local data
-          localStorage.setItem("nearbuy_location_db_ts", new Date(new Date(localTimestamp).getTime() - 1).toISOString());
+          localStorage.setItem("zyphcart_location_db_ts", new Date(new Date(localTimestamp).getTime() - 1).toISOString());
           return;
         }
         const name = user.locationName || "Select Location";
@@ -127,17 +127,17 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         setLandmark(lmk);
         setLatitude(lat);
         setLongitude(lon);
-        localStorage.setItem("nearbuy_locationName", name);
-        localStorage.setItem("nearbuy_pincode", pin);
-        localStorage.setItem("nearbuy_landmark", lmk);
+        localStorage.setItem("zyphcart_locationName", name);
+        localStorage.setItem("zyphcart_pincode", pin);
+        localStorage.setItem("zyphcart_landmark", lmk);
         // Set db_ts to now but keep location_ts AHEAD so local always wins next refresh
         const now = new Date();
-        localStorage.setItem("nearbuy_location_db_ts", now.toISOString());
-        localStorage.setItem("nearbuy_location_ts", new Date(now.getTime() + 1).toISOString());
-        if (lat !== null) localStorage.setItem("nearbuy_latitude", lat.toString());
-        else localStorage.removeItem("nearbuy_latitude");
-        if (lon !== null) localStorage.setItem("nearbuy_longitude", lon.toString());
-        else localStorage.removeItem("nearbuy_longitude");
+        localStorage.setItem("zyphcart_location_db_ts", now.toISOString());
+        localStorage.setItem("zyphcart_location_ts", new Date(now.getTime() + 1).toISOString());
+        if (lat !== null) localStorage.setItem("zyphcart_latitude", lat.toString());
+        else localStorage.removeItem("zyphcart_latitude");
+        if (lon !== null) localStorage.setItem("zyphcart_longitude", lon.toString());
+        else localStorage.removeItem("zyphcart_longitude");
       }
     }
   }, [isLoggedIn, user]);
@@ -229,25 +229,25 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
     setPincode(pin);
     setLandmark(lmk || "");
     setFullAddress(fullAddr || "");
-    localStorage.setItem("nearbuy_locationName", name);
-    localStorage.setItem("nearbuy_pincode", pin);
-    localStorage.setItem("nearbuy_landmark", lmk || "");
-    localStorage.setItem("nearbuy_fullAddress", fullAddr || "");
+    localStorage.setItem("zyphcart_locationName", name);
+    localStorage.setItem("zyphcart_pincode", pin);
+    localStorage.setItem("zyphcart_landmark", lmk || "");
+    localStorage.setItem("zyphcart_fullAddress", fullAddr || "");
     if (lat !== undefined && lat !== null) {
       setLatitude(lat);
-      localStorage.setItem("nearbuy_latitude", lat.toString());
+      localStorage.setItem("zyphcart_latitude", lat.toString());
     } else {
       setLatitude(null);
-      localStorage.removeItem("nearbuy_latitude");
+      localStorage.removeItem("zyphcart_latitude");
     }
     if (lon !== undefined && lon !== null) {
       setLongitude(lon);
-      localStorage.setItem("nearbuy_longitude", lon.toString());
+      localStorage.setItem("zyphcart_longitude", lon.toString());
     } else {
       setLongitude(null);
-      localStorage.removeItem("nearbuy_longitude");
+      localStorage.removeItem("zyphcart_longitude");
     }
-    localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
+    localStorage.setItem("zyphcart_location_ts", new Date().toISOString());
     if (isLoggedIn && updateUser) {
       updateUser({
         locationName: name,

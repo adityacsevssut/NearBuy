@@ -1,4 +1,4 @@
-package com.aditya.nearbuy;
+package com.aditya.Zyphcart;
 
 import com.getcapacitor.BridgeActivity;
 

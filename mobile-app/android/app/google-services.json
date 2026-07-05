@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "1009771297153",
-    "project_id": "nearbuy-d7daf",
-    "storage_bucket": "nearbuy-d7daf.firebasestorage.app"
+    "project_id": "zyphcart-d7daf",
+    "storage_bucket": "zyphcart-d7daf.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:1009771297153:android:67e9a995919a3b661d9080",
         "android_client_info": {
-          "package_name": "com.aditya.nearbuy"
+          "package_name": "com.aditya.Zyphcart"
         }
       },
       "oauth_client": [],

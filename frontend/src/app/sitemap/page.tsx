@@ -106,7 +106,7 @@ export default function SitemapPage() {
         </div>
 
         <p className="text-base md:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-12 max-w-3xl">
-          Looking for something specific? Use our sitemap to quickly navigate through all the sections and features of NearBuy.
+          Looking for something specific? Use our sitemap to quickly navigate through all the sections and features of ZyphCart.
         </p>
 
         {/* Sitemap Grid */}

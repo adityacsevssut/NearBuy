@@ -91,7 +91,7 @@ app.use("/api/auth/send-otp", otpLimiter);
 app.use("/api/auth/verify-otp", otpLimiter);
 
 // ── Routes ────────────────────────────────────────────────────────────────
-app.get("/", (req, res) => res.json({ status: "NearBuy API is running 🚀" }));
+app.get("/", (req, res) => res.json({ status: "ZyphCart API is running 🚀" }));
 app.use("/api/auth", authRouter);
 app.use("/api/managers", managerRouter);
 app.use("/api/vendor-requests", require("./routes/vendor-requests"));
@@ -185,7 +185,7 @@ io.on("connection", (socket) => {
 
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
   server.listen(PORT, () => {
-    console.log(`✅ NearBuy backend (with Socket.io) running on http://localhost:${PORT}`);
+    console.log(`✅ ZyphCart backend (with Socket.io) running on http://localhost:${PORT}`);
   });
 }
 

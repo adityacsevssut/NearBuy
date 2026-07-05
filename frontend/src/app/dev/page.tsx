@@ -70,8 +70,8 @@ export default function DevDashboard() {
   const [platformFee, setPlatformFee] = useState(5);
   const [gst, setGst] = useState(10);
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
-  const [foodEmail, setFoodEmail] = useState("manager@nearbuy.com");
-  const [storeEmail, setStoreEmail] = useState("manager@nearbuy.com");
+  const [foodEmail, setFoodEmail] = useState("manager@zyphcart.com");
+  const [storeEmail, setStoreEmail] = useState("manager@zyphcart.com");
   const [enableFood, setEnableFood] = useState(true);
   const [enableStore, setEnableStore] = useState(false);
   const [savingSettings, setSavingSettings] = useState(false);
@@ -425,7 +425,7 @@ export default function DevDashboard() {
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="font-black text-[15px] text-white tracking-tight leading-tight">NearBuy Dev</span>
+              <span className="font-black text-[15px] text-white tracking-tight leading-tight">ZyphCart Dev</span>
               <span className="text-[10px] font-semibold text-violet-100 uppercase tracking-widest leading-tight">Developer Console</span>
             </div>
           </div>
@@ -1232,7 +1232,7 @@ export default function DevDashboard() {
       <footer className="mt-auto py-5 border-t border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <p className="text-[11px] font-medium text-gray-400">
-            © 2026 NearBuy Technologies · Developer Console
+            © 2026 ZyphCart Technologies · Developer Console
           </p>
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full bg-gradient-to-br from-violet-500 to-purple-600`} />

@@ -288,7 +288,7 @@ function RestaurantOrderCard({
               type="text"
               value={coupon}
               onChange={(e) => setCoupon(e.target.value.toUpperCase())}
-              placeholder="Promo code (NEARBUY10)"
+              placeholder="Promo code (ZYPHCART10)"
               disabled={couponApplied}
               className="flex-1 text-xs font-semibold tracking-wider outline-none bg-transparent disabled:text-gray-500 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
@@ -296,7 +296,7 @@ function RestaurantOrderCard({
           <button
             onClick={() => {
               if (couponApplied) { setCouponApplied(false); setCoupon(""); }
-              else if (coupon === "NEARBUY10") setCouponApplied(true);
+              else if (coupon === "ZYPHCART10") setCouponApplied(true);
             }}
             className={`px-4 py-2 rounded-xl text-xs font-black transition-all ${couponApplied
                 ? "bg-red-50 text-red-500"
@@ -545,7 +545,7 @@ function RestaurantOrderCard({
                     key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
                     amount: rzpOrder.amount,
                     currency: rzpOrder.currency,
-                    name: "NearBuy Platform Fees",
+                    name: "ZyphCart Platform Fees",
                     description: "Tax and Platform Fees",
                     order_id: rzpOrder.id,
                     config: {
