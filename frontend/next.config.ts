@@ -30,7 +30,7 @@ const securityHeaders = [
     value: [
       // Only load scripts from self, Google APIs, Firebase, Razorpay, Geoapify
       "default-src 'self'",
-      "script-src 'self' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://checkout.razorpay.com https://api.geoapify.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://www.gstatic.com https://checkout.razorpay.com https://api.geoapify.com",
       "object-src 'none'",
       "base-uri 'self'",
       // Styles from self + Google Fonts + inline styles (needed by Next.js + many libs)
