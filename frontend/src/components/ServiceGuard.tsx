@@ -42,7 +42,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
-        const welcomed = sessionStorage.getItem("nearbuy_welcomed") === "true";
+        const welcomed = sessionStorage.getItem("zyphcart_welcomed") === "true";
         setIsWelcomed(welcomed);
       } catch (e) {}
     }
@@ -139,7 +139,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
     if (status !== "checking") {
       if (typeof window !== "undefined") {
         try {
-          sessionStorage.setItem("nearbuy_welcomed", "true");
+          sessionStorage.setItem("zyphcart_welcomed", "true");
           setIsWelcomed(true);
         } catch (e) {}
       }
@@ -198,19 +198,19 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           {/* Logo */}
           <div className="flex items-center -skew-x-6 pr-1 mb-6">
             <span className={`font-black text-4xl tracking-tighter drop-shadow-sm ${isStore ? "text-blue-600" : "text-orange-gradient"}`}>
-              N
+              Z
             </span>
             <span className="text-black dark:text-white font-black text-4xl tracking-tighter drop-shadow-sm">
-              B
+              C
             </span>
             <span className="font-black text-2xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
-              <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Near</span>Buy
+              <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Zyph</span>Cart
             </span>
           </div>
 
           {/* Texts */}
           <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight leading-tight">
-            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Near</span>Buy
+            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Zyph</span>Cart
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-tight mb-8">
             Explore Your Nearest Market
@@ -270,7 +270,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
           {/* Bottom Section */}
           <div className="flex flex-col items-center">
             <p className="text-[#93959f] font-bold text-[15px] tracking-wide mb-0.5">
-              NearBuy
+              ZyphCart
             </p>
             <p className="text-[#d4d5d9] font-black text-2xl tracking-tighter mb-4">
               Your Nearest Market Place

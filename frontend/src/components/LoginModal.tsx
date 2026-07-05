@@ -102,7 +102,7 @@ const ModalHeader = ({ title, back, reset, t, onClose }: any) => (
     ) : <div className="w-9" />}
     <div className="text-center">
       <span className="font-black text-2xl tracking-tighter">
-        <span className={`${t.logoText} drop-shadow-sm`}>Near</span><span className="text-gray-900 dark:text-gray-100 drop-shadow-sm">Buy</span>
+        <span className={`${t.logoText} drop-shadow-sm`}>Zyph</span><span className="text-gray-900 dark:text-gray-100 drop-shadow-sm">Cart</span>
       </span>
       {/* title intentionally removed */}
     </div>
@@ -287,7 +287,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
       });
       
       login(result.user, result.accessToken, result.refreshToken);
-      setSuccessMsg(`Welcome to NearBuy, ${result.user.firstName}! 🎉`);
+      setSuccessMsg(`Welcome to ZyphCart, ${result.user.firstName}! 🎉`);
       reset("success");
     } catch (err: any) { 
       setError(err.message || "Invalid OTP code."); 
@@ -740,6 +740,11 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                         value={loginPass} onChange={(e:any) => setLoginPass(e.target.value)} required minLength={8}
                         showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
                       />
+                      <div className="text-right">
+                        <button type="button" onClick={() => reset("forgot-email")} className={`text-[13px] ${t.forgotText} font-bold transition-colors`}>
+                          Forgot password?
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -785,6 +790,11 @@ export default function LoginModal({ isOpen, onClose }: Props) {
                         value={loginPass} onChange={(e:any) => setLoginPass(e.target.value)} required minLength={8}
                         showEye onEyeClick={() => setShowPass(!showPass)} isEyeOpen={showPass} 
                       />
+                      <div className="text-right">
+                        <button type="button" onClick={() => reset("forgot-email")} className={`text-[13px] ${t.forgotText} font-bold transition-colors`}>
+                          Forgot password?
+                        </button>
+                      </div>
                     </div>
 
                     <div className="space-y-1.5">

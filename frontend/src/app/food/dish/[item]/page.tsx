@@ -320,12 +320,12 @@ export default function DishPage() {
                             try {
                               if (navigator.share) {
                                 await navigator.share({
-                                  title: `NearBuy - ${dish.name}`,
-                                  text: `Check out ${dish.name} by ${dish.vendor} on NearBuy!`,
+                                  title: `ZyphCart - ${dish.name}`,
+                                  text: `Check out ${dish.name} by ${dish.vendor} on ZyphCart!`,
                                   url: url
                                 });
                               } else {
-                                await navigator.clipboard.writeText(`Check out ${dish.name} by ${dish.vendor} on NearBuy! ${url}`);
+                                await navigator.clipboard.writeText(`Check out ${dish.name} by ${dish.vendor} on ZyphCart! ${url}`);
                                 toast.success("Link copied to clipboard!");
                               }
                             } catch (err) {}
@@ -539,7 +539,7 @@ export default function DishPage() {
                           if (res.ok) {
                             const { id } = await res.json();
                             const shareUrl = `${window.location.origin}/s/${id}`;
-                            if (navigator.share) await navigator.share({ title: 'NearBuy', text: `Check out ${selectedFood.name}`, url: shareUrl });
+                            if (navigator.share) await navigator.share({ title: 'ZyphCart', text: `Check out ${selectedFood.name}`, url: shareUrl });
                             else { await navigator.clipboard.writeText(shareUrl); toast.success("Link copied!"); }
                           }
                         } catch (err) {}

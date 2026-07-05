@@ -149,7 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("nb_access",  token);
     localStorage.setItem("nb_refresh", refresh);
     scheduleRefresh();
-    toast.success("Welcome to NearBuy!", {
+    toast.success("Welcome to ZyphCart!", {
       duration: 2000,
       style: {
         border: `1px solid ${isEssentials ? '#3b82f6' : '#f97316'}`,

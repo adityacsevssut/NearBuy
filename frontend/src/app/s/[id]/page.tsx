@@ -53,7 +53,7 @@ export default function ShareRedirectPage() {
         <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
       </div>
       <h2 className="text-xl font-black text-gray-800 dark:text-gray-200">Opening link...</h2>
-      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">Taking you to NearBuy.</p>
+      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">Taking you to ZyphCart.</p>
     </div>
   );
 }

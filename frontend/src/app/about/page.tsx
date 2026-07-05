@@ -5,8 +5,8 @@ import { Utensils, ShoppingBag, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
-  title: "About Us – NearBuy",
-  description: "Learn more about NearBuy, your smart campus companion.",
+  title: "About Us – ZyphCart",
+  description: "Learn more about ZyphCart, your smart campus companion.",
 };
 
 export default function AboutUsPage() {
@@ -34,7 +34,7 @@ export default function AboutUsPage() {
 
         {/* Paragraph */}
         <p className="text-base md:text-[17px] text-gray-600 dark:text-gray-400 leading-relaxed mb-16 md:mb-20 max-w-4xl">
-          Welcome to NearBuy, your ultimate smart campus companion. We are a student-centric platform dedicated to making your life easier by delivering everything you need right to your doorstep. From sudden cravings to urgent study supplies, we bridge the gap between local campus vendors and you, offering a seamless, lightning-fast, and highly convenient hyperlocal delivery experience.
+          Welcome to ZyphCart, your ultimate smart campus companion. We are a student-centric platform dedicated to making your life easier by delivering everything you need right to your doorstep. From sudden cravings to urgent study supplies, we bridge the gap between local campus vendors and you, offering a seamless, lightning-fast, and highly convenient hyperlocal delivery experience.
         </p>
 
         {/* Subheading */}

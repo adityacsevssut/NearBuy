@@ -32,7 +32,7 @@ export default function TermsPage() {
             Terms & <span className={accentColor}>Conditions</span>
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-lg font-medium">
-            Please read these terms carefully before using NearBuy.
+            Please read these terms carefully before using ZyphCart.
           </p>
         </div>
       </div>
@@ -47,14 +47,14 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">1. Acceptance of Terms</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              By accessing and placing an order on NearBuy, you confirm that you are in agreement with and bound by the terms of service contained in the Terms & Conditions outlined below. These terms apply to the entire website and any email or other type of communication between you and NearBuy.
+              By accessing and placing an order on ZyphCart, you confirm that you are in agreement with and bound by the terms of service contained in the Terms & Conditions outlined below. These terms apply to the entire website and any email or other type of communication between you and ZyphCart.
             </p>
           </section>
 
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">2. Scope of Service</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
-              NearBuy operates as a localized hyper-delivery platform connecting users with local vendors. Please note our strict service limitations:
+              ZyphCart operates as a localized hyper-delivery platform connecting users with local vendors. Please note our strict service limitations:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
               <li className="bg-red-50 dark:bg-red-900/10 p-3 rounded-xl border border-red-100 dark:border-red-900/30"><strong className="text-red-600 dark:text-red-500">Delivery System:</strong> <span className="text-red-700 dark:text-red-400 font-medium">Our delivery system is not centralized. Each vendor is responsible for delivering their own items directly to you.</span></li>
@@ -66,7 +66,7 @@ export default function TermsPage() {
           <section className="mb-10 bg-red-50 dark:bg-red-900/10 p-6 rounded-2xl border border-red-100 dark:border-red-900/30">
             <h2 className="text-2xl font-black italic mb-4 text-red-600 dark:text-red-500">3. Strictly Prohibited Items</h2>
             <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-3">
-              To ensure the safety and legality of our platform, NearBuy maintains a zero-tolerance policy for unauthorized goods. The following items are explicitly banned:
+              To ensure the safety and legality of our platform, ZyphCart maintains a zero-tolerance policy for unauthorized goods. The following items are explicitly banned:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-700 dark:text-gray-300">
               <li><strong className="text-gray-900 dark:text-white">Medicines & Pharmaceuticals:</strong> We do NOT permit the sale, purchase, or delivery of any prescription drugs, over-the-counter medicines, or pharmaceutical products.</li>
@@ -81,7 +81,7 @@ export default function TermsPage() {
           <section className="mb-10">
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">4. User Responsibilities</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed mb-3">
-              As a user of NearBuy, you agree to the following responsibilities to ensure smooth operations:
+              As a user of ZyphCart, you agree to the following responsibilities to ensure smooth operations:
             </p>
             <ul className="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
               <li><strong className="text-gray-900 dark:text-white">Accurate Information:</strong> You must provide accurate delivery addresses and active contact numbers.</li>
@@ -93,7 +93,7 @@ export default function TermsPage() {
           <section>
             <h2 className="text-2xl font-black italic mb-4 text-black dark:text-white">5. Limitation of Liability</h2>
             <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-              NearBuy acts as an intermediary platform. We do not {isStore ? "manufacture the essentials" : "prepare the food"} sold. While we strictly vet our partners, NearBuy is not liable for the quality, safety, or exact representation of the items provided by the vendors. Any severe grievances regarding product quality will be mediated between you and the vendor directly.
+              ZyphCart acts as an intermediary platform. We do not {isStore ? "manufacture the essentials" : "prepare the food"} sold. While we strictly vet our partners, ZyphCart is not liable for the quality, safety, or exact representation of the items provided by the vendors. Any severe grievances regarding product quality will be mediated between you and the vendor directly.
             </p>
           </section>
 

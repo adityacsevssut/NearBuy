@@ -1,4 +1,4 @@
--- NearBuy Users Table (Supabase / PostgreSQL)
+-- ZyphCart Users Table (Supabase / PostgreSQL)
 -- Run this SQL in your Supabase SQL Editor
 
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";

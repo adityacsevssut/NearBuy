@@ -31,7 +31,7 @@ function AccountContent() {
   const [showAddresses, setShowAddresses] = useState(false);
   const [deletingAddressId, setDeletingAddressId] = useState<string | null>(null);
   const [instagramLink, setInstagramLink] = useState("https://instagram.com/");
-  const [supportEmail, setSupportEmail] = useState("manager@nearbuy.com");
+  const [supportEmail, setSupportEmail] = useState("manager@zyphcart.com");
   
   const [isTogglingNotifications, setIsTogglingNotifications] = useState(false);
   
@@ -256,13 +256,13 @@ function AccountContent() {
   };
 
   const handleInvite = async () => {
-    const inviteText = "Hey! I'm inviting you to join NearBuy, an awesome app where you can get food from your nearest kitchens and groceries from your local market places delivered fast right to your doorstep!";
+    const inviteText = "Hey! I'm inviting you to join ZyphCart, an awesome app where you can get food from your nearest kitchens and groceries from your local market places delivered fast right to your doorstep!";
     const inviteUrl = window.location.origin;
 
     if (navigator.share) {
       try {
         await navigator.share({
-          title: "Join NearBuy",
+          title: "Join ZyphCart",
           text: inviteText,
           url: inviteUrl,
         });
@@ -379,7 +379,7 @@ function AccountContent() {
             ) : (
               <>
                 <h2 className="text-[19px] font-black text-gray-800 dark:text-gray-200 tracking-tight leading-tight truncate">
-                  {user?.firstName || "NearBuy"} {user?.lastName || "User"}
+                  {user?.firstName || "ZyphCart"} {user?.lastName || "User"}
                 </h2>
                 <p className="text-[13px] font-medium text-gray-400 mt-0.5 truncate">{user?.email}</p>
               </>
@@ -712,7 +712,7 @@ function AccountContent() {
             </div>
 
             <ModernRow icon={Users} label="Invite Friends" onClick={handleInvite} theme={theme} />
-            <ModernRow icon={Star} label="Rate NearBuy" onClick={() => setShowRatingModal(true)} theme={theme} />
+            <ModernRow icon={Star} label="Rate ZyphCart" onClick={() => setShowRatingModal(true)} theme={theme} />
             <ModernRow icon={Globe} label="App Language" value={appLanguage} onClick={() => setShowLanguageModal(true)} theme={theme} />
           </div>
         </div>
@@ -780,7 +780,7 @@ function AccountContent() {
               <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-3 bg-gradient-to-tr ${theme.avatarBg}`}>
                 <Star className={`w-8 h-8 ${theme.textPrimary}`} />
               </div>
-              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Rate NearBuy</h3>
+              <h3 className="text-xl font-black text-gray-900 dark:text-gray-100">Rate ZyphCart</h3>
               <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">How much do you love using our app?</p>
             </div>
             

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Shop Essentials – NearBuy",
+  title: "Shop Essentials – ZyphCart",
   description: "Shop stationery, lab gear, tech accessories and daily essentials for campus life.",
 };
 

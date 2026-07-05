@@ -39,20 +39,20 @@ const zeptoTransporter = nodemailer.createTransport({
  */
 async function sendOtpEmail(to, otp, purpose = "verify") {
   const subjectMap = {
-    verify: "NearBuy – Verify Your Email",
-    reset: "NearBuy – Reset Your Password",
+    verify: "ZyphCart – Verify Your Email",
+    reset: "ZyphCart – Reset Your Password",
   };
 
   const bodyMap = {
-    verify: `Your OTP to verify your NearBuy account is: <b>${otp}</b>. It expires in 10 minutes.`,
-    reset: `Your OTP to reset your NearBuy password is: <b>${otp}</b>. It expires in 10 minutes.`,
+    verify: `Your OTP to verify your ZyphCart account is: <b>${otp}</b>. It expires in 10 minutes.`,
+    reset: `Your OTP to reset your ZyphCart password is: <b>${otp}</b>. It expires in 10 minutes.`,
   };
 
   const htmlContent = `
       <div style="font-family:Inter,sans-serif;max-width:500px;margin:auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #f1f1f1;">
         <div style="text-align:center;margin-bottom:24px;">
           <span style="font-size:28px;font-weight:900;letter-spacing:-1px;">
-            <span style="color:#f97316;">Near</span><span style="color:#111;">Buy</span>
+            <span style="color:#f97316;">Zyph</span><span style="color:#111;">Cart</span>
           </span>
         </div>
         <h2 style="font-size:20px;font-weight:700;color:#111;margin-bottom:8px;">${subjectMap[purpose]}</h2>
@@ -65,9 +65,9 @@ async function sendOtpEmail(to, otp, purpose = "verify") {
     `;
 
   const mailOptions = {
-    from: `"${process.env.SMTP_FROM_NAME || "NearBuy"}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
+    from: `"${process.env.SMTP_FROM_NAME || "ZyphCart"}" <${process.env.SMTP_FROM_EMAIL || process.env.SMTP_USER}>`,
     to,
-    subject: subjectMap[purpose] || "NearBuy OTP",
+    subject: subjectMap[purpose] || "ZyphCart OTP",
     html: htmlContent,
   };
 
@@ -97,7 +97,7 @@ async function sendOtpEmail(to, otp, purpose = "verify") {
   // Fallback to SendGrid
   if (currentQuota.sendgrid_count < sendgridQuota) {
     try {
-      mailOptions.from = `"${process.env.SMTP_FROM_NAME || "NearBuy"}" <${process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`;
+      mailOptions.from = `"${process.env.SMTP_FROM_NAME || "ZyphCart"}" <${process.env.SENDGRID_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`;
       await sendgridTransporter.sendMail(mailOptions);
       await pool.query('UPDATE daily_email_quotas SET sendgrid_count = sendgrid_count + 1 WHERE date = CURRENT_DATE');
       return;
@@ -133,10 +133,10 @@ async function sendWelcomeEmail(to, firstName) {
     <div style="font-family:Inter,sans-serif;max-width:500px;margin:auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #f1f1f1;">
       <div style="text-align:center;margin-bottom:24px;">
         <span style="font-size:28px;font-weight:900;letter-spacing:-1px;">
-          <span style="color:#f97316;">Near</span><span style="color:#111;">Buy</span>
+          <span style="color:#f97316;">Zyph</span><span style="color:#111;">Cart</span>
         </span>
       </div>
-      <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:12px;text-align:center;">Welcome To NearBuy!</h2>
+      <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:12px;text-align:center;">Welcome To ZyphCart!</h2>
       <p style="color:#555;font-size:16px;margin-bottom:24px;text-align:center;line-height:1.5;">
         Hi ${firstName || 'there'},<br/><br/>
         Explore Your Nearest Market right from your screen. Fast delivery, great deals, and endless choices await!
@@ -151,9 +151,9 @@ async function sendWelcomeEmail(to, firstName) {
   `;
 
   const mailOptions = {
-    from: `"${process.env.SMTP_FROM_NAME || "NearBuy"}" <${process.env.ZEPTOMAIL_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`,
+    from: `"${process.env.SMTP_FROM_NAME || "ZyphCart"}" <${process.env.ZEPTOMAIL_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`,
     to,
-    subject: "Welcome to NearBuy!",
+    subject: "Welcome to ZyphCart!",
     html: htmlContent,
   };
 
@@ -217,7 +217,7 @@ async function sendOrderDeliveredEmail(to, orderData, userDetails) {
     <div style="font-family:Inter,sans-serif;max-width:500px;margin:auto;padding:32px;background:#fff;border-radius:16px;border:1px solid #f1f1f1;">
       <div style="text-align:center;margin-bottom:24px;">
         <span style="font-size:28px;font-weight:900;letter-spacing:-1px;">
-          <span style="color:#f97316;">Near</span><span style="color:#111;">Buy</span>
+          <span style="color:#f97316;">Zyph</span><span style="color:#111;">Cart</span>
         </span>
       </div>
       <h2 style="font-size:22px;font-weight:800;color:#111;margin-bottom:8px;text-align:center;">Order Delivered! 🎉</h2>
@@ -244,9 +244,9 @@ async function sendOrderDeliveredEmail(to, orderData, userDetails) {
   `;
 
   const mailOptions = {
-    from: `"${process.env.SMTP_FROM_NAME || "NearBuy"}" <${process.env.ZEPTOMAIL_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`,
+    from: `"${process.env.SMTP_FROM_NAME || "ZyphCart"}" <${process.env.ZEPTOMAIL_FROM_EMAIL || process.env.SMTP_FROM_EMAIL}>`,
     to,
-    subject: `Order #${orderData.id} Delivered - NearBuy`,
+    subject: `Order #${orderData.id} Delivered - ZyphCart`,
     html: htmlContent,
   };
 

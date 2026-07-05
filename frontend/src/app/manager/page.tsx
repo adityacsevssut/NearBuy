@@ -73,7 +73,7 @@ export default function PartnerDashboard() {
   const { user, logout, isLoggedIn, accessToken, isInitializing } = useAuth();
   const { theme: appTheme, toggleTheme } = useTheme();
   const router = useRouter();
-  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend" | "orders" | "feedback" | "support" | "refunds" | "vendor_payment" | "vendor_delivered" | "vendor_cancelled" | "nearbuy_payments">("dashboard");
+  const [view, setView] = useState<"dashboard" | "vendors" | "requests" | "frontend" | "orders" | "feedback" | "support" | "refunds" | "vendor_payment" | "vendor_delivered" | "vendor_cancelled" | "zyphcart_payments">("dashboard");
   const [selectedVendorForDetails, setSelectedVendorForDetails] = useState<any | null>(null);
   const [vendorDetailsData, setVendorDetailsData] = useState<any | null>(null);
   const [vendorDetailsLoading, setVendorDetailsLoading] = useState(false);
@@ -182,35 +182,35 @@ export default function PartnerDashboard() {
   const [cancelSearchQuery, setCancelSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
 
-  // Nearbuy Payments State
-  const [nearbuyPaymentsDate, setNearbuyPaymentsDate] = useState(() => new Date().toISOString().split('T')[0]);
-  const [nearbuyPaymentsData, setNearbuyPaymentsData] = useState<any>(null);
-  const [loadingNearbuyPayments, setLoadingNearbuyPayments] = useState(false);
+  // Zyphcart Payments State
+  const [zyphcartPaymentsDate, setZyphcartPaymentsDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [zyphcartPaymentsData, setZyphcartPaymentsData] = useState<any>(null);
+  const [loadingZyphcartPayments, setLoadingZyphcartPayments] = useState(false);
 
-  const fetchNearbuyPayments = async () => {
-    setLoadingNearbuyPayments(true);
+  const fetchZyphcartPayments = async () => {
+    setLoadingZyphcartPayments(true);
     try {
-      const res = await fetch(`${API}/api/managers/nearbuy-payments?date=${nearbuyPaymentsDate}`, {
+      const res = await fetch(`${API}/api/managers/zyphcart-payments?date=${zyphcartPaymentsDate}`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
       const data = await res.json();
       if (res.ok) {
-        setNearbuyPaymentsData(data.payments);
+        setZyphcartPaymentsData(data.payments);
       } else {
         toast.error(data.error || "Failed to fetch payments");
       }
     } catch (err: any) {
-      toast.error(err.message || "Error fetching nearbuy payments");
+      toast.error(err.message || "Error fetching zyphcart payments");
     } finally {
-      setLoadingNearbuyPayments(false);
+      setLoadingZyphcartPayments(false);
     }
   };
 
   useEffect(() => {
-    if (view === "nearbuy_payments") {
-      fetchNearbuyPayments();
+    if (view === "zyphcart_payments") {
+      fetchZyphcartPayments();
     }
-  }, [view, nearbuyPaymentsDate]);
+  }, [view, zyphcartPaymentsDate]);
 
   const handleVendorAction = async (actionView: "vendor_payment" | "vendor_delivered" | "vendor_cancelled", vendor: any, stats: any) => {
     setSelectedVendorForDetails(vendor);
@@ -906,7 +906,7 @@ export default function PartnerDashboard() {
             <Building2 className="w-4 h-4 text-white" />
           </div>
           <span className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight">
-            NB <span className={theme.text}>Partner</span>
+            ZC <span className={theme.text}>Partner</span>
           </span>
           <span className={`ml-2 text-[10px] font-bold ${theme.textDark} ${theme.bg} px-2 py-0.5 rounded-full uppercase tracking-widest border ${theme.border}`}>
             {user?.manager_type || "Manager"}
@@ -954,7 +954,7 @@ export default function PartnerDashboard() {
               </div>
               <div className="flex flex-col gap-1">
                 <span className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight leading-none mt-1">
-                  NB <span className={theme.text}>Partner</span>
+                  ZC <span className={theme.text}>Partner</span>
                 </span>
                 <span className={`inline-flex items-center self-start text-[9px] font-black ${theme.textDark} ${theme.bg} px-2 py-0.5 rounded border ${theme.border} uppercase tracking-widest`}>
                   {user?.manager_type || "Manager"}
@@ -995,8 +995,8 @@ export default function PartnerDashboard() {
         <button onClick={() => { setView("refunds"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "refunds" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <Undo2 className="w-5 h-5 shrink-0" /> <span className="truncate">Refund Requests</span>
         </button>
-        <button onClick={() => { setView("nearbuy_payments"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "nearbuy_payments" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
-          <IndianRupee className="w-5 h-5 shrink-0" /> <span className="truncate">Nearbuy Payments</span>
+        <button onClick={() => { setView("zyphcart_payments"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "zyphcart_payments" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <IndianRupee className="w-5 h-5 shrink-0" /> <span className="truncate">Zyphcart Payments</span>
         </button>
       </div>
 
@@ -1912,11 +1912,11 @@ export default function PartnerDashboard() {
                 </div>
               )}
             </motion.div>
-          ) : view === "nearbuy_payments" ? (
-            <motion.div key="nearbuy_payments" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6">
+          ) : view === "zyphcart_payments" ? (
+            <motion.div key="zyphcart_payments" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }} className="space-y-6">
               <div className="flex items-center justify-between gap-4 mb-6">
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Nearbuy Payments</h2>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Zyphcart Payments</h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Platform fee and GST collected day-wise across all vendors</p>
                 </div>
                 <div className="relative">
@@ -1925,32 +1925,32 @@ export default function PartnerDashboard() {
                   </div>
                   <input
                     type="date"
-                    value={nearbuyPaymentsDate}
-                    onChange={(e) => setNearbuyPaymentsDate(e.target.value)}
+                    value={zyphcartPaymentsDate}
+                    onChange={(e) => setZyphcartPaymentsDate(e.target.value)}
                     className="pl-10 pr-4 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-700 dark:text-gray-300 outline-none focus:border-gray-400 focus:ring-1 focus:ring-gray-400 transition-all cursor-pointer shadow-sm"
                   />
                 </div>
               </div>
 
-              {loadingNearbuyPayments ? (
+              {loadingZyphcartPayments ? (
                 <div className="p-10 text-center"><RefreshCw className="w-8 h-8 text-blue-500 animate-spin mx-auto" /></div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">PF (Delivered)</h3>
-                    <p className="text-3xl font-black text-green-600 dark:text-green-500">₹{Number(nearbuyPaymentsData?.delivered_platform_fee || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-black text-green-600 dark:text-green-500">₹{Number(zyphcartPaymentsData?.delivered_platform_fee || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">GST (Delivered)</h3>
-                    <p className="text-3xl font-black text-gray-900 dark:text-gray-100">₹{Number(nearbuyPaymentsData?.delivered_gst || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-black text-gray-900 dark:text-gray-100">₹{Number(zyphcartPaymentsData?.delivered_gst || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">PF (Cancelled)</h3>
-                    <p className="text-3xl font-black text-orange-gradient dark:text-orange-gradient">₹{Number(nearbuyPaymentsData?.cancelled_platform_fee || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-black text-orange-gradient dark:text-orange-gradient">₹{Number(zyphcartPaymentsData?.cancelled_platform_fee || 0).toFixed(2)}</p>
                   </div>
                   <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl p-6 flex flex-col items-center text-center shadow-sm">
                     <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">GST (Cancelled)</h3>
-                    <p className="text-3xl font-black text-red-600 dark:text-red-500">₹{Number(nearbuyPaymentsData?.cancelled_gst || 0).toFixed(2)}</p>
+                    <p className="text-3xl font-black text-red-600 dark:text-red-500">₹{Number(zyphcartPaymentsData?.cancelled_gst || 0).toFixed(2)}</p>
                   </div>
                 </div>
               )}
@@ -2198,7 +2198,7 @@ export default function PartnerDashboard() {
       <footer className="mt-auto py-5 border-t border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-center sm:justify-between">
           <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400">
-            © 2026 NearBuy Technologies · Partner Console
+            © 2026 ZyphCart Technologies · Partner Console
           </p>
           <div className="hidden sm:flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-[10px] font-bold text-green-600 uppercase tracking-widest bg-green-50 px-2 py-1 rounded-md border border-green-100">

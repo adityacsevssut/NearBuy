@@ -75,7 +75,7 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
             Poor Internet Connection
           </h2>
           <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
-            It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using NearBuy.
+            It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using ZyphCart.
           </p>
 
           {/* Action Buttons */}
