@@ -36,6 +36,7 @@ interface Order {
   image_url: string;
   gps_address: string;
   manual_address: string;
+  landmark?: string;
   vendor_pincode: string;
   items: any[];
   subtotal: string;
@@ -686,7 +687,7 @@ export default function OrderStatusPage() {
               </div>
               <div>
                 <p className="font-black text-gray-900 dark:text-gray-100 text-lg leading-tight">{order.restaurant_name}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{order.manual_address || order.gps_address}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5 line-clamp-1">{order.landmark || "No Landmark Provided"}</p>
               </div>
             </div>
           </div>
@@ -929,7 +930,7 @@ export default function OrderStatusPage() {
               <div className="text-right max-w-[250px]">
                 <p className="font-bold text-xl">{order.restaurant_name}</p>
                 <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
-                  {order.manual_address || order.gps_address || "Address not provided"}
+                  {order.landmark || "No Landmark Provided"}
                   {order.vendor_pincode ? ` - ${order.vendor_pincode}` : ''}
                 </p>
               </div>
