@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Food Essentials – ZyphCart",
-  description: "Get your favourite food delivered to your campus.",
+  title: "Food Delivery - ZyphCart",
+  description: "Get your favourite food delivered blazing fast by ZyphCart.",
 };
 
 export default function FoodLayout({ children }: { children: React.ReactNode }) {

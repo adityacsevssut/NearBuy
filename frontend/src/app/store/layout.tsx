@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 export const metadata: Metadata = {
-  title: "Shop Essentials – ZyphCart",
-  description: "Shop stationery, lab gear, tech accessories and daily essentials for campus life.",
+  title: "Shop Essentials - ZyphCart",
+  description: "Shop stationery, lab gear, tech accessories and daily essentials delivered instantly by ZyphCart.",
 };
 
 export default async function EssentialsLayout({ children }: { children: React.ReactNode }) {

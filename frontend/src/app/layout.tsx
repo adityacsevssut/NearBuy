@@ -14,13 +14,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ZyphCart – Campus life, simplified.",
+  title: "ZyphCart",
   description:
-    "From late-night snacks to lab equipment. Delivered to your hostel gate in 15 mins.",
-  keywords: ["student delivery", "campus food", "hostel delivery", "VSSUT", "hyperlocal"],
+    "Your favorite food, groceries, and essentials delivered fast.",
+  keywords: ["student delivery", "campus food", "hostel delivery", "VSSUT", "hyperlocal", "zyphcart"],
   openGraph: {
-    title: "ZyphCart – Campus life, simplified.",
-    description: "Hyperlocal student super app for food and essentials.",
+    title: "ZyphCart",
+    description: "Your favorite food, groceries, and essentials delivered fast.",
     type: "website",
   },
 };
