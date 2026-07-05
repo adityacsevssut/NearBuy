@@ -42,6 +42,7 @@ interface Order {
   delivery_charge?: string;
   gps_address?: string;
   manual_address?: string;
+  landmark?: string;
   vendor_pincode?: string;
 }
 
@@ -443,7 +444,7 @@ function OrdersPageContent() {
               <div className="text-right max-w-[250px]">
                 <p className="font-bold text-xl">{orderToDownload.restaurant_name}</p>
                 <p className="mt-1 text-sm" style={{ color: "#6b7280" }}>
-                  {orderToDownload.manual_address || orderToDownload.gps_address || "Address not provided"}
+                  {orderToDownload.landmark || "No Landmark Provided"}
                   {orderToDownload.vendor_pincode ? ` - ${orderToDownload.vendor_pincode}` : ''}
                 </p>
               </div>

@@ -403,7 +403,7 @@ router.get("/me", authenticate, async (req, res) => {
     const total = parseInt(countResult.rows[0].count);
 
     const { rows } = await pool.query(
-      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode, u.manager_type
+      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.landmark, v.pincode as vendor_pincode, u.manager_type
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
        JOIN users u ON v.user_id = u.id
@@ -536,7 +536,7 @@ router.get("/stats", authenticate, async (req, res) => {
 router.get("/:id", authenticate, async (req, res) => {
   try {
     const { rows } = await pool.query(
-      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.pincode as vendor_pincode, v.owner_number, v.delivery_boy_number
+      `SELECT o.*, v.restaurant_name, v.image_url, v.gps_address, v.manual_address, v.landmark, v.pincode as vendor_pincode, v.owner_number, v.delivery_boy_number
        FROM orders o
        JOIN vendor_profiles v ON o.vendor_id = v.user_id
        WHERE o.id = $1 AND o.user_id = $2`,

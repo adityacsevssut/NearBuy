@@ -311,8 +311,7 @@ export default function VendorOrdersPage() {
                       <div className="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400 font-medium">
                         <MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                         <span className="line-clamp-2">
-                          {order.delivery_address?.fullAddress || order.delivery_address?.landmark || order.delivery_address?.locationName || "Unknown Location"}
-                          {order.delivery_address?.pincode ? ` - ${order.delivery_address.pincode}` : ""}
+                          {order.delivery_address?.landmark || "No Landmark Provided"}
                         </span>
                       </div>
                       {order.customer_mobile ? (
@@ -470,10 +469,9 @@ export default function VendorOrdersPage() {
                   </h4>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Full Address</p>
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Landmark</p>
                       <p className="text-sm font-black text-gray-800 dark:text-gray-200 leading-snug">
-                        {selectedOrderForItems.delivery_address?.fullAddress || selectedOrderForItems.delivery_address?.landmark || selectedOrderForItems.delivery_address?.locationName || "Unknown Location"}
-                        {selectedOrderForItems.delivery_address?.pincode ? ` - ${selectedOrderForItems.delivery_address.pincode}` : ""}
+                        {selectedOrderForItems.delivery_address?.landmark || "No Landmark Provided"}
                       </p>
                     </div>
                     {selectedOrderForItems.customer_mobile && (
@@ -576,11 +574,9 @@ export default function VendorOrdersPage() {
                 </h4>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Full Address</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Landmark</p>
                     <p className="text-sm font-black text-gray-800 dark:text-gray-200 leading-snug">
-                      {statusModalOrder.delivery_address?.fullAddress || statusModalOrder.delivery_address?.locationName || "Unknown Location"}
-                      {statusModalOrder.delivery_address?.landmark ? `, ${statusModalOrder.delivery_address.landmark}` : ""}
-                      {statusModalOrder.delivery_address?.pincode ? ` - ${statusModalOrder.delivery_address.pincode}` : ""}
+                      {statusModalOrder.delivery_address?.landmark || "No Landmark Provided"}
                     </p>
                   </div>
                   {statusModalOrder.customer_mobile && (
