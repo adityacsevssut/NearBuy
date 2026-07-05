@@ -87,9 +87,10 @@ function RestaurantOrderCard({
   const [showBill, setShowBill] = useState(true);
   const discount = (couponApplied && paymentMethod !== 'cod') ? Math.floor(subtotal * 0.1) : 0;
 
-  // Calculate actual fee amounts based on percentage of subtotal, capped at ₹8 each
-  let calculatedPlatformFee = Math.min((subtotal * platformFee) / 100, 8);
-  const calculatedGst = Math.min((subtotal * gst) / 100, 8);
+  // Fee amounts are calculated as a percentage of the subtotal.
+  // Minimum fee is ₹1 for Platform Fee if it is enabled (>0).
+  let calculatedPlatformFee = platformFee > 0 ? Math.max((subtotal * platformFee) / 100, 1) : 0;
+  const calculatedGst = (subtotal * gst) / 100;
   let totalFees = calculatedPlatformFee + calculatedGst;
 
   // Razorpay requires a minimum amount of ₹1. Enforce this if fees are non-zero.

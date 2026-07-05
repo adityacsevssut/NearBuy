@@ -328,7 +328,8 @@ router.post(
       if (settingsRes.rows.length) {
         const s = settingsRes.rows[0];
         const serverGst = Math.round((subtotal * parseFloat(s.gst)) / 100 * 100) / 100;
-        const serverPlatformFee = parseFloat(s.platform_fee);
+        const serverPlatformFeePercent = parseFloat(s.platform_fee);
+        const serverPlatformFee = serverPlatformFeePercent > 0 ? Math.max((subtotal * serverPlatformFeePercent) / 100, 1) : 0;
         // Delivery charge is set by vendor after order placement, so exclude from check
         const serverMinTotal = subtotal + serverGst + serverPlatformFee;
         if (Math.abs(serverMinTotal - total_amount) > 2) { // ₹2 tolerance for rounding
