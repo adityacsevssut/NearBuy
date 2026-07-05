@@ -575,7 +575,8 @@ router.get("/settings", async (req, res) => {
 // Update global settings — restricted to managers and admins
 router.post("/settings", authenticate, validate(updateSettingsSchema), async (req, res) => {
   try {
-    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+    const isDevAdmin = req.user.email === process.env.DEV_ADMIN_EMAIL;
+    if (req.user.role !== 'admin' && req.user.role !== 'manager' && !isDevAdmin) {
       return res.status(403).json({ error: "Access denied. Managers and admins only." });
     }
     const { platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store } = req.body;
