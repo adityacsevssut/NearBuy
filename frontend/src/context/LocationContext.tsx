@@ -111,8 +111,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       if (user.locationName || user.latitude) {
         const localTimestamp = localStorage.getItem("nearbuy_location_ts");
         const dbTimestamp = localStorage.getItem("nearbuy_location_db_ts");
-        if (localTimestamp && dbTimestamp && localTimestamp > dbTimestamp) {
-          localStorage.setItem("nearbuy_location_db_ts", new Date().toISOString());
+        // If the user has set a location locally after the last DB sync, keep it
+        if (localTimestamp && dbTimestamp && localTimestamp >= dbTimestamp) {
+          // Mark that we've acknowledged the DB sync without overwriting local data
+          localStorage.setItem("nearbuy_location_db_ts", new Date(new Date(localTimestamp).getTime() - 1).toISOString());
           return;
         }
         const name = user.locationName || "Select Location";
@@ -128,8 +130,10 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem("nearbuy_locationName", name);
         localStorage.setItem("nearbuy_pincode", pin);
         localStorage.setItem("nearbuy_landmark", lmk);
-        localStorage.setItem("nearbuy_location_db_ts", new Date().toISOString());
-        localStorage.setItem("nearbuy_location_ts", new Date().toISOString());
+        // Set db_ts to now but keep location_ts AHEAD so local always wins next refresh
+        const now = new Date();
+        localStorage.setItem("nearbuy_location_db_ts", now.toISOString());
+        localStorage.setItem("nearbuy_location_ts", new Date(now.getTime() + 1).toISOString());
         if (lat !== null) localStorage.setItem("nearbuy_latitude", lat.toString());
         else localStorage.removeItem("nearbuy_latitude");
         if (lon !== null) localStorage.setItem("nearbuy_longitude", lon.toString());
@@ -151,12 +155,28 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
       });
       if (res.ok) {
         const data = await res.json();
-        const addresses: SavedAddress[] = data.addresses || [];
-        setSavedAddresses(addresses);
-        lsSetSavedAddresses(addresses);
+        const dbAddresses: SavedAddress[] = data.addresses || [];
+        if (dbAddresses.length > 0) {
+          // DB has addresses — trust DB as source of truth
+          setSavedAddresses(dbAddresses);
+          lsSetSavedAddresses(dbAddresses);
+        } else {
+          // DB returned empty — fallback to localStorage to avoid wiping locally-saved data
+          // (can happen if the DB save failed silently or user hasn't synced yet)
+          const localAddresses = lsGetSavedAddresses();
+          setSavedAddresses(localAddresses);
+          // Don't overwrite localStorage with empty DB response
+        }
+      } else {
+        // Request failed — fallback to localStorage
+        const localAddresses = lsGetSavedAddresses();
+        setSavedAddresses(localAddresses);
       }
     } catch {
       console.error("Failed to fetch saved addresses from DB");
+      // On network error, fallback to localStorage
+      const localAddresses = lsGetSavedAddresses();
+      setSavedAddresses(localAddresses);
     }
   }, [isLoggedIn, accessToken, apiBase]);
 
