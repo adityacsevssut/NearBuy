@@ -181,6 +181,7 @@ export default function PartnerDashboard() {
   const [vendorSearchQuery, setVendorSearchQuery] = useState("");
   const [cancelSearchQuery, setCancelSearchQuery] = useState("");
   const [orderSearchQuery, setOrderSearchQuery] = useState("");
+  const [orderDateQuery, setOrderDateQuery] = useState(() => new Date().toISOString().split('T')[0]);
 
   // Zyphcart Payments State
   const [zyphcartPaymentsDate, setZyphcartPaymentsDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -980,9 +981,6 @@ export default function PartnerDashboard() {
         <button onClick={() => { setView("requests"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "requests" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <ClipboardList className="w-5 h-5 shrink-0" /> <span className="truncate">Vendor Requests</span>
         </button>
-        <button onClick={() => { setView("vendors"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "vendors" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
-          <StoreIcon className="w-5 h-5 shrink-0" /> <span className="truncate">Manage Vendors</span>
-        </button>
         <button onClick={() => { setView("orders"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "orders" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <Receipt className="w-5 h-5 shrink-0" /> <span className="truncate whitespace-nowrap">See Order and Payment</span>
         </button>
@@ -1082,6 +1080,58 @@ export default function PartnerDashboard() {
               initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
               className="space-y-8"
             >
+              {/* ── Service Center Status Widget ────────────────────────── */}
+              <div className={`rounded-2xl border p-4 transition-all ${
+                gpsStatus === "outside"
+                  ? "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30"
+                  : gpsStatus === "inside"
+                  ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30"
+                  : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A]"
+              }`}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
+                      gpsStatus === "outside" ? "bg-red-100 dark:bg-red-500/20"
+                      : gpsStatus === "inside" ? "bg-green-100 dark:bg-green-500/20"
+                      : theme.bg
+                    }`}>
+                      <Building2 className={`w-4 h-4 ${
+                        gpsStatus === "outside" ? "text-red-500"
+                        : gpsStatus === "inside" ? "text-green-500"
+                        : theme.text
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Your Service Center</p>
+                      {assignedCenter ? (
+                        <>
+                          <p className="font-black text-gray-900 dark:text-gray-100 text-[15px] leading-tight line-clamp-1">
+                            {assignedCenter.landmark || assignedCenter.name}
+                          </p>
+                          {assignedCenter.landmark && (
+                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{assignedCenter.name}</p>
+                          )}
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {assignedCenter.pincode && (
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${theme.text} ${theme.bg} ${theme.border}`}>
+                                PIN {assignedCenter.pincode}
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 dark:bg-[#1F1F2E] px-2 py-0.5 rounded-full border border-gray-100 dark:border-[#2A2A3A]">
+                              {parseFloat(String(assignedCenter.radius_km)).toFixed(1)} km radius
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
+                          No service center assigned yet. Set one up to get started.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Registered Shops */}
               <div>
                 <div className="flex items-center justify-between mb-5">
@@ -1131,152 +1181,6 @@ export default function PartnerDashboard() {
                 )}
               </div>
 
-              {/* ── Service Center Status Widget ────────────────────────── */}
-              <div className={`rounded-2xl border p-4 transition-all ${
-                gpsStatus === "outside"
-                  ? "bg-red-50 dark:bg-red-500/10 border-red-200 dark:border-red-500/30"
-                  : gpsStatus === "inside"
-                  ? "bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/30"
-                  : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A]"
-              }`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-start gap-3">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${
-                      gpsStatus === "outside" ? "bg-red-100 dark:bg-red-500/20"
-                      : gpsStatus === "inside" ? "bg-green-100 dark:bg-green-500/20"
-                      : theme.bg
-                    }`}>
-                      <Building2 className={`w-4 h-4 ${
-                        gpsStatus === "outside" ? "text-red-500"
-                        : gpsStatus === "inside" ? "text-green-500"
-                        : theme.text
-                      }`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">Your Service Center</p>
-                      {assignedCenter ? (
-                        <>
-                          <p className="font-black text-gray-900 dark:text-gray-100 text-[15px] leading-tight line-clamp-1">
-                            {assignedCenter.landmark || assignedCenter.name}
-                          </p>
-                          {assignedCenter.landmark && (
-                            <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{assignedCenter.name}</p>
-                          )}
-                          <div className="flex flex-wrap gap-1.5 mt-1.5">
-                            {assignedCenter.pincode && (
-                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${theme.text} ${theme.bg} ${theme.border}`}>
-                                PIN {assignedCenter.pincode}
-                              </span>
-                            )}
-                            <span className="text-[10px] font-bold text-gray-400 bg-gray-50 dark:bg-[#1F1F2E] px-2 py-0.5 rounded-full border border-gray-100 dark:border-[#2A2A3A]">
-                              {parseFloat(String(assignedCenter.radius_km)).toFixed(1)} km radius
-                            </span>
-                            {gpsStatus === "inside" && (
-                              <span className="text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-500/10 px-2 py-0.5 rounded-full border border-green-100 dark:border-green-500/20">✅ In service area</span>
-                            )}
-                            {gpsStatus === "outside" && (
-                              <span className="text-[10px] font-bold text-red-600 bg-red-50 dark:bg-red-500/10 px-2 py-0.5 rounded-full border border-red-100 dark:border-red-500/20">⚠️ Outside service area</span>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">
-                          No service center assigned yet. Set one up to get started.
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 shrink-0">
-                    {assignedCenter && (
-                      <button
-                        onClick={checkGpsStatus}
-                        disabled={gpsStatus === "checking"}
-                        className="px-3 py-1.5 text-xs font-bold rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] text-gray-600 dark:text-gray-400 hover:bg-gray-50 transition-colors disabled:opacity-60 flex items-center gap-1 justify-center whitespace-nowrap"
-                      >
-                        {gpsStatus === "checking"
-                          ? <RefreshCw className="w-3 h-3 animate-spin" />
-                          : <Navigation className="w-3 h-3" />}
-                        GPS Check
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {gpsStatus === "outside" && (
-                  <div className="mt-3 pt-3 border-t border-red-200 dark:border-red-500/30">
-                    <div className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm font-bold text-red-700 dark:text-red-400">
-                          Not Available At Your Location
-                        </p>
-                        <p className="text-xs text-red-600/80 dark:text-red-400/70 font-medium mt-0.5">
-                          Your GPS is outside all active service areas. Users in your current location see this service as unavailable. Move to your assigned area or update your service center.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-            </motion.div>
-          ) : view === "vendors" ? (
-            <motion.div
-              key="vendors"
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
-              className="space-y-6"
-            >
-              {/* Existing Vendors List */}
-              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] shadow-sm rounded-3xl p-6">
-                <div className="flex items-center justify-between mb-5">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Active Vendors</h2>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">{user?.manager_type} division — {vendors.length} vendor{vendors.length !== 1 ? "s" : ""}</p>
-                  </div>
-                  <button onClick={fetchVendors} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingVendors ? "opacity-50 pointer-events-none" : ""}`}>
-                    {loadingVendors ? "Loading..." : "Refresh"}
-                  </button>
-                </div>
-
-                {vendors.length === 0 && !loadingVendors ? (
-                  <div className="text-center py-12 bg-gray-50 dark:bg-[#151522] rounded-2xl border border-dashed border-gray-200 dark:border-[#2A2A3A]">
-                    <StoreIcon className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400">No vendors yet. Create one above!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {vendors.map(v => (
-                      <div key={v.id} className={`flex items-center gap-4 p-4 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] hover:border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522]/50 hover:${theme.bg} transition-all group`}>
-                        <div className={`w-10 h-10 rounded-xl ${theme.bg} border ${theme.border} flex items-center justify-center shrink-0`}>
-                          <span className={`font-black text-sm ${theme.textDark}`}>{v.first_name?.[0]?.toUpperCase()}</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-bold text-gray-900 dark:text-gray-100 text-sm truncate">{v.first_name} {v.last_name}</p>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{v.email}</p>
-                          {v.mobile && <p className="text-xs text-gray-400">{v.mobile}</p>}
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-green-100 text-green-700 uppercase tracking-wider">Active</span>
-                          <button
-                            onClick={() => openEditVendor(v)}
-                            className="p-1.5 rounded-lg text-gray-300 hover:text-blue-500 hover:bg-blue-50 transition-colors"
-                            title="Edit vendor"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteVendor(v.id)}
-                            className="p-1.5 rounded-lg text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                            title="Delete vendor"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </motion.div>
           ) : view === "requests" ? (
             <motion.div 
@@ -1638,7 +1542,13 @@ export default function PartnerDashboard() {
                   <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Orders & Payments</h2>
                   <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 capitalize">Recent orders from {user?.manager_type} vendors</p>
                 </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+                  <input
+                    type="date"
+                    value={orderDateQuery}
+                    onChange={(e) => setOrderDateQuery(e.target.value)}
+                    className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all shadow-sm text-gray-700 dark:text-gray-300 dark:[color-scheme:dark]"
+                  />
                   <input
                     type="text"
                     placeholder="Search Order ID..."
@@ -1670,7 +1580,13 @@ export default function PartnerDashboard() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
-                      {orders.filter((order: any) => (order.id || "").toLowerCase().includes(orderSearchQuery.toLowerCase())).map((order: any) => (
+                      {orders.filter((order: any) => {
+                        const matchesId = (order.id || "").toLowerCase().includes(orderSearchQuery.toLowerCase());
+                        const orderDate = new Date(order.created_at);
+                        const orderDateStr = !isNaN(orderDate.getTime()) ? orderDate.toISOString().split('T')[0] : "";
+                        const matchesDate = orderDateQuery ? orderDateStr === orderDateQuery : true;
+                        return matchesId && matchesDate;
+                      }).map((order: any) => (
                         <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50 transition-colors">
                           <td className="p-4 font-mono text-sm text-gray-900 dark:text-gray-100 font-bold">#{order.id.slice(0, 8).toUpperCase()}</td>
                           <td className="p-4 text-sm text-gray-600 dark:text-gray-400">{new Date(order.created_at).toLocaleString()}</td>
