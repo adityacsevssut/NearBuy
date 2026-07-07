@@ -60,7 +60,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         setCenters(data.centers || []);
       }
     } catch (err) {
-      console.error("Failed to fetch service centers", err);
+      console.warn("Failed to fetch service centers", err);
     } finally {
       setLoading(false);
     }

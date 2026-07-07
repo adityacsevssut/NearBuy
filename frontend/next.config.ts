@@ -40,7 +40,7 @@ const securityHeaders = [
       // Images: self + data URIs + blob (for map tiles, previews) + all HTTPS
       "img-src 'self' data: blob: https:",
       // API calls: self + backend + Google + Firebase + Razorpay + Geoapify + maps
-      "connect-src 'self' https://localhost:5000 https://nearbuy-production-b534.up.railway.app https://*.googleapis.com https://*.firebaseio.com https://fcm.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com wss://*.firebaseio.com https://api.geoapify.com https://maps.googleapis.com",
+      "connect-src 'self' http://localhost:5000 ws://localhost:5000 https://nearbuy-production-b534.up.railway.app https://*.googleapis.com https://*.firebaseio.com https://fcm.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://api.razorpay.com wss://*.firebaseio.com https://api.geoapify.com https://maps.googleapis.com",
       // Frames allowed for Google Sign-In, Razorpay
       "frame-src 'self' https://accounts.google.com https://api.razorpay.com https://checkout.razorpay.com",
       // Media from self + blob
