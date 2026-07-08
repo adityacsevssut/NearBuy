@@ -156,11 +156,11 @@ router.get("/vendors", authenticate, async (req, res) => {
                WHERE u.role='vendor' ORDER BY u.created_at DESC`;
       params = [];
     } else {
-      query = `SELECT u.id, u.first_name, u.last_name, u.email, u.mobile, u.manager_type, u.is_active, u.created_at, v.restaurant_name AS business_name
+      query = `SELECT u.id, u.first_name, u.last_name, u.email, u.mobile, u.manager_type, u.service_center_id, u.is_active, u.created_at, v.restaurant_name AS business_name
                FROM users u
                LEFT JOIN vendor_profiles v ON u.id = v.user_id
-               WHERE u.role='vendor' AND LOWER(u.manager_type)=$1 ORDER BY u.created_at DESC`;
-      params = [mType];
+               WHERE u.role='vendor' AND LOWER(u.manager_type)=$1 AND u.service_center_id=$2 ORDER BY u.created_at DESC`;
+      params = [mType, req.user.service_center_id || null];
     }
     const { rows } = await pool.query(query, params);
     return res.json({ vendors: rows });
@@ -169,10 +169,6 @@ router.get("/vendors", authenticate, async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch vendors." });
   }
 });
-
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// POST /api/managers/vendor  â€” manager directly creates a vendor account
-// â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 router.post(
   "/vendor",
   authenticate,
@@ -197,10 +193,10 @@ router.post(
       const passwordHash = await bcrypt.hash(password, 10);
 
       const { rows } = await pool.query(
-        `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, manager_type, is_verified, is_active)
-         VALUES ($1, $2, $3, $4, $5, 'vendor', $6, TRUE, TRUE)
-         RETURNING id, first_name, last_name, email, mobile, manager_type, is_active, created_at`,
-        [firstName, lastName, email, mobile || null, passwordHash, vendorType]
+        `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, manager_type, service_center_id, is_verified, is_active)
+         VALUES ($1, $2, $3, $4, $5, 'vendor', $6, $7, TRUE, TRUE)
+         RETURNING id, first_name, last_name, email, mobile, manager_type, service_center_id, is_active, created_at`,
+        [firstName, lastName, email, mobile || null, passwordHash, vendorType, req.user.service_center_id || null]
       );
 
       return res.status(201).json({ message: "Vendor account created successfully.", vendor: rows[0] });
@@ -227,13 +223,14 @@ router.patch(
     const { firstName, lastName, email, mobile, password } = req.body;
 
     try {
-      const check = await pool.query("SELECT manager_type FROM users WHERE id=$1 AND role='vendor'", [id]);
+      const check = await pool.query("SELECT manager_type, service_center_id FROM users WHERE id=$1 AND role='vendor'", [id]);
       if (!check.rows.length) return res.status(404).json({ error: "Vendor not found." });
 
       if (req.user.role === "manager") {
         const userType = (req.user.manager_type || "").toLowerCase();
         const targetType = (check.rows[0].manager_type || "").toLowerCase();
         if (userType !== targetType) return res.status(403).json({ error: "Cannot edit vendor of a different type." });
+        if (check.rows[0].service_center_id !== req.user.service_center_id) return res.status(403).json({ error: "Cannot edit vendor from a different service center." });
       }
 
       const updates = [];
@@ -381,14 +378,14 @@ router.delete("/feedbacks/:id", authenticate, async (req, res) => {
       return res.status(403).json({ error: "Access denied." });
     }
     const { id } = req.params;
-    
+
     // Admin can delete any, manager can only delete if it belongs to their type or general
     const mType = (req.user.manager_type || "").toLowerCase();
-    
+
     if (req.user.role === "manager") {
       const check = await pool.query("SELECT type FROM feedbacks WHERE id=$1", [id]);
       if (!check.rows.length) return res.status(404).json({ error: "Feedback not found." });
-      
+
       const fType = check.rows[0].type;
       if (fType !== 'general' && fType !== mType) {
         return res.status(403).json({ error: "Cannot delete feedback from another division." });
@@ -444,13 +441,13 @@ router.delete("/support-requests/:id", authenticate, async (req, res) => {
       return res.status(403).json({ error: "Access denied." });
     }
     const { id } = req.params;
-    
+
     const mType = (req.user.manager_type || "").toLowerCase();
-    
+
     if (req.user.role === "manager") {
       const check = await pool.query("SELECT type FROM support_requests WHERE id=$1", [id]);
       if (!check.rows.length) return res.status(404).json({ error: "Support request not found." });
-      
+
       const sType = check.rows[0].type;
       if (sType !== 'general' && sType !== mType) {
         return res.status(403).json({ error: "Cannot delete support request from another division." });
@@ -494,7 +491,7 @@ router.get("/refund-requests", authenticate, async (req, res) => {
       params = [mType];
     }
     const { rows } = await pool.query(query, params);
-    
+
     const formattedRows = rows.map(r => {
       const name = `${r.first_name || ''} ${r.last_name || ''}`.trim();
       return {
@@ -520,19 +517,19 @@ router.patch("/refund-requests/:id", authenticate, async (req, res) => {
       return res.status(403).json({ error: "Access denied." });
     }
     const { id } = req.params;
-    const { status, rejection_reason } = req.body; 
-    
+    const { status, rejection_reason } = req.body;
+
     const validStatuses = ['Approved', 'Rejected', 'Completed', 'Awaiting UPI'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({ error: "Invalid status." });
     }
 
     const mType = (req.user.manager_type || "").toLowerCase();
-    
+
     if (req.user.role === "manager") {
       const check = await pool.query("SELECT type FROM refund_requests WHERE id=$1", [id]);
       if (!check.rows.length) return res.status(404).json({ error: "Refund request not found." });
-      
+
       const sType = check.rows[0].type;
       if (sType !== 'general' && sType !== mType) {
         return res.status(403).json({ error: "Cannot modify refund request from another division." });
@@ -561,9 +558,9 @@ router.post("/refund-requests/:id/process-razorpay", authenticate, async (req, r
 
     const check = await pool.query("SELECT * FROM refund_requests WHERE id=$1", [id]);
     if (!check.rows.length) return res.status(404).json({ error: "Refund request not found." });
-    
+
     const refundData = check.rows[0];
-    
+
     if (req.user.role === "manager") {
       const mType = (req.user.manager_type || "").toLowerCase();
       if (refundData.type !== 'general' && refundData.type !== mType) {
@@ -738,10 +735,10 @@ router.get("/vendors/:vendorId/orders", authenticate, async (req, res) => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-// GET /api/managers/zyphcart-payments
+// GET /api/managers/nearbuy-payments
 // Returns day-wise total platform fee and gst collected by all vendors
 // ════════════════════════════════════════════════════════════════════
-router.get("/zyphcart-payments", authenticate, async (req, res) => {
+router.get("/nearbuy-payments", authenticate, async (req, res) => {
   try {
     if (req.user.role !== "manager" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied." });
@@ -782,8 +779,8 @@ router.get("/zyphcart-payments", authenticate, async (req, res) => {
     const { rows } = await pool.query(query, params);
     return res.json({ payments: rows[0] });
   } catch (err) {
-    console.error("zyphcart payments error:", err);
-    return res.status(500).json({ error: "Failed to fetch zyphcart payments." });
+    console.error("nearbuy payments error:", err);
+    return res.status(500).json({ error: "Failed to fetch nearbuy payments." });
   }
 });
 
