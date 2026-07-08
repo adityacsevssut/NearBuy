@@ -168,7 +168,6 @@ export default function WishlistPage() {
                           </span>
                         )}
                       </div>
-                      
                       <h3 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight mb-0.5">
                         {dish.name}
                       </h3>
