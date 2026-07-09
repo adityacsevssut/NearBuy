@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   X, CheckCircle, RefreshCw,
   User, Mail, Phone, Lock,
-  Store, Pill, UtensilsCrossed, School, MapPin
+  Store, Pill, UtensilsCrossed, School, MapPin, ChevronDown
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -105,10 +105,11 @@ export default function BusinessRequestModal({
       fetch(`${API}/api/public/service-centers`)
         .then(res => res.json())
         .then(data => {
-          if (data.serviceCenters) {
-            setServiceCenters(data.serviceCenters);
-            if (data.serviceCenters.length === 1) {
-              setServiceCenterId(data.serviceCenters[0].id);
+          const fetchedCenters = data.centers || data.serviceCenters;
+          if (fetchedCenters) {
+            setServiceCenters(fetchedCenters);
+            if (fetchedCenters.length === 1) {
+              setServiceCenterId(fetchedCenters[0].id);
             }
           }
         })
@@ -251,24 +252,29 @@ export default function BusinessRequestModal({
 
                   {/* Service Center Dropdown */}
                   <div className="relative group">
-                    <MapPin className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${theme.icon} transition-colors pointer-events-none`} />
+                    <MapPin className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${theme.icon} transition-colors pointer-events-none z-10`} />
                     <select
                       id="br-service-center"
                       value={serviceCenterId}
                       onChange={(e) => setServiceCenterId(e.target.value)}
                       required
-                      className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-[#0D0D17] ${theme.focus} transition-all appearance-none cursor-pointer`}
+                      className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] pr-10 text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-[#0D0D17] ${theme.focus} transition-all appearance-none cursor-pointer relative z-0`}
                     >
                       <option value="" disabled hidden></option>
-                      {serviceCenters.map((sc) => (
-                        <option key={sc.id} value={sc.id}>
-                          {sc.name} - {sc.landmark} ({sc.pincode})
-                        </option>
-                      ))}
+                      {serviceCenters.length === 0 ? (
+                        <option value="" disabled>No service areas available</option>
+                      ) : (
+                        serviceCenters.map((sc) => (
+                          <option key={sc.id} value={sc.id}>
+                            {sc.name} - {sc.landmark} ({sc.pincode})
+                          </option>
+                        ))
+                      )}
                     </select>
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
                     <label
                       htmlFor="br-service-center"
-                      className={`absolute left-[42px] top-2 text-[10px] uppercase font-bold text-gray-400 ${!serviceCenterId ? "top-1/2 -translate-y-1/2 text-sm" : ""} peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] ${theme.label} transition-all pointer-events-none`}
+                      className={`absolute left-[42px] top-2 text-[10px] uppercase font-bold text-gray-400 ${!serviceCenterId ? "top-1/2 -translate-y-1/2 text-sm" : ""} peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] ${theme.label} transition-all pointer-events-none z-10`}
                     >
                       Your Business Area
                     </label>
