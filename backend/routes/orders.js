@@ -185,7 +185,7 @@ router.post("/:id/initiate-payment", authenticate, async (req, res) => {
     const rzpOrder = await initiateRazorpay(amount, "receipt_" + order.id);
     res.json(rzpOrder);
   } catch(err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to initiate payment. Please try again." });
   }
 });
 
@@ -199,7 +199,7 @@ router.post("/:id/initiate-advance", authenticate, async (req, res) => {
     const rzpOrder = await initiateRazorpay(advanceAmount, "adv_" + order.id);
     res.json(rzpOrder);
   } catch(err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to initiate advance payment. Please try again." });
   }
 });
 
@@ -214,7 +214,7 @@ router.post("/:id/initiate-remaining", authenticate, async (req, res) => {
     const rzpOrder = await initiateRazorpay(remainingAmount, "rem_" + order.id);
     res.json(rzpOrder);
   } catch(err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: "Failed to initiate remaining payment. Please try again." });
   }
 });
 
@@ -250,7 +250,7 @@ router.post("/verify-payment", authenticate, async (req, res) => {
       return res.status(400).json({ error: "Invalid signature" });
     }
   } catch (err) {
-    return res.status(500).json({ error: err.message || "Error verifying payment" });
+    return res.status(500).json({ error: "Error verifying payment. Please try again." });
   }
 });
 
@@ -291,7 +291,7 @@ router.post("/verify-advance", authenticate, async (req, res) => {
       return res.status(400).json({ error: "Invalid signature" });
     }
   } catch (err) {
-    return res.status(500).json({ error: err.message || "Error verifying advance payment" });
+    return res.status(500).json({ error: "Error verifying advance payment. Please try again." });
   }
 });
 
@@ -383,7 +383,7 @@ router.post(
       return res.status(201).json({ message: "Order placed successfully", order: newOrder });
     } catch (err) {
       console.error("Place order error:", err);
-      return res.status(500).json({ error: "Failed to place order. " + err.message });
+      return res.status(500).json({ error: "Failed to place order. Please try again." });
     }
   }
 );

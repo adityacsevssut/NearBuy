@@ -268,7 +268,7 @@ router.delete("/vendor/:id", authenticate, async (req, res) => {
   }
   const { id } = req.params;
   try {
-    const check = await pool.query("SELECT manager_type FROM users WHERE id=$1 AND role='vendor'", [id]);
+    const check = await pool.query("SELECT manager_type, email FROM users WHERE id=$1 AND role='vendor'", [id]);
     if (!check.rows.length) return res.status(404).json({ error: "Vendor not found." });
 
     if (req.user.role === "manager") {
@@ -277,7 +277,14 @@ router.delete("/vendor/:id", authenticate, async (req, res) => {
       if (userType !== targetType) return res.status(403).json({ error: "Cannot delete vendor of a different type." });
     }
 
+    const vendorEmail = check.rows[0].email;
+
     await pool.query("DELETE FROM users WHERE id=$1 AND role='vendor'", [id]);
+    
+    if (vendorEmail) {
+      await pool.query("DELETE FROM vendor_requests WHERE owner_email=$1", [vendorEmail]);
+    }
+    
     return res.json({ message: "Vendor deleted successfully." });
   } catch (err) {
     console.error("delete vendor error:", err);

@@ -12,7 +12,7 @@ router.post(
   validate(createVendorRequestSchema),
   async (req, res) => {
 
-    const { restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, requestType, collegeName } = req.body;
+    const { restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, requestType, collegeName, serviceCenterId } = req.body;
     try {
       // Check if email already exists in vendor_requests
       const existing = await pool.query("SELECT id FROM vendor_requests WHERE owner_email=$1", [ownerEmail]);
@@ -30,10 +30,10 @@ router.post(
       const passwordHash = await bcrypt.hash(password, 10);
 
       const { rows } = await pool.query(
-        `INSERT INTO vendor_requests (restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        `INSERT INTO vendor_requests (restaurant_name, owner_name, owner_mobile, owner_email, password, vendor_type, request_type, college_name, service_center_id)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING id`,
-        [restaurantName, ownerName, ownerMobile, ownerEmail, passwordHash, vendorType, requestType || 'vendor', collegeName]
+        [restaurantName, ownerName, ownerMobile, ownerEmail, passwordHash, vendorType, requestType || 'vendor', collegeName, serviceCenterId]
       );
 
       return res.status(201).json({ message: "Vendor request submitted successfully.", requestId: rows[0].id });
@@ -57,15 +57,15 @@ router.get("/", authenticate, async (req, res) => {
                     FROM vendor_requests`;
     let queryParams = [];
 
-    // Filter by manager_type if it is a manager (admin sees all)
+    // Filter by manager_type and service_center_id if it is a manager (admin sees all)
     if (req.user.role === "manager") {
       const mType = (req.user.manager_type || "").toLowerCase();
-      if (mType) {
-        queryStr += ` WHERE LOWER(vendor_type) = $1`;
-        queryParams.push(mType);
+      const scId = req.user.service_center_id;
+      if (mType && scId) {
+        queryStr += ` WHERE LOWER(vendor_type) = $1 AND service_center_id = $2`;
+        queryParams.push(mType, scId);
       } else {
-        // If manager has no type assigned, they shouldn't see anything for safety
-        // unless you want them to see all (not recommended)
+        // If manager has no type or service center assigned, they shouldn't see anything for safety
         queryStr += ` WHERE 1=0`; 
       }
     }
@@ -122,12 +122,13 @@ router.patch("/:id/approve", authenticate, async (req, res) => {
     const passwordHash = request.password;
 
     const newUser = await pool.query(
-      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type, manager_type)
-       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9) RETURNING id`,
+      `INSERT INTO users (first_name, last_name, email, mobile, password_hash, role, is_verified, is_active, college_name, request_type, manager_type, service_center_id)
+       VALUES ($1, $2, $3, $4, $5, $6, TRUE, TRUE, $7, $8, $9, $10) RETURNING id`,
       [
         firstName, lastName, request.owner_email, request.owner_mobile, 
         passwordHash, request.request_type || 'vendor', 
-        request.college_name, request.request_type, request.vendor_type
+        request.college_name, request.request_type, request.vendor_type,
+        request.service_center_id
       ]
     );
 
@@ -190,7 +191,7 @@ router.delete("/:id", authenticate, async (req, res) => {
     if (req.user.role !== "manager" && req.user.role !== "admin") {
       return res.status(403).json({ error: "Access denied." });
     }
-    const check = await pool.query("SELECT vendor_type FROM vendor_requests WHERE id=$1", [id]);
+    const check = await pool.query("SELECT vendor_type, owner_email, status FROM vendor_requests WHERE id=$1", [id]);
     if (!check.rows.length) return res.status(404).json({ error: "Request not found." });
 
     if (req.user.role === "manager") {
@@ -199,6 +200,11 @@ router.delete("/:id", authenticate, async (req, res) => {
       if (userType !== targetType) {
         return res.status(403).json({ error: "Cannot delete request for a different vendor type." });
       }
+    }
+
+    // If the request was approved, deleting it should also remove the registered shop account
+    if (check.rows[0].status === 'approved') {
+      await pool.query("DELETE FROM users WHERE email=$1 AND role='vendor'", [check.rows[0].owner_email]);
     }
 
     await pool.query("DELETE FROM vendor_requests WHERE id=$1", [id]);

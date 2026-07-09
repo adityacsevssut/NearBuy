@@ -219,6 +219,10 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
 // DELETE /api/vendor-profile
 router.delete("/", authenticate, async (req, res) => {
   try {
+    // Only vendor accounts may delete their own vendor profile
+    if (req.user.role !== 'vendor') {
+      return res.status(403).json({ error: "Access denied. Vendor accounts only." });
+    }
     const { rows } = await pool.query(
       "DELETE FROM vendor_profiles WHERE user_id = $1 RETURNING *",
       [req.user.id]
@@ -236,6 +240,10 @@ router.delete("/", authenticate, async (req, res) => {
 // PATCH /api/vendor-profile/contact
 router.patch("/contact", authenticate, async (req, res) => {
   try {
+    // Only vendor accounts may update contact details
+    if (req.user.role !== 'vendor') {
+      return res.status(403).json({ error: "Access denied. Vendor accounts only." });
+    }
     const { owner_number, delivery_boy_number } = req.body;
     
     // Using UPSERT behavior for just the contact numbers might require all other fields if it's an insert,

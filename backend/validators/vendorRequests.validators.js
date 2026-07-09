@@ -28,7 +28,11 @@ const createVendorRequestSchema = Joi.object({
     "any.required": "Vendor type is required"
   }),
   requestType: Joi.string().valid("vendor", "student").optional().default("vendor"),
-  collegeName: Joi.string().trim().max(150).optional().allow("", null)
+  collegeName: Joi.string().trim().max(150).optional().allow("", null),
+  serviceCenterId: Joi.string().uuid().required().messages({
+    "any.required": "Please select your Business Area (Service Center)",
+    "string.uuid": "Invalid Service Center ID format"
+  })
 });
 
 /* ── Edit vendor request (manager updates name/email/mobile) ──────── */

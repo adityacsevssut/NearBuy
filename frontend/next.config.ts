@@ -71,9 +71,25 @@ const config = {
   images: {
     minimumCacheTTL: 604800, // Cache optimized images for 1 week
     remotePatterns: [
+      // Supabase Storage (vendor images, homepage posters)
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "cwaiqkgimqdjsznrizgt.supabase.co",
+      },
+      // Google OAuth profile pictures
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      // Google user content (fallback avatar CDN)
+      {
+        protocol: "https",
+        hostname: "*.googleusercontent.com",
+      },
+      // Firebase Storage (if used for any assets)
+      {
+        protocol: "https",
+        hostname: "firebasestorage.googleapis.com",
       },
     ],
   },

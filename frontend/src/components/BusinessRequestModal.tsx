@@ -1,10 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   X, CheckCircle, RefreshCw,
   User, Mail, Phone, Lock,
-  Store, Pill, UtensilsCrossed, School,
+  Store, Pill, UtensilsCrossed, School, MapPin
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -97,6 +97,25 @@ export default function BusinessRequestModal({
   const [collegeName, setCollegeName] = useState("");
   const [vendorType,  setVendorType]  = useState<"food" | "store">("food");
 
+  const [serviceCenters, setServiceCenters] = useState<any[]>([]);
+  const [serviceCenterId, setServiceCenterId] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      fetch(`${API}/api/public/service-centers`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.serviceCenters) {
+            setServiceCenters(data.serviceCenters);
+            if (data.serviceCenters.length === 1) {
+              setServiceCenterId(data.serviceCenters[0].id);
+            }
+          }
+        })
+        .catch(err => console.error("Failed to fetch service centers", err));
+    }
+  }, [isOpen]);
+
   const theme = THEME[vendorType];
 
   async function handleSubmit(e: React.FormEvent) {
@@ -104,6 +123,8 @@ export default function BusinessRequestModal({
     if (password.length < 6) return toast.error("Password must be at least 6 characters.");
     if (!ownerMobile || !/^[0-9]{10}$/.test(ownerMobile))
       return toast.error("Please enter a valid 10-digit mobile number.");
+    if (!serviceCenterId)
+      return toast.error("Please select a Business Area.");
 
     setLoading(true);
     try {
@@ -112,7 +133,7 @@ export default function BusinessRequestModal({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           restaurantName, ownerName, ownerMobile, ownerEmail, password, vendorType, 
-          requestType: defaultType, collegeName 
+          requestType: defaultType, collegeName, serviceCenterId
         }),
       });
       const data = await res.json();
@@ -131,6 +152,7 @@ export default function BusinessRequestModal({
     setTimeout(() => {
       setSuccess(false);
       setRestaurantName(""); setOwnerName(""); setOwnerMobile(""); setOwnerEmail(""); setPassword(""); setCollegeName("");
+      if (serviceCenters.length !== 1) setServiceCenterId("");
     }, 500);
   };
 
@@ -225,6 +247,31 @@ export default function BusinessRequestModal({
                         );
                       })}
                     </div>
+                  </div>
+
+                  {/* Service Center Dropdown */}
+                  <div className="relative group">
+                    <MapPin className={`absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 ${theme.icon} transition-colors pointer-events-none`} />
+                    <select
+                      id="br-service-center"
+                      value={serviceCenterId}
+                      onChange={(e) => setServiceCenterId(e.target.value)}
+                      required
+                      className={`peer w-full bg-gray-50 dark:bg-[#151522] border-2 border-gray-100 dark:border-[#2A2A3A] rounded-xl px-4 pt-5 pb-2 pl-[42px] text-sm text-gray-800 dark:text-gray-200 outline-none focus:bg-white dark:focus:bg-[#0D0D17] ${theme.focus} transition-all appearance-none cursor-pointer`}
+                    >
+                      <option value="" disabled hidden></option>
+                      {serviceCenters.map((sc) => (
+                        <option key={sc.id} value={sc.id}>
+                          {sc.name} - {sc.landmark} ({sc.pincode})
+                        </option>
+                      ))}
+                    </select>
+                    <label
+                      htmlFor="br-service-center"
+                      className={`absolute left-[42px] top-2 text-[10px] uppercase font-bold text-gray-400 ${!serviceCenterId ? "top-1/2 -translate-y-1/2 text-sm" : ""} peer-focus:top-2 peer-focus:-translate-y-0 peer-focus:text-[10px] ${theme.label} transition-all pointer-events-none`}
+                    >
+                      Your Business Area
+                    </label>
                   </div>
 
                   {/* Fields — themed by selected category */}
