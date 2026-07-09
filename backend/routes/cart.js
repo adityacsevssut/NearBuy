@@ -32,6 +32,10 @@ router.put("/", authenticate, async (req, res) => {
       return res.status(400).json({ error: "items must be an array" });
     }
 
+    if (items.length > 100) {
+      return res.status(400).json({ error: "Cart cannot exceed 100 items." });
+    }
+
     const query = `
       INSERT INTO user_carts (user_id, items, updated_at)
       VALUES ($1, $2, NOW())

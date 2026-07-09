@@ -496,6 +496,7 @@ export default function PartnerDashboard() {
                 if (!res.ok) throw new Error(data.error || "Failed to delete");
                 toast.success("Vendor deleted.");
                 fetchVendors();
+                fetchRequests();
               } catch (err: any) {
                 toast.error(err.message);
               }
@@ -564,6 +565,9 @@ export default function PartnerDashboard() {
       if (!res.ok) throw new Error(data.error || `Failed to ${action}`);
       toast.success(data.message);
       fetchRequests();
+      if (action === "approve") {
+        fetchVendors();
+      }
     } catch (err: any) {
       toast.error(err.message);
     }
@@ -602,6 +606,7 @@ export default function PartnerDashboard() {
                 if (!res.ok) throw new Error(data.error || "Failed to delete");
                 toast.success("Vendor request deleted.");
                 fetchRequests();
+                fetchVendors();
               } catch (err: any) {
                 toast.error(err.message);
               }
@@ -975,6 +980,9 @@ export default function PartnerDashboard() {
         <button onClick={() => { setView("dashboard"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "dashboard" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <LayoutDashboard className="w-5 h-5 shrink-0" /> <span className="truncate">Dashboard</span>
         </button>
+        <button onClick={() => { setView("vendors"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "vendors" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
+          <StoreIcon className="w-5 h-5 shrink-0" /> <span className="truncate">Manage Vendors</span>
+        </button>
         <button onClick={() => { setView("frontend"); setMobileSidebarOpen(false); }} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all text-left ${view === "frontend" ? `${theme.bg} ${theme.textDark}` : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]"}`}>
           <LayoutTemplate className="w-5 h-5 shrink-0" /> <span className="truncate">Manage Frontend</span>
         </button>
@@ -1182,6 +1190,78 @@ export default function PartnerDashboard() {
               </div>
 
             </motion.div>
+          ) : view === "vendors" ? (
+            <motion.div 
+              key="vendors"
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Manage Vendors</h2>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Edit or remove active vendors in your division</p>
+                </div>
+                <button onClick={fetchVendors} className={`px-4 py-2 text-sm font-bold bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] shadow-sm ${loadingVendors ? "opacity-50 pointer-events-none" : ""}`}>
+                  {loadingVendors ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+
+              <div className="bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl overflow-hidden shadow-sm">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A]">
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Shop Name</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Owner</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact</th>
+                        <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-[#2A2A3A]">
+                      {loadingVendors ? (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-sm font-medium text-gray-500">Loading vendors...</td>
+                        </tr>
+                      ) : vendors.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-sm font-medium text-gray-500">No vendors found.</td>
+                        </tr>
+                      ) : (
+                        vendors.map((vendor: any) => (
+                          <tr key={vendor.id} className="hover:bg-gray-50 dark:hover:bg-[#151522]/50 transition-colors">
+                            <td className="p-4">
+                              <div className="font-bold text-gray-900 dark:text-gray-100 text-sm">{vendor.business_name || "Unnamed"}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">{vendor.vendor_type}</div>
+                            </td>
+                            <td className="p-4">
+                              <div className="font-medium text-gray-700 dark:text-gray-300 text-sm">{vendor.first_name} {vendor.last_name}</div>
+                            </td>
+                            <td className="p-4">
+                              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">{vendor.email}</div>
+                              <div className="text-xs text-gray-500 mt-0.5">{vendor.mobile}</div>
+                            </td>
+                            <td className="p-4 text-right space-x-2">
+                              <button 
+                                onClick={() => openEditVendor(vendor)}
+                                className="inline-flex items-center justify-center p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={() => handleDeleteVendor(vendor.id)}
+                                className="inline-flex items-center justify-center p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </motion.div>
           ) : view === "requests" ? (
             <motion.div 
               key="requests"
@@ -1263,20 +1343,9 @@ export default function PartnerDashboard() {
                         </div>
                       )}
 
-                      {req.status === "approved" && (
-                        <div className="flex gap-2 mt-2">
-                          <button
-                            onClick={() => setEditingReq(req)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 text-gray-600 dark:text-gray-400 text-sm font-bold rounded-xl transition-colors"
-                          >
-                            <Pencil className="w-3.5 h-3.5" /> Edit
-                          </button>
-                          <button
-                            onClick={() => handleDelete(req.id)}
-                            className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-red-50 hover:text-red-600 hover:border-red-200 text-gray-600 dark:text-gray-400 text-sm font-bold rounded-xl transition-colors"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete
-                          </button>
+                      {req.status === "approved" && req.password && (
+                        <div className="mt-2 flex items-center justify-center p-2 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold border border-blue-100 dark:border-blue-900/30">
+                          Approved & Active
                         </div>
                       )}
                     </div>
@@ -1284,58 +1353,7 @@ export default function PartnerDashboard() {
                 </div>
               )}
 
-              {/* Edit Modal */}
-              {editingReq && (
-                <div className="fixed inset-0 z-[80] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-                  <div className="bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-6 w-full max-w-md">
-                    <h3 className="font-black text-lg text-gray-900 dark:text-gray-100 mb-5">Edit Vendor Details</h3>
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Owner Name</label>
-                        <input
-                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
-                          defaultValue={editingReq.owner_name}
-                          id="edit-owner-name"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email</label>
-                        <input
-                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
-                          defaultValue={editingReq.owner_email}
-                          id="edit-owner-email"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Mobile</label>
-                        <input
-                          className="w-full border border-gray-200 dark:border-[#2A2A3A] rounded-xl px-4 py-2.5 text-sm font-semibold outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
-                          defaultValue={editingReq.owner_mobile}
-                          id="edit-owner-mobile"
-                        />
-                      </div>
-                    </div>
-                    <div className="flex gap-3 mt-6">
-                      <button
-                        onClick={() => setEditingReq(null)}
-                        className="flex-1 py-2.5 border border-gray-200 dark:border-[#2A2A3A] rounded-xl text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522] transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => handleEditSave(editingReq.id, {
-                          owner_name: (document.getElementById("edit-owner-name") as HTMLInputElement)?.value,
-                          owner_email: (document.getElementById("edit-owner-email") as HTMLInputElement)?.value,
-                          owner_mobile: (document.getElementById("edit-owner-mobile") as HTMLInputElement)?.value,
-                        })}
-                        className={`flex-1 py-2.5 bg-gradient-to-r ${theme.from} ${theme.to} text-white rounded-xl text-sm font-bold shadow-sm transition-all hover:opacity-90`}
-                      >
-                        Save Changes
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
+
             </motion.div>
           ) : view === "frontend" ? (
             <motion.div

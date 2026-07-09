@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const { OAuth2Client } = require("google-auth-library");
 const validate = require("../middleware/validate");
 const {
-  sendOtpSchema, verifyOtpSchema, signupSchema, signupFirebaseSchema,
+  sendOtpSchema, verifyOtpSchema, signupSchema,
   loginSchema, typedLoginSchema, resetPasswordSchema,
   updateLocationSchema, saveAddressSchema, updateProfileSchema
 } = require("../validators/auth.validators");
@@ -130,7 +130,7 @@ router.post(
       }
     } catch (err) {
       console.error("send-otp error:", err);
-      return res.status(500).json({ error: "Failed to send OTP. " + (err.message || "Try again.") });
+      return res.status(500).json({ error: "Failed to send OTP. Please try again." });
     }
   }
 );
@@ -233,46 +233,8 @@ router.post(
   }
 );
 
-// ════════════════════════════════════════════════════════════════════════════
-// POST /api/auth/signup-firebase
-// Step 2 — create user account after Firebase OTP verified on frontend
-// ════════════════════════════════════════════════════════════════════════════
-router.post(
-  "/signup-firebase",
-  validate(signupFirebaseSchema),
-  async (req, res) => {
-
-    const { firstName, lastName, email, mobile, password } = req.body;
-    try {
-      // For this implementation, we trust the frontend verified the phone number via Firebase.
-      const existing = await pool.query("SELECT id FROM users WHERE email=$1 OR mobile=$2", [email, mobile]);
-      if (existing.rows.length) return res.status(409).json({ error: "Account with this email or mobile already exists." });
-
-      const passwordHash = await hashValue(password);
-      const { rows } = await pool.query(
-        `INSERT INTO users (first_name, last_name, email, mobile, password_hash, is_verified)
-         VALUES ($1, $2, $3, $4, $5, TRUE) RETURNING *`,
-        [firstName, lastName, email, mobile, passwordHash]
-      );
-
-      const user = rows[0];
-      const { accessToken, refreshToken } = await issueTokens(user);
-
-      // Trigger Welcome Email via ZeptoMail
-      sendWelcomeEmail(user.email, user.first_name);
-
-      return res.status(201).json({
-        message: "Account created successfully!",
-        user: safeUser(user),
-        accessToken,
-        refreshToken,
-      });
-    } catch (err) {
-      console.error("firebase signup error:", err);
-      return res.status(500).json({ error: "Signup failed. Please try again." });
-    }
-  }
-);
+// /signup-firebase endpoint removed — mobile OTP verification is not used.
+// All signups go through the email OTP flow: /send-otp → /verify-otp → /signup
 
 // ════════════════════════════════════════════════════════════════════════════
 // POST /api/auth/login
@@ -850,6 +812,7 @@ router.patch("/me/notifications", authenticate, async (req, res) => {
 router.put(
   "/profile",
   authenticate,
+  validate(updateProfileSchema),
   async (req, res) => {
     try {
       const { firstName, lastName } = req.body;

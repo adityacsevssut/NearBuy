@@ -54,15 +54,7 @@ const signupSchema = Joi.object({
   })
 });
 
-/* ── signup-firebase ──────────────────────────────────────────────── */
-const signupFirebaseSchema = Joi.object({
-  firstName:       Joi.string().trim().min(1).max(50).required(),
-  lastName:        Joi.string().trim().min(0).max(50).allow("", null).optional(),
-  email:           email.required(),
-  mobile:          mobile10.required(),
-  password:        password(8).required().messages({ "string.min": "Password must be at least 8 characters" }),
-  firebaseIdToken: Joi.string().required().messages({ "any.required": "Firebase ID token is required" })
-});
+/* signup-firebase schema removed — mobile OTP feature disabled; email OTP flow is used instead */
 
 /* ── login ────────────────────────────────────────────────────────── */
 const loginSchema = Joi.object({
@@ -122,7 +114,6 @@ module.exports = {
   sendOtpSchema,
   verifyOtpSchema,
   signupSchema,
-  signupFirebaseSchema,
   loginSchema,
   typedLoginSchema,
   resetPasswordSchema,
