@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Zap, Heart } from "lucide-react";
+// @ts-ignore - Suppress type resolution warning for react-icons
 import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import BusinessRequestModal from "./BusinessRequestModal";
 import FeedbackModal from "./FeedbackModal";
