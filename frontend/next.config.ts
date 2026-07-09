@@ -57,9 +57,7 @@ const config = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+
   async headers() {
     return [
       {

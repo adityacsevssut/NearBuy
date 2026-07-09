@@ -24,9 +24,7 @@ jobs:
           cache-dependency-path: './frontend/package-lock.json'
 
       - name: Install Dependencies
-        run: |
-          rm -f package-lock.json
-          npm install --include=dev
+        run: npm ci
 
       # - name: Run Linter
       #   run: npm run lint
@@ -51,7 +49,7 @@ jobs:
           cache-dependency-path: './backend/package-lock.json'
 
       - name: Install Dependencies
-        run: npm install --include=dev
+        run: npm ci
         
       # Uncomment the following lines if you add lint/test scripts to backend/package.json
       - name: Run Linter
