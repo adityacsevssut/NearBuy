@@ -8,7 +8,6 @@
 
 
 @custom-variant dark (&:where(.dark, .dark *));
-
 .dark {
   --background: #0D0D17;
   --foreground: #F9FAFB;
@@ -24,42 +23,34 @@
   --nb-subtle: #6B7280;
   --nb-placeholder: #4B5563;
 }
-
 /* Dim images slightly in dark mode for better contrast */
 .dark img {
   filter: brightness(0.85);
   transition: filter 0.3s ease;
 }
-
 :root {
   --background: #FFFFFF;
   --foreground: #111827;
-
   --nb-orange: #f97316;
   --nb-orange-dark: #ea580c;
   --nb-orange-light: #fff7ed;
   --nb-orange-mid: #ffedd5;
-
   --nb-surface: #F9FAFB;
   --nb-elevated: #F3F4F6;
   --nb-border: #E5E7EB;
   --nb-border-dark: #D1D5DB;
-
   --nb-text: #111827;
   --nb-text-secondary: #374151;
   --nb-muted: #6B7280;
   --nb-subtle: #9CA3AF;
   --nb-placeholder: #D1D5DB;
 }
-
 * {
   box-sizing: border-box;
 }
-
 html {
   scroll-behavior: smooth;
 }
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -180,7 +171,6 @@ body {
     inset 0 -1px 0 rgba(0, 0, 0, 0.1);
   transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
-
 .btn-blue:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
@@ -189,14 +179,11 @@ body {
 .btn-blue:active {
   transform: translateY(0px);
 }
-
-
 /* Horizontal marquee animation */
 @keyframes marquee {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
 }
-
 .animate-marquee {
   animation: marquee 20s linear infinite;
 }

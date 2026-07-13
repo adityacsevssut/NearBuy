@@ -117,7 +117,7 @@ export default function OrderStatusPage() {
         setOrder(data.order);
       } else {
         toast.error(data.error || "Failed to fetch order details");
-        router.push("/food/orders");
+        router.push("/food/user/orders");
       }
     } catch (err) {
       toast.error("Network error while fetching order details");
@@ -531,7 +531,7 @@ export default function OrderStatusPage() {
         
         <div className="max-w-2xl mx-auto relative z-10">
           <div className="flex items-center gap-3 mb-6">
-            <Link href="/food/orders" className="p-2 -ml-2 rounded-xl bg-white/20 dark:bg-[#0D0D17]/20 hover:bg-white/30 dark:hover:bg-[#0D0D17]/30 text-white transition-colors backdrop-blur-sm">
+            <Link href="/food/user/orders" className="p-2 -ml-2 rounded-xl bg-white/20 dark:bg-[#0D0D17]/20 hover:bg-white/30 dark:hover:bg-[#0D0D17]/30 text-white transition-colors backdrop-blur-sm">
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div>

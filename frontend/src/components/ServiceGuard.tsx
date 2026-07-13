@@ -49,7 +49,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }, []);
 
   // Bypass the guard for these paths
-  const bypassedPaths = ["/dev", "/manager", "/vendor", "/account", "/food/wishlist", "/food/orders", "/food/cart", "/wishlist", "/orders", "/cart"];
+  const bypassedPaths = ["/dev", "/food/manager", "/food/vendor", "/account", "/food/user/wishlist", "/food/user/orders", "/food/user/cart", "/wishlist", "/orders", "/cart"];
   const isBypassed = bypassedPaths.some(path => pathname?.startsWith(path));
 
   async function fetchCenters() {

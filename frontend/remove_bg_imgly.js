@@ -14,7 +14,6 @@ async function processImage(inputPath, outputPath) {
         console.error(`Error processing ${inputPath}:`, e);
     }
 }
-
 async function main() {
     const images = [
         'images/404_store_light.png',
@@ -26,7 +25,6 @@ async function main() {
         'images/network_error_store_dark.png',
         'images/network_error_food_dark.png'
     ];
-    
     for (const name of images) {
         const inputPath = path.join(__dirname, 'public', name);
         // Overwrite the same image with transparent one
@@ -40,5 +38,4 @@ async function main() {
     }
     console.log("All done!");
 }
-
 main();

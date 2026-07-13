@@ -132,8 +132,8 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
     ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"
     : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400";
 
-  const isHeroTransparent = !forceSolid && isFood && !isScrolled && pathname === '/food' && !mobileMenuOpen;
-  const isHeroMatching = !forceSolid && isFood && !isScrolled && pathname === '/food' && !mobileMenuOpen;
+  const isHeroTransparent = !forceSolid && isFood && !isScrolled && pathname === '/food/user' && !mobileMenuOpen;
+  const isHeroMatching = !forceSolid && isFood && !isScrolled && pathname === '/food/user' && !mobileMenuOpen;
 
   const suggestions = [
     "🍛 Biryani near VSSUT",

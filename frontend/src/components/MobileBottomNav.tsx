@@ -30,7 +30,7 @@ export default function MobileBottomNav() {
   const { getCartCount } = useCart();
   const cartCount = getCartCount(domain);
 
-  const baseUrl = `/${domain}`;
+  const baseUrl = isFood ? "/food/user" : `/${domain}`;
 
   const tabs = [
     { id: "mobile-nav-home", label: "Home", icon: Home, href: baseUrl },

@@ -63,7 +63,7 @@ export default function SitemapPage() {
       icon: <LayoutDashboard className="w-6 h-6" strokeWidth={2.5} />,
       show: isLoggedIn && isVendor,
       links: [
-        { name: "Vendor Dashboard", href: "/manager", icon: <LayoutDashboard className="w-4 h-4" /> },
+        { name: "Vendor Dashboard", href: "/food/vendor", icon: <LayoutDashboard className="w-4 h-4" /> },
       ]
     },
     {

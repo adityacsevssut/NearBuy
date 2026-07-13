@@ -17,7 +17,7 @@ export default function CapacitorHardwareBackButton() {
     const setupListener = async () => {
       listener = await CapacitorApp.addListener("backButton", ({ canGoBack }) => {
         // If we are at a root tab or home page, we might want to exit
-        if (pathname === "/" || pathname === "/food" || pathname === "/store" || pathname === "/manager" || pathname === "/vendor") {
+        if (pathname === "/" || pathname === "/food/user" || pathname === "/store" || pathname === "/food/manager" || pathname === "/food/vendor") {
           CapacitorApp.exitApp();
         } else if (canGoBack) {
           router.back();
