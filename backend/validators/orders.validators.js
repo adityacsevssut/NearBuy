@@ -6,15 +6,15 @@ const indianMobile = Joi.string()
 
 /* ── Order item sub-schema ────────────────────────────────────────── */
 const orderItemSchema = Joi.object({
-  id:             Joi.alternatives().try(Joi.string(), Joi.number()).required(),
-  name:           Joi.string().trim().min(1).required(),
+  id:             Joi.alternatives().try(Joi.string().max(100), Joi.number()).required(),
+  name:           Joi.string().trim().min(1).max(150).required(),
   price:          Joi.number().min(0).required(),
   qty:            Joi.number().integer().min(1).required(),
-  image:          Joi.string().optional().allow("", null),
+  image:          Joi.string().max(500).optional().allow("", null),
   type:           Joi.string().valid("veg", "non-veg").optional(),
-  restaurantId:   Joi.alternatives().try(Joi.string(), Joi.number()).optional(),
-  restaurantName: Joi.string().optional().allow("", null),
-  section:        Joi.string().optional().allow("", null)
+  restaurantId:   Joi.alternatives().try(Joi.string().max(100), Joi.number()).optional(),
+  restaurantName: Joi.string().max(150).optional().allow("", null),
+  section:        Joi.string().max(100).optional().allow("", null)
 });
 
 /* ── Create order ─────────────────────────────────────────────────── */
@@ -31,15 +31,15 @@ const createOrderSchema = Joi.object({
   gst:                  Joi.number().min(0).required(),
   platform_fee:         Joi.number().min(0).required(),
   total_amount:         Joi.number().min(0).required(),
-  payment_method:       Joi.string().trim().min(1).required().messages({ "any.required": "Payment method is required" }),
-  delivery_address:     Joi.alternatives().try(Joi.object(), Joi.string()).required().messages({ "any.required": "Delivery address is required" }),
+  payment_method:       Joi.string().trim().min(1).max(50).required().messages({ "any.required": "Payment method is required" }),
+  delivery_address:     Joi.alternatives().try(Joi.object(), Joi.string().max(1000)).required().messages({ "any.required": "Delivery address is required" }),
   customer_mobile:      indianMobile.required().messages({ "any.required": "Customer mobile is required" }),
   alternate_mobile:     indianMobile.optional().allow("", null),
   cooking_instructions: Joi.string().trim().max(500).optional().allow("", null),
-  razorpay_order_id:    Joi.string().optional().allow("", null),
-  razorpay_payment_id:  Joi.string().optional().allow("", null),
-  razorpay_signature:   Joi.string().optional().allow("", null),
-  payment_status:       Joi.string().optional().allow("", null)
+  razorpay_order_id:    Joi.string().max(150).optional().allow("", null),
+  razorpay_payment_id:  Joi.string().max(150).optional().allow("", null),
+  razorpay_signature:   Joi.string().max(256).optional().allow("", null),
+  payment_status:       Joi.string().max(50).optional().allow("", null)
 });
 
 module.exports = { createOrderSchema };

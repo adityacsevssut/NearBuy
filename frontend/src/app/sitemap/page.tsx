@@ -33,10 +33,10 @@ export default function SitemapPage() {
       show: true,
       links: [
         { name: "Food Home", href: "/", icon: <Map className="w-4 h-4" /> },
-        { name: "Active Orders", href: "/food/orders", icon: <Clock className="w-4 h-4" /> },
-        { name: "Order History", href: "/food/orders?history=true", icon: <Clock className="w-4 h-4" /> },
-        { name: "Food Cart", href: "/food/cart", icon: <ShoppingCart className="w-4 h-4" /> },
-        { name: "Food Wishlist", href: "/food/wishlist", icon: <Heart className="w-4 h-4" /> },
+        { name: "Active Orders", href: "/food/user/orders", icon: <Clock className="w-4 h-4" /> },
+        { name: "Order History", href: "/food/user/orders?history=true", icon: <Clock className="w-4 h-4" /> },
+        { name: "Food Cart", href: "/food/user/cart", icon: <ShoppingCart className="w-4 h-4" /> },
+        { name: "Food Wishlist", href: "/food/user/wishlist", icon: <Heart className="w-4 h-4" /> },
       ]
     },
     {

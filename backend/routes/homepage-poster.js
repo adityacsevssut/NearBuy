@@ -4,6 +4,7 @@ const multer = require("multer");
 const pool = require("../config/db");
 const { authenticate } = require("../middleware/auth");
 const { createClient } = require("@supabase/supabase-js");
+const { verifyImageSignature } = require("../utils/fileUpload");
 
 const supabase = createClient(
   process.env.SUPABASE_URL || "https://cwaiqkgimqdjsznrizgt.supabase.co",
@@ -85,6 +86,10 @@ router.post("/", authenticate, upload.single("image"), async (req, res) => {
 
     if (!req.file) {
       return res.status(400).json({ error: "No image file provided." });
+    }
+
+    if (!verifyImageSignature(req.file.buffer)) {
+      return res.status(400).json({ error: "Invalid image file format detected." });
     }
 
     if (!process.env.SUPABASE_ANON_KEY) {

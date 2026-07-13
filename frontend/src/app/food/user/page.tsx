@@ -733,7 +733,7 @@ function PromoImages() {
             transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
             className="relative w-full h-full animate-[float_5s_ease-in-out_infinite]"
           >
-            <Link href={`/food/dish/${items[index].route}`} className="block absolute inset-0 pointer-events-auto">
+            <Link href={`/food/user/dish/${items[index].route}`} className="block absolute inset-0 pointer-events-auto">
               {/* Item Name Pop-up */}
               <div className="absolute top-[21px] left-1/2 -translate-x-1/2 md:top-1/2 md:-translate-y-1/2 md:left-[-15px] md:-translate-x-full bg-white dark:bg-[#151522] shadow-[0_4px_15px_rgba(234,88,12,0.2)] dark:shadow-[0_4px_15px_rgba(0,0,0,0.8)] px-2.5 py-0.5 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[12px] font-black tracking-wide z-20 whitespace-nowrap border border-orange-100 dark:border-orange-500/20 uppercase transition-all duration-500">
                 <span className="text-orange-gradient">{items[index].name}</span>
@@ -1319,7 +1319,7 @@ export default function HomePage() {
                     transition={{ delay: index * 0.04, duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <Link
-                      href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                      href={`/food/user/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
                       <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
@@ -1469,7 +1469,7 @@ export default function HomePage() {
               {quickBites.map(({ label, image }) => (
                 <Link
                   key={label}
-                  href={`/food/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
+                  href={`/food/user/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                   onClick={() => setIsQuickBitesDrawerOpen(false)}
                   className="flex flex-col items-center gap-2 group outline-none"
                 >
@@ -1630,7 +1630,7 @@ export default function HomePage() {
                   {posters.map((poster, index) => {
                     const Wrapper = poster.link ? Link : 'div';
                     return (
-                      <Wrapper key={poster.id || index} href={poster.link || undefined} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
+                      <Wrapper key={poster.id || index} href={poster.link ? poster.link.replace('/food/dish/', '/food/user/dish/') : undefined} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
                         <Image src={poster.image_url || "/1000242984.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
                         <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
                       </Wrapper>

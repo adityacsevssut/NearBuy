@@ -394,7 +394,7 @@ function AccountContent() {
           
           {/* Cart Button */}
           <button
-            onClick={() => router.push(`/${domain}/cart`)}
+            onClick={() => router.push(domain === 'food' ? `/food/user/cart` : `/${domain}/cart`)}
             className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-orange-50 dark:hover:bg-orange-500/5 hover:border-orange-200/80 dark:hover:border-orange-500/20
@@ -416,7 +416,7 @@ function AccountContent() {
 
           {/* Wishlist Button */}
           <button
-            onClick={() => router.push(`/${domain}/wishlist`)}
+            onClick={() => router.push(domain === 'food' ? `/food/user/wishlist` : `/${domain}/wishlist`)}
             className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-rose-50 dark:hover:bg-rose-500/5 hover:border-rose-200/80 dark:hover:border-rose-500/20
@@ -460,7 +460,7 @@ function AccountContent() {
 
           {/* Your Orders Button */}
           <button
-            onClick={() => router.push(`/${domain}/orders?history=true`)}
+            onClick={() => router.push(domain === 'food' ? `/food/user/orders?history=true` : `/${domain}/orders?history=true`)}
             className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-purple-50 dark:hover:bg-purple-500/5 hover:border-purple-200/80 dark:hover:border-purple-500/20
@@ -486,7 +486,7 @@ function AccountContent() {
         <div className="space-y-3">
           <h3 className="text-xs font-black text-gray-400 uppercase tracking-widest px-2">Saved Information</h3>
           <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] rounded-3xl shadow-[0_2px_15px_rgb(0,0,0,0.03)] border border-gray-100 dark:border-[#2A2A3A]/50 overflow-hidden py-1">
-            <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push(`/${domain}/orders?history=true`)} />
+            <ModernRow icon={ShoppingBag} label="Recently Ordered" theme={theme} onClick={() => router.push(domain === 'food' ? `/food/user/orders?history=true` : `/${domain}/orders?history=true`)} />
             
             {/* ── Saved Addresses — expandable ── */}
             <div>

@@ -6,15 +6,26 @@ const { authenticate } = require("../middleware/auth");
 const validate = require("../middleware/validate");
 const { createMenuItemSchema, updateMenuItemSchema } = require("../validators/vendorMenu.validators");
 const { createClient } = require("@supabase/supabase-js");
+const { verifyImageSignature } = require("../utils/fileUpload");
 
 const supabase = createClient(
   process.env.SUPABASE_URL || "https://cwaiqkgimqdjsznrizgt.supabase.co",
   process.env.SUPABASE_ANON_KEY || "dummy_key"
 );
 
+// Only allow image MIME types
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/jpg'];
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_IMAGE_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only image files (JPEG, PNG, WebP, GIF) are allowed."));
+    }
+  },
 });
 
 // ─── Ensure vendor_menu_items table exists ───────────────────────────────────
@@ -92,6 +103,10 @@ router.post("/", authenticate, upload.single("image"), validate(createMenuItemSc
   try {
     let imageUrl = "";
     if (req.file) {
+      if (!verifyImageSignature(req.file.buffer)) {
+        return res.status(400).json({ error: "Invalid image file format detected." });
+      }
+
       const fileExt = req.file.mimetype.split("/")[1] || "jpeg";
       const fileName = `menu_${req.user.id}_${Date.now()}.${fileExt}`;
       const { error } = await supabase.storage
@@ -131,6 +146,10 @@ router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuIt
 
     let imageUrl = existing.image_url;
     if (req.file) {
+      if (!verifyImageSignature(req.file.buffer)) {
+        return res.status(400).json({ error: "Invalid image file format detected." });
+      }
+
       const fileExt = req.file.mimetype.split("/")[1] || "jpeg";
       const fileName = `menu_${req.user.id}_${Date.now()}.${fileExt}`;
       const { error } = await supabase.storage

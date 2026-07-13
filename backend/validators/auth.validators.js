@@ -25,7 +25,7 @@ const sendOtpSchema = Joi.object({
 /* ── verify-otp ───────────────────────────────────────────────────── */
 const verifyOtpSchema = Joi.object({
   email: email.required().messages({ "any.required": "Email is required" }),
-  mobile: Joi.string().optional(),
+  mobile: mobile10.optional(),
   otp: Joi.string().length(6).pattern(/^\d{6}$/).required().messages({
     "string.length": "OTP must be exactly 6 digits",
     "string.pattern.base": "OTP must be exactly 6 digits",
@@ -36,7 +36,7 @@ const verifyOtpSchema = Joi.object({
 
 /* ── signup ───────────────────────────────────────────────────────── */
 const signupSchema = Joi.object({
-  verificationToken: Joi.string().required().messages({
+  verificationToken: Joi.string().max(1000).required().messages({
     "any.required": "Verification token is required"
   }),
   firstName: Joi.string().trim().min(1).max(50).required().messages({
@@ -71,7 +71,7 @@ const typedLoginSchema = Joi.object({
 
 /* ── reset-password ───────────────────────────────────────────────── */
 const resetPasswordSchema = Joi.object({
-  verificationToken: Joi.string().required(),
+  verificationToken: Joi.string().max(1000).required(),
   newPassword: password(8).required().messages({
     "string.min": "Password must be at least 8 characters",
     "any.required": "New password is required"
@@ -84,8 +84,8 @@ const updateLocationSchema = Joi.object({
     "any.required": "Location name is required",
     "string.empty": "Location name is required"
   }),
-  pincode:   Joi.string().optional().allow("", null),
-  landmark:  Joi.string().optional().allow("", null),
+  pincode:   Joi.string().max(10).optional().allow("", null),
+  landmark:  Joi.string().max(200).optional().allow("", null),
   latitude:  Joi.number().min(-90).max(90).optional().allow(null),
   longitude: Joi.number().min(-180).max(180).optional().allow(null)
 });
@@ -103,9 +103,9 @@ const updateProfileSchema = Joi.object({
 /* ── save address ─────────────────────────────────────────────────── */
 const saveAddressSchema = Joi.object({
   name:        Joi.string().trim().min(1).required().messages({ "any.required": "Address name is required" }),
-  fullAddress: Joi.string().optional().allow("", null),
-  pincode:     Joi.string().optional().allow("", null),
-  landmark:    Joi.string().optional().allow("", null),
+  fullAddress: Joi.string().max(500).optional().allow("", null),
+  pincode:     Joi.string().max(10).optional().allow("", null),
+  landmark:    Joi.string().max(200).optional().allow("", null),
   latitude:    Joi.number().min(-90).max(90).optional().allow(null),
   longitude:   Joi.number().min(-180).max(180).optional().allow(null)
 });

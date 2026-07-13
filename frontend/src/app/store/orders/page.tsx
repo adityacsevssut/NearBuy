@@ -321,7 +321,7 @@ function OrdersPageContent() {
                 </button>
                 {!isHistory && (
                   <Link
-                    href={`/food/orders/${order.id}`}
+                    href={`/store/orders/${order.id}`}
                     className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-xl text-sm font-bold text-blue-600 transition-all active:scale-[0.98]"
                   >
                     <Package className="w-4 h-4" />

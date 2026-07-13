@@ -7,6 +7,7 @@ const validate = require("../middleware/validate");
 const { upsertProfileSchema } = require("../validators/vendorProfile.validators");
 const { createClient } = require("@supabase/supabase-js");
 const redis = require("../config/redis");
+const { verifyImageSignature } = require("../utils/fileUpload");
 
 // Initialize Supabase Storage client
 // NOTE: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env
@@ -121,6 +122,10 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
 
     // If a new file is uploaded, push it to Supabase bucket
     if (req.file) {
+      if (!verifyImageSignature(req.file.buffer)) {
+        return res.status(400).json({ error: "Invalid image file format detected." });
+      }
+
       if (!process.env.SUPABASE_ANON_KEY) {
         throw new Error("SUPABASE_ANON_KEY is missing from backend/.env! Cannot upload to bucket.");
       }
