@@ -379,7 +379,7 @@ export default function VendorDashboard() {
               <div
                 key={s.label}
                 onClick={() => {
-                  if (s.id === "todays_orders") router.push("/vendor/todays-orders");
+                  if (s.id === "todays_orders") router.push("/food/vendor/todays-orders");
                 }}
                 className={`rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#151522] px-3 py-3 flex flex-col items-center text-center gap-1 shadow-sm ${s.id === "todays_orders" ? "cursor-pointer hover:bg-gray-100 dark:hover:bg-[#1F1F2E] transition-colors" : ""}`}
               >
@@ -424,7 +424,7 @@ export default function VendorDashboard() {
                   } else if (card.id === "contact") {
                     setIsContactModalOpen(true);
                   } else if (card.id === "orders") {
-                    router.push("/vendor/orders");
+                    router.push("/food/vendor/orders");
                   }
                 }}
                 className={`group text-left flex flex-col p-6 bg-white dark:bg-[#0D0D17] rounded-3xl border ${t.cardBorder} hover:shadow-xl ${t.cardShadow} transition-all duration-300 relative overflow-hidden cursor-pointer`}

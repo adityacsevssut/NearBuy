@@ -788,7 +788,7 @@ export default function CartPage() {
       toast.success("Order placed! Wait for confirmation.");
       orderItems.forEach(item => removeItem(item.uid));
       localStorage.removeItem(`fees_${restId}`);
-      router.push("/food/orders");
+      router.push("/food/user/orders");
     } catch (err: any) {
       toast.error(err.message || "An error occurred");
     } finally {

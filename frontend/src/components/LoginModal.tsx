@@ -227,7 +227,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     try {
       const data = await post("vendor-login", { email: loginEmail, password: loginPass, type: loginType });
       login(data.user, data.accessToken, data.refreshToken);
-      window.location.href = "/vendor";
+      window.location.href = "/food/vendor";
     } catch (err: any) { setError(err.message); }
     setLoading(false);
   }
@@ -238,7 +238,7 @@ export default function LoginModal({ isOpen, onClose }: Props) {
     try {
       const data = await post("manager-login", { email: loginEmail, password: loginPass, type: loginType });
       login(data.user, data.accessToken, data.refreshToken);
-      window.location.href = "/manager";
+      window.location.href = "/food/manager";
     } catch (err: any) { setError(err.message); }
     setLoading(false);
   }

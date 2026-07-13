@@ -14,14 +14,14 @@ export default function RootPage() {
 
     if (isLoggedIn && user) {
       if (user.role === "vendor") {
-        router.replace("/vendor");
+        router.replace("/food/vendor");
       } else if (user.role === "admin") {
-        router.replace("/manager");
+        router.replace("/food/manager");
       } else {
-        router.replace("/food");
+        router.replace("/food/user");
       }
     } else {
-      router.replace("/food");
+      router.replace("/food/user");
     }
   }, [isLoggedIn, user, isInitializing, router]);
 

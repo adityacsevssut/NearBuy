@@ -111,7 +111,7 @@ export default function TodaysOrdersPage() {
       {/* Page Header */}
       <div className="bg-white dark:bg-[#151522] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-0 z-20 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center gap-3">
-          <Link href="/vendor" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 dark:hover:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 transition-colors">
+          <Link href="/food/vendor" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 dark:hover:bg-[#1F1F2E] text-gray-700 dark:text-gray-300 transition-colors">
             <ChevronLeft className="w-6 h-6" />
           </Link>
           <h1 className="font-black text-gray-900 dark:text-gray-100 text-xl tracking-tight">Today's Orders</h1>

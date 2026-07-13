@@ -54,5 +54,5 @@ jobs:
       # Uncomment the following lines if you add lint/test scripts to backend/package.json
       - name: Run Linter
         run: npm run lint
-      # - name: Run Tests
-      #   run: npm test
+      #  name: Run Tests
+      #  run: npm test

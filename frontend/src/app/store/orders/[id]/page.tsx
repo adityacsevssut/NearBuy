@@ -103,7 +103,7 @@ export default function OrderStatusPage() {
         setOrder(data.order);
       } else {
         toast.error(data.error || "Failed to fetch order details", blueToastStyle);
-        router.push("/food/orders");
+        router.push("/food/user/orders");
       }
     } catch (err) {
       toast.error("Network error while fetching order details", blueToastStyle);
