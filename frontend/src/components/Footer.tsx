@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowRight, Zap, Heart } from "lucide-react";
-// @ts-ignore - Suppress type resolution warning for react-icons
+// @ts-expect-error - Suppress type resolution warning for react-icons
 import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import BusinessRequestModal from "./BusinessRequestModal";
 import FeedbackModal from "./FeedbackModal";
@@ -39,9 +39,9 @@ export default function Footer() {
       { name: "Feedback", href: "#", onClick: (e: any) => { e.preventDefault(); setIsFeedbackOpen(true); } },
     ],
     "Important Links": [
-      { name: isStore ? "Store Cart" : "Food Cart", href: isStore ? "/store/cart" : "/food/cart" },
-      { name: "Wishlist", href: isStore ? "/store/wishlist" : "/food/wishlist" },
-      { name: "Your Orders", href: isStore ? "/store/orders" : "/food/orders?history=true" },
+      { name: isStore ? "Store Cart" : "Food Cart", href: isStore ? "/store/cart" : "/food/user/cart" },
+      { name: "Wishlist", href: isStore ? "/store/wishlist" : "/food/user/wishlist" },
+      { name: "Your Orders", href: isStore ? "/store/orders" : "/food/user/orders?history=true" },
       isLoggedIn ? { name: "Account", href: "/account" } : { name: "Login", href: "#", onClick: (e: any) => { e.preventDefault(); openLoginModal(); } },
     ],
     Register: [

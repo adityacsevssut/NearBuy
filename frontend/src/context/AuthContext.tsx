@@ -28,7 +28,7 @@ interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   accessToken: string | null;
-  login: (user: AuthUser, accessToken: string, refreshToken: string) => void;
+  login: (user: AuthUser, accessToken: string, refreshToken?: string) => void;
   logout: () => void;
   isLoggedIn: boolean;
   isLoginModalOpen: boolean;
@@ -53,12 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Silently refresh the access token using the stored refresh token ──
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
-      const refresh = localStorage.getItem("nb_refresh");
-      if (!refresh) return null;
       const res = await fetch(`${API}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: refresh }),
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Refresh failed");
       const data = await res.json();
@@ -84,7 +82,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setAccessToken(null);
         localStorage.removeItem("nb_user");
         localStorage.removeItem("nb_access");
-        localStorage.removeItem("nb_refresh");
       }
     }, 12 * 60 * 1000); // every 12 minutes
   };
@@ -93,9 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const stored = localStorage.getItem("nb_user");
     const token  = localStorage.getItem("nb_access");
-    const refresh = localStorage.getItem("nb_refresh");
 
-    if (stored && refresh) {
+    if (stored) {
       try { setUser(JSON.parse(stored)); } catch {}
       // Immediately get a fresh token (handles page reloads after 15+ min)
       refreshAccessToken().then(newToken => {
@@ -113,10 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Refresh token when app comes back to foreground (Capacitor background freezing fix)
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
-        const refresh = localStorage.getItem("nb_refresh");
         const lastRefresh = parseInt(localStorage.getItem("nb_last_refresh") || "0");
         // Only refresh if more than 5 minutes have passed since last refresh to avoid spam
-        if (refresh && Date.now() - lastRefresh > 5 * 60 * 1000) {
+        if (Date.now() - lastRefresh > 5 * 60 * 1000) {
           refreshAccessToken().then(newToken => {
              if (newToken) scheduleRefresh();
           });
@@ -142,12 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isEssentials = pathname?.startsWith("/essentials") || pathname?.startsWith("/store") || (typeof window !== "undefined" && window.location.href.includes("theme=blue")) || false;
 
-  const login = (u: AuthUser, token: string, refresh: string) => {
+  const login = (u: AuthUser, token: string, refresh?: string) => {
     setUser(u);
     setAccessToken(token);
     localStorage.setItem("nb_user",    JSON.stringify(u));
     localStorage.setItem("nb_access",  token);
-    localStorage.setItem("nb_refresh", refresh);
     scheduleRefresh();
     toast.success("Welcome to ZyphCart!", {
       duration: 2000,
@@ -165,19 +159,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
-    const refresh = localStorage.getItem("nb_refresh");
-    if (refresh) {
-      fetch(`${API}/api/auth/logout`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: refresh }),
-      }).catch(() => {});
-    }
+    fetch(`${API}/api/auth/logout`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    }).catch(() => {});
     setUser(null);
     setAccessToken(null);
     localStorage.removeItem("nb_user");
     localStorage.removeItem("nb_access");
-    localStorage.removeItem("nb_refresh");
     toast("Logged out. See you soon! 👋", {
       icon: "👋",
       duration: 2000,

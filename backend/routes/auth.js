@@ -14,6 +14,7 @@ const pool = require("../config/db");
 const { sendOtpEmail, sendWelcomeEmail } = require("../config/mailer");
 const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/jwt");
 const { authenticate } = require("../middleware/auth");
+const { authLimiterExponential } = require("../middleware/rateLimiter");
 
 // Comma-separated list allowed (e.g. web + staging). Must include the same client id as
 // NEXT_PUBLIC_GOOGLE_CLIENT_ID on the frontend or verifyIdToken returns 401.
@@ -44,7 +45,7 @@ async function hashValue(value) {
 }
 
 // ── Helper: issue tokens and store refresh token ──────────────────────────
-async function issueTokens(user, client) {
+async function issueTokens(user, res, client) {
   const payload = { id: user.id, email: user.email, role: user.role, manager_type: user.manager_type };
   const accessToken  = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
@@ -56,7 +57,14 @@ async function issueTokens(user, client) {
     [user.id, tokenHash]
   );
 
-  return { accessToken, refreshToken };
+  res.cookie("nb_refresh", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+  });
+
+  return { accessToken };
 }
 
 // ── Helper: safe user object (strip secrets) ─────────────────────────────
@@ -82,6 +90,7 @@ function safeUser(u) {
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/send-otp",
+  authLimiterExponential,
   validate(sendOtpSchema),
   async (req, res) => {
 
@@ -142,6 +151,7 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/verify-otp",
+  authLimiterExponential,
   validate(verifyOtpSchema),
   async (req, res) => {
 
@@ -183,6 +193,7 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/signup",
+  authLimiterExponential,
   validate(signupSchema),
   async (req, res) => {
 
@@ -215,7 +226,7 @@ router.post(
       );
 
       const user = rows[0];
-      const { accessToken, refreshToken } = await issueTokens(user);
+      const { accessToken } = await issueTokens(user, res);
 
       // Trigger Welcome Email via ZeptoMail
       sendWelcomeEmail(user.email, user.first_name);
@@ -224,7 +235,6 @@ router.post(
         message: "Account created successfully!",
         user: safeUser(user),
         accessToken,
-        refreshToken,
       });
     } catch (err) {
       console.error("signup error:", err);
@@ -242,6 +252,7 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/login",
+  authLimiterExponential,
   validate(loginSchema),
   async (req, res) => {
 
@@ -261,8 +272,8 @@ router.post(
       const valid = await bcrypt.compare(password, user.password_hash);
       if (!valid) return res.status(401).json({ error: "Invalid email or password." });
 
-      const { accessToken, refreshToken } = await issueTokens(user);
-      return res.json({ user: safeUser(user), accessToken, refreshToken });
+      const { accessToken } = await issueTokens(user, res);
+      return res.json({ user: safeUser(user), accessToken });
     } catch (err) {
       console.error("login error:", err);
       return res.status(500).json({ error: "Login failed. Please try again." });
@@ -276,6 +287,7 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/vendor-login",
+  authLimiterExponential,
   validate(typedLoginSchema),
   async (req, res) => {
 
@@ -301,8 +313,8 @@ router.post(
       const valid = await bcrypt.compare(password, user.password_hash);
       if (!valid) return res.status(401).json({ error: "Invalid email or password." });
 
-      const { accessToken, refreshToken } = await issueTokens(user);
-      return res.json({ user: safeUser(user), accessToken, refreshToken });
+      const { accessToken } = await issueTokens(user, res);
+      return res.json({ user: safeUser(user), accessToken });
     } catch (err) {
       console.error("vendor login error:", err);
       return res.status(500).json({ error: "Login failed. Please try again." });
@@ -316,6 +328,7 @@ router.post(
 // ════════════════════════════════════════════════════════════════════════════
 router.post(
   "/manager-login",
+  authLimiterExponential,
   validate(typedLoginSchema),
   async (req, res) => {
 
@@ -340,8 +353,8 @@ router.post(
       const valid = await bcrypt.compare(password, user.password_hash);
       if (!valid) return res.status(401).json({ error: "Invalid email or password." });
 
-      const { accessToken, refreshToken } = await issueTokens(user);
-      return res.json({ user: safeUser(user), accessToken, refreshToken });
+      const { accessToken } = await issueTokens(user, res);
+      return res.json({ user: safeUser(user), accessToken });
     } catch (err) {
       console.error("manager login error:", err);
       return res.status(500).json({ error: "Login failed. Please try again." });
@@ -353,7 +366,7 @@ router.post(
 // POST /api/auth/google
 // Google OAuth — login or auto-signup
 // ════════════════════════════════════════════════════════════════════════════
-router.post("/google", async (req, res) => {
+router.post("/google", authLimiterExponential, async (req, res) => {
   const { idToken, accessToken } = req.body;
   if (!idToken && !accessToken) {
     return res.status(400).json({ error: "Provide Google idToken or accessToken." });
@@ -446,8 +459,8 @@ router.post("/google", async (req, res) => {
     );
 
     const user = rows[0];
-    const tokens = await issueTokens(user);
-    return res.json({ user: safeUser(user), accessToken: tokens.accessToken, refreshToken: tokens.refreshToken });
+    const tokens = await issueTokens(user, res);
+    return res.json({ user: safeUser(user), accessToken: tokens.accessToken });
   } catch (err) {
     console.error("google auth error:", err);
     const msg = err?.message || String(err);
@@ -505,7 +518,7 @@ router.post(
 // Refresh access token
 // ════════════════════════════════════════════════════════════════════════════
 router.post("/refresh", async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.nb_refresh;
   if (!refreshToken) return res.status(400).json({ error: "Refresh token required." });
 
   try {
@@ -540,10 +553,11 @@ router.post("/refresh", async (req, res) => {
 // Revoke refresh token
 // ════════════════════════════════════════════════════════════════════════════
 router.post("/logout", async (req, res) => {
-  const { refreshToken } = req.body;
+  const refreshToken = req.cookies?.nb_refresh;
   if (refreshToken) {
     const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
     await pool.query("DELETE FROM refresh_tokens WHERE token_hash=$1", [tokenHash]).catch(() => {});
+    res.clearCookie("nb_refresh");
   }
   return res.json({ message: "Logged out." });
 });

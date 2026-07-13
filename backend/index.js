@@ -59,44 +59,23 @@ app.use(
   })
 );
 
-// ── Body Parser ───────────────────────────────────────────────────────────
+// ── Body Parser & Cookies ──────────────────────────────────────────────────
 app.use(express.json({ limit: "10kb" }));
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
 
-// ── Global Rate Limiter ───────────────────────────────────────────────────
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
-  max: 200,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: "Too many requests, please try again later." },
-});
-app.use(globalLimiter);
+// ── Rate Limiters ─────────────────────────────────────────────────────────
+const { publicLimiter, authActionLimiter } = require("./middleware/rateLimiter");
 
-// ── Auth-specific stricter rate limits ────────────────────────────────────
-// Login/signup/google — 10 attempts per 15 min (only counts failures)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "production" ? 10 : 1000,
-  message: { error: "Too many auth attempts, please wait 15 minutes." },
-  skipSuccessfulRequests: true,
-});
-// OTP send/verify — 5 per 15 min (prevent OTP flooding)
-const otpLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: process.env.NODE_ENV === "production" ? 5 : 1000,
-  message: { error: "Too many OTP requests. Please wait 15 minutes." },
-});
-app.use("/api/auth", authLimiter);
-app.use("/api/auth/send-otp", otpLimiter);
-app.use("/api/auth/verify-otp", otpLimiter);
+app.use(authActionLimiter); // Apply as a baseline limit for all routes
 
 // ── Routes ────────────────────────────────────────────────────────────────
-app.get("/", (req, res) => res.json({ status: "ZyphCart API is running 🚀" }));
+app.get("/", publicLimiter, (req, res) => res.json({ status: "ZyphCart API is running 🚀" }));
 app.use("/api/auth", authRouter);
 app.use("/api/managers", managerRouter);
 app.use("/api/vendor-requests", require("./routes/vendor-requests"));
 app.use("/api/vendor-profile", require("./routes/vendor-profile"));
-app.use("/api/public", require("./routes/public"));
+app.use("/api/public", publicLimiter, require("./routes/public"));
 app.use("/api/service-centers", require("./routes/service_centers"));
 app.use("/api/vendor-menu", require("./routes/vendor-menu"));
 app.use("/api/orders", require("./routes/orders"));

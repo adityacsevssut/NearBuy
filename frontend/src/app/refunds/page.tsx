@@ -44,7 +44,7 @@ export default function RefundsPage() {
         if (res.ok) {
           setRefunds(data.refunds || []);
         } else {
-          toast.error("Failed to load refund requests");
+          toast.error(data.error || "Failed to load refund requests");
         }
       } catch (error) {
         console.error(error);

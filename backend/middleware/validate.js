@@ -8,13 +8,15 @@
  */
 const validate = (schema) => (req, res, next) => {
   const { error, value } = schema.validate(req.body, {
-    abortEarly: true,       // return first error only
-    stripUnknown: true,     // remove unexpected fields silently
+    abortEarly: false,      // return all errors
+    allowUnknown: false,    // explicitly reject unexpected fields
+    convert: true,          // allow string-to-number coercions for form-data
     errors: { label: "key" }
   });
 
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    const errorMessages = error.details.map((detail) => detail.message);
+    return res.status(400).json({ error: errorMessages.join(", ") });
   }
 
   req.body = value; // use the sanitised/coerced value

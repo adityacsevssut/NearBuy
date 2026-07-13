@@ -321,7 +321,7 @@ export default function PartnerDashboard() {
       if (posterLink.trim()) {
         const mType = (user?.manager_type || "food").toLowerCase();
         const path = posterLink.trim().toLowerCase().replace(/\s+/g, '-');
-        const prefix = mType === "store" ? "/store/category/" : "/food/dish/";
+        const prefix = mType === "store" ? "/store/category/" : "/food/user/dish/";
         form.append("link", `${prefix}${path}`);
       }
       const res = await fetch(`${API}/api/homepage-poster`, {
@@ -376,8 +376,8 @@ export default function PartnerDashboard() {
     setPosterSaved(false);
     let rawLink = "";
     if (poster.link) {
-      if (poster.link.includes("/food/dish/")) {
-        rawLink = poster.link.split("/food/dish/")[1].replace(/-/g, " ");
+      if (poster.link.includes("/food/user/dish/")) {
+        rawLink = poster.link.split("/food/user/dish/")[1].replace(/-/g, " ");
       } else if (poster.link.includes("/store/category/")) {
         rawLink = poster.link.split("/store/category/")[1];
       }
@@ -399,7 +399,7 @@ export default function PartnerDashboard() {
     const usedPaths = currentPosters.filter(p => p.id !== editingPosterId).map(p => {
       if (p.link) {
         if (mType === "store") return p.link.replace("/store/category/", "");
-        return p.link.replace("/food/dish/", "");
+        return p.link.replace("/food/user/dish/", "");
       }
       return "";
     });
@@ -415,7 +415,7 @@ export default function PartnerDashboard() {
     try {
       const mType = (user?.manager_type || "food").toLowerCase();
       const path = posterLink.trim().toLowerCase().replace(/\s+/g, '-');
-      const prefix = mType === "store" ? "/store/category/" : "/food/dish/";
+      const prefix = mType === "store" ? "/store/category/" : "/food/user/dish/";
       const link = `${prefix}${path}`;
 
       const res = await fetch(`${API}/api/homepage-poster/${editingPosterId}/link`, {

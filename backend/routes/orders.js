@@ -158,7 +158,8 @@ router.post("/create-razorpay-order", authenticate, async (req, res) => {
     });
     res.json(order);
   } catch (error) {
-    const errorMsg = error.error?.description || error.message || "Error creating Razorpay order";
+    console.error("Razorpay order creation error:", error);
+    const errorMsg = error.error?.description || "Error creating Razorpay order. Please try again.";
     res.status(500).json({ error: errorMsg });
   }
 });
@@ -585,7 +586,8 @@ router.post("/:id/initiate-advance", authenticate, async (req, res) => {
     });
     res.json(rzpOrder);
   } catch (error) {
-    const errorMsg = error.error?.description || error.message || "Error creating Razorpay order";
+    console.error("Razorpay advance order error:", error);
+    const errorMsg = error.error?.description || "Error creating Razorpay order for advance. Please try again.";
     res.status(500).json({ error: errorMsg });
   }
 });
@@ -615,7 +617,8 @@ router.post("/:id/initiate-remaining", authenticate, async (req, res) => {
     });
     res.json(rzpOrder);
   } catch (error) {
-    const errorMsg = error.error?.description || error.message || "Error creating Razorpay order";
+    console.error("Razorpay remaining order error:", error);
+    const errorMsg = error.error?.description || "Error creating Razorpay order for remaining amount. Please try again.";
     res.status(500).json({ error: errorMsg });
   }
 });
