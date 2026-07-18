@@ -24,7 +24,6 @@ interface AuthUser {
   longitude?: number | null;
   notifications_enabled?: boolean;
 }
-
 interface AuthContextType {
   user: AuthUser | null;
   accessToken: string | null;
@@ -190,7 +189,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return updated;
     });
   };
-
   return (
     <AuthContext.Provider value={{ user, accessToken, login, logout, updateUser, isLoggedIn: !!user, isLoginModalOpen, openLoginModal, closeLoginModal, isInitializing }}>
       {children}
@@ -198,7 +196,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     </AuthContext.Provider>
   );
 }
-
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error("useAuth must be used inside AuthProvider");

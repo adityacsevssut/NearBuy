@@ -248,5 +248,4 @@ router.patch("/:id/link", authenticate, async (req, res) => {
     return res.status(500).json({ error: "Failed to update poster link." });
   }
 });
-
 module.exports = router;
