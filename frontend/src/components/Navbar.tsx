@@ -110,6 +110,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
   const isHotels = domain === 'hotels';
   const isFood = domain === 'food';
   const baseUrl = `/${domain}`;
+  const userBaseUrl = isFood ? "/food/user" : `/${domain}`;
 
 
 
@@ -222,7 +223,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
             {/* ── Desktop Quick Links ── */}
             <div className="flex items-center gap-3">
               <Link
-                href={`${baseUrl}/wishlist`}
+                href={`${userBaseUrl}/wishlist`}
                 onClick={(e) => {
                   if (!isLoggedIn) {
                     e.preventDefault();
@@ -240,7 +241,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                     e.preventDefault();
                     openLoginModal();
                   } else {
-                    router.push(`${baseUrl}/orders`);
+                    router.push(`${userBaseUrl}/orders`);
                   }
                 }}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
@@ -256,7 +257,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
 
             {/* Cart – hidden on mobile (lives in hamburger) */}
             <Link
-              href={`${baseUrl}/cart`}
+              href={`${userBaseUrl}/cart`}
               id="cart-btn"
               onClick={(e) => {
                 if (!isLoggedIn) {
