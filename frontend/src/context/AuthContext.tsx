@@ -50,13 +50,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const closeLoginModal = () => setIsLoginModalOpen(false);
 
   // ── Silently refresh the access token using the stored refresh token ──
-  const refreshAccessToken = async (): Promise<string | null> => {
+  const refreshAccessToken = async (): Promise<string | null | false> => {
     try {
       const res = await fetch(`${API}/api/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
+      if (res.status === 401) return false; // Explicitly expired/invalid
+      if (res.status === 400) return null; // Missing cookie (CORS/Capacitor issue), fallback
       if (!res.ok) throw new Error("Refresh failed");
       const data = await res.json();
       const newToken = data.accessToken;
@@ -74,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     refreshTimerRef.current = setInterval(async () => {
       const newToken = await refreshAccessToken();
-      if (!newToken) {
-        // Refresh token also expired — log out silently
+      if (newToken === false) {
+        // Refresh token also expired or missing — log out silently
         clearInterval(refreshTimerRef.current!);
         setUser(null);
         setAccessToken(null);
@@ -96,8 +98,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       refreshAccessToken().then(newToken => {
         if (newToken) {
           scheduleRefresh();
+        } else if (newToken === false) {
+          // Token is explicitly invalid or missing. Log out.
+          setUser(null);
+          setAccessToken(null);
+          localStorage.removeItem("nb_user");
+          localStorage.removeItem("nb_access");
         } else if (token) {
-          // Fallback: use stored token if refresh endpoint is temporarily down
+          // Fallback: use stored token if refresh endpoint is temporarily down (network error)
           setAccessToken(token);
         }
       });
@@ -113,6 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (Date.now() - lastRefresh > 5 * 60 * 1000) {
           refreshAccessToken().then(newToken => {
              if (newToken) scheduleRefresh();
+             else if (newToken === false) {
+               setUser(null);
+               setAccessToken(null);
+               localStorage.removeItem("nb_user");
+               localStorage.removeItem("nb_access");
+             }
           });
         }
       }
@@ -141,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAccessToken(token);
     localStorage.setItem("nb_user",    JSON.stringify(u));
     localStorage.setItem("nb_access",  token);
+    localStorage.setItem("nb_last_refresh", Date.now().toString());
     scheduleRefresh();
     toast.success("Welcome to ZyphCart!", {
       duration: 2000,

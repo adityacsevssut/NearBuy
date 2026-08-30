@@ -556,6 +556,17 @@ router.get("/hot-deals", async (req, res) => {
 router.get("/settings", async (req, res) => {
   try {
     const { rows } = await pool.query("SELECT platform_fee, gst, instagram_link, food_email, store_email, enable_food, enable_store FROM global_settings WHERE id = 1");
+    if (rows.length === 0) {
+      return res.json({
+        platform_fee: 5.00,
+        gst: 10.00,
+        instagram_link: 'https://instagram.com/',
+        food_email: 'manager@zyphcart.com',
+        store_email: 'manager@zyphcart.com',
+        enable_food: true,
+        enable_store: false
+      });
+    }
     return res.json({
       platform_fee: parseFloat(rows[0].platform_fee),
       gst: parseFloat(rows[0].gst),
