@@ -4,10 +4,10 @@ require("dotenv").config();
 
 // Default Configurations with Environment Variable Overrides
 const RL_PUBLIC_WINDOW_MS = parseInt(process.env.RL_PUBLIC_WINDOW_MS) || 15 * 60 * 1000;
-const RL_PUBLIC_MAX = parseInt(process.env.RL_PUBLIC_MAX) || 150;
+const RL_PUBLIC_MAX = parseInt(process.env.RL_PUBLIC_MAX) || 5000; // Increased for development
 
 const RL_AUTH_ACTION_WINDOW_MS = parseInt(process.env.RL_AUTH_ACTION_WINDOW_MS) || 15 * 60 * 1000;
-const RL_AUTH_ACTION_MAX = parseInt(process.env.RL_AUTH_ACTION_MAX) || 300;
+const RL_AUTH_ACTION_MAX = parseInt(process.env.RL_AUTH_ACTION_MAX) || 5000; // Increased for development
 
 const RL_AUTH_FAILS_MAX = parseInt(process.env.RL_AUTH_FAILS_MAX) || 5;
 const RL_AUTH_BASE_DELAY_MS = parseInt(process.env.RL_AUTH_BASE_DELAY_MS) || 2000; // 2 seconds base delay

@@ -192,35 +192,47 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
       return <>{children}</>;
     }
     return (
-      <div className={`min-h-screen ${isStore ? "bg-blue-50/20" : "bg-orange-50/20"} dark:bg-black flex flex-col items-center justify-center p-4 select-none`}>
-        {/* Simple card container */}
-        <div className="max-w-md w-full bg-white dark:bg-[#0D0D17] rounded-3xl p-8 md:p-10 text-center shadow-xl border border-gray-100 dark:border-[#2A2A3A] flex flex-col items-center">
-          {/* Logo */}
-          <div className="flex items-center -skew-x-6 pr-1 mb-6">
-            <span className={`font-black text-4xl tracking-tighter drop-shadow-sm ${isStore ? "text-blue-600" : "text-orange-gradient"}`}>
+      <div className={`min-h-screen relative flex flex-col items-center justify-center p-4 select-none overflow-hidden ${isStore ? "bg-gradient-to-br from-blue-600 to-indigo-600" : "bg-gradient-to-br from-orange-600 to-red-500"} dark:bg-[#0D0D17]`}>
+        {/* Animated background elements */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-blue-300" : "bg-orange-300"}`} style={{ animationDuration: '4s' }}></div>
+          <div className={`absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-indigo-300" : "bg-rose-300"}`} style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
+          <div className={`absolute -bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-sky-300" : "bg-yellow-300"}`} style={{ animationDuration: '6s', animationDelay: '2s' }}></div>
+        </div>
+
+        {/* Solid white card container */}
+        <div className="relative z-10 max-w-md w-full bg-white dark:bg-[#0D0D17] border border-gray-100 dark:border-[#2A2A3A] rounded-[2rem] p-10 text-center card-shadow flex flex-col items-center transform transition-all duration-700 ease-out translate-y-0 opacity-100">
+          {/* Logo with float animation */}
+          <div className="flex items-center -skew-x-6 pr-1 mb-8 float-anim">
+            <span className={`font-black text-5xl tracking-tighter drop-shadow-sm ${isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}`}>
               Z
             </span>
-            <span className="text-black dark:text-white font-black text-4xl tracking-tighter drop-shadow-sm">
+            <span className="text-gray-900 dark:text-white font-black text-5xl tracking-tighter drop-shadow-sm">
               C
             </span>
-            <span className="font-black text-2xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
-              <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Zyph</span>Cart
+            <span className="font-black text-3xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
+              <span className={isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}>Zyph</span>Cart
             </span>
           </div>
 
           {/* Texts */}
-          <h2 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-1 tracking-tight leading-tight">
-            Welcome to <span className={isStore ? "text-blue-600" : "text-orange-gradient"}>Zyph</span>Cart
+          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight leading-tight">
+            Welcome to <span className={isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}>Zyph</span>Cart
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-tight mb-8">
+          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide uppercase mb-10 opacity-80">
             Explore Your Nearest Market
           </p>
 
-          {/* Simple classic spinning loader with MapPin */}
-          <div className="w-16 h-16 relative">
-            <div className={`absolute inset-0 rounded-full border-4 ${isStore ? "border-blue-100" : "border-orange-100"}`}></div>
-            <div className={`absolute inset-0 rounded-full border-4 ${isStore ? "border-blue-600" : "border-orange-500"} border-t-transparent animate-spin`}></div>
-            <MapPin className={`absolute inset-0 m-auto w-6 h-6 ${isStore ? "text-blue-600" : "text-orange-500"}`} />
+          {/* Modern Loader */}
+          <div className="relative flex justify-center items-center w-24 h-24 mb-4">
+            {/* Outer rings spinning */}
+            <div className={`absolute inset-0 rounded-full border-[3px] border-transparent ${isStore ? "border-t-blue-500 border-b-blue-300" : "border-t-orange-500 border-b-orange-300"} animate-spin opacity-80`} style={{ animationDuration: '1.5s' }}></div>
+            <div className={`absolute inset-2 rounded-full border-[3px] border-transparent ${isStore ? "border-l-indigo-400 border-r-indigo-200" : "border-l-rose-400 border-r-rose-200"} animate-spin opacity-60`} style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
+            
+            {/* Pulsing center icon */}
+            <div className={`relative flex items-center justify-center w-14 h-14 rounded-full ${isStore ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-orange-100 dark:bg-orange-900/40'} animate-pulse`}>
+              <MapPin className={`w-7 h-7 ${isStore ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"}`} strokeWidth={2.5} />
+            </div>
           </div>
         </div>
       </div>
