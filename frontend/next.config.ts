@@ -74,6 +74,11 @@ const config = {
         protocol: "https",
         hostname: "cwaiqkgimqdjsznrizgt.supabase.co",
       },
+      // Mock images
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+      },
       // Google OAuth profile pictures
       {
         protocol: "https",
