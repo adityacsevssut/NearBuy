@@ -49,9 +49,9 @@ export default function MobileBottomNav() {
     <>
       <nav
         id="mobile-bottom-nav"
-        className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-[#05050A]/95 backdrop-blur-md border-t border-gray-100 dark:border-[#2A2A3A] shadow-[0_-4px_20px_rgba(0,0,0,0.05)] pb-safe transition-colors duration-300"
+        className="fixed bottom-3 left-3 right-3 z-50 md:hidden bg-white/95 dark:bg-[#05050A]/95 backdrop-blur-xl border border-gray-100 dark:border-[#2A2A3A] shadow-[0_8px_25px_rgba(0,0,0,0.08)] rounded-[2rem] pb-safe transition-colors duration-300"
       >
-        <div className="flex items-center justify-around px-3 py-2">
+        <div className="flex items-center justify-around px-2 py-2">
           {tabs.map((tab) => {
             const { id, label, icon: Icon, href, badge } = tab;
             const cleanHref = href.split('?')[0];
@@ -72,7 +72,7 @@ export default function MobileBottomNav() {
                 id={id}
                 href={href}
                 onClick={handleClick}
-                className={`flex flex-col items-center gap-1 flex-1 py-1.5 rounded-2xl transition-all duration-300 group cursor-pointer relative ${
+                className={`flex flex-col items-center gap-1 flex-1 py-1.5 mx-1 rounded-full transition-all duration-300 group cursor-pointer relative ${
                   active 
                     ? `${activeBg} ${activeText} scale-105` 
                     : "text-gray-400 hover:text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]/50"
