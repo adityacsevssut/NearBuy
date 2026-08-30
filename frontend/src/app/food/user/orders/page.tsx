@@ -99,7 +99,7 @@ function OrdersPageContent() {
       if (res.ok) {
         setHasMore(pageNum < (data.pagination?.totalPages || 1));
         setOrders(prev => pageNum === 1 ? (data.orders || []) : [...prev, ...(data.orders || [])]);
-      } else {
+      } else if (res.status !== 401) {
         toast.error(data.error || "Failed to fetch orders");
       }
     } catch (err) {
