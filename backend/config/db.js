@@ -5,7 +5,7 @@ const pool = new Pool({
   ssl: (process.env.NODE_ENV && process.env.NODE_ENV.toLowerCase() === "production") || (process.env.DATABASE_URL && process.env.DATABASE_URL.includes("supabase")) ? { rejectUnauthorized: false } : false,
   max: 20,                // max connections in pool
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
+  connectionTimeoutMillis: 10000, // Increased to 10s to prevent premature timeouts
 });
 
 pool.on("error", (err) => {

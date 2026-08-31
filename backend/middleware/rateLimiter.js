@@ -1,4 +1,4 @@
-const rateLimit = require("express-rate-limit");
+const { rateLimit, ipKeyGenerator } = require("express-rate-limit");
 const redis = require("../config/redis");
 require("dotenv").config();
 
@@ -27,9 +27,10 @@ const authActionLimiter = rateLimit({
   max: RL_AUTH_ACTION_MAX,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
+  keyGenerator: (req, res) => {
     // Prefer user ID for limits, fallback to IP if not authenticated yet
-    return req.user && req.user.id ? req.user.id : req.ip;
+    if (req.user && req.user.id) return req.user.id;
+    return ipKeyGenerator(req, res);
   },
   message: { error: "Too many requests. Please slow down." },
 });

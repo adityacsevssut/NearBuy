@@ -47,9 +47,9 @@ async function hashValue(value) {
 // ── Helper: issue tokens and store refresh token ──────────────────────────
 async function issueTokens(user, res, client) {
   const payload = { id: user.id, email: user.email, role: user.role, manager_type: user.manager_type };
-  const accessToken  = signAccessToken(payload);
+  const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
-  const tokenHash    = crypto.createHash("sha256").update(refreshToken).digest("hex");
+  const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
 
   await (client || pool).query(
     `INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
@@ -60,7 +60,7 @@ async function issueTokens(user, res, client) {
   res.cookie("nb_refresh", refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
   });
 
@@ -557,7 +557,11 @@ router.post("/logout", async (req, res) => {
   if (refreshToken) {
     const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
     await pool.query("DELETE FROM refresh_tokens WHERE token_hash=$1", [tokenHash]).catch(() => {});
-    res.clearCookie("nb_refresh");
+    res.clearCookie("nb_refresh", { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === "production", 
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" 
+    });
   }
   return res.json({ message: "Logged out." });
 });
@@ -571,15 +575,15 @@ router.post("/logout", async (req, res) => {
 router.delete("/me", authenticate, async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // Because of ON DELETE CASCADE in the database schema, 
     // deleting the user will automatically delete their refresh_tokens.
     // Assuming other tables (orders, wishlists, etc.) are also set up with
     // ON DELETE CASCADE referencing the users table, they will be deleted too.
-    
+
     // Perform the deletion
     const result = await pool.query("DELETE FROM users WHERE id = $1 RETURNING id", [userId]);
-    
+
     if (result.rowCount === 0) {
       return res.status(404).json({ error: "User not found or already deleted." });
     }
@@ -771,7 +775,7 @@ router.post("/rate-app", authenticate, async (req, res) => {
   if (!rating || rating < 1 || rating > 5) {
     return res.status(400).json({ error: "Rating must be between 1 and 5." });
   }
-  
+
   try {
     // Upsert rating so user only has 1 rating
     await pool.query(
@@ -780,7 +784,7 @@ router.post("/rate-app", authenticate, async (req, res) => {
        ON CONFLICT (id) DO NOTHING`, // Since id is serial, we can't easily upsert by user_id without unique constraint. Let's just insert multiple or delete previous.
       [req.user.id, rating]
     ); // Wait, there's no unique constraint on user_id. Let's just delete their previous ratings.
-    
+
     await pool.query(`DELETE FROM app_ratings WHERE user_id = $1`, [req.user.id]);
     await pool.query(
       `INSERT INTO app_ratings (user_id, rating) VALUES ($1, $2)`,
