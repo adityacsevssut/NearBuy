@@ -841,12 +841,6 @@ export default function CartPage() {
             <p className="text-sm text-gray-400 font-medium max-w-xs mb-7">
               Add items from a restaurant to get started.
             </p>
-            <Link
-              href="/"
-              className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white font-black rounded-xl text-sm shadow-lg shadow-orange-500/25 transition-all active:scale-[0.97]"
-            >
-              Browse Restaurants
-            </Link>
           </motion.div>
         ) : (
           <>

@@ -7,8 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ArrowLeft, Star, Clock, Utensils, Heart, ArrowDown } from "lucide-react";
-import Navbar from "@/components/Navbar";
+import { ArrowLeft, Star, Clock, Utensils, Heart, ArrowDown, Search } from "lucide-react";
+
 import MobileBottomNav from "@/components/MobileBottomNav";
 
 export default function WishlistPage() {
@@ -47,27 +47,62 @@ export default function WishlistPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-16 pb-24 md:pb-8">
-      <Navbar />
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-2 pb-24 md:pb-8">
 
-      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6">
-        <div className="flex items-center gap-3 mb-6">
-          <Link href="/" className="p-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full text-gray-500 dark:text-gray-400 hover:text-orange-500 shadow-sm transition-colors">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pt-2 pb-6">
+        <div className="relative flex items-center justify-center mb-6 min-h-[44px]">
+          <Link href="/" className="absolute left-0 p-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full text-gray-500 dark:text-gray-400 hover:text-orange-500 shadow-sm transition-colors z-10">
             <ArrowLeft className="w-5 h-5" />
           </Link>
-          <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight">
-            Your <span className="text-rose-500">Wishlist</span>
+          <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight text-center w-full relative z-0">
+            Your <span className="text-orange-500">Wishlist</span>
           </h1>
         </div>
 
         {restaurantWishlist.length === 0 && foodWishlist.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-32 sm:py-40 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm mt-8">
-            <Heart className="w-16 h-16 mb-4 text-gray-300" />
-            <p className="font-bold text-gray-600 dark:text-gray-400 text-lg">Your wishlist is empty</p>
-            <p className="text-sm mt-1 max-w-[250px] text-center">Start adding your favorite restaurants and dishes!</p>
-            <Link href="/" className="mt-6 px-6 py-2.5 bg-orange-500 text-white font-bold rounded-xl shadow-sm shadow-orange-500/20 hover:bg-orange-600 transition-colors">
-              Explore Food
-            </Link>
+          <div className="flex flex-col items-center justify-center py-20 sm:py-32 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl mt-8">
+            <style>{`
+              @keyframes searchPath {
+                0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+                33% { transform: translate(-20px, 10px) rotate(-10deg); }
+                66% { transform: translate(15px, -10px) rotate(10deg); }
+              }
+            `}</style>
+            
+            <div className="relative w-48 h-48 mb-8 flex items-center justify-center group">
+              {/* Abstract blob behind */}
+              <div className="absolute w-36 h-36 bg-gray-100 dark:bg-gray-800/40 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] -rotate-12 transition-transform duration-700 group-hover:rotate-0 group-hover:scale-105"></div>
+              
+              {/* Document Base */}
+              <div className="relative z-10 w-24 h-[110px] bg-[#54657A] dark:bg-[#3B4756] rounded-lg rounded-tr-[28px] shadow-sm flex flex-col pt-6 px-4">
+                {/* Folded Top Right Corner */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-gray-100 dark:bg-gray-800/40 rounded-bl-lg rounded-tr-lg"></div>
+                {/* Inner fold triangle */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-[#435162] dark:bg-[#2C3541] rounded-bl-lg rounded-tr-lg" style={{ clipPath: "polygon(0 0, 0% 100%, 100% 100%)" }}></div>
+                
+                {/* Document lines */}
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-2/3 h-1.5 bg-white/50 rounded-full"></div>
+              </div>
+
+              {/* Moving Magnifying Glass */}
+              <div 
+                className="absolute z-20 ml-12 mt-12"
+                style={{ animation: 'searchPath 4s ease-in-out infinite' }}
+              >
+                {/* The glass ring */}
+                <div className="w-11 h-11 rounded-full border-[4px] border-[#54657A] dark:border-[#3B4756] bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-sm shadow-sm relative z-10"></div>
+                {/* The handle */}
+                <div className="absolute top-[80%] left-[80%] w-3.5 h-7 bg-[#54657A] dark:bg-[#3B4756] -rotate-45 rounded-b-md shadow-sm transform -translate-x-1.5 -translate-y-1.5 z-0"></div>
+              </div>
+            </div>
+            
+            <p className="font-black text-gray-800 dark:text-gray-200 text-[22px] tracking-tight mb-2">No saved favorites yet</p>
+            <p className="text-[14px] font-medium text-center text-gray-500 dark:text-gray-400 leading-relaxed max-w-[300px]">
+              There are no items in the wishlist.<br/>
+              To add items to wishlist, click on the heart icon.
+            </p>
           </div>
         )}
 
@@ -101,7 +136,7 @@ export default function WishlistPage() {
                       }}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm hover:scale-110 transition-transform z-30"
                     >
-                      <Heart className="w-4 h-4 fill-rose-500 text-rose-500" />
+                      <Heart className="w-4 h-4 fill-orange-500 text-orange-500" />
                     </button>
                     
                     {r.isClosed && (
@@ -234,7 +269,7 @@ export default function WishlistPage() {
                         onClick={() => toggleFood(dish)}
                         className="absolute top-2 right-2 p-1.5 rounded-full bg-white dark:bg-[#0D0D17]/80 backdrop-blur-sm border border-gray-200 dark:border-[#2A2A3A] shadow-sm hover:scale-110 transition-transform z-20"
                       >
-                        <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                        <Heart className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
                       </button>
                     </div>
                     

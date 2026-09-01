@@ -438,7 +438,7 @@ function AccountContent() {
 
           {/* Browse Restaurant Button */}
           <button
-            onClick={() => router.push(`/${domain}`)}
+            onClick={() => router.push(domain === 'food' ? '/food/user#all-section' : `/${domain}`)}
             className="group bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm
               p-4 sm:p-5 flex flex-col justify-between gap-4 text-left w-full
               hover:shadow-md hover:-translate-y-0.5 hover:bg-blue-50 dark:hover:bg-blue-500/5 hover:border-blue-200/80 dark:hover:border-blue-500/20

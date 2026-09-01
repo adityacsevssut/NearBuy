@@ -10,7 +10,6 @@ import {
   CheckCircle, Loader2, Store, FileText, ChevronRight,
   Eye, Truck, AlertCircle, Download
 } from "lucide-react";
-import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -215,17 +214,17 @@ function OrdersPageContent() {
   });
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
-      <Navbar />
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-2 pb-20">
 
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-16 z-20">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center gap-3">
-          <Link href={isHistory ? "/account" : "/"} className="p-2 -ml-2 rounded-xl hover:bg-gray-50 dark:bg-[#151522] dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 transition-colors">
-            <ChevronLeft className="w-5 h-5" />
+      <div className="bg-[#f5f5f5] dark:bg-[#0D0D17] sticky top-2 z-20 mb-4">
+        <div className="relative max-w-2xl mx-auto px-4 min-h-[44px] flex items-center justify-center">
+          <Link href={isHistory ? "/account" : "/"} className="absolute left-4 p-2 rounded-full border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] hover:text-orange-500 shadow-sm transition-colors z-10">
+            <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Link>
-          <h1 className="font-black text-gray-900 dark:text-gray-100 text-lg tracking-tight">
-            {isHistory ? "Recently Ordered" : "Your Orders"}
+          <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight text-center w-full relative z-0">
+            {isHistory ? "Recently " : "Your "}
+            <span className="text-orange-500">{isHistory ? "Ordered" : "Orders"}</span>
           </h1>
         </div>
       </div>
@@ -237,17 +236,48 @@ function OrdersPageContent() {
             <p className="text-gray-500 dark:text-gray-400 font-medium">Fetching your orders...</p>
           </div>
         ) : displayedOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-20 h-20 bg-gray-100 dark:bg-[#1F1F2E] rounded-full flex items-center justify-center mb-4">
-              <Package className="w-10 h-10 text-gray-400" />
+          <div className="flex flex-col items-center justify-center py-20 sm:py-32 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl mt-4 border border-gray-200 dark:border-[#2A2A3A] shadow-sm">
+            <style>{`
+              @keyframes searchPath {
+                0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+                33% { transform: translate(-20px, 10px) rotate(-10deg); }
+                66% { transform: translate(15px, -10px) rotate(10deg); }
+              }
+            `}</style>
+            
+            <div className="relative w-48 h-48 mb-8 flex items-center justify-center group">
+              {/* Abstract blob behind */}
+              <div className="absolute w-36 h-36 bg-gray-100 dark:bg-gray-800/40 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] -rotate-12 transition-transform duration-700 group-hover:rotate-0 group-hover:scale-105"></div>
+              
+              {/* Document Base */}
+              <div className="relative z-10 w-24 h-[110px] bg-[#54657A] dark:bg-[#3B4756] rounded-lg rounded-tr-[28px] shadow-sm flex flex-col pt-6 px-4">
+                {/* Folded Top Right Corner */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-gray-100 dark:bg-gray-800/40 rounded-bl-lg rounded-tr-lg"></div>
+                {/* Inner fold triangle */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-[#435162] dark:bg-[#2C3541] rounded-bl-lg rounded-tr-lg" style={{ clipPath: "polygon(0 0, 0% 100%, 100% 100%)" }}></div>
+                
+                {/* Document lines */}
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-2/3 h-1.5 bg-white/50 rounded-full"></div>
+              </div>
+
+              {/* Moving Magnifying Glass */}
+              <div 
+                className="absolute z-20 ml-12 mt-12"
+                style={{ animation: 'searchPath 4s ease-in-out infinite' }}
+              >
+                {/* The glass ring */}
+                <div className="w-11 h-11 rounded-full border-[4px] border-[#54657A] dark:border-[#3B4756] bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-sm shadow-sm relative z-10"></div>
+                {/* The handle */}
+                <div className="absolute top-[80%] left-[80%] w-3.5 h-7 bg-[#54657A] dark:bg-[#3B4756] -rotate-45 rounded-b-md shadow-sm transform -translate-x-1.5 -translate-y-1.5 z-0"></div>
+              </div>
             </div>
-            <h2 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-2">No orders yet</h2>
-            <p className="text-gray-500 dark:text-gray-400 mb-6 text-sm">
+            
+            <p className="font-black text-gray-800 dark:text-gray-200 text-[22px] tracking-tight mb-2">No orders yet</p>
+            <p className="text-[14px] font-medium text-center text-gray-500 dark:text-gray-400 leading-relaxed max-w-[300px] px-4">
               {isHistory ? "You have no past orders." : "Looks like you haven't placed any orders or they are all completed."}
             </p>
-            <Link href="/" className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all active:scale-95">
-              Explore Nearby Shops
-            </Link>
           </div>
         ) : (
           displayedOrders.map((order) => (
