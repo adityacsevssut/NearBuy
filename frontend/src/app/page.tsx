@@ -36,7 +36,7 @@ export default function RootPage() {
 
   // Classic Gradient Splash Screen
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-orange-200 flex flex-col items-center justify-center relative">
+    <div className="min-h-[100dvh] bg-gradient-to-b from-white to-orange-200 flex flex-col items-center justify-center relative pb-safe">
       {/* Central Logo Area */}
       <div className="flex flex-col items-center animate-fade-in">
         <div className="flex items-center justify-center mb-2">
@@ -57,7 +57,7 @@ export default function RootPage() {
       </div>
 
       {/* Bottom Tagline */}
-      <div className="absolute bottom-12 flex flex-col items-center animate-fade-in-up">
+      <div className="absolute bottom-6 sm:bottom-12 flex flex-col items-center animate-fade-in-up w-full">
         <p className="text-gray-500 text-[11px] font-black tracking-[0.25em] uppercase">
           An Eternal Company
         </p>
