@@ -38,13 +38,22 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   const [status, setStatus] = useState<"checking" | "allowed" | "denied" | "no-location">("checking");
   const [permissionPrompted, setPermissionPrompted] = useState(false);
   const [isWelcomed, setIsWelcomed] = useState(false);
+  const [minSplashDone, setMinSplashDone] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
       try {
         const welcomed = sessionStorage.getItem("zyphcart_welcomed") === "true";
         setIsWelcomed(welcomed);
-      } catch (e) {}
+        if (welcomed) {
+          setMinSplashDone(true);
+        } else {
+          // Force splash screen for at least 1.8 seconds on first visit
+          setTimeout(() => setMinSplashDone(true), 1800);
+        }
+      } catch (e) {
+        setMinSplashDone(true);
+      }
     }
   }, []);
 
@@ -136,7 +145,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
   }, [latitude, longitude, centers, loading, permissionPrompted, setLocation, setIsLocationModalOpen]);
 
   useEffect(() => {
-    if (status !== "checking") {
+    if (status !== "checking" && minSplashDone) {
       if (typeof window !== "undefined") {
         try {
           sessionStorage.setItem("zyphcart_welcomed", "true");
@@ -144,7 +153,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         } catch (e) {}
       }
     }
-  }, [status]);
+  }, [status, minSplashDone]);
 
   const [isDetecting, setIsDetecting] = useState(false);
 
@@ -187,53 +196,38 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
 
   if (isBypassed) return <>{children}</>;
 
-  if (loading || status === "checking") {
+  const showSplash = (!isWelcomed && !minSplashDone) || loading || status === "checking";
+
+  if (showSplash) {
     if (isWelcomed) {
       return <>{children}</>;
     }
     return (
-      <div className={`min-h-screen relative flex flex-col items-center justify-center p-4 select-none overflow-hidden ${isStore ? "bg-gradient-to-br from-blue-600 to-indigo-600" : "bg-gradient-to-br from-orange-600 to-red-500"} dark:bg-[#0D0D17]`}>
-        {/* Animated background elements */}
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-blue-300" : "bg-orange-300"}`} style={{ animationDuration: '4s' }}></div>
-          <div className={`absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-indigo-300" : "bg-rose-300"}`} style={{ animationDuration: '5s', animationDelay: '1s' }}></div>
-          <div className={`absolute -bottom-[10%] left-[20%] w-[40%] h-[40%] rounded-full opacity-60 dark:opacity-20 blur-[100px] mix-blend-multiply dark:mix-blend-lighten animate-pulse ${isStore ? "bg-sky-300" : "bg-yellow-300"}`} style={{ animationDuration: '6s', animationDelay: '2s' }}></div>
+      <div className="min-h-screen relative flex flex-col items-center justify-center select-none overflow-hidden bg-gradient-to-b from-white to-orange-200">
+        {/* Central Logo Area */}
+        <div className="flex flex-col items-center animate-pulse" style={{ animationDuration: '2s' }}>
+          <div className="flex items-center justify-center mb-2">
+            {/* ZC Logo */}
+            <div className="flex items-baseline -skew-x-12 mr-2 sm:mr-3">
+              <span className="relative z-10 font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-700">Z</span>
+              <span className="relative z-0 font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter text-gray-800 -ml-1">C</span>
+            </div>
+            {/* ZyphCart Text */}
+            <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter flex items-center">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-700">Zyph</span>
+              <span className="text-gray-800">Cart</span>
+            </h1>
+          </div>
+          <p className="text-gray-600 text-[15px] font-bold tracking-wide mt-1">
+            Your Nearest Market Place
+          </p>
         </div>
 
-        {/* Solid white card container */}
-        <div className="relative z-10 max-w-md w-full bg-white dark:bg-[#0D0D17] border border-gray-100 dark:border-[#2A2A3A] rounded-[2rem] p-10 text-center card-shadow flex flex-col items-center transform transition-all duration-700 ease-out translate-y-0 opacity-100">
-          {/* Logo with float animation */}
-          <div className="flex items-center -skew-x-6 pr-1 mb-8 float-anim">
-            <span className={`font-black text-5xl tracking-tighter drop-shadow-sm ${isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}`}>
-              Z
-            </span>
-            <span className="text-gray-900 dark:text-white font-black text-5xl tracking-tighter drop-shadow-sm">
-              C
-            </span>
-            <span className="font-black text-3xl tracking-tight text-gray-800 dark:text-gray-200 ml-1.5 skew-x-6">
-              <span className={isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}>Zyph</span>Cart
-            </span>
-          </div>
-
-          {/* Texts */}
-          <h2 className="text-3xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight leading-tight">
-            Welcome to <span className={isStore ? "text-transparent bg-clip-text bg-gradient-to-br from-blue-600 to-indigo-600" : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400"}>Zyph</span>Cart
-          </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-bold text-sm tracking-wide uppercase mb-10 opacity-80">
-            Explore Your Nearest Market
+        {/* Bottom Tagline */}
+        <div className="absolute bottom-10 flex flex-col items-center">
+          <p className="text-gray-500 text-[11px] font-black tracking-[0.2em] uppercase">
+            An Eternal Company
           </p>
-
-          {/* Modern Loader */}
-          <div className="relative flex justify-center items-center w-24 h-24 mb-4">
-            {/* Outer rings spinning */}
-            <div className={`absolute inset-0 rounded-full border-[3px] border-transparent ${isStore ? "border-t-blue-500 border-b-blue-300" : "border-t-orange-500 border-b-orange-300"} animate-spin opacity-80`} style={{ animationDuration: '1.5s' }}></div>
-            <div className={`absolute inset-2 rounded-full border-[3px] border-transparent ${isStore ? "border-l-indigo-400 border-r-indigo-200" : "border-l-rose-400 border-r-rose-200"} animate-spin opacity-60`} style={{ animationDuration: '2s', animationDirection: 'reverse' }}></div>
-            
-            {/* Pulsing center icon */}
-            <div className={`relative flex items-center justify-center w-14 h-14 rounded-full ${isStore ? 'bg-blue-100 dark:bg-blue-900/40' : 'bg-orange-100 dark:bg-orange-900/40'} animate-pulse`}>
-              <MapPin className={`w-7 h-7 ${isStore ? "text-blue-600 dark:text-blue-400" : "text-orange-600 dark:text-orange-400"}`} strokeWidth={2.5} />
-            </div>
-          </div>
         </div>
       </div>
     );
