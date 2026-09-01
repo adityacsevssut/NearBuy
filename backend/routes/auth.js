@@ -529,7 +529,7 @@ router.post("/refresh", async (req, res) => {
       "SELECT * FROM refresh_tokens WHERE token_hash=$1 AND expires_at > NOW()",
       [tokenHash]
     );
-    if (!rows.length) return res.status(401).json({ error: "Invalid or expired refresh token." });
+    if (!rows.length) return res.status(401).json({ error: "Your session has expired. Please log in again." });
 
     const user = await pool.query("SELECT * FROM users WHERE id=$1 AND is_active=TRUE", [decoded.id]);
     if (!user.rows.length) return res.status(401).json({ error: "User not found." });

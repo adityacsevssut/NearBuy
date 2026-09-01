@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Home, ClipboardList, User, LogIn, Heart, ShoppingBag, ChevronRight } from "lucide-react";
@@ -9,6 +9,42 @@ import { useCart } from "../context/CartContext";
 
 export default function MobileBottomNav() {
   const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let scrollTimeout: NodeJS.Timeout;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      // If at top, always show
+      if (currentScrollY < 20) {
+        setIsVisible(true);
+        lastScrollY = currentScrollY;
+        return;
+      }
+      
+      // Hide whenever actively scrolling
+      if (Math.abs(currentScrollY - lastScrollY) > 5) {
+        setIsVisible(false);
+      }
+      
+      lastScrollY = currentScrollY;
+
+      // Show again when scrolling stops
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        setIsVisible(true);
+      }, 400); 
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, []);
   
   const getDomain = () => {
     const currentPath = typeof window !== "undefined" ? window.location.href : (pathname || "");
@@ -49,7 +85,11 @@ export default function MobileBottomNav() {
 
   return (
     <>
-      <div className="fixed bottom-4 left-3 right-3 z-50 md:hidden flex items-end gap-3 pointer-events-none pb-safe">
+      <div 
+        className={`fixed bottom-4 left-3 right-3 z-50 md:hidden flex items-end gap-3 pointer-events-none pb-safe transition-all duration-500 ease-in-out ${
+          isVisible ? "translate-y-0 opacity-100" : "translate-y-[120%] opacity-0"
+        }`}
+      >
         {/* Main Nav */}
         <nav
           id="mobile-bottom-nav"
