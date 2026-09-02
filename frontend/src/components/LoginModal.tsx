@@ -94,7 +94,7 @@ const Divider = () => (
 );
 
 const ModalHeader = ({ title, back, reset, t, onClose }: any) => (
-  <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50  relative z-20">
+  <div className="flex items-center justify-between p-5 bg-white dark:bg-[#0D0D17]/50  relative z-20">
     {back ? (
       <button onClick={() => reset(back)} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 transition-colors">
         <ArrowLeft className="w-5 h-5" />
@@ -411,59 +411,41 @@ export default function LoginModal({ isOpen, onClose }: Props) {
             {flow === "choose" && (
               <>
                 <ModalHeader title="" reset={reset} t={t} onClose={onClose} />
-                <div className="p-6 sm:p-8 space-y-3 relative z-10 overflow-y-auto no-scrollbar">
-                  <p className="text-center text-[13px] text-gray-400 font-semibold uppercase tracking-widest mb-5">Choose account type</p>
+                <div className="p-6 sm:p-8 relative z-10 overflow-y-auto no-scrollbar">
+                  <div className="grid grid-cols-3 gap-4">
+                    {/* User */}
+                    <button
+                      onClick={() => reset("pick-user")}
+                      className="group relative flex flex-col items-center justify-center gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-300"
+                    >
+                      <div className={`w-14 h-14 rounded-full ${t.panelIcon} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
+                        <User className="w-7 h-7" />
+                      </div>
+                      <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">User</span>
+                    </button>
 
-                  {/* User Login */}
-                  <button
-                    onClick={() => reset("pick-user")}
-                    className={`w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5`}
-                  >
-                    <div className={`w-12 h-12 ${t.panelIcon} rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
-                      <User className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col items-start flex-1 text-left">
-                      <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">User Login</span>
-                      <span className="text-[12px] text-gray-400 font-medium mt-0.5">Order food & essentials</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
-                      <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
-                    </div>
-                  </button>
+                    {/* Vendor */}
+                    <button
+                      onClick={() => reset("vendor-login")}
+                      className="group relative flex flex-col items-center justify-center gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-emerald-200 dark:hover:border-emerald-800 transition-all duration-300"
+                    >
+                      <div className="w-14 h-14 rounded-full bg-emerald-50 text-emerald-500 dark:bg-emerald-900/30 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Phone className="w-7 h-7" />
+                      </div>
+                      <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">Vendor</span>
+                    </button>
 
-                  {/* Vendor Login */}
-                  <button
-                    onClick={() => reset("vendor-login")}
-                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
-                  >
-                    <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                      <Phone className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col items-start flex-1 text-left">
-                      <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">Vendor Login</span>
-                      <span className="text-[12px] text-emerald-600/70 font-medium mt-0.5">Manage your store</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
-                      <ChevronRight className="w-4 h-4 text-emerald-400 group-hover:text-emerald-600 transition-colors" />
-                    </div>
-                  </button>
-
-                  {/* Manager Login */}
-                  <button
-                    onClick={() => reset("manager-login")}
-                    className="w-full p-4 flex items-center gap-4 rounded-lg border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-black/20 hover:border-gray-300 dark:hover:border-[#3A3A4A] hover:bg-gray-100 dark:hover:bg-black/40 transition-all duration-300 group shadow-[0_2px_12px_rgba(0,0,0,0.03)] hover:shadow-md hover:-translate-y-0.5"
-                  >
-                    <div className="w-12 h-12 bg-violet-100 text-violet-600 rounded-lg flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
-                      <Lock className="w-6 h-6" />
-                    </div>
-                    <div className="flex flex-col items-start flex-1 text-left">
-                      <span className="font-black text-gray-900 dark:text-gray-100 text-[16px] transition-colors">Manager Login</span>
-                      <span className="text-[12px] text-violet-600/70 font-medium mt-0.5">Admin dashboard</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-black/30 flex items-center justify-center group-hover:bg-white dark:hover:bg-black/50 border border-transparent group-hover:border-gray-200 dark:hover:border-[#3A3A4A] transition-all">
-                      <ChevronRight className="w-4 h-4 text-violet-400 group-hover:text-violet-600 transition-colors" />
-                    </div>
-                  </button>
+                    {/* Manager */}
+                    <button
+                      onClick={() => reset("manager-login")}
+                      className="group relative flex flex-col items-center justify-center gap-3 p-4 sm:p-5 rounded-2xl border border-gray-100 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17]/50 shadow-sm hover:shadow-lg hover:-translate-y-1 hover:border-violet-200 dark:hover:border-violet-800 transition-all duration-300"
+                    >
+                      <div className="w-14 h-14 rounded-full bg-violet-50 text-violet-500 dark:bg-violet-900/30 dark:text-violet-400 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <Lock className="w-7 h-7" />
+                      </div>
+                      <span className="font-bold text-gray-800 dark:text-gray-200 text-sm">Manager</span>
+                    </button>
+                  </div>
                 </div>
               </>
             )}
