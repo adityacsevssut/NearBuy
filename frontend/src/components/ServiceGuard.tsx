@@ -207,11 +207,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
         {/* Central Logo Area */}
         <div className="flex flex-col items-center animate-pulse" style={{ animationDuration: '2s' }}>
           <div className="flex items-center justify-center mb-2">
-            {/* ZC Logo */}
-            <div className="flex items-baseline -skew-x-12 mr-2 sm:mr-3">
-              <span className="relative z-10 font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-700">Z</span>
-              <span className="relative z-0 font-black text-5xl sm:text-6xl md:text-7xl tracking-tighter text-gray-800 -ml-1">C</span>
-            </div>
+
             {/* ZyphCart Text */}
             <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tighter flex items-center">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-700">Zyph</span>
@@ -219,7 +215,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
             </h1>
           </div>
           <p className="text-gray-600 text-[15px] font-bold tracking-wide mt-1">
-            Your Nearest Market Place
+            Explore Your Nearest Online Store
           </p>
         </div>
 
@@ -279,7 +275,7 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
               ZyphCart
             </p>
             <p className="text-[#d4d5d9] font-black text-2xl tracking-tighter mb-4">
-              Your Nearest Market Place
+              Explore Your Nearest Online Store
             </p>
             <div className="w-48 mx-auto mb-10">
               <img 

@@ -1163,7 +1163,7 @@ export default function HomePage() {
         </div>
 
         {/* Moved Location & Search */}
-        <div className="pt-0 pb-0 z-40 relative bg-white dark:bg-[#0D0D17]">
+        <div className="pt-0 pb-2 z-40 relative bg-white dark:bg-[#0D0D17]">
                 {/* ══ LOCATION ════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-4 pb-1">
               <div className="w-full">
@@ -1194,7 +1194,10 @@ export default function HomePage() {
                 </button>
               </div>
             </div>
+        </div>
 
+        {/* ══ STICKY SEARCH & QUICK BITES ════════════════════════════ */}
+        <div className="sticky top-0 z-[60] bg-white dark:bg-[#0D0D17] pt-2 pb-1">
             {/* ══ SEARCH ════════════════════════════ */}
             <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
               <div className="w-full flex items-center gap-3 pt-1 pb-1">
@@ -1305,7 +1308,6 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
-        </div>
 
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
@@ -1322,9 +1324,9 @@ export default function HomePage() {
                       href={`/food/user/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
-                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
-                        <Image src={image} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 dark:hidden" />
-                        <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="54px" priority={true} className="object-cover transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
+                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
+                        <Image src={image} alt={label} fill sizes="54px" priority={true} className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 mix-blend-darken dark:mix-blend-normal dark:hidden" />
+                        <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="54px" priority={true} className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
                       </div>
                       <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
                         {label}
@@ -1344,8 +1346,8 @@ export default function HomePage() {
                       onClick={() => setIsQuickBitesDrawerOpen(true)}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
-                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-orange-50 dark:bg-orange-500/10 shadow-sm group-hover:shadow-md transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 flex items-center justify-center isolate">
-                        <ChevronDown className="w-6 h-6 text-orange-500 -rotate-90 group-hover:scale-110 transition-transform duration-300" />
+                      <div className="relative w-[54px] h-[54px] transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 flex items-center justify-center isolate">
+                        <ChevronDown className="w-8 h-8 text-orange-500 -rotate-90 group-hover:scale-110 transition-transform duration-300" />
                       </div>
                       <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
                         See All
@@ -1356,6 +1358,7 @@ export default function HomePage() {
               </div>
             </section>
           </div>
+        </div>
 
         {/* Mobile filter drawer */}
         {showFilters && (
@@ -1473,9 +1476,9 @@ export default function HomePage() {
                   onClick={() => setIsQuickBitesDrawerOpen(false)}
                   className="flex flex-col items-center gap-2 group outline-none"
                 >
-                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden border-[2px] border-transparent group-hover:border-orange-400 bg-gray-100 dark:bg-[#1F1F2E] shadow-sm transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
-                    <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-cover transition-transform duration-500 group-hover:scale-110 dark:hidden" />
-                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-cover transition-transform duration-500 group-hover:scale-110 dark:block" />
+                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
+                    <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-contain transition-transform duration-500 group-hover:scale-110 mix-blend-darken dark:mix-blend-normal dark:hidden" />
+                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-contain transition-transform duration-500 group-hover:scale-110 dark:block" />
                   </div>
                   <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors">
                     {label}
