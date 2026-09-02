@@ -73,11 +73,7 @@ export default function Footer() {
             <div className="md:col-span-3 lg:col-span-3">
               <div className="flex items-center flex-shrink-0 mb-6 group cursor-pointer">
 
-                {/* Simple NB Logo */}
-                <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                  <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-5xl ${logoGradient} tracking-tighter drop-shadow-sm`}>Z</span>
-                  <span className="relative z-0 font-black text-3xl sm:text-4xl md:text-5xl text-black dark:text-white tracking-tighter drop-shadow-sm -ml-0.5">C</span>
-                </div>
+
 
                 <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
                   <span className={`${logoGradient} drop-shadow-sm`}>Zyph</span>

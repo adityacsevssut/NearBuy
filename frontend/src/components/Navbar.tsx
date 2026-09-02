@@ -153,7 +153,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
+      <nav className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -175,11 +175,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
           <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center flex-shrink-0">
             <Link href="/" className="flex items-baseline gap-1 md:gap-1.5 group">
 
-              {/* Simple NB Logo */}
-              <div className="flex items-baseline mr-1.5 md:mr-2 transition-transform duration-300 group-hover:scale-105 -skew-x-12">
-                <span className={`relative z-10 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm ${logoGradient}`}>Z</span>
-                <span className={`relative z-0 font-black text-3xl sm:text-4xl md:text-4xl lg:text-[34px] tracking-tighter drop-shadow-sm -ml-0.5 ${isHeroTransparent ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>C</span>
-              </div>
+
 
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-3xl lg:text-2xl tracking-tight flex items-baseline">
@@ -474,10 +470,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
               className="relative w-full max-w-[90vw] sm:max-w-md bg-white dark:bg-[#0D0D17] rounded-3xl shadow-2xl p-8 flex flex-col items-center text-center overflow-hidden z-10"
             >
               <div className="flex items-center justify-center mb-4 font-black text-2xl sm:text-3xl tracking-tight">
-                <div className="flex items-baseline -skew-x-12 mr-2">
-                  <span className="text-blue-600 drop-shadow-sm">Z</span>
-                  <span className="text-black dark:text-white drop-shadow-sm -ml-0.5">C</span>
-                </div>
+
                 <div className="flex items-baseline">
                   <span className="text-blue-600 drop-shadow-sm">Zyph</span>
                   <span className="relative text-black dark:text-white drop-shadow-sm">

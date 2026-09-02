@@ -13,6 +13,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
+import { quickBites } from "@/config/categories";
 
 function deg2rad(d: number) { return d * (Math.PI / 180); }
 
@@ -136,35 +137,32 @@ export default function DishPage() {
 
   const filteredDishes = dishes;
 
+  const itemMatch = quickBites.find(q => q.label.toLowerCase() === rawItem.toLowerCase().replace(/-/g, ' '));
+  const dishImage = itemMatch ? itemMatch.image : null;
+
   return (
-    <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col pt-16">
-      <Navbar />
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] flex flex-col pt-2 pb-24 md:pb-8">
+      <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 pt-2 pb-6">
+        <div className="relative flex items-center justify-between mb-6 min-h-[44px] gap-4">
+          <Link href="/" className="p-2 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full text-gray-500 dark:text-gray-400 hover:text-orange-500 shadow-sm transition-colors z-10 flex-shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <h1 className="font-black text-2xl md:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-orange-400 dark:from-orange-500 dark:to-orange-300 tracking-tight text-center flex-1 capitalize truncate">
+            {itemName}
+          </h1>
 
-      {/* Sticky Header */}
-      <div className="sticky top-16 z-40 bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-3 py-4">
-            <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200 flex-shrink-0">
-              <ArrowLeft className="w-4 h-4" /> Back to Home
-            </Link>
-
-
-            <div className="ml-auto flex items-center gap-2 relative z-40">
-              {/* Filter Picker */}
-              <div className="relative" ref={filterDropdownRef}>
+          <div className="relative z-40 flex items-center flex-shrink-0" ref={filterDropdownRef}>
                 <button
                   onClick={() => setShowFilterDropdown(prev => !prev)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all shadow-sm ${
+                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-sm ${
                     foodPref !== "all" || sortOrder !== "relevance"
-                      ? "bg-orange-500 border-orange-500 text-white"
+                      ? "bg-orange-500 border border-orange-500 text-white"
                       : showFilterDropdown
-                      ? "bg-orange-50 border-orange-400 text-orange-600"
-                      : "bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
+                      ? "bg-orange-50 border border-orange-400 text-orange-600"
+                      : "bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:border-gray-300"
                   }`}
                 >
-                  <Filter className="w-3 h-3" />
-                  <span>Filters</span>
-                  <ChevronDown className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${showFilterDropdown ? "rotate-180" : ""}`} />
+                  <Filter className="w-4 h-4" />
                 </button>
 
                 {showFilterDropdown && (
@@ -225,14 +223,9 @@ export default function DishPage() {
                   </div>
                 )}
               </div>
-            </div>
-          </div>
         </div>
-      </div>
 
-      <main className="flex-1 pb-24 md:pb-8">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6">
-          <div className="space-y-4">
+        <div className="space-y-4">
             {filteredDishes.map((dish) => {
               const wished = isFoodWished(dish.id);
               const inCartCount = itemQty(dish.id, dish.vendor_id);
@@ -442,17 +435,24 @@ export default function DishPage() {
                 {[1, 2, 3, 4, 5].map(i => <DishCardSkeleton key={`initial-${i}`} />)}
               </div>
             ) : filteredDishes.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-24 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl border border-gray-200 dark:border-[#2A2A3A]">
-                <motion.span 
-                  animate={{ scale: [1, 1.2, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-6xl mb-4 inline-block"
+              <div className="flex flex-col items-center justify-center min-h-[50vh] text-gray-400">
+                <motion.div 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="w-32 h-32 mb-6 relative isolate flex items-center justify-center"
                 >
-                  🍽️
-                </motion.span>
-                <p className="font-black text-gray-700 dark:text-gray-300 text-xl text-center">No {itemName} found</p>
-                <p className="text-sm mt-2 font-medium text-center px-6 max-w-xs leading-relaxed">
-                  Try disabling the Veg Only filter or check back later.
+                  {dishImage ? (
+                    <>
+                      <img src={dishImage} alt={itemName} className="w-full h-full object-contain mix-blend-multiply dark:hidden" style={{ maskImage: 'radial-gradient(circle, black 55%, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 72%)' }} />
+                      <img src={dishImage.replace('.png', '_dark.png').replace('.jpg', '_dark.jpg')} alt={itemName} className="w-full h-full object-contain hidden dark:block" style={{ maskImage: 'radial-gradient(circle, black 55%, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 72%)' }} />
+                    </>
+                  ) : (
+                    <span className="text-6xl">🍽️</span>
+                  )}
+                </motion.div>
+                <p className="font-black text-gray-800 dark:text-gray-200 text-[22px] tracking-tight mb-2 text-center">No {itemName} found</p>
+                <p className="text-[14px] font-medium text-center text-gray-500 dark:text-gray-400 leading-relaxed max-w-[300px]">
+                  Try disabling the Veg Only filter or<br/>check back later.
                 </p>
               </div>
             )}
@@ -485,7 +485,6 @@ export default function DishPage() {
               </div>
             )}
           </div>
-        </div>
 
         {/* Food Details Modal */}
         {selectedFood && (() => {

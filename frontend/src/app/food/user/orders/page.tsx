@@ -222,7 +222,7 @@ function OrdersPageContent() {
             <p className="text-gray-500 dark:text-gray-400 font-medium">Fetching your orders...</p>
           </div>
         ) : displayedOrders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 sm:py-32 text-gray-400 bg-white dark:bg-[#0D0D17] rounded-3xl mt-4 border border-gray-200 dark:border-[#2A2A3A] shadow-sm">
+          <div className="flex flex-col items-center justify-center py-20 sm:py-32 text-gray-400 mt-4">
             <style>{`
               @keyframes searchPath {
                 0%, 100% { transform: translate(0px, 0px) rotate(0deg); }

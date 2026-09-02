@@ -35,7 +35,7 @@ export default function RefundsPage() {
 
   useEffect(() => {
     const fetchRefunds = async () => {
-      if (!isLoggedIn) return;
+      if (!isLoggedIn || !accessToken) return;
       try {
         const res = await fetch(`${API}/api/public/refunds`, {
           headers: { Authorization: `Bearer ${accessToken}` },
