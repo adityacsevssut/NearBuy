@@ -192,32 +192,38 @@ export default function BusinessRequestModal({
 
             <div className="p-6 overflow-y-auto no-scrollbar">
               {success ? (
-                <div className="text-center py-6">
+                <div className="text-center py-8 px-2">
                   <motion.div
-                    initial={{ scale: 0 }} animate={{ scale: 1 }}
-                    className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-5"
+                    initial={{ scale: 0, opacity: 0 }} 
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 20 }}
+                    className="relative w-24 h-24 mx-auto mb-6"
                   >
-                    <CheckCircle className="w-10 h-10 text-green-500" />
+                    <div className="absolute inset-0 bg-green-500/20 rounded-full animate-ping" style={{ animationDuration: '3s' }} />
+                    <div className="relative w-full h-full bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-xl shadow-green-500/30">
+                      <CheckCircle className="w-12 h-12 text-white" strokeWidth={2.5} />
+                    </div>
                   </motion.div>
-                  <h3 className="text-2xl font-black text-gray-900 dark:text-gray-100 mb-2">Request Sent!</h3>
                   
-                  {/* Routing confirmation */}
-                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-4 ${theme.border} ${theme.bg}`}>
+                  <h3 className="text-3xl font-black text-gray-900 dark:text-white mb-3 tracking-tight">You're All Set!</h3>
+                  
+                  <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border-2 mb-5 ${theme.border} ${theme.bg}`}>
                     {vendorType === "food" && <UtensilsCrossed className={`w-4 h-4 ${theme.text}`} />}
                     {vendorType === "store" && <Store className={`w-4 h-4 ${theme.text}`} />}
-                    <span className={`text-sm font-black ${theme.text} capitalize`}>
-                      Sent to {vendorType} Manager
+                    <span className={`text-sm font-bold ${theme.text} capitalize`}>
+                      {vendorType} Application Sent
                     </span>
                   </div>
 
-                  <p className="text-gray-500 dark:text-gray-400 font-medium text-sm leading-relaxed max-w-xs mx-auto">
-                    Your request has been routed to the <span className={`font-black ${theme.text} capitalize`}>{vendorType} Division Manager</span>. They will review your details and contact you soon.
+                  <p className="text-gray-500 dark:text-gray-400 font-medium text-[15px] leading-relaxed max-w-sm mx-auto mb-8">
+                    Your application is now under review by our <span className={`font-bold ${theme.text} capitalize`}>{vendorType} Team</span>. We will get in touch with you shortly.
                   </p>
+                  
                   <button
                     onClick={handleClose}
-                    className="mt-7 w-full py-3.5 rounded-xl bg-gray-900 text-white font-bold hover:bg-gray-800 transition-colors"
+                    className={`w-full py-4 rounded-2xl bg-gradient-to-r ${theme.submit} text-white font-black text-lg shadow-lg hover:-translate-y-1 active:translate-y-0 transition-all flex items-center justify-center gap-2`}
                   >
-                    Close
+                    Got it, thanks!
                   </button>
                 </div>
               ) : (
