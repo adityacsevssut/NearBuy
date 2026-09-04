@@ -124,6 +124,7 @@ router.get("/vendors", async (req, res) => {
         v.gps_address as "gpsAddress",
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
+        v.reviews,
         u.manager_type,
         u.first_name,
         u.last_name
@@ -147,7 +148,7 @@ router.get("/vendors", async (req, res) => {
       ...r,
       badgeColor: "bg-orange-100 text-orange-700",
       rating: r.rating !== null && r.rating !== undefined ? parseFloat(r.rating) : 0.0,
-      reviews: 120,
+      reviews: r.reviews !== null && r.reviews !== undefined ? parseInt(r.reviews) : 0,
       veg: r.cuisine ? r.cuisine.toLowerCase().includes('veg') : false,
       ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim()
     }));
@@ -213,6 +214,7 @@ router.get("/vendors/:id", async (req, res) => {
         v.gps_address as "gpsAddress",
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
+        v.reviews,
         u.manager_type
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
@@ -225,7 +227,7 @@ router.get("/vendors/:id", async (req, res) => {
       ...rows[0],
       badgeColor: "bg-orange-100 text-orange-700",
       rating: rows[0].rating !== null && rows[0].rating !== undefined ? parseFloat(rows[0].rating) : 0.0,
-      reviews: 120
+      reviews: rows[0].reviews !== null && rows[0].reviews !== undefined ? parseInt(rows[0].reviews) : 0
     };
 
     if (redis) {
@@ -240,6 +242,63 @@ router.get("/vendors/:id", async (req, res) => {
   } catch (err) {
     console.error("GET /api/public/vendors/:id error:", err);
     return res.status(500).json({ error: "Failed to load vendor" });
+  }
+});
+
+// POST /api/public/vendors/:id/rate
+router.post("/vendors/:id/rate", authenticate, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+    const userId = req.user.id;
+    const parsedRating = parseFloat(rating);
+
+    if (isNaN(parsedRating) || parsedRating < 1 || parsedRating > 5) {
+      return res.status(400).json({ error: "Valid rating between 1 and 5 is required." });
+    }
+
+    try {
+      await pool.query(
+        `INSERT INTO vendor_ratings (vendor_id, user_id, rating) VALUES ($1, $2, $3)`,
+        [id, userId, parsedRating]
+      );
+    } catch (dbErr) {
+      if (dbErr.code === '23505') { // Unique violation
+        return res.status(400).json({ error: "You have already Rated" });
+      }
+      throw dbErr;
+    }
+
+    const { rows } = await pool.query(
+      `UPDATE vendor_profiles 
+       SET rating = ((COALESCE(rating, 0) * COALESCE(reviews, 0)) + $1) / (COALESCE(reviews, 0) + 1),
+           reviews = COALESCE(reviews, 0) + 1,
+           updated_at = NOW()
+       WHERE user_id = $2
+       RETURNING rating, reviews`,
+      [parsedRating, id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Vendor not found." });
+    }
+
+    const updatedRating = parseFloat(rows[0].rating).toFixed(1);
+    const updatedReviews = parseInt(rows[0].reviews);
+
+    const cacheKey = `vendor_${id}`;
+    if (redis) {
+      try {
+        await redis.del(cacheKey);
+      } catch (err) {
+        console.error("Redis del error:", err.message);
+      }
+    }
+
+    return res.json({ success: true, rating: updatedRating, reviews: updatedReviews });
+  } catch (err) {
+    console.error("POST /api/public/vendors/:id/rate error:", err);
+    return res.status(500).json({ error: "Failed to submit rating." });
   }
 });
 

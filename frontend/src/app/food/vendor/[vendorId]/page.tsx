@@ -4,11 +4,13 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X } from "lucide-react";
-import Navbar from "@/components/Navbar";
+
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
+import toast from "react-hot-toast";
 
 function VendorPageSkeleton() {
   return (
@@ -79,7 +81,11 @@ export default function VendorPage() {
   const [vendor, setVendor] = useState<any>(null);
   const [selectedFood, setSelectedFood] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [userRating, setUserRating] = useState(0);
+  const [isSubmittingRating, setIsSubmittingRating] = useState(false);
   const { latitude, longitude } = useLocationContext();
+  const { user, accessToken, openLoginModal } = useAuth();
 
   const getDistance = (lat1: number | null, lon1: number | null, lat2: number | null, lon2: number | null) => {
     if (lat1 === null || lon1 === null || lat2 === null || lon2 === null) return null;
@@ -219,9 +225,7 @@ export default function VendorPage() {
     .filter((cat) => selectedCategory === null || cat === selectedCategory);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col pt-16">
-      <Navbar />
-
+    <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col">
       {/* Warning Banner */}
       {!isLoading && vendor && (isClosed || isOutOfRange) && (
         <div className="bg-red-50 border-b border-red-100 px-4 py-3 flex items-center justify-center text-center">
@@ -249,10 +253,23 @@ export default function VendorPage() {
             )}
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative z-30 overflow-visible">
-              <div className="flex items-center gap-2 mb-6">
+              <div className="flex items-center gap-4 mb-6">
                 <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200">
                   <ArrowLeft className="w-4 h-4" /> Back to Home
                 </Link>
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      toast.error("Please log in to rate this restaurant.");
+                      openLoginModal();
+                      return;
+                    }
+                    setShowRatingModal(true);
+                  }}
+                  className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-amber-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-amber-200"
+                >
+                  <Star className="w-4 h-4 text-amber-500" /> Rate {vendor.name}
+                </button>
               </div>
 
               <div className="flex gap-4 md:gap-6 items-start mb-2">
@@ -811,6 +828,115 @@ export default function VendorPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rating Modal */}
+      {showRatingModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !isSubmittingRating && setShowRatingModal(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#151522] rounded-3xl overflow-hidden shadow-2xl p-6 text-center animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => !isSubmittingRating && setShowRatingModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="mx-auto w-16 h-16 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
+              <Star className="w-8 h-8 fill-amber-500 text-amber-500" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-1">Rate {vendor.name}</h3>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-6">How was your experience?</p>
+            
+            <div className="flex justify-center gap-2 mb-8">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setUserRating(star)}
+                  onMouseEnter={(e) => {
+                    const stars = e.currentTarget.parentElement?.children;
+                    if (stars) {
+                      for (let i = 0; i < stars.length; i++) {
+                        const svg = stars[i].querySelector('svg');
+                        if (i < star) {
+                          svg?.classList.add('fill-amber-500', 'text-amber-500');
+                          svg?.classList.remove('fill-gray-200', 'text-gray-200', 'dark:fill-gray-700', 'dark:text-gray-700');
+                        } else {
+                          svg?.classList.remove('fill-amber-500', 'text-amber-500');
+                          svg?.classList.add('fill-gray-200', 'text-gray-200', 'dark:fill-gray-700', 'dark:text-gray-700');
+                        }
+                      }
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    const stars = e.currentTarget.parentElement?.children;
+                    if (stars) {
+                      for (let i = 0; i < stars.length; i++) {
+                        const svg = stars[i].querySelector('svg');
+                        if (i < userRating) {
+                          svg?.classList.add('fill-amber-500', 'text-amber-500');
+                          svg?.classList.remove('fill-gray-200', 'text-gray-200', 'dark:fill-gray-700', 'dark:text-gray-700');
+                        } else {
+                          svg?.classList.remove('fill-amber-500', 'text-amber-500');
+                          svg?.classList.add('fill-gray-200', 'text-gray-200', 'dark:fill-gray-700', 'dark:text-gray-700');
+                        }
+                      }
+                    }
+                  }}
+                  className="p-1 hover:scale-110 transition-transform"
+                >
+                  <Star className={`w-8 h-8 transition-colors ${star <= userRating ? 'fill-amber-500 text-amber-500' : 'fill-gray-200 text-gray-200 dark:fill-gray-700 dark:text-gray-700'}`} />
+                </button>
+              ))}
+            </div>
+
+            <button
+              disabled={userRating === 0 || isSubmittingRating}
+              onClick={async () => {
+                if (!accessToken) {
+                  toast.error("Please login first.");
+                  return;
+                }
+                setIsSubmittingRating(true);
+                try {
+                  const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                  const res = await fetch(`${API}/api/public/vendors/${vendorId}/rate`, {
+                    method: 'POST',
+                    headers: { 
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ rating: userRating })
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    setVendor((prev: any) => ({
+                      ...prev,
+                      rating: data.rating,
+                      reviews: data.reviews
+                    }));
+                    setShowRatingModal(false);
+                    toast.success("Thanks for rating!");
+                  } else {
+                    const errData = await res.json();
+                    toast.error(errData.error || "Failed to submit rating");
+                  }
+                } catch (err) {
+                  console.error("Error submitting rating", err);
+                  toast.error("An error occurred");
+                } finally {
+                  setIsSubmittingRating(false);
+                }
+              }}
+              className="w-full py-3.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-black text-sm uppercase tracking-wide shadow-lg shadow-amber-500/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isSubmittingRating ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Submit Rating'}
+            </button>
           </div>
         </div>
       )}
