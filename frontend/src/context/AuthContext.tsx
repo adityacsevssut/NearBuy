@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // ── Schedule auto-refresh every 12 min (access token expires in 15 min) ──
+  // ── Schedule auto-refresh every 50 min (access token expires in 1 hour) ──
   const scheduleRefresh = () => {
     if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
     refreshTimerRef.current = setInterval(async () => {
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem("nb_user");
         localStorage.removeItem("nb_access");
       }
-    }, 12 * 60 * 1000); // every 12 minutes
+    }, 50 * 60 * 1000); // every 50 minutes
   };
 
   // ── On mount: restore session and immediately get a fresh token ──
@@ -117,8 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         const lastRefresh = parseInt(localStorage.getItem("nb_last_refresh") || "0");
-        // Only refresh if more than 5 minutes have passed since last refresh to avoid spam
-        if (Date.now() - lastRefresh > 5 * 60 * 1000) {
+        // Only refresh if more than 10 minutes have passed since last refresh to avoid spam
+        if (Date.now() - lastRefresh > 10 * 60 * 1000) {
           refreshAccessToken().then(newToken => {
              if (newToken) scheduleRefresh();
              else if (newToken === false) {

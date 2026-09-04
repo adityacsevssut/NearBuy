@@ -183,7 +183,7 @@ function FoodItemPreviewCard({
 
 // ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
 export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFrontPage }: Props) {
-  const { accessToken } = useAuth();
+  const { accessToken, openLoginModal } = useAuth();
 
   // Theme colours
   const tColor = vendorType === "store" ? "blue" : "orange";
@@ -371,8 +371,17 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
       const url = editingItem ? `${API}/api/vendor-menu/${editingItem.id}` : `${API}/api/vendor-menu`;
       const method = editingItem ? "PATCH" : "POST";
 
+      if (!accessToken) { toast.error("Please log in to continue."); openLoginModal(); return; }
       const res = await fetch(url, { method, headers: { Authorization: `Bearer ${accessToken}` }, body: fd });
-      if (!res.ok) { const d = await res.json(); throw new Error(d.error || "Save failed"); }
+      if (!res.ok) {
+        const d = await res.json();
+        if (res.status === 401) {
+          toast.error("Session expired. Please log in again.", { duration: 4000 });
+          openLoginModal();
+          return;
+        }
+        throw new Error(d.error || "Save failed");
+      }
 
       toast.success(editingItem ? "Item updated! ✅" : "Item added! ✅");
       setShowForm(false);
@@ -388,6 +397,7 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
   // ── Delete item ───────────────────────────────────────────────────────────
   const handleDelete = async (id: string, category: string) => {
     setDeletingId(id);
+    if (!accessToken) { toast.error("Please log in to continue."); openLoginModal(); return; }
     try {
       const res = await fetch(`${API}/api/vendor-menu/${id}`, {
         method: "DELETE",
@@ -406,8 +416,11 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
         }
         
         fetchItems(); 
+      } else {
+        const d = await res.json();
+        if (res.status === 401) { toast.error("Session expired. Please log in again.", { duration: 4000 }); openLoginModal(); return; }
+        toast.error(d.error || "Delete failed.");
       }
-      else { const d = await res.json(); toast.error(d.error || "Delete failed."); }
     } catch { toast.error("Network error."); }
     finally { setDeletingId(null); }
   };
@@ -932,7 +945,9 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                     value={form.rating}
                                     onChange={(e) => setForm((f) => ({ ...f, rating: e.target.value }))}
                                     placeholder="4.5"
-                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm`}
+                                    disabled={!!editingItem}
+                                    title={!!editingItem ? "Ratings are dynamic and customer-driven once created." : ""}
+                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
                                   />
                                 </div>
                                 <div className="space-y-1">
@@ -954,7 +969,9 @@ export default function ManageFoodsModal({ isOpen, onClose, vendorType, onOpenFr
                                     value={form.reviews}
                                     onChange={(e) => setForm((f) => ({ ...f, reviews: e.target.value }))}
                                     placeholder="0"
-                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm`}
+                                    disabled={!!editingItem}
+                                    title={!!editingItem ? "Reviews are dynamic and customer-driven once created." : ""}
+                                    className={`w-full px-3 py-3 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 outline-none ${ringCls} transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed`}
                                   />
                                 </div>
                               </div>

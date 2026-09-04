@@ -922,4 +922,114 @@ router.patch("/:id/upi", authenticate, async (req, res) => {
   }
 });
 
+// POST /api/orders/:orderId/rate-item
+router.post("/:orderId/rate-item", authenticate, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { menu_item_id, rating } = req.body;
+    
+    if (!menu_item_id || !rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ error: "Valid menu_item_id and rating (1-5) are required." });
+    }
+
+    // 1. Verify order belongs to user and is delivered
+    const orderRes = await pool.query(
+      `SELECT id, status, items FROM orders WHERE id = $1 AND user_id = $2`,
+      [orderId, req.user.id]
+    );
+    if (!orderRes.rows.length) return res.status(404).json({ error: "Order not found." });
+    const order = orderRes.rows[0];
+    if (order.status.toLowerCase() !== 'delivered') {
+      return res.status(400).json({ error: "Only delivered orders can be rated." });
+    }
+
+    // 2. Verify item was actually in this order
+    // order.items is stored as JSON array in DB, where each item has an 'id' which maps to vendor_menu_items.id
+    const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
+    const itemInOrder = items.find((item) => item.id == menu_item_id || item.id === menu_item_id);
+    if (!itemInOrder) {
+      return res.status(400).json({ error: "Item not found in this order." });
+    }
+
+    // 3. Insert rating (upsert/fail on conflict)
+    // We use ON CONFLICT DO NOTHING and check rowCount, or just let the UNIQUE constraint catch duplicate ratings.
+    // We will do a manual check to give a friendly error.
+    const checkRating = await pool.query(
+      `SELECT id FROM item_ratings WHERE user_id = $1 AND menu_item_id = $2`,
+      [req.user.id, menu_item_id]
+    );
+    if (checkRating.rows.length > 0) {
+      return res.status(400).json({ error: "You have already rated this item." });
+    }
+
+    await pool.query(
+      `INSERT INTO item_ratings (user_id, menu_item_id, order_id, rating) VALUES ($1, $2, $3, $4)`,
+      [req.user.id, menu_item_id, orderId, rating]
+    );
+
+    // 4. Recalculate and update vendor_menu_items average
+    // Get all ratings for this item to calculate accurate avg and count
+    const statsRes = await pool.query(
+      `SELECT COUNT(id) as total_reviews, AVG(rating) as avg_rating FROM item_ratings WHERE menu_item_id = $1`,
+      [menu_item_id]
+    );
+    
+    if (statsRes.rows.length > 0) {
+      const { total_reviews, avg_rating } = statsRes.rows[0];
+      await pool.query(
+        `UPDATE vendor_menu_items SET rating = $1, reviews = $2 WHERE id = $3`,
+        [parseFloat(avg_rating).toFixed(1), parseInt(total_reviews), menu_item_id]
+      );
+    }
+
+    return res.json({ message: "Rating submitted successfully." });
+  } catch(err) {
+    console.error("Rate item error:", err);
+    res.status(500).json({ error: "Failed to submit rating." });
+  }
+});
+
+// GET /api/orders/:orderId/item-ratings
+// Fetches the ratings the current user has given for items in a specific order
+router.get("/:orderId/item-ratings", authenticate, async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { rows } = await pool.query(
+      `SELECT menu_item_id, rating FROM item_ratings WHERE user_id = $1 AND order_id = $2`,
+      [req.user.id, orderId]
+    );
+    // Alternatively, if we just want to know what items a user has rated ever (so they can't rate again from another order),
+    // we could query without order_id, but usually showing the rating for *this* order is nice, 
+    // or we just return all ratings the user has given for the items present in this order.
+    // Let's get all ratings by this user for any item in this order.
+    
+    const orderRes = await pool.query(
+      `SELECT items FROM orders WHERE id = $1 AND user_id = $2`,
+      [orderId, req.user.id]
+    );
+    if (!orderRes.rows.length) return res.status(404).json({ error: "Order not found." });
+    
+    const items = typeof orderRes.rows[0].items === 'string' ? JSON.parse(orderRes.rows[0].items) : orderRes.rows[0].items;
+    const itemIds = items.map(i => i.id);
+    
+    if (itemIds.length === 0) return res.json({ ratings: [] });
+
+    // Ensure itemIds are strings/UUIDs (might be integers from legacy cart, handle carefully)
+    const validItemIds = itemIds.map(String).filter(id => id.length > 0);
+    
+    if (validItemIds.length === 0) return res.json({ ratings: [] });
+    
+    const userRatingsRes = await pool.query(
+      `SELECT menu_item_id, rating FROM item_ratings WHERE user_id = $1 AND menu_item_id = ANY($2::uuid[])`,
+      [req.user.id, validItemIds]
+    );
+    
+    return res.json({ ratings: userRatingsRes.rows });
+  } catch(err) {
+    console.error("Get item ratings error:", err);
+    res.status(500).json({ error: "Failed to fetch item ratings." });
+  }
+});
+
 module.exports = router;
+
