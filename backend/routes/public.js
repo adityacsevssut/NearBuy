@@ -26,7 +26,7 @@ router.get("/vendors", async (req, res) => {
     const cacheLon = lon && !isNaN(parseFloat(lon)) ? (Math.round(parseFloat(lon) * 200) / 200).toFixed(3) : '';
 
     // Generate a unique cache key based on all filter parameters
-    const cacheKey = `${page}_${limit}_${search||''}_${foodPref||''}_${cacheLat}_${cacheLon}_${pincode||''}`;
+    const cacheKey = `vendors_list:${page}_${limit}_${search||''}_${foodPref||''}_${cacheLat}_${cacheLon}_${pincode||''}`;
 
     // Return from Redis cache if valid
     if (redis) {
@@ -286,12 +286,22 @@ router.post("/vendors/:id/rate", authenticate, async (req, res) => {
     const updatedRating = parseFloat(rows[0].rating).toFixed(1);
     const updatedReviews = parseInt(rows[0].reviews);
 
-    const cacheKey = `vendor_${id}`;
+    // Invalidate individual vendor cache
+    const vendorCacheKey = `vendor_${id}`;
     if (redis) {
       try {
-        await redis.del(cacheKey);
+        await redis.del(vendorCacheKey);
       } catch (err) {
-        console.error("Redis del error:", err.message);
+        console.error("Redis del error (vendor):", err.message);
+      }
+      // Also invalidate all vendor list caches so the home page card rating updates
+      try {
+        const listKeys = await redis.keys("vendors_list:*");
+        if (listKeys && listKeys.length > 0) {
+          await redis.del(...listKeys);
+        }
+      } catch (err) {
+        console.error("Redis del error (vendor list):", err.message);
       }
     }
 

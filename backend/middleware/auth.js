@@ -7,13 +7,13 @@ function authenticate(req, res, next) {
   try {
     const auth = req.headers.authorization;
     if (!auth || !auth.startsWith("Bearer ")) {
-      return res.status(401).json({ error: "No access token provided" });
+      return res.status(401).json({ error: "Please log in and try again." });
     }
     const token = auth.slice(7);
     req.user = verifyAccessToken(token);
     next();
   } catch {
-    return res.status(401).json({ error: "Invalid or expired access token" });
+    return res.status(401).json({ error: "Session expired. Please log in and try again." });
   }
 }
 
