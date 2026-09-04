@@ -16,8 +16,6 @@ export default function NotFound() {
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-6 flex flex-col items-center justify-center text-center relative z-10">
         
-        {/* Ambient Glow Background behind illustration */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-orange-400/20 dark:bg-orange-500/10 blur-[100px] rounded-full pointer-events-none" />
 
         {/* Error Illustration Wrapper */}
         <div className="relative w-72 h-72 sm:w-96 sm:h-96 mb-8 hover:scale-105 transition-transform duration-700 ease-out z-10">

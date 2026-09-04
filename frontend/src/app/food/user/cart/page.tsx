@@ -193,7 +193,7 @@ function RestaurantOrderCard({
           </p>
         </div>
         <Link
-          href={`/vendor/${restId}`}
+          href={`/food/vendor/${restId}`}
           className="text-[11px] font-black text-orange-500 flex items-center shrink-0"
         >
           + Add <ChevronRight className="w-3 h-3" />

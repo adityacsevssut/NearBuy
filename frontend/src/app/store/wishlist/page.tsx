@@ -114,7 +114,7 @@ export default function WishlistPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {restaurantWishlist.map((r) => (
                 <Link
-                  href={`/vendor/${r.id}`}
+                  href={`/food/vendor/${r.id}`}
                   key={r.id}
                   className={`relative group flex flex-col bg-white dark:bg-[#0D0D17] rounded-2xl border border-gray-200 dark:border-[#2A2A3A] hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/10 text-left transition-all duration-300 overflow-hidden ${r.isClosed ? "opacity-75" : ""}`}
                 >
@@ -207,7 +207,7 @@ export default function WishlistPage() {
                         {dish.name}
                       </h3>
                       
-                      <Link href={`/vendor/${dish.restaurantId}`} className="text-xs font-semibold text-gray-400 hover:text-blue-500 transition-colors mb-1 block">
+                      <Link href={`/food/vendor/${dish.restaurantId}`} className="text-xs font-semibold text-gray-400 hover:text-blue-500 transition-colors mb-1 block">
                         by <span className="font-bold">{dish.restaurantName}</span>
                       </Link>
                       
