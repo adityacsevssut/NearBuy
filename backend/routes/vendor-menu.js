@@ -28,7 +28,7 @@ const upload = multer({
   },
 });
 
-// ─── Ensure vendor_menu_items table exists ───────────────────────────────────
+// ─── Ensure vendor_menu_items and item_ratings tables exist ──────────────────
 async function ensureTables() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS vendor_menu_items (
@@ -59,6 +59,22 @@ async function ensureTables() {
     ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS front_page_category TEXT DEFAULT '';
     ALTER TABLE vendor_menu_items ADD COLUMN IF NOT EXISTS actual_price INTEGER DEFAULT 0;
   `).catch(err => console.error("Error adding columns:", err));
+
+  // ── item_ratings: one rating per user per menu item (customer-driven) ──
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS item_ratings (
+      id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      user_id       UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      menu_item_id  UUID NOT NULL REFERENCES vendor_menu_items(id) ON DELETE CASCADE,
+      order_id      UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+      rating        NUMERIC(2,1) NOT NULL CHECK (rating >= 1 AND rating <= 5),
+      created_at    TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, menu_item_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_item_ratings_item ON item_ratings(menu_item_id);
+    CREATE INDEX IF NOT EXISTS idx_item_ratings_user ON item_ratings(user_id);
+    CREATE INDEX IF NOT EXISTS idx_item_ratings_order ON item_ratings(order_id);
+  `).catch(err => console.error("Error creating item_ratings table:", err));
 }
 
 ensureTables().catch(console.error);
@@ -131,6 +147,8 @@ router.post("/", authenticate, upload.single("image"), validate(createMenuItemSc
 });
 
 // ── PATCH /api/vendor-menu/:id  →  update a menu item ────────────────────────
+// NOTE: rating and reviews are customer-driven (via item_ratings table).
+// Vendors can set them only at creation time. They are intentionally stripped here.
 router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuItemSchema), async (req, res) => {
   const { id } = req.params;
   try {
@@ -142,7 +160,8 @@ router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuIt
     if (!check.rows.length) return res.status(404).json({ error: "Item not found." });
 
     const existing = check.rows[0];
-    const { category, name, description, price, actual_price, type, badge, is_available, sort_order, rating, prep_time, reviews, front_page_category } = req.body;
+    // rating and reviews are intentionally excluded — they are customer-driven
+    const { category, name, description, price, actual_price, type, badge, is_available, sort_order, prep_time, front_page_category } = req.body;
 
     let imageUrl = existing.image_url;
     if (req.file) {
@@ -172,12 +191,10 @@ router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuIt
         image_url = $8,
         is_available = COALESCE($9, is_available),
         sort_order = COALESCE($10, sort_order),
-        rating = COALESCE($11, rating),
-        prep_time = COALESCE($12, prep_time),
-        reviews = COALESCE($13, reviews),
-        front_page_category = COALESCE($14, front_page_category),
+        prep_time = COALESCE($11, prep_time),
+        front_page_category = COALESCE($12, front_page_category),
         updated_at = NOW()
-       WHERE id=$15 AND vendor_id=$16 RETURNING *`,
+       WHERE id=$13 AND vendor_id=$14 RETURNING *`,
       [
         category?.trim() || null,
         name?.trim() || null,
@@ -189,14 +206,15 @@ router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuIt
         imageUrl,
         is_available !== undefined ? (is_available === "true" || is_available === true) : null,
         sort_order ? parseInt(sort_order) : null,
-        rating ? parseFloat(rating) : null,
+        // rating intentionally omitted — customer-driven via item_ratings table
         prep_time !== undefined ? prep_time : null,
-        reviews ? parseInt(reviews) : null,
+        // reviews intentionally omitted — customer-driven via item_ratings table
         front_page_category !== undefined ? front_page_category : null,
         id,
         req.user.id,
       ]
     );
+
 
     return res.json({ item: rows[0] });
   } catch (err) {

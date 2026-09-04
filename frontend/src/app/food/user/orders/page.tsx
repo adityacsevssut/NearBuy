@@ -8,12 +8,13 @@ import jsPDF from "jspdf";
 import {
   Package, MapPin, ChevronLeft, Clock,
   CheckCircle, Loader2, Store, FileText, ChevronRight,
-  Eye, Truck, AlertCircle, Download
+  Eye, Truck, AlertCircle, Download, Star
 } from "lucide-react";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+import RateItemsModal from "./RateItemsModal";
 
 interface OrderItem {
   id: number;
@@ -55,6 +56,7 @@ function OrdersPageContent() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOrderForItems, setSelectedOrderForItems] = useState<Order | null>(null);
   const [orderToDownload, setOrderToDownload] = useState<Order | null>(null);
+  const [showRateModalForOrder, setShowRateModalForOrder] = useState<Order | null>(null);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -335,6 +337,15 @@ function OrdersPageContent() {
                   <Eye className="w-4 h-4" />
                   See Items
                 </button>
+                {order.status.toLowerCase() === 'delivered' && (
+                  <button
+                    onClick={() => setShowRateModalForOrder(order)}
+                    className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 hover:bg-black border-2 border-gray-900 rounded-xl text-sm font-bold text-white transition-all active:scale-[0.98]"
+                  >
+                    <Star className="w-4 h-4" />
+                    Rate Items
+                  </button>
+                )}
                 {!isHistory && (
                   <Link
                     href={`/food/user/orders/${order.id}`}
@@ -556,6 +567,12 @@ function OrdersPageContent() {
       )}
 
       {/* Print Styles for Native PDF Generation */}
+      <RateItemsModal
+        isOpen={!!showRateModalForOrder}
+        onClose={() => setShowRateModalForOrder(null)}
+        order={showRateModalForOrder}
+      />
+
       <style dangerouslySetInnerHTML={{ __html: `
         @media print {
           @page { margin: 0; }

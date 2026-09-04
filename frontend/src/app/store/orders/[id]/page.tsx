@@ -7,7 +7,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import {
   ChevronLeft, Package, MapPin, Truck, CheckCircle,
-  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown, AlertTriangle, Copy
+  Clock, Store, Phone, Info, Loader2, Navigation, FileText, X, FileDown, AlertTriangle, Copy, Star
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import Script from "next/script";
 import { Checkout } from 'capacitor-razorpay';
 import { Capacitor } from '@capacitor/core';
+import RateItemsModal from "../RateItemsModal";
 
 const blueToastStyle = {
   style: {
@@ -68,6 +69,7 @@ export default function OrderStatusPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [showBilling, setShowBilling] = useState(false);
   const [showCancelRequest, setShowCancelRequest] = useState(false);
+  const [showRateModal, setShowRateModal] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
   const [isPaying, setIsPaying] = useState(false);
@@ -652,12 +654,20 @@ export default function OrderStatusPage() {
                           </p>
                         )}
                         {isCurrent && index === 4 && (
-                          <button
-                            onClick={generateReceipt}
-                            className="mt-3 flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit"
-                          >
-                            <FileDown className="w-3.5 h-3.5" /> Download Receipt
-                          </button>
+                          <div className="flex flex-col sm:flex-row gap-2 mt-3">
+                            <button
+                              onClick={generateReceipt}
+                              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-600 text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit"
+                            >
+                              <FileDown className="w-3.5 h-3.5" /> Download Receipt
+                            </button>
+                            <button
+                              onClick={() => setShowRateModal(true)}
+                              className="flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-all active:scale-95 shadow-sm w-fit"
+                            >
+                              <Star className="w-3.5 h-3.5" /> Rate Items
+                            </button>
+                          </div>
                         )}
                       </div>
                     </div>
@@ -915,6 +925,12 @@ export default function OrderStatusPage() {
           </div>
         )}
       </AnimatePresence>
+
+      <RateItemsModal 
+        isOpen={showRateModal}
+        onClose={() => setShowRateModal(false)}
+        order={order}
+      />
 
       {/* Hidden Receipt Template for PDF */}
       {order && (
