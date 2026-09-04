@@ -4,6 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X } from "lucide-react";
+import { handleApiError } from "@/utils/apiError";
+
 
 import MobileBottomNav from "@/components/MobileBottomNav";
 import { useCart } from "@/context/CartContext";
@@ -924,7 +926,8 @@ export default function VendorPage() {
                     toast.success("Thanks for rating!");
                   } else {
                     const errData = await res.json();
-                    toast.error(errData.error || "Failed to submit rating");
+                    handleApiError(res.status, errData, openLoginModal);
+                    if (res.status === 401) setShowRatingModal(false);
                   }
                 } catch (err) {
                   console.error("Error submitting rating", err);
