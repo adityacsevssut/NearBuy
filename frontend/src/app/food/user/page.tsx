@@ -191,7 +191,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
   return (
     <Link
-      href={`/vendor/${r.id}`}
+      href={`/food/vendor/${r.id}`}
       className={`group flex-shrink-0 w-[148px] h-[168px] relative bg-gray-100 dark:bg-[#1F1F2E] rounded-2xl overflow-hidden shadow-sm border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_15px_rgba(249,115,22,0.15)] dark:hover:shadow-[0_0_15px_rgba(249,115,22,0.3)] active:scale-[0.97] ${dim ? "opacity-60" : ""}`}
     >
       {/* Background Image */}
@@ -446,7 +446,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
   return (
     <Link
-      href={`/vendor/${r.id}`}
+      href={`/food/vendor/${r.id}`}
       className={`group block w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-[#2A2A3A] hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] hover:-translate-y-1 ${dim ? "opacity-70" : ""}`}
     >
       <div className="relative w-full h-[260px] bg-gray-100 dark:bg-[#1F1F2E]">
