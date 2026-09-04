@@ -7,19 +7,9 @@ import { useAuth } from "@/context/AuthContext";
 export default function RootPage() {
   const router = useRouter();
   const { user, isLoggedIn, isInitializing } = useAuth();
-  const [showSplash, setShowSplash] = useState(true);
-
-  // Minimum duration for the splash screen
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-    }, 1800); // 1.8 seconds
-
-    return () => clearTimeout(timer);
-  }, []);
 
   useEffect(() => {
-    if (isInitializing || showSplash) return;
+    if (isInitializing) return;
 
     if (isLoggedIn && user) {
       if (user.role === "vendor") {
@@ -32,7 +22,7 @@ export default function RootPage() {
     } else {
       router.replace("/food/user");
     }
-  }, [isLoggedIn, user, isInitializing, showSplash, router]);
+  }, [isLoggedIn, user, isInitializing, router]);
 
   // Classic Gradient Splash Screen
   return (

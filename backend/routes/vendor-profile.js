@@ -78,6 +78,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       pincode,
       landmark,
       rating,
+      reviews,
       is_open,
       delivery_range,
     } = req.body;
@@ -105,6 +106,9 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
     
     const parsedRating = parseFloat(rating);
     const final_rating = !isNaN(parsedRating) ? parsedRating : (existing.rating !== null && existing.rating !== undefined ? parseFloat(existing.rating) : 0.0);
+
+    const parsedReviews = parseInt(reviews);
+    const final_reviews = !isNaN(parsedReviews) ? parsedReviews : (existing.reviews !== null && existing.reviews !== undefined ? parseInt(existing.reviews) : 0);
 
     const is_open_val = is_open !== undefined && is_open !== ""
       ? (is_open === "true" || is_open === true) 
@@ -159,9 +163,9 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       `INSERT INTO vendor_profiles (
         user_id, restaurant_name, cuisine, delivery_time, min_order, 
         offer, badge, image_url, gps_address, manual_address, 
-        latitude, longitude, pincode, landmark, rating, is_open, delivery_range
+        latitude, longitude, pincode, landmark, rating, reviews, is_open, delivery_range
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
        ON CONFLICT (user_id) DO UPDATE SET
         restaurant_name = EXCLUDED.restaurant_name,
         cuisine = EXCLUDED.cuisine,
@@ -177,6 +181,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
         pincode = EXCLUDED.pincode,
         landmark = EXCLUDED.landmark,
         rating = EXCLUDED.rating,
+        reviews = EXCLUDED.reviews,
         is_open = EXCLUDED.is_open,
         delivery_range = EXCLUDED.delivery_range,
         updated_at = NOW()
@@ -197,6 +202,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
         final_pincode,
         final_landmark,
         final_rating,
+        final_reviews,
         is_open_val,
         delivery_range_val,
       ]

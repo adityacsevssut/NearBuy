@@ -41,7 +41,10 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
     pincode: "",
     landmark: "",
     rating: "4.5",
+    reviews: "120",
   });
+
+  const [isRatingSet, setIsRatingSet] = useState(false);
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -72,7 +75,11 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
           pincode: data.profile.pincode || (!data.profile.latitude && ctxPincode ? ctxPincode : ""),
           landmark: data.profile.landmark || (!data.profile.latitude && ctxLandmark ? ctxLandmark : ""),
           rating: data.profile.rating?.toString() || "0.0",
+          reviews: data.profile.reviews?.toString() || "0",
         });
+        
+        setIsRatingSet(parseFloat(data.profile.rating || "0") > 0 || parseInt(data.profile.reviews || "0") > 0);
+
         // Preserve the current open/closed state so saving this modal never resets it
         setCurrentIsOpen(data.profile.is_open ?? false);
         if (data.profile.image_url) {
@@ -456,9 +463,24 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                       min="0"
                       max="5"
                       value={formData.rating}
+                      disabled={isRatingSet}
                       onChange={e => setFormData({...formData, rating: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none"
+                      className={`w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none ${isRatingSet ? "opacity-50 cursor-not-allowed" : ""}`}
                       placeholder="e.g. 4.5"
+                    />
+                  </div>
+
+                  {/* Reviews Count */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Total Ratings</label>
+                    <input 
+                      type="number"
+                      min="0"
+                      value={formData.reviews}
+                      disabled={isRatingSet}
+                      onChange={e => setFormData({...formData, reviews: e.target.value})}
+                      className={`w-full px-4 py-3 bg-gray-50 dark:bg-[#151522] border border-gray-200 dark:border-[#2A2A3A] rounded-xl font-bold text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all outline-none ${isRatingSet ? "opacity-50 cursor-not-allowed" : ""}`}
+                      placeholder="e.g. 120"
                     />
                   </div>
                 </div>
