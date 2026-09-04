@@ -46,7 +46,13 @@ async function hashValue(value) {
 
 // ── Helper: issue tokens and store refresh token ──────────────────────────
 async function issueTokens(user, res, client) {
-  const payload = { id: user.id, email: user.email, role: user.role, manager_type: user.manager_type };
+  const payload = { 
+    id: user.id, 
+    email: user.email, 
+    role: user.role, 
+    manager_type: user.manager_type,
+    service_center_id: user.service_center_id
+  };
   const accessToken = signAccessToken(payload);
   const refreshToken = signRefreshToken(payload);
   const tokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
@@ -539,6 +545,7 @@ router.post("/refresh", async (req, res) => {
       email: user.rows[0].email,
       role: user.rows[0].role,
       manager_type: user.rows[0].manager_type,
+      service_center_id: user.rows[0].service_center_id,
     });
 
     return res.json({ accessToken: newAccessToken });
