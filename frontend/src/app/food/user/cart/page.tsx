@@ -12,8 +12,7 @@ import {
 } from "lucide-react";
 import { Checkout } from 'capacitor-razorpay';
 import { Capacitor } from '@capacitor/core';
-import Navbar from "@/components/Navbar";
-import MobileBottomNav from "@/components/MobileBottomNav";
+// Navbar and MobileBottomNav removed for cart section
 import { useCart } from "@/context/CartContext";
 import { useLocationContext } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
@@ -799,27 +798,26 @@ export default function CartPage() {
   if (!mounted || (!isLoggedIn && mounted)) return null;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-16 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-2 pb-20">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
-      <Navbar />
 
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-16 z-20">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Back button */}
-          <Link href="/" className="flex items-center gap-1.5 px-3 py-2 -ml-2 rounded-xl bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] hover:bg-gray-50 dark:bg-[#0D0D17] dark:hover:bg-[#0D0D17] text-gray-700 dark:text-gray-300 font-bold text-sm transition-all active:scale-95 shadow-sm">
-            <ChevronLeft className="w-4 h-4" />
-            Back to Home
+      <div className="bg-[#f5f5f5] dark:bg-[#0D0D17] sticky top-2 z-20 mb-4">
+        <div className="relative max-w-2xl mx-auto px-4 min-h-[44px] flex items-center justify-center">
+          <Link href="/" className="absolute left-4 p-2 rounded-full border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] hover:text-orange-500 shadow-sm transition-colors z-10">
+            <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
           </Link>
-
+          <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight text-center w-full relative z-0">
+            Your <span className="text-orange-500">Cart</span>
+          </h1>
           {/* Clear All button */}
           {foodItems.length > 0 && (
             <button
               onClick={clearCart}
-              className="flex items-center gap-1.5 px-3 py-1.5 m-[10px] rounded-lg bg-red-50 text-red-500 hover:bg-red-100 text-xs font-black transition-all active:scale-[0.97]"
+              className="absolute right-4 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 text-xs font-black transition-all active:scale-[0.97] z-10"
             >
               <Trash2 className="w-3.5 h-3.5" />
-              Clear All
+              Clear
             </button>
           )}
         </div>
@@ -832,13 +830,47 @@ export default function CartPage() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center justify-center py-32 text-center"
+            className="flex flex-col items-center justify-center py-20 sm:py-32 text-gray-400 mt-4"
           >
-            <div className="w-24 h-24 bg-orange-50 dark:bg-[#0D0D17] rounded-full flex items-center justify-center mb-5">
-              <ShoppingBag className="w-12 h-12 text-orange-300" />
+            <style>{`
+              @keyframes searchPath {
+                0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+                33% { transform: translate(-20px, 10px) rotate(-10deg); }
+                66% { transform: translate(15px, -10px) rotate(10deg); }
+              }
+            `}</style>
+            
+            <div className="relative w-48 h-48 mb-8 flex items-center justify-center group">
+              {/* Abstract blob behind */}
+              <div className="absolute w-36 h-36 bg-gray-100 dark:bg-gray-800/40 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] -rotate-12 transition-transform duration-700 group-hover:rotate-0 group-hover:scale-105"></div>
+              
+              {/* Document Base */}
+              <div className="relative z-10 w-24 h-[110px] bg-[#54657A] dark:bg-[#3B4756] rounded-lg rounded-tr-[28px] shadow-sm flex flex-col pt-6 px-4">
+                {/* Folded Top Right Corner */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-gray-100 dark:bg-gray-800/40 rounded-bl-lg rounded-tr-lg"></div>
+                {/* Inner fold triangle */}
+                <div className="absolute top-0 right-0 w-7 h-7 bg-[#435162] dark:bg-[#2C3541] rounded-bl-lg rounded-tr-lg" style={{ clipPath: "polygon(0 0, 0% 100%, 100% 100%)" }}></div>
+                
+                {/* Document lines */}
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-full h-1.5 bg-white/50 rounded-full mb-3"></div>
+                <div className="w-2/3 h-1.5 bg-white/50 rounded-full"></div>
+              </div>
+
+              {/* Moving Magnifying Glass */}
+              <div 
+                className="absolute z-20 ml-12 mt-12"
+                style={{ animation: 'searchPath 4s ease-in-out infinite' }}
+              >
+                {/* The glass ring */}
+                <div className="w-11 h-11 rounded-full border-[4px] border-[#54657A] dark:border-[#3B4756] bg-white/80 dark:bg-[#0D0D17]/80 backdrop-blur-sm shadow-sm relative z-10"></div>
+                {/* The handle */}
+                <div className="absolute top-[80%] left-[80%] w-3.5 h-7 bg-[#54657A] dark:bg-[#3B4756] -rotate-45 rounded-b-md shadow-sm transform -translate-x-1.5 -translate-y-1.5 z-0"></div>
+              </div>
             </div>
+            
             <h2 className="font-black text-xl text-gray-800 dark:text-gray-200 mb-1">Your cart is empty</h2>
-            <p className="text-sm text-gray-400 font-medium max-w-xs mb-7">
+            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium max-w-[300px] text-center px-4">
               Add items from a restaurant to get started.
             </p>
           </motion.div>
@@ -883,8 +915,6 @@ export default function CartPage() {
           </>
         )}
       </main>
-
-      <MobileBottomNav />
     </div>
   );
 }

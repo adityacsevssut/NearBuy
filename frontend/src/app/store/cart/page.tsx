@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { Store, ArrowLeft } from "lucide-react";
-import Navbar from "@/components/Navbar";
-import MobileBottomNav from "@/components/MobileBottomNav";
+import { Store, ArrowLeft, ChevronLeft } from "lucide-react";
+// Navbar and MobileBottomNav removed
 import { useAuth } from "@/context/AuthContext";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -17,10 +16,20 @@ export default function StoreCartPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-[#0D0D17] flex flex-col pt-16">
-      <Navbar />
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#0D0D17] flex flex-col pt-2 pb-20">
+      {/* Page Header */}
+      <div className="bg-[#f5f5f5] dark:bg-[#0D0D17] sticky top-2 z-20 mb-4">
+        <div className="relative max-w-2xl mx-auto px-4 min-h-[44px] flex items-center justify-center">
+          <Link href="/" className="absolute left-4 p-2 rounded-full border border-gray-200 dark:border-[#2A2A3A] bg-white dark:bg-[#0D0D17] hover:text-orange-500 shadow-sm transition-colors z-10">
+            <ChevronLeft className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+          </Link>
+          <h1 className="font-black text-2xl md:text-3xl text-gray-900 dark:text-gray-100 tracking-tight text-center w-full relative z-0">
+            Your <span className="text-orange-500">Cart</span>
+          </h1>
+        </div>
+      </div>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto w-full mt-20 mb-32">
+      <main className="flex-1 flex flex-col items-center justify-center p-6 text-center max-w-lg mx-auto w-full mt-10 mb-20">
         <div className="bg-white dark:bg-[#151522] rounded-[2rem] p-8 md:p-12 shadow-sm border border-gray-100 dark:border-[#2A2A3A] w-full flex flex-col items-center">
           <div className="w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-6">
             <Store className="w-10 h-10 text-blue-500" />
@@ -43,8 +52,6 @@ export default function StoreCartPage() {
           </Link>
         </div>
       </main>
-
-      <MobileBottomNav />
     </div>
   );
 }
