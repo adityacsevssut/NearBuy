@@ -444,7 +444,7 @@ export default function DishPage() {
                   {dishImage ? (
                     <>
                       <img src={dishImage} alt={itemName} className="w-full h-full object-contain mix-blend-multiply dark:hidden" style={{ maskImage: 'radial-gradient(circle, black 55%, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 72%)' }} />
-                      <img src={dishImage.replace('.png', '_dark.png').replace('.jpg', '_dark.jpg')} alt={itemName} className="w-full h-full object-contain hidden dark:block" style={{ maskImage: 'radial-gradient(circle, black 55%, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 72%)' }} />
+                      <img src={dishImage.replace('.png', '_dark.png')} alt={itemName} className="w-full h-full object-contain hidden dark:block" style={{ maskImage: 'radial-gradient(circle, black 55%, transparent 72%)', WebkitMaskImage: 'radial-gradient(circle, black 55%, transparent 72%)' }} />
                     </>
                   ) : (
                     <span className="text-6xl">🍽️</span>

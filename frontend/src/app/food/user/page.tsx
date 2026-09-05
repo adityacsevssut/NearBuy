@@ -22,6 +22,7 @@ import {
   Package,
   UtensilsCrossed,
   ChevronRight,
+  Filter,
 } from "lucide-react";
 import { Caveat, Playfair_Display } from "next/font/google";
 
@@ -1222,15 +1223,14 @@ export default function HomePage() {
                 <div className="relative shrink-0">
                   <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || foodPref !== "all"
-                      ? "bg-orange-500 text-white border-orange-500 shadow-lg shadow-orange-500/30"
-                      : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-transparent hover:bg-gray-50 dark:hover:bg-[#0D0D17] hover:border-orange-300 transition-all duration-300 hover:text-orange-600"
-                      }`}
+                    className="relative w-[52px] h-[52px] shrink-0 flex items-center justify-center bg-white dark:bg-[#151522] rounded-full shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-transparent hover:border-orange-200 dark:hover:border-orange-500/30 transition-all duration-300 hover:scale-105 active:scale-95 group"
                   >
-                    <SlidersHorizontal className="w-4 h-4" />
-                    <span className="hidden sm:inline">Filter</span>
+                    <Filter 
+                      className={`w-5 h-5 transition-colors duration-300 ${showFilters || foodPref !== "all" ? "text-orange-600 dark:text-orange-500" : "text-orange-500 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300"}`} 
+                      strokeWidth={2.5}
+                    />
                     {foodPref !== "all" && (
-                      <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
+                      <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#0D0D17] shadow-sm" />
                     )}
                   </button>
                   {/* Desktop dropdown */}
@@ -1634,8 +1634,8 @@ export default function HomePage() {
                     const Wrapper = poster.link ? Link : 'div';
                     return (
                       <Wrapper key={poster.id || index} href={poster.link ? poster.link.replace('/food/dish/', '/food/user/dish/') : undefined} className="flex-shrink-0 w-full aspect-[2/1] md:aspect-[21/9] snap-center block relative overflow-hidden bg-transparent">
-                        <Image src={poster.image_url || "/1000242984.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
-                        <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="ZyphCart Special Offer" fill priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
+                        <Image src={poster.image_url || "/1000242984.png"} alt="ZyphCart Special Offer" fill sizes="(max-width: 768px) 100vw, 100vw" priority={index === 0} className="object-cover transition-transform duration-500 ease-out dark:hidden" />
+                        <Image src={poster.dark_image_url || poster.image_url || "/1000242984_dark.png"} alt="ZyphCart Special Offer" fill sizes="(max-width: 768px) 100vw, 100vw" priority={index === 0} className="hidden object-cover transition-transform duration-500 ease-out dark:block" />
                       </Wrapper>
                     );
                   })}

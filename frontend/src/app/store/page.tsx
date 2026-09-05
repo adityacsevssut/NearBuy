@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Search, Star, SlidersHorizontal, ChevronDown,
+  Search, Star, Filter, ChevronDown,
   ShoppingCart, Heart, Zap, BadgePercent, Package, X, MapPin
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -206,22 +206,18 @@ export default function EssentialsPage() {
                 )}
               </div>
 
-              {/* Filter */}
-              <div className="relative shrink-0 md:hidden">
-                <button
-                  onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3.5 rounded-2xl text-[14px] font-black border transition-all shadow-[0_2px_8px_rgba(0,0,0,0.04)] ${showFilters || activeCats.length > 0 || priceRange
-                    ? "bg-blue-600 text-white border-blue-600 shadow-lg shadow-blue-500/30"
-                    : "bg-gray-50 dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A] hover:bg-white dark:hover:bg-[#0D0D17] hover:border-blue-300 transition-all duration-300 hover:shadow-[0_0_15px_rgba(37,99,235,0.15)] dark:hover:shadow-[0_0_15px_rgba(37,99,235,0.3)] hover:text-blue-600"
-                    }`}
+              <button
+                  onClick={() => setShowFilters(true)}
+                  className="relative w-[52px] h-[52px] shrink-0 flex items-center justify-center bg-white dark:bg-[#151522] rounded-full shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-transparent hover:border-blue-200 dark:hover:border-blue-500/30 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 >
-                  <SlidersHorizontal className="w-4 h-4" />
-                  <span className="hidden sm:inline">Filter</span>
+                  <Filter 
+                    className={`w-5 h-5 transition-colors duration-300 ${showFilters || activeCats.length > 0 || priceRange ? "text-blue-600 dark:text-blue-500" : "text-blue-500 dark:text-blue-400 group-hover:text-blue-600 dark:group-hover:text-blue-300"}`} 
+                    strokeWidth={2.5}
+                  />
                   {(activeCats.length > 0 || priceRange) && (
-                    <span className="w-2 h-2 rounded-full bg-white dark:bg-[#0D0D17] shadow-sm" />
+                    <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#0D0D17] shadow-sm" />
                   )}
-                </button>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -458,19 +454,6 @@ export default function EssentialsPage() {
                 {/* Mobile right side */}
                 <div className="flex md:hidden items-center gap-2">
                   <p className="text-xs font-medium text-gray-500 mr-1">{filtered.length} items</p>
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold border transition-all ${showFilters || activeCats.length > 0 || priceRange
-                      ? "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/30"
-                      : "bg-white dark:bg-[#151522] text-gray-700 dark:text-gray-300 border-gray-200 dark:border-[#2A2A3A]"
-                      }`}
-                  >
-                    <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>Filter</span>
-                    {(activeCats.length > 0 || priceRange) && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                    )}
-                  </button>
                 </div>
               </div>
 
