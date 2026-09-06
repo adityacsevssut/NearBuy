@@ -225,7 +225,7 @@ export default function LocationModal() {
         latitude: resolvedAddress.lat,
         longitude: resolvedAddress.lng,
       });
-      toast.success("Address saved!");
+      toast.success("Address saved!", { icon: <CheckCircle className="w-5 h-5 text-emerald-500" /> });
       handleClose();
     } catch (err) {
       toast.error("Failed to save address. Please try again.");

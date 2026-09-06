@@ -9,7 +9,7 @@ import {
   MapPin, ChevronDown, Search, ShoppingCart, X, Store, Package, LogOut, Code2,
   CreditCard, Bell, Heart, ShoppingBag, Calendar, Clock, Mail, MessageCircle,
   QrCode, Globe, Percent, Star, Users, Trash2, Pencil, ChevronRight, Menu,
-  UtensilsCrossed, Pill, User as UserIcon
+  UtensilsCrossed, Pill, User as UserIcon, Download
 } from "lucide-react";
 import LoginModal from "./LoginModal";
 import { useAuth } from "@/context/AuthContext";
@@ -153,7 +153,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
 
   return (
     <>
-      <nav className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
+      <nav className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${mobileMenuOpen ? 'bg-white dark:bg-[#0D0D17]' : isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -162,10 +162,14 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
               id="hamburger-btn"
               onClick={() => setMobileMenuOpen(prev => !prev)}
               aria-label="Open menu"
-              className={`flex items-center justify-center w-11 h-11 -ml-2 rounded-2xl border shadow-sm transition-all duration-300 active:scale-95 group ${isHeroTransparent ? 'bg-white/10 border-white/20' : isHeroMatching ? 'bg-orange-400/20 border-orange-400/50 hover:bg-orange-400/40' : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A]/60'}`}
+              className={`flex items-center justify-center w-11 h-11 -ml-2 border transition-all duration-300 active:scale-95 group ${
+                mobileMenuOpen 
+                  ? 'rounded-full bg-white dark:bg-[#1F1F2E] border-gray-100 dark:border-[#2A2A3A] shadow-[0_4px_12px_rgba(0,0,0,0.08)]' 
+                  : `rounded-2xl shadow-sm ${isHeroTransparent ? 'bg-white/10 border-white/20' : isHeroMatching ? 'bg-orange-400/20 border-orange-400/50 hover:bg-orange-400/40' : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A]/60'}`
+              }`}
             >
               {mobileMenuOpen
-                ? <X className={`w-6 h-6 group-hover:rotate-90 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : isHeroMatching ? 'text-gray-900' : 'text-gray-700 dark:text-gray-300'}`} />
+                ? <X className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300 text-orange-500 hover:text-orange-600" />
                 : <Menu className={`w-6 h-6 group-hover:scale-110 transition-transform duration-300 ${isHeroTransparent ? 'text-white' : isHeroMatching ? 'text-gray-900' : 'text-gray-700 dark:text-gray-300'}`} />
               }
             </button>
@@ -405,7 +409,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="fixed top-16 left-0 right-0 bottom-0 w-full bg-[#F8F9FA] dark:bg-[#0D0D17] z-[99] pt-10 px-5 pb-6 overflow-y-auto"
+            className="fixed top-16 left-0 right-0 bottom-0 w-full bg-white dark:bg-[#0D0D17] z-[99] pt-10 px-5 pb-6 overflow-y-auto"
           >
             <div className="flex flex-wrap gap-4 max-w-sm mx-auto w-full pb-10 justify-center">
               {/* Food Card */}
@@ -448,6 +452,34 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
+              {/* Install App Button */}
+              <motion.button
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ delay: 0.25, ease: [0.25, 1, 0.5, 1] }}
+                onClick={() => {
+                  /* Add install prompt logic here if available */
+                  setMobileMenuOpen(false);
+                }}
+                className="w-full mt-2 py-4 px-5 bg-gradient-to-r from-gray-900 to-black dark:from-white dark:to-gray-200 text-white dark:text-black rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-white/20 relative overflow-hidden active:scale-95 transition-all flex items-center justify-between group border border-gray-800 dark:border-white/50"
+              >
+                <div className="flex items-center gap-4 relative z-10">
+                  <div className="w-11 h-11 rounded-2xl bg-white/10 dark:bg-black/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/10 dark:border-black/10">
+                    <Download className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-black text-[17px] leading-tight mb-0.5 tracking-wide">Install ZyphCart</h3>
+                    <p className="text-[11px] font-bold opacity-70 tracking-wider uppercase">Get The App</p>
+                  </div>
+                </div>
+                <div className="w-9 h-9 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors">
+                  <ChevronRight className="w-4 h-4" />
+                </div>
+                {/* Decorative background effects */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-black/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 dark:bg-black/5 rounded-full blur-xl -ml-8 -mb-8 pointer-events-none"></div>
+              </motion.button>
             </div>
           </motion.div>
         )}
