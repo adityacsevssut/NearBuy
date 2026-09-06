@@ -21,7 +21,7 @@ export default function PrivacyPage() {
   const selectionBg = isStore ? "selection:bg-blue-500/30" : "selection:bg-orange-500/30";
 
   return (
-    <div className={`min-h-screen bg-gray-50 dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans ${selectionBg}`}>
+    <div className={`min-h-screen bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans ${selectionBg}`}>
       <Navbar />
       
       {/* Hero Section */}
@@ -40,7 +40,7 @@ export default function PrivacyPage() {
       {/* Content Section */}
       <div className="max-w-[800px] mx-auto px-6 sm:px-8 pb-16">
         <div 
-          className="bg-white dark:bg-[#151522] rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-[#2A2A3A]"
+          className="bg-gray-50 dark:bg-[#151522] rounded-3xl p-8 md:p-12 shadow-sm border border-gray-100 dark:border-[#2A2A3A]"
           style={{ fontFamily: '"Times New Roman", Times, serif' }}
         >
           
