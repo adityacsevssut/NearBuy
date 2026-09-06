@@ -124,6 +124,32 @@ function fmtTime(v: any) {
 }
 
 /* ─── Section header ───────────────────────────────────────────────────────── */
+const renderSectionTitle = (text: string, isSpecial: boolean) => {
+  const parts = text.split(/(₹\d+)/);
+  return parts.map((part, index) =>
+    part.startsWith('₹') ? (
+      <span
+        key={index}
+        className="relative inline-flex items-center justify-center px-4 py-0.5 mx-2 text-[15px] font-black tracking-widest text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-md shadow-[0_4px_12px_rgba(239,68,68,0.35)] transform -rotate-2 hover:rotate-0 hover:scale-110 active:scale-95 transition-all duration-300 overflow-hidden cursor-default"
+      >
+        {/* Inner Dashed Border Overlay */}
+        <span className="absolute inset-[3px] border-[1.5px] border-dashed border-white/50 rounded-[3px] pointer-events-none"></span>
+
+        {/* Left Notch */}
+        <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-r-full shadow-[inset_-2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
+        {/* Right Notch */}
+        <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-l-full shadow-[inset_2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
+
+        <span className="relative z-20 drop-shadow-md">{part}</span>
+      </span>
+    ) : (
+      <span key={index} className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400' : 'text-gray-900 dark:text-gray-100'}>
+        {part}
+      </span>
+    )
+  );
+};
+
 function SectionHeader({
   title,
   onViewAll,
@@ -133,36 +159,10 @@ function SectionHeader({
 }) {
   const isSpecial = title.includes('Hot Deals') || title.includes('Popular');
 
-  const renderTitle = (text: string) => {
-    const parts = text.split(/(₹\d+)/);
-    return parts.map((part, index) =>
-      part.startsWith('₹') ? (
-        <span 
-          key={index} 
-          className="relative inline-flex items-center justify-center px-4 py-0.5 mx-2 text-[15px] font-black tracking-widest text-white bg-gradient-to-r from-orange-500 to-red-500 rounded-md shadow-[0_4px_12px_rgba(239,68,68,0.35)] transform -rotate-2 hover:rotate-0 hover:scale-110 active:scale-95 transition-all duration-300 overflow-hidden cursor-default"
-        >
-          {/* Inner Dashed Border Overlay */}
-          <span className="absolute inset-[3px] border-[1.5px] border-dashed border-white/50 rounded-[3px] pointer-events-none"></span>
-
-          {/* Left Notch */}
-          <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-r-full shadow-[inset_-2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
-          {/* Right Notch */}
-          <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-4 bg-white dark:bg-[#151522] rounded-l-full shadow-[inset_2px_0_4px_rgba(0,0,0,0.15)] z-10 transition-colors"></span>
-          
-          <span className="relative z-20 drop-shadow-md">{part}</span>
-        </span>
-      ) : (
-        <span key={index} className={isSpecial ? 'text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400' : 'text-gray-900 dark:text-gray-100'}>
-          {part}
-        </span>
-      )
-    );
-  };
-
   return (
     <div className="flex items-center justify-between mb-3 px-4">
       <h2 className="text-[17px] font-black tracking-tight drop-shadow-sm flex items-center">
-        {renderTitle(title)}
+        {renderSectionTitle(title, isSpecial)}
       </h2>
       {onViewAll && (
         <button
@@ -283,7 +283,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 }
 
 /* ─── Compact "Deal" card ──────────────────────────────────────────── */
-function DealCard({ deal, onConfirmNeeded }: any) {
+function DealCard({ deal, onConfirmNeeded, fluid }: any) {
   const { items, addItem, updateQty, itemQty } = useCart();
 
   // Create a numeric ID from string for CartContext
@@ -331,7 +331,7 @@ function DealCard({ deal, onConfirmNeeded }: any) {
   };
 
   return (
-    <div className={`group flex-shrink-0 w-[140px] h-[200px] relative rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E] cursor-pointer border border-gray-200 dark:border-[#2A2A3A] ${closed ? "opacity-60" : ""}`}>
+    <div className={`group flex-shrink-0 ${fluid ? "w-full aspect-[7/10] h-auto" : "w-[140px] h-[200px]"} relative rounded-2xl overflow-hidden shadow-sm bg-gray-100 dark:bg-[#1F1F2E] cursor-pointer border border-gray-200 dark:border-[#2A2A3A] ${closed ? "opacity-60" : ""}`}>
       {/* Background Image */}
       {deal.image ? (
         <Image src={deal.image} alt={deal.name} fill sizes="(max-width: 768px) 50vw, 33vw" className="object-cover z-0" />
@@ -740,10 +740,10 @@ function PromoImages() {
                 <span className="text-orange-gradient">{items[index].name}</span>
               </div>
               {/* Transparent Theme-Agnostic Image */}
-              <Image 
-                src={`/${items[index].img}_transparent.png`} 
-                alt={items[index].name} 
-                fill 
+              <Image
+                src={`/${items[index].img}_transparent.png`}
+                alt={items[index].name}
+                fill
                 className="object-contain drop-shadow-[0_10px_25px_rgba(234,88,12,0.4)] dark:drop-shadow-[0_10px_35px_rgba(0,0,0,0.9)] scale-110"
                 sizes="(max-width: 768px) 180px, 320px"
                 priority
@@ -861,6 +861,7 @@ export default function HomePage() {
   const [hotDealsUnder130, setHotDealsUnder130] = useState<any[]>(cachedState.hotDealsUnder130);
   const [isHotDealsLoading, setIsHotDealsLoading] = useState(!cachedState.hotDealsLoaded);
   const [dealToConfirm, setDealToConfirm] = useState<any>(null);
+  const [dealsDrawer, setDealsDrawer] = useState<{ isOpen: boolean; type: "under60" | "under130" | null }>({ isOpen: false, type: null });
   const { addItem, clearVendorCart } = useCart();
 
   const handleConfirmDeal = (action: "replace" | "add") => {
@@ -1126,7 +1127,7 @@ export default function HomePage() {
           {/* decorative wave blob */}
           <div className="absolute -right-10 -bottom-10 w-[240px] h-[160px] pointer-events-none opacity-90 z-0">
             <svg viewBox="0 0 240 160" preserveAspectRatio="none" className="w-full h-full">
-              <path d="M240,160 L240,40 C200,10 150,60 110,90 C70,120 30,100 0,160 Z" fill="#ea580c" opacity="0.1"/>
+              <path d="M240,160 L240,40 C200,10 150,60 110,90 C70,120 30,100 0,160 Z" fill="#ea580c" opacity="0.1" />
             </svg>
           </div>
 
@@ -1148,7 +1149,7 @@ export default function HomePage() {
                   <p className="text-[15px] leading-relaxed text-gray-300 mb-4 font-medium">
                     Get Upto <b className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 dark:from-red-500 dark:to-orange-400 font-extrabold">30-40% off</b><br />on your first order
                   </p>
-                  <button 
+                  <button
                     onClick={() => document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' })}
                     className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
                   >
@@ -1165,149 +1166,149 @@ export default function HomePage() {
 
         {/* Moved Location & Search */}
         <div className="pt-0 pb-2 z-40 relative bg-white dark:bg-[#0D0D17]">
-                {/* ══ LOCATION ════════════════════════════ */}
-            <div className="max-w-7xl mx-auto px-4 pb-1">
-              <div className="w-full">
-                <button
-                  suppressHydrationWarning
-                  onClick={() => setIsLocationModalOpen(true)}
-                  className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#151522] rounded-2xl border border-transparent hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 shadow-sm active:scale-[0.99]"
-                >
-                  <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
-                    <MapPin className="w-4 h-4 text-orange-500" />
-                  </div>
-                  <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
-                    <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
-                      Deliver to
+          {/* ══ LOCATION ════════════════════════════ */}
+          <div className="max-w-7xl mx-auto px-4 pb-1">
+            <div className="w-full">
+              <button
+                suppressHydrationWarning
+                onClick={() => setIsLocationModalOpen(true)}
+                className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#151522] rounded-2xl border border-transparent hover:border-orange-400 dark:hover:border-orange-500 transition-all duration-300 shadow-sm active:scale-[0.99]"
+              >
+                <div className="w-8 h-8 rounded-full bg-orange-50 dark:bg-[#0D0D17] shadow-sm flex items-center justify-center shrink-0 border border-gray-100 dark:border-[#2A2A3A]">
+                  <MapPin className="w-4 h-4 text-orange-500" />
+                </div>
+                <div className="flex flex-col items-start leading-none flex-1 min-w-0 text-left mr-3 md:mr-6">
+                  <span className="text-[11px] text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">
+                    Deliver to
+                  </span>
+                  <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
+                    <span className="truncate max-w-[120px] sm:max-w-[200px]">
+                      {landmark || locationName}
                     </span>
-                    <span className="text-[14px] font-black text-gray-900 dark:text-gray-100 flex items-center gap-1 mt-1">
-                      <span className="truncate max-w-[120px] sm:max-w-[200px]">
-                        {landmark || locationName}
-                      </span>
-                      <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
-                    </span>
-                  </div>
-                  {pincode && (
-                    <span className="ml-auto shrink-0 text-[12px] font-black text-orange-gradient bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
-                      📍 {pincode}
-                    </span>
-                  )}
-                </button>
-              </div>
+                    <ChevronDown className="w-4 h-4 text-orange-500 shrink-0" />
+                  </span>
+                </div>
+                {pincode && (
+                  <span className="ml-auto shrink-0 text-[12px] font-black text-orange-gradient bg-orange-50 dark:bg-[#0D0D17] border border-orange-200 dark:border-orange-500/50 px-3 py-1.5 rounded-full shadow-sm flex items-center gap-1">
+                    📍 {pincode}
+                  </span>
+                )}
+              </button>
             </div>
+          </div>
         </div>
 
         {/* ══ STICKY SEARCH & QUICK BITES ════════════════════════════ */}
         <div className="sticky top-0 z-[60] bg-white dark:bg-[#0D0D17] pt-2 pb-1">
-            {/* ══ SEARCH ════════════════════════════ */}
-            <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
-              <div className="w-full flex items-center gap-3 pt-1 pb-1">
-                <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300">
-                  <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
-                  <input
-                    suppressHydrationWarning
-                    type="text"
-                    placeholder="Search Restaurants..."
-                    className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 font-medium"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button
-                    onClick={() => setSearchQuery("")}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
-                  >
-                    <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
-                  </button>
-                </div>
+          {/* ══ SEARCH ════════════════════════════ */}
+          <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
+            <div className="w-full flex items-center gap-3 pt-1 pb-1">
+              <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300">
+                <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
+                <input
+                  suppressHydrationWarning
+                  type="text"
+                  placeholder="Search Restaurants..."
+                  className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 font-medium"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                >
+                  <X className="w-4 h-4 text-orange-500 dark:text-orange-400" />
+                </button>
+              </div>
 
-                <div className="relative shrink-0">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="relative w-[52px] h-[52px] shrink-0 flex items-center justify-center bg-white dark:bg-[#151522] rounded-full shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-transparent hover:border-orange-200 dark:hover:border-orange-500/30 transition-all duration-300 hover:scale-105 active:scale-95 group"
-                  >
-                    <Filter 
-                      className={`w-5 h-5 transition-colors duration-300 ${showFilters || foodPref !== "all" ? "text-orange-600 dark:text-orange-500" : "text-orange-500 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300"}`} 
-                      strokeWidth={2.5}
-                    />
-                    {foodPref !== "all" && (
-                      <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#0D0D17] shadow-sm" />
-                    )}
-                  </button>
-                  {/* Desktop dropdown */}
-                  {showFilters && (
-                    <div className="hidden md:block absolute right-0 top-full mt-2 z-[80] w-52 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden">
-                      <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A]">
-                        <Utensils className="w-4 h-4 text-orange-500" />
-                        <p className="font-black text-sm text-gray-900 dark:text-gray-100">
-                          Dietary Preference
-                        </p>
-                      </div>
-                      <div className="p-2 space-y-1">
-                        {(
-                          [
-                            "all",
-                            "veg",
-                            "non-veg",
-                            "avail-all",
-                            "avail-veg",
-                            "avail-non-veg",
-                          ] as const
-                        ).map((p) => {
-                          const active = foodPref === p;
-                          const label =
-                            p === "all"
-                              ? "View All"
-                              : p === "veg"
-                                ? "Pure Veg"
-                                : p === "non-veg"
-                                  ? "Non-Veg Only"
-                                  : p === "avail-all"
-                                    ? "Available (ALL)"
-                                    : p === "avail-veg"
-                                      ? "Available Veg"
-                                      : "Available Non-Veg";
-                          const activeBg =
-                            p === "all" || p === "avail-all"
-                              ? "bg-orange-500"
-                              : p === "veg" || p === "avail-veg"
-                                ? "bg-green-600"
-                                : "bg-red-600";
-                          return (
-                            <button
-                              key={p}
-                              onClick={() => {
-                                setFoodPref(p);
-                                setShowFilters(false);
-                              }}
-                              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
-                                ? `${activeBg} text-white`
-                                : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
+              <div className="relative shrink-0">
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="relative w-[52px] h-[52px] shrink-0 flex items-center justify-center bg-white dark:bg-[#151522] rounded-full shadow-[0_2px_15px_rgba(0,0,0,0.06)] border border-transparent hover:border-orange-200 dark:hover:border-orange-500/30 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                >
+                  <Filter
+                    className={`w-5 h-5 transition-colors duration-300 ${showFilters || foodPref !== "all" ? "text-orange-600 dark:text-orange-500" : "text-orange-500 dark:text-orange-400 group-hover:text-orange-600 dark:group-hover:text-orange-300"}`}
+                    strokeWidth={2.5}
+                  />
+                  {foodPref !== "all" && (
+                    <span className="absolute top-3 right-3 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-[#0D0D17] shadow-sm" />
+                  )}
+                </button>
+                {/* Desktop dropdown */}
+                {showFilters && (
+                  <div className="hidden md:block absolute right-0 top-full mt-2 z-[80] w-52 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-2xl shadow-2xl overflow-hidden">
+                    <div className="flex items-center gap-2 px-4 py-3 border-b border-gray-100 dark:border-[#2A2A3A]">
+                      <Utensils className="w-4 h-4 text-orange-500" />
+                      <p className="font-black text-sm text-gray-900 dark:text-gray-100">
+                        Dietary Preference
+                      </p>
+                    </div>
+                    <div className="p-2 space-y-1">
+                      {(
+                        [
+                          "all",
+                          "veg",
+                          "non-veg",
+                          "avail-all",
+                          "avail-veg",
+                          "avail-non-veg",
+                        ] as const
+                      ).map((p) => {
+                        const active = foodPref === p;
+                        const label =
+                          p === "all"
+                            ? "View All"
+                            : p === "veg"
+                              ? "Pure Veg"
+                              : p === "non-veg"
+                                ? "Non-Veg Only"
+                                : p === "avail-all"
+                                  ? "Available (ALL)"
+                                  : p === "avail-veg"
+                                    ? "Available Veg"
+                                    : "Available Non-Veg";
+                        const activeBg =
+                          p === "all" || p === "avail-all"
+                            ? "bg-orange-500"
+                            : p === "veg" || p === "avail-veg"
+                              ? "bg-green-600"
+                              : "bg-red-600";
+                        return (
+                          <button
+                            key={p}
+                            onClick={() => {
+                              setFoodPref(p);
+                              setShowFilters(false);
+                            }}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
+                              ? `${activeBg} text-white`
+                              : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
+                              }`}
+                          >
+                            <span>{label}</span>
+                            {/* Pill toggle */}
+                            <div
+                              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
+                                ? "bg-black/20 dark:bg-black/40"
+                                : "bg-gray-200"
                                 }`}
                             >
-                              <span>{label}</span>
-                              {/* Pill toggle */}
-                              <div
-                                className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
-                                  ? "bg-black/20 dark:bg-black/40"
-                                  : "bg-gray-200"
+                              <span
+                                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
+                                  ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
+                                  : "translate-x-0 bg-gray-400"
                                   }`}
-                              >
-                                <span
-                                  className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
-                                    ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                                    : "translate-x-0 bg-gray-400"
-                                    }`}
-                                />
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
+                              />
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
+          </div>
 
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
@@ -1343,7 +1344,12 @@ export default function HomePage() {
                     transition={{ delay: 8 * 0.04, duration: 0.3, type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <button
-                      onClick={() => setIsQuickBitesDrawerOpen(true)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        setIsQuickBitesDrawerOpen(true);
+                      }}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
                       <div className="relative w-[54px] h-[54px] transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 flex items-center justify-center isolate">
@@ -1446,6 +1452,7 @@ export default function HomePage() {
           </div>
         </div>
 
+
         {/* Quick Bites Drawer */}
         {isQuickBitesDrawerOpen && (
           <div
@@ -1454,11 +1461,11 @@ export default function HomePage() {
           />
         )}
         <div
-          className={`fixed inset-y-0 right-0 z-[80] w-80 max-w-full bg-white dark:bg-[#0D0D17] shadow-2xl flex flex-col transition-transform duration-300 ${isQuickBitesDrawerOpen ? "translate-x-0" : "translate-x-full"}`}
+          className={`fixed inset-x-0 bottom-0 z-[80] h-[85vh] rounded-t-2xl bg-white dark:bg-[#0D0D17] shadow-[0_-4px_25px_rgba(0,0,0,0.1)] flex flex-col transition-transform duration-300 ${isQuickBitesDrawerOpen ? "translate-y-0" : "translate-y-full"}`}
         >
-          <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-[#2A2A3A]">
-            <p className="font-black text-[17px] tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400 drop-shadow-sm flex items-center gap-2">
-              What are you craving?
+          <div className="flex items-center justify-between px-5 pb-3 border-b border-gray-100 dark:border-[#2A2A3A] pt-4">
+            <p className="font-black text-[17px] tracking-tight drop-shadow-sm flex items-center text-orange-600 dark:text-orange-500">
+              What are you craving for?
             </p>
             <button
               onClick={() => setIsQuickBitesDrawerOpen(false)}
@@ -1467,25 +1474,61 @@ export default function HomePage() {
               <X className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 transition-colors group-hover:rotate-90 duration-300" />
             </button>
           </div>
-          <div className="flex-1 overflow-y-auto p-5 scrollbar-hide">
-            <div className="grid grid-cols-3 gap-y-6 gap-x-4">
+          <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-y-6 gap-x-2 justify-items-center">
               {quickBites.map(({ label, image }) => (
                 <Link
                   key={label}
                   href={`/food/user/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
-                  onClick={() => setIsQuickBitesDrawerOpen(false)}
                   className="flex flex-col items-center gap-2 group outline-none"
+                  onClick={() => setIsQuickBitesDrawerOpen(false)}
                 >
-                  <div className="relative w-[70px] h-[70px] rounded-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90">
-                    <Image src={image} alt={label} fill sizes="70px" loading="lazy" className="object-contain transition-transform duration-500 group-hover:scale-110 mix-blend-darken dark:mix-blend-normal dark:hidden" />
-                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="70px" loading="lazy" className="hidden object-contain transition-transform duration-500 group-hover:scale-110 dark:block" />
+                  <div className="relative w-[64px] h-[64px] rounded-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
+                    <Image src={image} alt={label} fill sizes="64px" className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 mix-blend-darken dark:mix-blend-normal dark:hidden" />
+                    <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="64px" className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
                   </div>
-                  <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors">
+                  <span className="text-[12px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors">
                     {label}
                   </span>
                 </Link>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Hot Deals Drawer */}
+        {dealsDrawer.isOpen && (
+          <div
+            className="fixed inset-0 z-[75] bg-black/40 backdrop-blur-sm"
+            onClick={() => setDealsDrawer({ isOpen: false, type: null })}
+          />
+        )}
+        <div
+          className={`fixed inset-x-0 bottom-0 z-[80] h-[85vh] rounded-t-2xl bg-white dark:bg-[#0D0D17] shadow-[0_-4px_25px_rgba(0,0,0,0.1)] flex flex-col transition-transform duration-300 ${dealsDrawer.isOpen ? "translate-y-0" : "translate-y-full"}`}
+        >
+          <div className="flex items-center justify-between px-5 pb-3 border-b border-gray-100 dark:border-[#2A2A3A] pt-4">
+            <p className="font-black text-[17px] tracking-tight drop-shadow-sm flex items-center">
+              {renderSectionTitle(dealsDrawer.type === "under60" ? "Hot Deals Under ₹60" : "Hot Deals Under ₹130", true)}
+            </p>
+            <button
+              onClick={() => setDealsDrawer({ isOpen: false, type: null })}
+              className="group relative p-2 bg-gray-50 dark:bg-[#151522] hover:bg-red-50 dark:hover:bg-red-500/10 rounded-full border border-gray-200 dark:border-[#2A2A3A] hover:border-red-200 dark:hover:border-red-500/30 transition-all duration-300 shadow-sm hover:shadow-md active:scale-90"
+            >
+              <X className="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-red-500 transition-colors group-hover:rotate-90 duration-300" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto p-2 pt-4 pb-8 scrollbar-hide">
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 sm:gap-3 lg:gap-4">
+              {(dealsDrawer.type === "under60" ? filteredDeals60 : filteredDeals130).map((deal: any) => (
+                <DealCard key={deal.id} deal={deal} fluid onConfirmNeeded={setDealToConfirm} />
+              ))}
+            </div>
+            {(dealsDrawer.type === "under60" ? filteredDeals60 : filteredDeals130).length === 0 && (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <UtensilsCrossed className="w-10 h-10 mb-3 opacity-50" />
+                <p>No deals found.</p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1563,7 +1606,7 @@ export default function HomePage() {
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹60"
-                onViewAll={() => { }}
+                onViewAll={() => setDealsDrawer({ isOpen: true, type: "under60" })}
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
@@ -1665,7 +1708,7 @@ export default function HomePage() {
             <section className="py-3">
               <SectionHeader
                 title="Hot Deals Under ₹130"
-                onViewAll={() => { }}
+                onViewAll={() => setDealsDrawer({ isOpen: true, type: "under130" })}
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
