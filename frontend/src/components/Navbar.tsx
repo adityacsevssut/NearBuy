@@ -198,7 +198,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
             <div className={`flex p-1 rounded-xl flex-shrink-0 border ${isHeroTransparent ? 'bg-black/20 border-white/20' : 'bg-gray-100 dark:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/50'}`}>
               <button
                 onClick={() => enableFood ? router.push("/") : setShowEssentialsModal(true)}
-                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isFood
+                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 whitespace-nowrap shrink-0 ${isFood
                   ? isHeroTransparent ? `bg-white/20 text-white shadow-sm` : `bg-white dark:bg-[#0D0D17] text-orange-600 shadow-sm`
                   : isHeroTransparent ? "text-white/70 hover:text-white hover:bg-white/10" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                   }`}
@@ -209,7 +209,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
               </button>
               <button
                 onClick={() => enableStore ? router.push("/store") : setShowEssentialsModal(true)}
-                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 ${isStore
+                className={`flex items-center gap-1 md:gap-1.5 px-2.5 sm:px-3 md:px-4 py-1.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition-all duration-300 whitespace-nowrap shrink-0 ${isStore
                   ? isHeroTransparent ? `bg-white/20 text-white shadow-sm` : `bg-white dark:bg-[#0D0D17] text-blue-600 shadow-sm`
                   : isHeroTransparent ? "text-white/70 hover:text-white hover:bg-white/10" : "text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:text-gray-200 hover:bg-gray-200/50"
                   }`}
@@ -221,7 +221,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
             </div>
 
             {/* ── Desktop Quick Links ── */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 lg:gap-3 shrink-0">
               <Link
                 href={`${userBaseUrl}/wishlist`}
                 onClick={(e) => {
@@ -230,9 +230,9 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                     openLoginModal();
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
+                className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border whitespace-nowrap shrink-0 ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
               >
-                <Heart className={`w-4 h-4 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
+                <Heart className={`w-4 h-4 shrink-0 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
                 <span>Wishlist</span>
               </Link>
               <button
@@ -244,9 +244,9 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                     router.push(`${userBaseUrl}/orders`);
                   }
                 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
+                className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-xl transition-all text-sm font-bold shadow-sm active:scale-95 duration-200 border whitespace-nowrap shrink-0 ${isHeroTransparent ? 'bg-white/10 hover:bg-white/20 border-white/20 text-white' : 'bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E] border-gray-200 dark:border-[#2A2A3A]/60 text-gray-700 dark:text-gray-300'}`}
               >
-                <ShoppingBag className={`w-4 h-4 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
+                <ShoppingBag className={`w-4 h-4 shrink-0 ${isHeroTransparent ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`} />
                 <span>My Orders</span>
               </button>
             </div>
@@ -380,10 +380,10 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                     router.push(`/account${themeQuery}`);
                   }
                 }}
-                className={`hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border transition-all duration-200 group ${isHeroTransparent ? 'border-white/20 hover:border-white/40 hover:bg-white/10' : 'border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]'}`}
+                className={`hidden md:flex items-center gap-2 ml-1 px-3 py-1.5 rounded-full border transition-all duration-200 group whitespace-nowrap shrink-0 ${isHeroTransparent ? 'border-white/20 hover:border-white/40 hover:bg-white/10' : 'border-gray-200 dark:border-[#2A2A3A] hover:border-gray-300 hover:bg-gray-50 dark:hover:bg-[#151522]'}`}
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center transition-colors ${isHeroTransparent ? 'bg-white/20 group-hover:bg-white/30' : 'bg-gray-100 dark:bg-[#1F1F2E] group-hover:bg-gray-200'}`}>
-                  <UserIcon className={`w-4 h-4 ${isHeroTransparent ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`} />
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${isHeroTransparent ? 'bg-white/20 group-hover:bg-white/30' : 'bg-gray-100 dark:bg-[#1F1F2E] group-hover:bg-gray-200'}`}>
+                  <UserIcon className={`w-4 h-4 shrink-0 ${isHeroTransparent ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`} />
                 </div>
                 <span className={`text-sm font-bold ${isHeroTransparent ? 'text-white' : 'text-gray-700 dark:text-gray-300'}`}>Account</span>
               </button>
@@ -391,7 +391,7 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
               <button
                 id="login-signup-btn"
                 onClick={openLoginModal}
-                className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 text-white ${primaryBg}`}
+                className={`hidden sm:flex items-center ml-2 px-5 py-1.5 rounded-full text-sm font-bold shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 active:scale-95 text-white whitespace-nowrap shrink-0 ${primaryBg}`}
               >
                 Login
               </button>
