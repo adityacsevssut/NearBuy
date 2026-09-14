@@ -83,6 +83,7 @@ app.use("/api/cart", require("./routes/cart"));
 app.use("/api/homepage-poster", require("./routes/homepage-poster"));
 app.use("/api/share", require("./routes/share"));
 app.use("/api/notifications", require("./routes/notifications"));
+app.use("/api/feedback", require("./routes/feedback"));
 
 // ── 404 Handler ───────────────────────────────────────────────────────────
 app.use((req, res) => res.status(404).json({ error: "Route not found" }));

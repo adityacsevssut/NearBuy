@@ -469,21 +469,47 @@ router.get("/vendor", authenticate, async (req, res) => {
 });
 
 // GET /api/orders/vendor/stats
-// Get high-level stats for the vendor
+// Get high-level stats for the vendor, optionally filtered by ?date=YYYY-MM-DD
 router.get("/vendor/stats", authenticate, async (req, res) => {
   try {
-    const { rows: todayRows } = await pool.query(
-      `SELECT COUNT(*) as count FROM orders WHERE vendor_id = $1 AND DATE(created_at) = CURRENT_DATE`,
-      [req.user.id]
+    // Validate and default to today
+    const rawDate = req.query.date;
+    let filterDate;
+    if (rawDate && /^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+      filterDate = rawDate;
+    } else {
+      // Default: today in IST (UTC+5:30)
+      const now = new Date();
+      now.setMinutes(now.getMinutes() + 330); // shift to IST
+      filterDate = now.toISOString().split("T")[0];
+    }
+
+    // Orders count for selected date
+    const { rows: orderRows } = await pool.query(
+      `SELECT COUNT(*) as count FROM orders WHERE vendor_id = $1 AND DATE(created_at AT TIME ZONE 'Asia/Kolkata') = $2`,
+      [req.user.id, filterDate]
     );
+
+    // Revenue from delivered orders on selected date
     const { rows: revenueRows } = await pool.query(
-      `SELECT SUM(subtotal::numeric) as total_revenue FROM orders WHERE vendor_id = $1 AND status ILIKE 'delivered'`,
+      `SELECT COALESCE(SUM(subtotal::numeric), 0) as total_revenue
+       FROM orders
+       WHERE vendor_id = $1
+         AND status ILIKE 'delivered'
+         AND DATE(created_at AT TIME ZONE 'Asia/Kolkata') = $2`,
+      [req.user.id, filterDate]
+    );
+
+    // Overall rating from vendor_profiles (as shown on the frontend)
+    const { rows: ratingRows } = await pool.query(
+      `SELECT rating as avg_rating FROM vendor_profiles WHERE id = $1`,
       [req.user.id]
     );
 
     return res.json({
-      todaysOrders: parseInt(todayRows[0].count) || 0,
-      avgRating: 0,
+      date: filterDate,
+      todaysOrders: parseInt(orderRows[0].count) || 0,
+      avgRating: parseFloat(ratingRows[0].avg_rating) || 0,
       totalRevenue: parseFloat(revenueRows[0].total_revenue) || 0,
     });
   } catch (err) {
@@ -491,6 +517,7 @@ router.get("/vendor/stats", authenticate, async (req, res) => {
     return res.status(500).json({ error: "Failed to fetch vendor stats." });
   }
 });
+
 
 // GET /api/orders/vendor/todays
 // Get all orders for the vendor placed today
