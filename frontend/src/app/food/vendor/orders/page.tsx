@@ -260,15 +260,24 @@ export default function VendorOrdersPage() {
   const tColor = vType === "store" ? "blue" : "orange";
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#151522] flex flex-col pt-4 pb-20">
+    <div className="min-h-screen bg-[#f5f5f5] dark:bg-[#151522] flex flex-col pb-20">
 
       {/* Page Header */}
-      <div className="bg-white dark:bg-[#0D0D17] border-b border-gray-200 dark:border-[#2A2A3A] sticky top-0 z-20 shadow-sm">
+      <div className={`sticky top-0 z-20 shadow-lg ${vType === "store" ? "bg-gradient-to-r from-blue-600 to-blue-700" : "bg-gradient-to-r from-orange-500 to-orange-600"}`}>
         <div className="max-w-2xl mx-auto px-4 h-16 flex items-center gap-3">
-          <Link href="/food/vendor" className="p-2 -ml-2 rounded-xl hover:bg-gray-50 dark:hover:bg-[#151522] text-gray-700 dark:text-gray-300 transition-colors">
-            <ChevronLeft className="w-6 h-6" />
+          <Link
+            href="/food/vendor"
+            className="p-2 rounded-xl bg-white/20 hover:bg-white/30 transition-colors"
+          >
+            <ChevronLeft className="w-5 h-5 text-white" />
           </Link>
-          <h1 className="font-black text-gray-900 dark:text-gray-100 text-xl tracking-tight">Customer Orders</h1>
+          <div className="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center">
+            <Package className="w-4 h-4 text-white" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <h1 className="font-black text-[15px] text-white tracking-tight leading-tight">Customer Orders</h1>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-white/70">Vendor Portal</span>
+          </div>
         </div>
       </div>
 

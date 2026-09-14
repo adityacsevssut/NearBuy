@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X, MessageSquare } from "lucide-react";
 import { handleApiError } from "@/utils/apiError";
 
 
@@ -86,6 +86,9 @@ export default function VendorPage() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [isSubmittingRating, setIsSubmittingRating] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [feedbackMessage, setFeedbackMessage] = useState("");
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
   const { latitude, longitude } = useLocationContext();
   const { user, accessToken, openLoginModal } = useAuth();
 
@@ -271,6 +274,20 @@ export default function VendorPage() {
                   className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-amber-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-amber-200"
                 >
                   <Star className="w-4 h-4 text-amber-500" /> Rate {vendor.name}
+                </button>
+                <button
+                  onClick={() => {
+                    if (!user) {
+                      toast.error("Please log in to send feedback.");
+                      openLoginModal();
+                      return;
+                    }
+                    setFeedbackMessage("");
+                    setShowFeedbackModal(true);
+                  }}
+                  className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-purple-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-purple-200"
+                >
+                  <MessageSquare className="w-4 h-4 text-purple-500" /> Feedback
                 </button>
               </div>
 
@@ -829,6 +846,90 @@ export default function VendorPage() {
                   </button>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Modal */}
+      {showFeedbackModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => !isSubmittingFeedback && setShowFeedbackModal(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white dark:bg-[#151522] rounded-3xl overflow-hidden shadow-2xl p-6 animate-in fade-in zoom-in-95 duration-200">
+            <button
+              onClick={() => !isSubmittingFeedback && setShowFeedbackModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] rounded-full transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="mx-auto w-14 h-14 bg-purple-50 dark:bg-purple-500/10 rounded-full flex items-center justify-center mb-4">
+              <MessageSquare className="w-7 h-7 text-purple-500" />
+            </div>
+            <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 mb-1 text-center">Send Feedback</h3>
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-5 text-center">
+              Share your experience with <span className="font-bold text-gray-700 dark:text-gray-300">{vendor.name}</span>
+            </p>
+
+            <textarea
+              id="feedback-message"
+              value={feedbackMessage}
+              onChange={(e) => setFeedbackMessage(e.target.value)}
+              placeholder="Tell us what you think — food quality, packaging, delivery speed..."
+              maxLength={1000}
+              rows={5}
+              disabled={isSubmittingFeedback}
+              className="w-full resize-none rounded-xl border border-gray-200 dark:border-[#2A2A3A] bg-gray-50 dark:bg-[#0D0D17] text-sm text-gray-800 dark:text-gray-200 placeholder:text-gray-400 p-3.5 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all mb-2 disabled:opacity-60"
+            />
+            <p className="text-[11px] text-gray-400 text-right mb-5">{feedbackMessage.length}/1000</p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowFeedbackModal(false)}
+                disabled={isSubmittingFeedback}
+                className="flex-1 py-3 rounded-xl font-black text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-[#1F1F2E] hover:bg-gray-200 dark:hover:bg-[#2A2A3A] transition-colors text-sm disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={feedbackMessage.trim().length < 3 || isSubmittingFeedback}
+                onClick={async () => {
+                  if (!accessToken) {
+                    toast.error("Please login first.");
+                    return;
+                  }
+                  setIsSubmittingFeedback(true);
+                  try {
+                    const API = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+                    const res = await fetch(`${API}/api/feedback`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${accessToken}`,
+                      },
+                      body: JSON.stringify({ vendor_id: vendorId, message: feedbackMessage.trim() }),
+                    });
+                    if (res.ok) {
+                      setShowFeedbackModal(false);
+                      setFeedbackMessage("");
+                      toast.success("Feedback submitted! Thank you 🙏");
+                    } else {
+                      const err = await res.json();
+                      toast.error(err.error || "Failed to submit feedback.");
+                    }
+                  } catch {
+                    toast.error("Something went wrong. Try again.");
+                  } finally {
+                    setIsSubmittingFeedback(false);
+                  }
+                }}
+                className="flex-[1.5] py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-black text-sm uppercase tracking-wide shadow-lg shadow-purple-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {isSubmittingFeedback ? <Loader2 className="w-4 h-4 animate-spin" /> : "Submit"}
+              </button>
             </div>
           </div>
         </div>
