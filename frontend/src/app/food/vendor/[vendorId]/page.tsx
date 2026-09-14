@@ -258,9 +258,9 @@ export default function VendorPage() {
             )}
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 relative z-30 overflow-visible">
-              <div className="flex items-center gap-4 mb-6">
-                <Link href="/" className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200">
-                  <ArrowLeft className="w-4 h-4" /> Back to Home
+              <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-6">
+                <Link href="/" className="inline-flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-orange-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-orange-200">
+                  <ArrowLeft className="w-3.5 h-3.5 md:w-4 md:h-4" /> Back to Home
                 </Link>
                 <button
                   onClick={() => {
@@ -271,9 +271,9 @@ export default function VendorPage() {
                     }
                     setShowRatingModal(true);
                   }}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-amber-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-amber-200"
+                  className="inline-flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-amber-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-amber-200"
                 >
-                  <Star className="w-4 h-4 text-amber-500" /> Rate {vendor.name}
+                  <Star className="w-3.5 h-3.5 md:w-4 md:h-4 text-amber-500" /> Rate {vendor.name}
                 </button>
                 <button
                   onClick={() => {
@@ -285,9 +285,9 @@ export default function VendorPage() {
                     setFeedbackMessage("");
                     setShowFeedbackModal(true);
                   }}
-                  className="inline-flex items-center gap-2 text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-purple-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-4 py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-purple-200"
+                  className="inline-flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-bold text-gray-600 dark:text-gray-400 hover:text-purple-600 transition-colors bg-white dark:bg-[#0D0D17]/60 backdrop-blur-md px-3 md:px-4 py-1.5 md:py-2 rounded-full shadow-sm border border-gray-200 dark:border-[#2A2A3A]/50 hover:border-purple-200"
                 >
-                  <MessageSquare className="w-4 h-4 text-purple-500" /> Feedback
+                  <MessageSquare className="w-3.5 h-3.5 md:w-4 md:h-4 text-purple-500" /> Feedback
                 </button>
               </div>
 
