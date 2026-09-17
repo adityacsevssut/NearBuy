@@ -114,7 +114,7 @@ export default function VendorPage() {
 
   const maxRange = vendor && vendor.deliveryRange ? parseFloat(vendor.deliveryRange) : 5.0;
   const isOutOfRange = rawDistance !== null && rawDistance > maxRange;
-  const isClosed = vendor && vendor.isOpen === false;
+  const isClosed = vendor && (vendor.isOpen === false || vendor.isLive === false);
 
   useEffect(() => {
     const fetchVendor = async () => {

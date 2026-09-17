@@ -227,6 +227,7 @@ router.get("/vendors/:id", async (req, res) => {
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
         v.reviews,
+        v.shop_timings as "shopTimings",
         u.manager_type
       FROM vendor_profiles v
       JOIN users u ON v.user_id = u.id
@@ -235,11 +236,21 @@ router.get("/vendors/:id", async (req, res) => {
 
     if (!rows.length) return res.status(404).json({ error: "Vendor not found" });
 
+    const r = rows[0];
+    const timings = r.shopTimings || {};
+    const dynamicOpen = isShopLiveNow(timings);
+    const isLive = r.isOpen && dynamicOpen;
+    const minsToOpen = isLive ? 0 : minutesToNextOpen(timings);
+
     const vendor = {
-      ...rows[0],
+      ...r,
       badgeColor: "bg-orange-100 text-orange-700",
-      rating: rows[0].rating !== null && rows[0].rating !== undefined ? parseFloat(rows[0].rating) : 0.0,
-      reviews: rows[0].reviews !== null && rows[0].reviews !== undefined ? parseInt(rows[0].reviews) : 0
+      rating: r.rating !== null && r.rating !== undefined ? parseFloat(r.rating) : 0.0,
+      reviews: r.reviews !== null && r.reviews !== undefined ? parseInt(r.reviews) : 0,
+      dynamicOpen,
+      isLive,
+      opensIn: formatMinutes(minsToOpen),
+      timingSummary: todayTimingSummary(timings),
     };
 
     if (redis) {
@@ -463,7 +474,7 @@ router.get("/dishes/:category", async (req, res) => {
          m.id, m.category, m.name, m.description as desc, m.price, m.actual_price, m.type, m.badge, m.image_url as image_url, 
          m.is_available, m.sort_order, m.rating, m.prep_time as time, m.reviews, m.front_page_category,
          v.restaurant_name as vendor, v.user_id as vendor_id, v.latitude, v.longitude, v.delivery_range,
-         v.is_open as vendor_is_open
+         v.is_open as vendor_is_open, v.shop_timings as shop_timings
       FROM vendor_menu_items m
       JOIN vendor_profiles v ON m.vendor_id = v.user_id
       ${whereClause}
@@ -473,10 +484,17 @@ router.get("/dishes/:category", async (req, res) => {
 
     const { rows } = await pool.query(dataQuery, queryParams);
     
-    const formatted = rows.map(r => ({
-      ...r,
-      emoji: r.image_url ? "" : "🍽️", // Fallback emoji if no image
-    }));
+    const formatted = rows.map(r => {
+      const timings = r.shop_timings || {};
+      const dynamicOpen = isShopLiveNow(timings);
+      const isLive = r.vendor_is_open && dynamicOpen;
+      return {
+        ...r,
+        emoji: r.image_url ? "" : "🍽️", // Fallback emoji if no image
+        dynamicOpen,
+        isLive
+      };
+    });
 
     const responseData = { 
       dishes: formatted,
@@ -560,7 +578,7 @@ router.get("/hot-deals", async (req, res) => {
          m.id, m.name, m.price as "discountPrice", m.actual_price as "originalPrice", m.type, m.image_url as image, m.rating,
          v.restaurant_name as "restaurantName", v.user_id as "restaurantId",
          v.latitude, v.longitude, v.delivery_range as "deliveryRange",
-         v.is_open as "isOpen"
+         v.is_open as "isOpen", v.shop_timings as "shopTimings"
       FROM vendor_menu_items m
       JOIN vendor_profiles v ON m.vendor_id = v.user_id
       ${whereClause}
@@ -571,13 +589,20 @@ router.get("/hot-deals", async (req, res) => {
     const { rows } = await pool.query(dataQuery, queryParams);
     
     // Provide default values and formatting
-    const formatDeal = (r) => ({
-      ...r,
-      originalPrice: (r.originalPrice && r.originalPrice > r.discountPrice) 
-        ? r.originalPrice 
-        : Math.floor(r.discountPrice * 1.5), // fallback if originalPrice missing or invalid
-      rating: r.rating ? parseFloat(r.rating).toFixed(1) : "4.0",
-    });
+    const formatDeal = (r) => {
+      const timings = r.shopTimings || {};
+      const dynamicOpen = isShopLiveNow(timings);
+      const isLive = r.isOpen && dynamicOpen;
+      return {
+        ...r,
+        originalPrice: (r.originalPrice && r.originalPrice > r.discountPrice) 
+          ? r.originalPrice 
+          : Math.floor(r.discountPrice * 1.5), // fallback if originalPrice missing or invalid
+        rating: r.rating ? parseFloat(r.rating).toFixed(1) : "4.0",
+        dynamicOpen,
+        isLive
+      };
+    };
 
     // Extract deals (up to 50 items for each category to allow up to 100 items total)
     const under60 = rows.filter(r => parseFloat(r.discountPrice) <= 60).slice(0, 50).map(formatDeal);
@@ -831,21 +856,27 @@ router.post("/wishlist-sync", async (req, res) => {
 
     if (restaurantIds.length > 0) {
       const { rows } = await pool.query(
-        `SELECT user_id, is_open FROM vendor_profiles WHERE user_id = ANY($1::uuid[])`,
+        `SELECT user_id, is_open, shop_timings FROM vendor_profiles WHERE user_id = ANY($1::uuid[])`,
         [restaurantIds]
       );
-      rows.forEach(r => { restaurants[r.user_id] = { is_open: r.is_open }; });
+      rows.forEach(r => { 
+        const isLive = r.is_open && isShopLiveNow(r.shop_timings || {});
+        restaurants[r.user_id] = { is_open: isLive }; 
+      });
     }
 
     if (foodIds.length > 0) {
       const { rows } = await pool.query(
-        `SELECT m.id, m.is_available, v.is_open 
+        `SELECT m.id, m.is_available, v.is_open, v.shop_timings 
          FROM vendor_menu_items m 
          JOIN vendor_profiles v ON m.vendor_id = v.user_id 
          WHERE m.id = ANY($1::uuid[])`,
         [foodIds]
       );
-      rows.forEach(r => { foods[r.id] = { is_available: r.is_available, is_open: r.is_open }; });
+      rows.forEach(r => { 
+        const isLive = r.is_open && isShopLiveNow(r.shop_timings || {});
+        foods[r.id] = { is_available: r.is_available, is_open: isLive }; 
+      });
     }
 
     return res.json({ restaurants, foods });

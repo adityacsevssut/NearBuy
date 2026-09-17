@@ -163,7 +163,7 @@ function RestaurantOrderCard({
 
   const meetsMinOrder = subtotal >= minOrder;
   const isAddressValid = locationName !== "Select Location";
-  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (paymentMethod !== 'cod' || feesPaid || totalFees === 0) && !outOfRange && paymentMethod !== "" && isMobileValid && isAltMobileValid && isAddressValid;
+  const finalCanPlaceOrder = canPlaceOrder && meetsMinOrder && (paymentMethod !== 'cod' || feesPaid || totalFees === 0) && !outOfRange && paymentMethod !== "" && isMobileValid && isAltMobileValid && isAddressValid && vendorData?.isLive !== false;
 
   let missingFieldsText = "Select Address & Payment";
   if (!isAddressValid) missingFieldsText = "Add Delivery Address";
@@ -638,7 +638,16 @@ function RestaurantOrderCard({
 
       {/* ── Place Order button for THIS restaurant ── */}
       <div className="px-5 pb-5 pt-4 border-t border-orange-100/50 bg-gradient-to-b from-white to-orange-50/30 dark:from-[#0D0D17] dark:to-[#0D0D17]">
-        {outOfRange ? (
+        {vendorData?.isLive === false ? (
+          <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2.5">
+            <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-red-500 font-black text-xs">!</span>
+            </div>
+            <p className="text-xs text-red-600 font-semibold leading-snug flex-1">
+              Store is currently closed and not accepting orders.
+            </p>
+          </div>
+        ) : outOfRange ? (
           <div className="mb-3 p-3 bg-red-50 border border-red-100 rounded-xl flex items-start gap-2.5">
             <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0 mt-0.5">
               <span className="text-red-500 font-black text-xs">!</span>
@@ -673,15 +682,17 @@ function RestaurantOrderCard({
           >
             {finalCanPlaceOrder && <div className="absolute inset-0 w-full h-full bg-white dark:bg-[#0D0D17] dark:bg-[#0D0D17]/20 -translate-x-full skew-x-12 group-hover:animate-[shimmer_1.5s_infinite]" />}
             <CreditCard className="w-4 h-4" />
-            {outOfRange
-              ? "Out of Delivery Range"
-              : finalCanPlaceOrder
-                ? `Place Order · ₹${mainOrderTotal}`
-                : !(feesPaid || totalFees === 0 || paymentMethod !== 'cod') && meetsMinOrder
-                  ? "Pay Fees to Place Order"
-                  : !meetsMinOrder && minOrder > 0
-                    ? `Minimum Amount is ₹${minOrder}`
-                    : missingFieldsText}
+            {vendorData?.isLive === false
+              ? "Restaurant Closed"
+              : outOfRange
+                ? "Out of Delivery Range"
+                : finalCanPlaceOrder
+                  ? `Place Order · ₹${mainOrderTotal}`
+                  : !(feesPaid || totalFees === 0 || paymentMethod !== 'cod') && meetsMinOrder
+                    ? "Pay Fees to Place Order"
+                    : !meetsMinOrder && minOrder > 0
+                      ? `Minimum Amount is ₹${minOrder}`
+                      : missingFieldsText}
           </button>
         )}
         <p className="text-center text-[10px] text-gray-400 font-medium mt-1.5">

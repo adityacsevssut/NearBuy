@@ -204,7 +204,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       const ist = new Date(utcMs + 330 * 60000);
       const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
       const dayKey = DAY_KEYS[ist.getDay()];
-      const nowMin = ist.getHours() * 60 + ist.getMinutes();
+      const nowSec = ist.getHours() * 3600 + ist.getMinutes() * 60 + ist.getSeconds();
       const timings = typeof r.shopTimings === 'string' ? JSON.parse(r.shopTimings) : (r.shopTimings || {});
       let minDiff = Infinity;
       for (let d = 0; d < 8; d++) {
@@ -212,20 +212,21 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         const slots = timings[checkDay] || [];
         for (const slot of slots) {
           const [oh, om] = slot.open.split(':').map(Number);
-          const slotMin = d * 1440 + oh * 60 + om;
-          const diff = slotMin - nowMin;
+          const slotSec = d * 86400 + oh * 3600 + om * 60;
+          const diff = slotSec - nowSec;
           if (diff > 0 && diff < minDiff) minDiff = diff;
         }
         if (minDiff < Infinity) break;
       }
       if (isFinite(minDiff)) {
-        const h = Math.floor(minDiff / 60);
-        const m = Math.floor(minDiff % 60);
-        setCountdown(h > 0 && m > 0 ? `${h}h ${m}m` : h > 0 ? `${h}h` : `${m}m`);
+        const h = Math.floor(minDiff / 3600);
+        const m = Math.floor((minDiff % 3600) / 60);
+        const s = Math.floor(minDiff % 60);
+        setCountdown(h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`);
       }
     };
     tick();
-    const id = setInterval(tick, 60000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [isLive, manualClosed, r.shopTimings]);
 
@@ -283,13 +284,13 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               Out of Range
             </span>
           ) : (
-            // Dynamically closed — show orange countdown
+            // Dynamically closed — show red countdown
             <div className="flex flex-col items-center gap-1">
-              <span className="text-orange-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-orange-100">
+              <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
                 Closed Now
               </span>
               {countdown && (
-                <span className="text-white/80 text-[8px] font-bold text-center">
+                <span className="text-red-500 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 text-[8px] font-bold text-center">
                   Opens in {countdown}
                 </span>
               )}
@@ -366,7 +367,7 @@ function DealCard({ deal, onConfirmNeeded, fluid }: any) {
 
   const quantity = itemQty(numericId, deal.restaurantId);
   const discountPercent = Math.round(((deal.originalPrice - deal.discountPrice) / deal.originalPrice) * 100);
-  const closed = deal.isOpen === false;
+  const closed = deal.isOpen === false || deal.isLive === false;
 
   const handlePlus = (e: any) => {
     e.preventDefault();
@@ -526,7 +527,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       const ist = new Date(utcMs + 330 * 60000);
       const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
       const dayKey = DAY_KEYS[ist.getDay()];
-      const nowMin = ist.getHours() * 60 + ist.getMinutes();
+      const nowSec = ist.getHours() * 3600 + ist.getMinutes() * 60 + ist.getSeconds();
       const timings = typeof r.shopTimings === 'string' ? JSON.parse(r.shopTimings) : (r.shopTimings || {});
       let minDiff = Infinity;
       for (let d = 0; d < 8; d++) {
@@ -534,18 +535,20 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         const slots = timings[checkDay] || [];
         for (const slot of slots) {
           const [oh, om] = slot.open.split(':').map(Number);
-          const diff = d * 1440 + oh * 60 + om - nowMin;
+          const diff = d * 86400 + oh * 3600 + om * 60 - nowSec;
           if (diff > 0 && diff < minDiff) minDiff = diff;
         }
         if (minDiff < Infinity) break;
       }
       if (isFinite(minDiff)) {
-        const h = Math.floor(minDiff / 60), m = Math.floor(minDiff % 60);
-        setCountdown(h > 0 && m > 0 ? `${h}h ${m}m` : h > 0 ? `${h}h` : `${m}m`);
+        const h = Math.floor(minDiff / 3600);
+        const m = Math.floor((minDiff % 3600) / 60);
+        const s = Math.floor(minDiff % 60);
+        setCountdown(h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`);
       }
     };
     tick();
-    const id = setInterval(tick, 60000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [isLive, manualClosed, r.shopTimings]);
 
@@ -655,11 +658,11 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
             ) : (
               // Dynamically closed — show countdown
               <div className="flex flex-col items-center gap-1.5">
-                <span className="text-orange-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-orange-100">
+                <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
                   Closed Now
                 </span>
                 {countdown && (
-                  <span className="text-white/80 text-[10px] font-bold">
+                  <span className="text-red-500 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 text-[10px] font-bold">
                     Opens in {countdown}
                   </span>
                 )}
