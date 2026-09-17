@@ -492,7 +492,7 @@ router.get("/vendor/stats", authenticate, async (req, res) => {
 
     // Revenue from delivered orders on selected date
     const { rows: revenueRows } = await pool.query(
-      `SELECT COALESCE(SUM(subtotal::numeric), 0) as total_revenue
+      `SELECT COALESCE(SUM(total_amount::numeric), 0) as total_revenue
        FROM orders
        WHERE vendor_id = $1
          AND status ILIKE 'delivered'
@@ -502,15 +502,15 @@ router.get("/vendor/stats", authenticate, async (req, res) => {
 
     // Overall rating from vendor_profiles (as shown on the frontend)
     const { rows: ratingRows } = await pool.query(
-      `SELECT rating as avg_rating FROM vendor_profiles WHERE id = $1`,
+      `SELECT rating as avg_rating FROM vendor_profiles WHERE user_id = $1`,
       [req.user.id]
     );
 
     return res.json({
       date: filterDate,
-      todaysOrders: parseInt(orderRows[0].count) || 0,
-      avgRating: parseFloat(ratingRows[0].avg_rating) || 0,
-      totalRevenue: parseFloat(revenueRows[0].total_revenue) || 0,
+      todaysOrders: parseInt(orderRows[0]?.count) || 0,
+      avgRating: ratingRows.length > 0 ? (parseFloat(ratingRows[0].avg_rating) || 0) : 0,
+      totalRevenue: revenueRows.length > 0 ? (parseFloat(revenueRows[0].total_revenue) || 0) : 0,
     });
   } catch (err) {
     console.error("Get vendor stats error:", err);

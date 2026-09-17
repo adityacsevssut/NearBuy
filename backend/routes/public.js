@@ -4,6 +4,7 @@ const pool = require("../config/db");
 const validate = require("../middleware/validate");
 const { updateSettingsSchema } = require("../validators/manager.validators");
 const { authenticate } = require("../middleware/auth");
+const { isShopLiveNow, minutesToNextOpen, formatMinutes, todayTimingSummary } = require("../utils/shopTimings");
 
 // Redis cache integration
 const redis = require("../config/redis");
@@ -125,6 +126,7 @@ router.get("/vendors", async (req, res) => {
         v.is_open as "isOpen",
         v.delivery_range as "deliveryRange",
         v.reviews,
+        v.shop_timings as "shopTimings",
         u.manager_type,
         u.first_name,
         u.last_name
@@ -144,14 +146,24 @@ router.get("/vendors", async (req, res) => {
     `;
     const { rows } = await pool.query(dataQuery, queryParams);
     
-    const formatted = rows.map(r => ({
-      ...r,
-      badgeColor: "bg-orange-100 text-orange-700",
-      rating: r.rating !== null && r.rating !== undefined ? parseFloat(r.rating) : 0.0,
-      reviews: r.reviews !== null && r.reviews !== undefined ? parseInt(r.reviews) : 0,
-      veg: r.cuisine ? r.cuisine.toLowerCase().includes('veg') : false,
-      ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim()
-    }));
+    const formatted = rows.map(r => {
+      const timings = r.shopTimings || {};
+      const dynamicOpen = isShopLiveNow(timings);
+      const isLive = r.isOpen && dynamicOpen;
+      const minsToOpen = isLive ? 0 : minutesToNextOpen(timings);
+      return {
+        ...r,
+        badgeColor: "bg-orange-100 text-orange-700",
+        rating: r.rating !== null && r.rating !== undefined ? parseFloat(r.rating) : 0.0,
+        reviews: r.reviews !== null && r.reviews !== undefined ? parseInt(r.reviews) : 0,
+        veg: r.cuisine ? r.cuisine.toLowerCase().includes('veg') : false,
+        ownerName: `${r.first_name || "Guest"} ${r.last_name || ""}`.trim(),
+        dynamicOpen,
+        isLive,
+        opensIn: formatMinutes(minsToOpen),
+        timingSummary: todayTimingSummary(timings),
+      };
+    });
 
     const responseData = {
       data: formatted,

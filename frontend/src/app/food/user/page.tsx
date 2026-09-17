@@ -187,8 +187,47 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   );
   const oor =
     raw != null && raw > (r.deliveryRange ? parseFloat(r.deliveryRange) : 5);
-  const closed = r.isOpen === false;
-  const dim = oor || closed;
+  // Use isLive (dynamic timing-aware) if available, else fall back to isOpen
+  const isLive = r.isLive !== undefined ? r.isLive : r.isOpen !== false;
+  const manualClosed = r.isOpen === false;
+  const dim = oor || !isLive;
+
+  // Live countdown state (ticks every minute)
+  const [countdown, setCountdown] = useState<string | null>(r.opensIn || null);
+  useEffect(() => {
+    if (isLive || manualClosed || !r.shopTimings) return;
+    // Recompute every minute using frontend timing util
+    const tick = () => {
+      // Simple IST helper
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const ist = new Date(utcMs + 330 * 60000);
+      const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+      const dayKey = DAY_KEYS[ist.getDay()];
+      const nowMin = ist.getHours() * 60 + ist.getMinutes();
+      const timings = typeof r.shopTimings === 'string' ? JSON.parse(r.shopTimings) : (r.shopTimings || {});
+      let minDiff = Infinity;
+      for (let d = 0; d < 8; d++) {
+        const checkDay = DAY_KEYS[(DAY_KEYS.indexOf(dayKey) + d) % 7];
+        const slots = timings[checkDay] || [];
+        for (const slot of slots) {
+          const [oh, om] = slot.open.split(':').map(Number);
+          const slotMin = d * 1440 + oh * 60 + om;
+          const diff = slotMin - nowMin;
+          if (diff > 0 && diff < minDiff) minDiff = diff;
+        }
+        if (minDiff < Infinity) break;
+      }
+      if (isFinite(minDiff)) {
+        const h = Math.floor(minDiff / 60);
+        const m = Math.floor(minDiff % 60);
+        setCountdown(h > 0 && m > 0 ? `${h}h ${m}m` : h > 0 ? `${h}h` : `${m}m`);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [isLive, manualClosed, r.shopTimings]);
 
   return (
     <Link
@@ -229,9 +268,33 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
       {/* Dim overlay */}
       {dim && (
         <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 pointer-events-none">
-          <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
-            {closed ? "Closed Now" : "Out of Range"}
-          </span>
+          {manualClosed ? (
+            // Vendor manually closed — red, no countdown
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+                Shop Closed
+              </span>
+              <span className="text-white/70 text-[8px] font-bold text-center px-2">
+                Not accepting orders
+              </span>
+            </div>
+          ) : oor ? (
+            <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+              Out of Range
+            </span>
+          ) : (
+            // Dynamically closed — show orange countdown
+            <div className="flex flex-col items-center gap-1">
+              <span className="text-orange-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-orange-100">
+                Closed Now
+              </span>
+              {countdown && (
+                <span className="text-white/80 text-[8px] font-bold text-center">
+                  Opens in {countdown}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -245,17 +308,24 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
           <p className="font-bold text-[13px] text-white leading-tight line-clamp-1 drop-shadow-sm flex-1">
             {r.name}
           </p>
-          {!closed ? (
+          {isLive && !oor ? (
             <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-green-500/20 border border-green-400/30 text-[7px] font-bold text-green-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
               <span className="w-1 h-1 rounded-full bg-green-400 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
               Open
             </span>
-          ) : (
+          ) : manualClosed ? (
+            // Manual close — red, no countdown ever
             <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[7px] font-bold text-red-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
               <span className="w-1 h-1 rounded-full bg-red-400"></span>
-              Offline
+              Closed
             </span>
-          )}
+          ) : !oor && countdown ? (
+            // Dynamic close — orange countdown
+            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[7px] font-bold text-orange-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+              <Clock className="w-2 h-2" />
+              {countdown}
+            </span>
+          ) : null}
         </div>
 
         {/* Rating, Time, Distance Row */}
@@ -442,8 +512,42 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
   );
   const oor =
     raw != null && raw > (r.deliveryRange ? parseFloat(r.deliveryRange) : 5);
-  const closed = r.isOpen === false;
-  const dim = oor || closed;
+  const isLive = r.isLive !== undefined ? r.isLive : r.isOpen !== false;
+  const manualClosed = r.isOpen === false;
+  const dim = oor || !isLive;
+
+  // Live countdown
+  const [countdown, setCountdown] = useState<string | null>(r.opensIn || null);
+  useEffect(() => {
+    if (isLive || manualClosed || !r.shopTimings) return;
+    const tick = () => {
+      const now = new Date();
+      const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+      const ist = new Date(utcMs + 330 * 60000);
+      const DAY_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+      const dayKey = DAY_KEYS[ist.getDay()];
+      const nowMin = ist.getHours() * 60 + ist.getMinutes();
+      const timings = typeof r.shopTimings === 'string' ? JSON.parse(r.shopTimings) : (r.shopTimings || {});
+      let minDiff = Infinity;
+      for (let d = 0; d < 8; d++) {
+        const checkDay = DAY_KEYS[(DAY_KEYS.indexOf(dayKey) + d) % 7];
+        const slots = timings[checkDay] || [];
+        for (const slot of slots) {
+          const [oh, om] = slot.open.split(':').map(Number);
+          const diff = d * 1440 + oh * 60 + om - nowMin;
+          if (diff > 0 && diff < minDiff) minDiff = diff;
+        }
+        if (minDiff < Infinity) break;
+      }
+      if (isFinite(minDiff)) {
+        const h = Math.floor(minDiff / 60), m = Math.floor(minDiff % 60);
+        setCountdown(h > 0 && m > 0 ? `${h}h ${m}m` : h > 0 ? `${h}h` : `${m}m`);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 60000);
+    return () => clearInterval(id);
+  }, [isLive, manualClosed, r.shopTimings]);
 
   return (
     <Link
@@ -534,9 +638,33 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         {/* Dim overlay for Closed/OOR */}
         {dim && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none">
-            <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
-              {closed ? "Closed Now" : "Out of Range"}
-            </span>
+            {manualClosed ? (
+              // Vendor manually closed — red, no countdown
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
+                  Shop Closed
+                </span>
+                <span className="text-white/80 text-[10px] font-bold">
+                  Not accepting orders
+                </span>
+              </div>
+            ) : oor ? (
+              <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
+                Out of Range
+              </span>
+            ) : (
+              // Dynamically closed — show countdown
+              <div className="flex flex-col items-center gap-1.5">
+                <span className="text-orange-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-orange-100">
+                  Closed Now
+                </span>
+                {countdown && (
+                  <span className="text-white/80 text-[10px] font-bold">
+                    Opens in {countdown}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -582,17 +710,24 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 </span>
               )}
             </div>
-            {!closed ? (
+            {isLive && !oor ? (
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-green-500/20 border border-green-400/30 text-[8px] font-bold text-green-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
                 <span className="w-1 h-1 rounded-full bg-green-400 animate-[pulse_1.5s_ease-in-out_infinite]"></span>
                 Open
               </span>
-            ) : (
+            ) : manualClosed ? (
+              // Manual close — no countdown, just red badge
               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[8px] font-bold text-red-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
                 <span className="w-1 h-1 rounded-full bg-red-400"></span>
-                Offline
+                Closed
               </span>
-            )}
+            ) : !oor && countdown ? (
+              // Dynamic close — live orange countdown only
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[8px] font-bold text-orange-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                <Clock className="w-2.5 h-2.5" />
+                {countdown}
+              </span>
+            ) : null}
           </div>
 
           {/* Offer */}

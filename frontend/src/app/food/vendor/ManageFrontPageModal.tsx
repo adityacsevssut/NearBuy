@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag, Heart, Send } from "lucide-react";
+import { X, Save, Image as ImageIcon, MapPin, Loader2, Navigation, Star, Clock, Tag, Heart, Send, Plus, Trash2 } from "lucide-react";
+import ClockPicker from "./ClockPicker";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationContext } from "@/context/LocationContext";
@@ -46,6 +47,33 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
 
   const [isRatingSet, setIsRatingSet] = useState(false);
 
+  // ── Day-wise shop timings ──────────────────────────────────────────────────
+  const DAY_KEYS = ['mon','tue','wed','thu','fri','sat','sun'];
+  const DAY_LABELS: Record<string,string> = {
+    mon:'Monday', tue:'Tuesday', wed:'Wednesday', thu:'Thursday',
+    fri:'Friday', sat:'Saturday', sun:'Sunday'
+  };
+  const DAY_SHORT: Record<string,string> = {
+    mon:'Mon', tue:'Tue', wed:'Wed', thu:'Thu', fri:'Fri', sat:'Sat', sun:'Sun'
+  };
+  type Slot = { open: string; close: string };
+  type Timings = Record<string, Slot[]>;
+  const defaultTimings = (): Timings => Object.fromEntries(DAY_KEYS.map(d => [d, []]));
+  const [shopTimings, setShopTimings] = useState<Timings>(defaultTimings());
+  const [activeDay, setActiveDay] = useState<string>('mon');
+  const [sameEveryDay, setSameEveryDay] = useState(false);
+  const [sameSlots, setSameSlots] = useState<Slot[]>([{ open: '09:00', close: '21:00' }]);
+  // openPicker: "dayKey-slotIdx-open" | "dayKey-slotIdx-close" | null
+  const [openPicker, setOpenPicker] = useState<string | null>(null);
+
+  // Format "HH:MM" → "h:mm AM/PM" for display
+  const fmt12 = (t: string) => {
+    const [hh, mm] = t.split(':').map(Number);
+    const ampm = hh < 12 ? 'AM' : 'PM';
+    const h12 = hh === 0 ? 12 : hh > 12 ? hh - 12 : hh;
+    return `${h12}:${String(mm).padStart(2,'0')} ${ampm}`;
+  };
+
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -79,6 +107,27 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
         });
         
         setIsRatingSet(parseFloat(data.profile.rating || "0") > 0 || parseInt(data.profile.reviews || "0") > 0);
+
+        // Load shop timings
+        if (data.profile.shop_timings) {
+          const loaded = typeof data.profile.shop_timings === 'string'
+            ? JSON.parse(data.profile.shop_timings)
+            : data.profile.shop_timings;
+          // Detect "same every day" mode: all days have identical slots
+          const isSame = loaded._sameEveryDay === true;
+          if (isSame && loaded._sameSlots) {
+            setSameEveryDay(true);
+            setSameSlots(loaded._sameSlots);
+            setShopTimings({ ...defaultTimings(), ...loaded });
+          } else {
+            setSameEveryDay(false);
+            setShopTimings({ ...defaultTimings(), ...loaded });
+          }
+        } else {
+          setSameEveryDay(false);
+          setSameSlots([{ open: '09:00', close: '21:00' }]);
+          setShopTimings(defaultTimings());
+        }
 
         // Preserve the current open/closed state so saving this modal never resets it
         setCurrentIsOpen(data.profile.is_open ?? false);
@@ -211,6 +260,16 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
       Object.entries(formData).forEach(([key, value]) =>
         form.append(key, value)
       );
+      // Append shop_timings as JSON string
+      // If sameEveryDay mode, expand slots to all 7 days + store meta flags
+      const finalTimings = sameEveryDay
+        ? {
+            ...Object.fromEntries(DAY_KEYS.map(d => [d, sameSlots])),
+            _sameEveryDay: true,
+            _sameSlots: sameSlots,
+          }
+        : shopTimings;
+      form.append('shop_timings', JSON.stringify(finalTimings));
       // Always send back the current is_open value so we don't accidentally reset it
       if (currentIsOpen !== null) {
         form.append("is_open", String(currentIsOpen));
@@ -557,6 +616,288 @@ export default function ManageFrontPageModal({ isOpen, onClose, vendorType }: Ma
                       placeholder="e.g. Shop No 4, Kirba Chowk, Near Main Gate, Burla"
                     />
                   </div>
+                </div>
+
+                {/* ════════ Shop Timings ════════ */}
+                <div className="mt-8 pt-6 border-t border-gray-100 dark:border-[#2A2A3A] space-y-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-black text-gray-900 dark:text-gray-100">Shop Timings</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Your shop auto-goes live/offline based on these times.</p>
+                    </div>
+                    {/* Mode toggle */}
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mode</span>
+                      <div className="flex rounded-xl border border-gray-200 dark:border-[#2A2A3A] overflow-hidden text-[11px] font-black">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSameEveryDay(true);
+                            const existing = shopTimings[activeDay] || [];
+                            setSameSlots(existing.length > 0 ? existing : [{ open: '09:00', close: '21:00' }]);
+                          }}
+                          className={`px-3 py-1.5 transition-colors ${sameEveryDay ? `bg-${tColor}-500 text-white` : 'bg-white dark:bg-[#0D0D17] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]'}`}
+                        >
+                          Same daily
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSameEveryDay(false);
+                            if (sameSlots.length > 0) {
+                              setShopTimings(Object.fromEntries(DAY_KEYS.map(d => [d, sameSlots])));
+                            }
+                          }}
+                          className={`px-3 py-1.5 transition-colors ${!sameEveryDay ? `bg-${tColor}-500 text-white` : 'bg-white dark:bg-[#0D0D17] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1F1F2E]'}`}
+                        >
+                          Day-wise
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {sameEveryDay ? (
+                    /* ── Same timing every day ── */
+                    <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A3A] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-black text-gray-700 dark:text-gray-300">All Days (Mon – Sun)</span>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {sameSlots.length === 0 ? 'Closed every day' : `${sameSlots.length} slot${sameSlots.length > 1 ? 's' : ''} · all days`}
+                        </span>
+                      </div>
+
+                      {sameSlots.map((slot, idx) => {
+                        const openKey = `same-${idx}-open`;
+                        const closeKey = `same-${idx}-close`;
+                        return (
+                        <div key={idx} className="flex items-center gap-2 bg-white dark:bg-[#0D0D17] rounded-xl px-3 py-2.5 border border-gray-200 dark:border-[#2A2A3A]">
+                          <div className="flex items-center gap-2 flex-1 flex-wrap">
+                            {/* Open time */}
+                            <div className="flex items-center gap-1.5 relative">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">Open</span>
+                              <button
+                                type="button"
+                                onClick={() => setOpenPicker(openPicker === openKey ? null : openKey)}
+                                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
+                                  openPicker === openKey
+                                    ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-md`
+                                    : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-800 dark:text-gray-100 hover:border-orange-400'
+                                }`}
+                              >
+                                <Clock className={`w-3 h-3 ${openPicker === openKey ? 'text-white' : `text-${tColor}-500`}`} />
+                                {fmt12(slot.open)}
+                              </button>
+                              <AnimatePresence>
+                                {openPicker === openKey && (
+                                  <ClockPicker
+                                    value={slot.open}
+                                    onChange={v => { const u=[...sameSlots]; u[idx]={...u[idx],open:v}; setSameSlots(u); }}
+                                    onClose={() => setOpenPicker(null)}
+                                  />
+                                )}
+                              </AnimatePresence>
+                            </div>
+                            <span className="text-gray-300 font-bold">→</span>
+                            {/* Close time */}
+                            <div className="flex items-center gap-1.5 relative">
+                              <span className="text-[10px] font-bold text-gray-400 uppercase">Close</span>
+                              <button
+                                type="button"
+                                onClick={() => setOpenPicker(openPicker === closeKey ? null : closeKey)}
+                                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
+                                  openPicker === closeKey
+                                    ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-md`
+                                    : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-800 dark:text-gray-100 hover:border-orange-400'
+                                }`}
+                              >
+                                <Clock className={`w-3 h-3 ${openPicker === closeKey ? 'text-white' : `text-${tColor}-500`}`} />
+                                {fmt12(slot.close)}
+                              </button>
+                              <AnimatePresence>
+                                {openPicker === closeKey && (
+                                  <ClockPicker
+                                    value={slot.close}
+                                    onChange={v => { const u=[...sameSlots]; u[idx]={...u[idx],close:v}; setSameSlots(u); }}
+                                    onClose={() => setOpenPicker(null)}
+                                  />
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setSameSlots(sameSlots.filter((_, i) => i !== idx))}
+                            className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors shrink-0"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        );
+                      })}
+
+                      {sameSlots.length < 3 && (
+                        <button
+                          type="button"
+                          onClick={() => setSameSlots([...sameSlots, { open: '09:00', close: '21:00' }])}
+                          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-${tColor}-300 dark:border-${tColor}-800 text-${tColor}-500 text-xs font-black hover:bg-${tColor}-50 dark:hover:bg-${tColor}-900/10 transition-colors`}
+                        >
+                          <Plus className="w-4 h-4" />
+                          Add Another Slot
+                        </button>
+                      )}
+
+                      {sameSlots.length === 0 && (
+                        <p className="text-center text-[11px] text-gray-400 py-1">No slots — shop will be <span className="font-black text-red-400">closed</span> all week</p>
+                      )}
+
+                      {sameSlots.length > 0 && (
+                        <div className={`flex items-center gap-2 px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/10 border border-green-100 dark:border-green-900/30`}>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Applied to:</span>
+                          <div className="flex gap-1 flex-wrap">
+                            {DAY_KEYS.map(d => (
+                              <span key={d} className="text-[10px] font-black px-1.5 py-0.5 rounded-md bg-green-500/10 text-green-600 dark:text-green-400">
+                                {DAY_SHORT[d]}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* ── Day-wise ── */
+                    <>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {DAY_KEYS.map(d => {
+                          const hasSlots = shopTimings[d]?.length > 0;
+                          const isActive = activeDay === d;
+                          return (
+                            <button
+                              key={d}
+                              type="button"
+                              onClick={() => setActiveDay(d)}
+                              className={`px-3 py-1.5 rounded-xl text-[11px] font-black transition-all border ${
+                                isActive
+                                  ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-md`
+                                  : hasSlots
+                                  ? `bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800`
+                                  : `bg-gray-100 dark:bg-[#1F1F2E] text-gray-500 dark:text-gray-400 border-gray-200 dark:border-[#2A2A3A] hover:border-${tColor}-300`
+                              }`}
+                            >
+                              {DAY_SHORT[d]}
+                              {hasSlots && !isActive && <span className="ml-1 text-[8px]">●</span>}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      <div className="bg-gray-50 dark:bg-[#151522] rounded-2xl p-4 border border-gray-200 dark:border-[#2A2A3A] space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-black text-gray-700 dark:text-gray-300">{DAY_LABELS[activeDay]}</span>
+                          <span className="text-[10px] text-gray-400 font-medium">
+                            {shopTimings[activeDay]?.length === 0 ? 'Closed this day' : `${shopTimings[activeDay]?.length} slot${shopTimings[activeDay]?.length > 1 ? 's' : ''}`}
+                          </span>
+                        </div>
+
+                        {shopTimings[activeDay]?.map((slot, idx) => {
+                          const openKey = `${activeDay}-${idx}-open`;
+                          const closeKey = `${activeDay}-${idx}-close`;
+                          return (
+                          <div key={idx} className="flex items-center gap-2 bg-white dark:bg-[#0D0D17] rounded-xl px-3 py-2.5 border border-gray-200 dark:border-[#2A2A3A]">
+                            <div className="flex items-center gap-2 flex-1 flex-wrap">
+                              {/* Open time */}
+                              <div className="flex items-center gap-1.5 relative">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">Open</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setOpenPicker(openPicker === openKey ? null : openKey)}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
+                                    openPicker === openKey
+                                      ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-md`
+                                      : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-800 dark:text-gray-100 hover:border-orange-400'
+                                  }`}
+                                >
+                                  <Clock className={`w-3 h-3 ${openPicker === openKey ? 'text-white' : `text-${tColor}-500`}`} />
+                                  {fmt12(slot.open)}
+                                </button>
+                                <AnimatePresence>
+                                  {openPicker === openKey && (
+                                    <ClockPicker
+                                      value={slot.open}
+                                      onChange={v => {
+                                        const updated = [...shopTimings[activeDay]];
+                                        updated[idx] = { ...updated[idx], open: v };
+                                        setShopTimings(prev => ({ ...prev, [activeDay]: updated }));
+                                      }}
+                                      onClose={() => setOpenPicker(null)}
+                                    />
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                              <span className="text-gray-300 font-bold">→</span>
+                              {/* Close time */}
+                              <div className="flex items-center gap-1.5 relative">
+                                <span className="text-[10px] font-bold text-gray-400 uppercase">Close</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setOpenPicker(openPicker === closeKey ? null : closeKey)}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs font-black transition-all ${
+                                    openPicker === closeKey
+                                      ? `bg-${tColor}-500 text-white border-${tColor}-500 shadow-md`
+                                      : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-800 dark:text-gray-100 hover:border-orange-400'
+                                  }`}
+                                >
+                                  <Clock className={`w-3 h-3 ${openPicker === closeKey ? 'text-white' : `text-${tColor}-500`}`} />
+                                  {fmt12(slot.close)}
+                                </button>
+                                <AnimatePresence>
+                                  {openPicker === closeKey && (
+                                    <ClockPicker
+                                      value={slot.close}
+                                      onChange={v => {
+                                        const updated = [...shopTimings[activeDay]];
+                                        updated[idx] = { ...updated[idx], close: v };
+                                        setShopTimings(prev => ({ ...prev, [activeDay]: updated }));
+                                      }}
+                                      onClose={() => setOpenPicker(null)}
+                                    />
+                                  )}
+                                </AnimatePresence>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const updated = shopTimings[activeDay].filter((_, i) => i !== idx);
+                                setShopTimings(prev => ({ ...prev, [activeDay]: updated }));
+                              }}
+                              className="w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors shrink-0"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                          );
+                        })}
+
+                        {(shopTimings[activeDay]?.length || 0) < 3 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newSlot: Slot = { open: '09:00', close: '21:00' };
+                              setShopTimings(prev => ({ ...prev, [activeDay]: [...(prev[activeDay] || []), newSlot] }));
+                            }}
+                            className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-${tColor}-300 dark:border-${tColor}-800 text-${tColor}-500 text-xs font-black hover:bg-${tColor}-50 dark:hover:bg-${tColor}-900/10 transition-colors`}
+                          >
+                            <Plus className="w-4 h-4" />
+                            Add Time Slot
+                          </button>
+                        )}
+
+                        {(shopTimings[activeDay]?.length || 0) === 0 && (
+                          <p className="text-center text-[11px] text-gray-400 py-1">No slots — shop will be <span className="font-black text-red-400">closed</span> all day on {DAY_LABELS[activeDay]}</p>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </div>
               </form>
               </div>

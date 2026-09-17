@@ -15,9 +15,11 @@ const upsertProfileSchema = Joi.object({
   pincode:            Joi.string().trim().max(10).optional().allow("", null),
   landmark:           Joi.string().trim().max(150).optional().allow("", null),
   rating:             Joi.number().min(0).max(5).optional().allow(null, ""),
+  reviews:            Joi.number().integer().min(0).optional().allow(null, ""),
   is_open:            Joi.boolean().optional(),
   delivery_range:     Joi.number().min(0).max(100).optional().allow(null, ""),
-  existing_image_url: Joi.string().uri().optional().allow("", null)
+  existing_image_url: Joi.string().optional().allow("", null),
+  shop_timings:       Joi.string().optional().allow("", null),  // JSON string
 });
 
 module.exports = { upsertProfileSchema };
