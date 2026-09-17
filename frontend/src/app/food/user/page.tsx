@@ -222,7 +222,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         const h = Math.floor(minDiff / 3600);
         const m = Math.floor((minDiff % 3600) / 60);
         const s = Math.floor(minDiff % 60);
-        setCountdown(h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`);
+        setCountdown(h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`);
       }
     };
     tick();
@@ -289,11 +289,6 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
                 Closed Now
               </span>
-              {countdown && (
-                <span className="text-red-500 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 text-[8px] font-bold text-center">
-                  Opens in {countdown}
-                </span>
-              )}
             </div>
           )}
         </div>
@@ -321,11 +316,18 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               Closed
             </span>
           ) : !oor ? (
-            // Dynamic close — show Offline
-            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[7px] font-bold text-red-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
-              <span className="w-1 h-1 rounded-full bg-red-400"></span>
-              Offline
-            </span>
+            // Dynamic close — show countdown instead of Offline
+            countdown ? (
+              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[7.5px] font-bold text-orange-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+                <Clock className="w-2 h-2 text-orange-400" />
+                in {countdown}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[7px] font-bold text-red-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+                <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                Closed
+              </span>
+            )
           ) : null}
         </div>
 
@@ -544,7 +546,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
         const h = Math.floor(minDiff / 3600);
         const m = Math.floor((minDiff % 3600) / 60);
         const s = Math.floor(minDiff % 60);
-        setCountdown(h > 0 ? `${h}h ${m}m ${s}s` : m > 0 ? `${m}m ${s}s` : `${s}s`);
+        setCountdown(h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${s}s` : `${s}s`);
       }
     };
     tick();
@@ -661,11 +663,6 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 <span className="text-red-500 bg-white font-black text-[12px] uppercase px-3 py-1 rounded-full shadow-sm border border-red-100">
                   Closed Now
                 </span>
-                {countdown && (
-                  <span className="text-red-500 bg-white px-2 py-0.5 rounded-full shadow-sm border border-red-100 text-[10px] font-bold">
-                    Opens in {countdown}
-                  </span>
-                )}
               </div>
             )}
           </div>
@@ -725,11 +722,18 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 Closed
               </span>
             ) : !oor ? (
-              // Dynamic close — show Offline
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[8px] font-bold text-red-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
-                <span className="w-1 h-1 rounded-full bg-red-400"></span>
-                Offline
-              </span>
+              // Dynamic close — show countdown instead of Offline
+              countdown ? (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[8.5px] font-bold text-orange-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                  <Clock className="w-2.5 h-2.5 text-orange-400" />
+                  in {countdown}
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[8px] font-bold text-red-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                  <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                  Closed
+                </span>
+              )
             ) : null}
           </div>
 
