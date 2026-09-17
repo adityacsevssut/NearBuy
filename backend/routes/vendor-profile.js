@@ -8,6 +8,12 @@ const { upsertProfileSchema } = require("../validators/vendorProfile.validators"
 const { createClient } = require("@supabase/supabase-js");
 const redis = require("../config/redis");
 const { verifyImageSignature } = require("../utils/fileUpload");
+const { isShopLiveNow, minutesToNextOpen, formatMinutes, todayTimingSummary } = require("../utils/shopTimings");
+
+// ── One-time migration: add shop_timings column if missing ────────────────────
+pool.query(`ALTER TABLE vendor_profiles ADD COLUMN IF NOT EXISTS shop_timings JSONB DEFAULT '[]'`)
+  .then(() => console.log("[migration] shop_timings column ready"))
+  .catch(err => console.error("[migration] shop_timings:", err.message));
 
 // Initialize Supabase Storage client
 // NOTE: SUPABASE_URL and SUPABASE_ANON_KEY must be set in .env
@@ -42,10 +48,49 @@ router.get("/", authenticate, async (req, res) => {
     if (!rows.length) {
       return res.json({ profile: null });
     }
-    return res.json({ profile: rows[0] });
+    const profile = rows[0];
+    const timings = profile.shop_timings || {};
+    const dynamicOpen = isShopLiveNow(timings);
+    const minsToOpen = dynamicOpen ? 0 : minutesToNextOpen(timings);
+    return res.json({
+      profile: {
+        ...profile,
+        dynamic_open: dynamicOpen,
+        opens_in: formatMinutes(minsToOpen),
+        timing_summary: todayTimingSummary(timings),
+      }
+    });
   } catch (err) {
     console.error("GET /api/vendor-profile error:", err);
     return res.status(500).json({ error: "Failed to load profile." });
+  }
+});
+
+// GET /api/vendor-profile/live-status?vendor_id=xxx  (public, no auth)
+router.get("/live-status", async (req, res) => {
+  try {
+    const { vendor_id } = req.query;
+    if (!vendor_id) return res.status(400).json({ error: "vendor_id required" });
+    const { rows } = await pool.query(
+      "SELECT is_open, shop_timings FROM vendor_profiles WHERE user_id = $1",
+      [vendor_id]
+    );
+    if (!rows.length) return res.status(404).json({ error: "Vendor not found" });
+    const { is_open, shop_timings } = rows[0];
+    const timings = shop_timings || {};
+    const dynamicOpen = isShopLiveNow(timings);
+    const isLive = is_open && dynamicOpen;
+    const minsToOpen = isLive ? 0 : minutesToNextOpen(timings);
+    return res.json({
+      isLive,
+      dynamicOpen,
+      manualOpen: is_open,
+      opensIn: formatMinutes(minsToOpen),
+      timingSummary: todayTimingSummary(timings),
+    });
+  } catch (err) {
+    console.error("GET /api/vendor-profile/live-status error:", err);
+    return res.status(500).json({ error: "Failed to fetch live status." });
   }
 });
 
@@ -81,6 +126,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       reviews,
       is_open,
       delivery_range,
+      shop_timings,
     } = req.body;
 
     // Merge incoming values with existing ones
@@ -118,6 +164,16 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
     const delivery_range_val = !isNaN(parsedDeliveryRange)
       ? parsedDeliveryRange 
       : (existing.delivery_range !== undefined && existing.delivery_range !== null ? parseFloat(existing.delivery_range) : 5.0);
+
+    // Parse shop_timings — accept JSON string or object
+    let final_shop_timings = existing.shop_timings || {};
+    if (shop_timings !== undefined && shop_timings !== null && shop_timings !== "") {
+      try {
+        final_shop_timings = typeof shop_timings === "string" ? JSON.parse(shop_timings) : shop_timings;
+      } catch (e) {
+        console.warn("Invalid shop_timings JSON:", shop_timings);
+      }
+    }
 
     let imageUrl = existing.image_url || "";
     if (req.body.existing_image_url !== undefined) {
@@ -163,9 +219,9 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
       `INSERT INTO vendor_profiles (
         user_id, restaurant_name, cuisine, delivery_time, min_order, 
         offer, badge, image_url, gps_address, manual_address, 
-        latitude, longitude, pincode, landmark, rating, reviews, is_open, delivery_range
+        latitude, longitude, pincode, landmark, rating, reviews, is_open, delivery_range, shop_timings
       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
        ON CONFLICT (user_id) DO UPDATE SET
         restaurant_name = EXCLUDED.restaurant_name,
         cuisine = EXCLUDED.cuisine,
@@ -184,6 +240,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
         reviews = EXCLUDED.reviews,
         is_open = EXCLUDED.is_open,
         delivery_range = EXCLUDED.delivery_range,
+        shop_timings = EXCLUDED.shop_timings,
         updated_at = NOW()
        RETURNING *`,
       [
@@ -205,6 +262,7 @@ router.post("/", authenticate, upload.single("image"), validate(upsertProfileSch
         final_reviews,
         is_open_val,
         delivery_range_val,
+        JSON.stringify(final_shop_timings),
       ]
     );
 

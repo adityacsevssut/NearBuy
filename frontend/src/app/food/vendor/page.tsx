@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   LogOut, Store, ShoppingBag, LayoutTemplate,
   Utensils, MessageSquare, UserCircle, ChevronRight,
@@ -76,6 +76,9 @@ export default function VendorDashboard() {
   const [profile, setProfile] = useState<any>(null);
   const [isOpenToggle, setIsOpenToggle] = useState(true);
   const [vendorStats, setVendorStats] = useState({ todaysOrders: 0, avgRating: 0, totalRevenue: 0 });
+  const [dynamicOpen, setDynamicOpen] = useState<boolean | null>(null);
+  const [timingSummary, setTimingSummary] = useState<string | null>(null);
+  const [opensIn, setOpensIn] = useState<string | null>(null);
 
   // Default to today in IST (UTC+5:30)
   const getTodayIST = () => {
@@ -85,6 +88,7 @@ export default function VendorDashboard() {
   };
   const [selectedDate, setSelectedDate] = useState<string>(getTodayIST);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const fetchProfile = async () => {
     try {
@@ -99,6 +103,9 @@ export default function VendorDashboard() {
         if (data.profile) {
           setProfile(data.profile);
           setIsOpenToggle(data.profile.is_open ?? false);
+          setDynamicOpen(data.profile.dynamic_open ?? null);
+          setTimingSummary(data.profile.timing_summary || null);
+          setOpensIn(data.profile.opens_in || null);
         }
       }
     } catch (err) {
@@ -371,26 +378,54 @@ export default function VendorDashboard() {
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.05 }}
-              className="flex items-center gap-3 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] px-4 py-2.5 rounded-2xl shadow-sm self-start md:self-center"
+              className="flex flex-col gap-2 self-start md:self-center"
             >
-              <div className="flex flex-col text-left">
-                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Shop Status</span>
-                <span className={`text-[13px] font-black mt-1 ${isOpenToggle ? "text-green-600" : "text-red-500"}`}>
-                  {isOpenToggle ? "Accepting Orders" : "Closed / Offline"}
-                </span>
-              </div>
-              <button
-                onClick={handleToggleOpenClosed}
-                className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 relative focus:outline-none flex items-center ${
-                  isOpenToggle ? "bg-green-500" : "bg-gray-300"
-                }`}
-              >
-                <div
-                  className={`w-5 h-5 rounded-full bg-white dark:bg-[#0D0D17] shadow-md transform transition-transform duration-300 ${
-                    isOpenToggle ? "translate-x-5" : "translate-x-0"
+              {/* Main toggle row */}
+              <div className="flex items-center gap-3 bg-gray-50 dark:bg-[#151522] border border-gray-100 dark:border-[#2A2A3A] px-4 py-2.5 rounded-2xl shadow-sm">
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Shop Status</span>
+                  <span className={`text-[13px] font-black mt-1 ${
+                    !isOpenToggle ? 'text-red-500'
+                    : dynamicOpen === false ? 'text-orange-500'
+                    : 'text-green-600'
+                  }`}>
+                    {!isOpenToggle
+                      ? 'Closed / Offline'
+                      : dynamicOpen === false
+                      ? 'Outside Hours'
+                      : 'Accepting Orders'
+                    }
+                  </span>
+                </div>
+                <button
+                  onClick={handleToggleOpenClosed}
+                  className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 relative focus:outline-none flex items-center ${
+                    isOpenToggle ? "bg-green-500" : "bg-gray-300"
                   }`}
-                />
-              </button>
+                >
+                  <div
+                    className={`w-5 h-5 rounded-full bg-white dark:bg-[#0D0D17] shadow-md transform transition-transform duration-300 ${
+                      isOpenToggle ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div>
+              {/* Timing summary chip */}
+              {timingSummary && (
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-[10px] font-bold ${
+                  isOpenToggle && dynamicOpen
+                    ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400'
+                    : isOpenToggle && dynamicOpen === false
+                    ? 'bg-orange-50 dark:bg-orange-900/10 border-orange-200 dark:border-orange-800 text-orange-600 dark:text-orange-400'
+                    : 'bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-500'
+                }`}>
+                  <CalendarDays className="w-3 h-3 shrink-0" />
+                  <span className="truncate max-w-[180px]">{timingSummary}</span>
+                  {isOpenToggle && dynamicOpen === false && opensIn && (
+                    <span className="ml-1 font-black text-orange-500">· Opens in {opensIn}</span>
+                  )}
+                </div>
+              )}
             </motion.div>
           </div>
 
@@ -407,9 +442,18 @@ export default function VendorDashboard() {
                 </button>
               )}
               {/* Styled date picker button */}
-              <label
-                htmlFor="stats-date-picker"
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer transition-all shadow-sm select-none
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (dateInputRef.current && 'showPicker' in HTMLInputElement.prototype) {
+                    try {
+                      dateInputRef.current.showPicker();
+                    } catch (err) {
+                      console.error(err);
+                    }
+                  }
+                }}
+                className={`relative flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer transition-all shadow-sm select-none
                   ${isToday
                     ? `bg-white dark:bg-[#0D0D17] border-gray-200 dark:border-[#2A2A3A] hover:border-orange-300`
                     : `${t.iconBg} border-orange-300`
@@ -422,14 +466,15 @@ export default function VendorDashboard() {
                   })}
                 </span>
                 <input
+                  ref={dateInputRef}
                   id="stats-date-picker"
                   type="date"
                   value={selectedDate}
                   max={getTodayIST()}
                   onChange={(e) => setSelectedDate(e.target.value)}
-                  className="sr-only"
+                  className="absolute bottom-0 left-1/2 w-0 h-0 opacity-0 pointer-events-none"
                 />
-              </label>
+              </button>
             </div>
           </div>
 
