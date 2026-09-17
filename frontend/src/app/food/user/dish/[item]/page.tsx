@@ -234,7 +234,7 @@ export default function DishPage() {
               const vendorLon = dish.longitude ? parseFloat(dish.longitude) : null;
               const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
               const isOutOfRange = rawDistance != null && rawDistance > (dish.delivery_range ? parseFloat(dish.delivery_range) : 5);
-              const isClosed = dish.vendor_is_open === false;
+              const isClosed = dish.vendor_is_open === false || dish.isLive === false;
               const isUnavailable = isOutOfRange || isClosed;
 
               return (
@@ -492,7 +492,7 @@ export default function DishPage() {
           const vendorLon = selectedFood.longitude ? parseFloat(selectedFood.longitude) : null;
           const rawDistance = getDistance(latitude ? parseFloat(latitude.toString()) : null, longitude ? parseFloat(longitude.toString()) : null, vendorLat, vendorLon);
           const isOutOfRange = rawDistance != null && rawDistance > (selectedFood.delivery_range ? parseFloat(selectedFood.delivery_range) : 5);
-          const isClosed = selectedFood.vendor_is_open === false;
+          const isClosed = selectedFood.vendor_is_open === false || selectedFood.isLive === false;
           const isUnavailable = isOutOfRange || isClosed;
 
           return (
