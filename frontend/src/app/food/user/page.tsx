@@ -320,11 +320,11 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
               <span className="w-1 h-1 rounded-full bg-red-400"></span>
               Closed
             </span>
-          ) : !oor && countdown ? (
-            // Dynamic close — orange countdown
-            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[7px] font-bold text-orange-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
-              <Clock className="w-2 h-2" />
-              {countdown}
+          ) : !oor ? (
+            // Dynamic close — show Offline
+            <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[7px] font-bold text-red-300 uppercase tracking-wider shrink-0 shadow-sm backdrop-blur-sm mt-0.5">
+              <span className="w-1 h-1 rounded-full bg-red-400"></span>
+              Offline
             </span>
           ) : null}
         </div>
@@ -724,11 +724,11 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
                 <span className="w-1 h-1 rounded-full bg-red-400"></span>
                 Closed
               </span>
-            ) : !oor && countdown ? (
-              // Dynamic close — live orange countdown only
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-[8px] font-bold text-orange-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
-                <Clock className="w-2.5 h-2.5" />
-                {countdown}
+            ) : !oor ? (
+              // Dynamic close — show Offline
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-red-500/20 border border-red-400/30 text-[8px] font-bold text-red-300 uppercase tracking-wider shrink-0 backdrop-blur-sm">
+                <span className="w-1 h-1 rounded-full bg-red-400"></span>
+                Offline
               </span>
             ) : null}
           </div>
