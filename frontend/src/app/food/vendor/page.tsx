@@ -8,6 +8,7 @@ import {
   Utensils, MessageSquare, UserCircle, ChevronRight,
   Pill, Package, TrendingUp, Star, Boxes, MapPin, ChevronDown, CheckCircle, Save, PhoneCall, CalendarDays, Menu, X
 } from "lucide-react";
+import ThemeSwitch from "@/components/ThemeSwitch";
 import { motion } from "framer-motion";
 import { useLocationContext } from "@/context/LocationContext";
 import ManageFrontPageModal from "./ManageFrontPageModal";
@@ -397,18 +398,11 @@ export default function VendorDashboard() {
                     }
                   </span>
                 </div>
-                <button
-                  onClick={handleToggleOpenClosed}
-                  className={`w-11 h-6 rounded-full p-0.5 transition-colors duration-300 relative focus:outline-none flex items-center ${
-                    isOpenToggle ? "bg-green-500" : "bg-gray-300"
-                  }`}
-                >
-                  <div
-                    className={`w-5 h-5 rounded-full bg-white dark:bg-[#0D0D17] shadow-md transform transition-transform duration-300 ${
-                      isOpenToggle ? "translate-x-5" : "translate-x-0"
-                    }`}
-                  />
-                </button>
+                <ThemeSwitch 
+                  checked={isOpenToggle} 
+                  onChange={handleToggleOpenClosed}
+                  themeColor="orange"
+                />
               </div>
               {/* Timing summary chip */}
               {timingSummary && (

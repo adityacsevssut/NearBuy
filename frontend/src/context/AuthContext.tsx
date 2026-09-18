@@ -108,10 +108,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           // Fallback: use stored token if refresh endpoint is temporarily down (network error)
           setAccessToken(token);
         }
+        setIsInitializing(false); // ✅ Only mark done AFTER token is resolved
       });
+    } else {
+      setIsInitializing(false); // No stored user — mark done immediately
     }
-    
-    setIsInitializing(false);
 
     // Refresh token when app comes back to foreground (Capacitor background freezing fix)
     const handleVisibilityChange = () => {

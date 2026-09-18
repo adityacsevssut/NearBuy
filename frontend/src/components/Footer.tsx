@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowRight, Zap, Heart } from "lucide-react";
 import { FaInstagram, FaTelegramPlane, FaWhatsapp, FaTwitter, FaLinkedinIn } from "react-icons/fa";
 import BusinessRequestModal from "./BusinessRequestModal";
@@ -10,6 +10,7 @@ import SupportModal from "./SupportModal";
 import RefundModal from "./RefundModal";
 import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
+import { Capacitor } from "@capacitor/core";
 
 export default function Footer() {
   const { isLoggedIn, openLoginModal } = useAuth();
@@ -28,6 +29,11 @@ export default function Footer() {
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRefundOpen, setIsRefundOpen] = useState(false);
+
+  const [isNative, setIsNative] = useState(false);
+  useEffect(() => {
+    setIsNative(Capacitor.isNativePlatform());
+  }, []);
 
   const links: Record<string, { name: string, href: string, onClick?: (e: any) => void }[]> = {
     ZyphCart: [
@@ -92,7 +98,9 @@ export default function Footer() {
             </div>
 
             {/* Links Columns */}
-            <div className="md:col-span-7 lg:col-span-7 grid grid-cols-2 lg:grid-cols-5 gap-8">
+            {!isNative && (
+              <>
+                <div className="md:col-span-7 lg:col-span-7 grid grid-cols-2 lg:grid-cols-5 gap-8">
               {Object.entries(links).map(([category, items]) => (
                 <div key={category}>
                   <h4 className="text-[13px] font-black uppercase tracking-wider text-gray-900 dark:text-gray-100 mb-5">
@@ -138,17 +146,21 @@ export default function Footer() {
                 ))}
               </div>
             </div>
+              </>
+            )}
 
           </div>
 
           {/* Bottom bar */}
-          <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
+          {!isNative && (
+            <div className="flex flex-col items-center justify-center pt-6 border-t border-gray-100 dark:border-[#2A2A3A]">
             {/* Copyright */}
             <div className="text-[12px] text-gray-400 font-medium text-center">
               Copyright {new Date().getFullYear()} © <span className={logoGradient}>Zyph</span><span className="text-black dark:text-white">Cart</span> Interactive<br />
               Platform by Students Of VSSUT Burla
             </div>
           </div>
+          )}
         </div>
       </footer>
       <BusinessRequestModal

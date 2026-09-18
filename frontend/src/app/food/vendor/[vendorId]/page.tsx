@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X, MessageSquare } from "lucide-react";
+import { ArrowLeft, Star, Clock, Filter, Plus, Heart, Loader2, Store, Utensils, ArrowDown, ChevronDown, LayoutList, Phone, Share2, Navigation, Send, X, MessageSquare, CalendarDays } from "lucide-react";
 import { handleApiError } from "@/utils/apiError";
 
 
@@ -89,6 +89,7 @@ export default function VendorPage() {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  const [showTimingsModal, setShowTimingsModal] = useState(false);
   const { latitude, longitude } = useLocationContext();
   const { user, accessToken, openLoginModal } = useAuth();
 
@@ -233,11 +234,30 @@ export default function VendorPage() {
     <div className="min-h-screen bg-white dark:bg-[#151522] flex flex-col">
       {/* Warning Banner */}
       {!isLoading && vendor && (isClosed || isOutOfRange) && (
-        <div className="bg-red-50 border-b border-red-100 px-4 py-3 flex items-center justify-center text-center">
-          <p className="text-xs sm:text-sm font-black text-red-600 uppercase tracking-wider">
-            ⚠️ {isClosed ? "This restaurant is temporarily closed and not accepting orders" : "This restaurant does not deliver to your location"}
-          </p>
-        </div>
+        <>
+          <style>{`
+            @keyframes marquee-classic {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+            .animate-marquee-classic {
+              display: flex;
+              width: max-content;
+              animation: marquee-classic 20s linear infinite;
+              will-change: transform;
+            }
+          `}</style>
+          <div className="overflow-hidden w-full bg-orange-500 shadow-[0_4px_20px_rgba(249,115,22,0.4)] z-10 relative">
+            <div className="animate-marquee-classic py-3 text-[13px] font-black text-white uppercase tracking-[0.2em]">
+               {[...Array(4)].map((_, i) => (
+                 <span key={i} className="flex items-center whitespace-nowrap">
+                   <span className="mx-8 text-yellow-300">⚠️</span>
+                   {isClosed ? "This restaurant is temporarily closed and not accepting orders" : "This restaurant does not deliver to your location"}
+                 </span>
+               ))}
+            </div>
+          </div>
+        </>
       )}
 
       {isLoading ? (
@@ -320,6 +340,14 @@ export default function VendorPage() {
                       <span className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl border border-emerald-100/50 shadow-sm">
                         Min Order: ₹{vendor.minOrder}
                       </span>
+                    )}
+                    {vendor.shopTimings && Object.keys(vendor.shopTimings).length > 0 && (
+                      <button 
+                        onClick={() => setShowTimingsModal(true)}
+                        className="flex items-center gap-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 px-3 py-1.5 rounded-xl border border-purple-100/50 shadow-sm transition-colors cursor-pointer"
+                      >
+                        <CalendarDays className="w-4 h-4 text-purple-500" /> Timings
+                      </button>
                     )}
                   </div>
 
@@ -1045,7 +1073,83 @@ export default function VendorPage() {
         </div>
       )}
 
+      {showTimingsModal && (
+        <TimingsModal 
+          isOpen={showTimingsModal}
+          onClose={() => setShowTimingsModal(false)}
+          shopTimings={vendor.shopTimings}
+        />
+      )}
+
       <MobileBottomNav />
     </div>
   );
 }
+const TimingsModal = ({ isOpen, onClose, shopTimings }: { isOpen: boolean, onClose: () => void, shopTimings: any }) => {
+  if (!isOpen) return null;
+
+  const DAY_LABELS: Record<string, string> = {
+    monday: 'Monday', tuesday: 'Tuesday', wednesday: 'Wednesday', thursday: 'Thursday', friday: 'Friday', saturday: 'Saturday', sunday: 'Sunday'
+  };
+
+  const formatTime = (timeStr: string) => {
+    if (!timeStr) return '';
+    const [hours, minutes] = timeStr.split(':');
+    const h = parseInt(hours, 10);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const formattedHours = h % 12 || 12;
+    return `${formattedHours}:${minutes} ${ampm}`;
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-[#151522] rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden border border-gray-100 dark:border-[#2A2A3A] animate-in fade-in zoom-in-95 duration-200">
+        <div className="p-5 border-b border-gray-100 dark:border-[#2A2A3A] flex items-center justify-between bg-gray-50/50 dark:bg-[#1A1A27]">
+          <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">
+            <CalendarDays className="w-5 h-5 text-purple-500" />
+            Shop Timings
+          </h2>
+          <button onClick={onClose} className="p-2 bg-gray-200/50 hover:bg-gray-200 dark:bg-[#2A2A3A] dark:hover:bg-[#353545] rounded-full transition-colors">
+            <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+          </button>
+        </div>
+        <div className="p-5 space-y-3">
+          {Object.entries(DAY_LABELS).map(([key, label]) => {
+            let slots = shopTimings?.[key];
+            
+            // Handle "Same Every Day" legacy/compact format
+            if (shopTimings?._sameEveryDay) {
+              slots = shopTimings._sameSlots;
+            }
+
+            const hasSlots = slots && slots.length > 0;
+            const isToday = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() === key;
+
+            return (
+              <div key={key} className={`flex items-start justify-between p-3 rounded-xl transition-colors ${isToday ? 'bg-purple-50 dark:bg-purple-900/10 border border-purple-100 dark:border-purple-800/30' : 'hover:bg-gray-50 dark:hover:bg-[#1A1A27]'}`}>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-bold ${isToday ? 'text-purple-700 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                    {label}
+                  </span>
+                  {isToday && <span className="text-[9px] font-black uppercase tracking-wider bg-purple-200 dark:bg-purple-800 text-purple-700 dark:text-purple-200 px-1.5 py-0.5 rounded-md">Today</span>}
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  {!hasSlots ? (
+                    <span className="text-xs font-bold text-red-500 bg-red-50 dark:bg-red-900/20 px-2 py-0.5 rounded-md">Closed</span>
+                  ) : (
+                    slots.map((slot: any, idx: number) => (
+                      <span key={idx} className={`text-xs font-semibold ${isToday ? 'text-purple-900 dark:text-purple-300' : 'text-gray-600 dark:text-gray-400'}`}>
+                        {formatTime(slot.open)} - {formatTime(slot.close)}
+                      </span>
+                    ))
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
