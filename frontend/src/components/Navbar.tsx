@@ -40,16 +40,34 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
   const [enableFood, setEnableFood] = useState(true);
   const [enableStore, setEnableStore] = useState(true); // Force enabled for this branch
 
-  const [isScrolled, setIsScrolled] = useState(false);
+  const navRef = useRef<HTMLElement>(null);
+  const [isHeroMode, setIsHeroMode] = useState(true); // tracks only text color threshold
+  const HERO_END = 260; // px after which navbar is fully white
+
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+    const onScroll = () => {
+      const y = window.scrollY;
+      const progress = Math.min(y / HERO_END, 1); // 0 → 1
+
+      // Update background directly on the DOM element — zero React re-renders
+      if (navRef.current && pathname === '/food/user' && !mobileMenuOpen) {
+        // White bg fades in as you scroll (rgba interpolation)
+        const whiteAlpha = progress * 0.97;
+        const blurPx = Math.round(progress * 12);
+        navRef.current.style.backgroundColor = `rgba(255,255,255,${whiteAlpha})`;
+        navRef.current.style.backdropFilter = progress > 0.05 ? `blur(${blurPx}px)` : 'none';
+        navRef.current.style.setProperty('-webkit-backdrop-filter', progress > 0.05 ? `blur(${blurPx}px)` : 'none');
+      }
+
+      // Only update React state at the midpoint (for text color swap)
+      setIsHeroMode(y < HERO_END / 2);
     };
-    // Initial check
-    handleScroll();
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+
+    onScroll(); // run on mount
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, mobileMenuOpen]);
 
   useEffect(() => {
     async function fetchSettings() {
@@ -133,8 +151,8 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
     ? "text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-400 dark:from-blue-400 dark:to-blue-300"
     : "text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-500 dark:from-orange-400 dark:to-red-400";
 
-  const isHeroTransparent = !forceSolid && isFood && !isScrolled && pathname === '/food/user' && !mobileMenuOpen;
-  const isHeroMatching = !forceSolid && isFood && !isScrolled && pathname === '/food/user' && !mobileMenuOpen;
+  const isHeroTransparent = !forceSolid && isFood && isHeroMode && pathname === '/food/user' && !mobileMenuOpen;
+  const isHeroMatching    = isHeroTransparent;
 
   const suggestions = [
     "🍛 Biryani near VSSUT",
@@ -153,7 +171,13 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
 
   return (
     <>
-      <nav className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${mobileMenuOpen ? 'bg-white dark:bg-[#0D0D17]' : isHeroMatching ? 'bg-transparent' : 'backdrop-blur-md bg-white/95 dark:bg-[#0D0D17]/95'}`}>
+      <nav
+        ref={navRef}
+        className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${
+          mobileMenuOpen ? 'bg-white dark:bg-[#0D0D17]' : ''
+        }`}
+        style={pathname === '/food/user' && !mobileMenuOpen ? {} : undefined}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 
           {/* ── Hamburger (Mobile only) ── */}
@@ -452,34 +476,6 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
                 <p className="text-xs font-bold text-white/80 mt-1 relative z-10">{enableStore ? "Order Now" : "Coming Soon"}</p>
               </motion.div>
 
-              {/* Install App Button */}
-              <motion.button
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ delay: 0.25, ease: [0.25, 1, 0.5, 1] }}
-                onClick={() => {
-                  /* Add install prompt logic here if available */
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full mt-2 py-4 px-5 bg-gradient-to-r from-gray-900 to-black dark:from-white dark:to-gray-200 text-white dark:text-black rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-white/20 relative overflow-hidden active:scale-95 transition-all flex items-center justify-between group border border-gray-800 dark:border-white/50"
-              >
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className="w-11 h-11 rounded-2xl bg-white/10 dark:bg-black/10 flex items-center justify-center backdrop-blur-md shadow-inner border border-white/10 dark:border-black/10">
-                    <Download className="w-5 h-5" />
-                  </div>
-                  <div className="text-left">
-                    <h3 className="font-black text-[17px] leading-tight mb-0.5 tracking-wide">Install ZyphCart</h3>
-                    <p className="text-[11px] font-bold opacity-70 tracking-wider uppercase">Get The App</p>
-                  </div>
-                </div>
-                <div className="w-9 h-9 rounded-full bg-white/10 dark:bg-black/10 flex items-center justify-center relative z-10 group-hover:bg-white/20 dark:group-hover:bg-black/20 transition-colors">
-                  <ChevronRight className="w-4 h-4" />
-                </div>
-                {/* Decorative background effects */}
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 dark:bg-black/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 dark:bg-black/5 rounded-full blur-xl -ml-8 -mb-8 pointer-events-none"></div>
-              </motion.button>
             </div>
           </motion.div>
         )}

@@ -34,6 +34,7 @@ import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
+import ThemeSwitch from "@/components/ThemeSwitch";
 import { useCart } from "@/context/CartContext";
 
 
@@ -963,7 +964,53 @@ export default function HomePage() {
   const [showFilters, setShowFilters] = useState(false);
   const [isQuickBitesDrawerOpen, setIsQuickBitesDrawerOpen] = useState(false);
 
+  const searchPlaceholders = [
+    "Search Restaurants...",
+    "Search Pizza...",
+    "Search Biryani...",
+    "Search Fast Food...",
+    "Search Desserts..."
+  ];
+  const placeholderRef = useRef<HTMLSpanElement>(null);
 
+  useEffect(() => {
+    let currentIndex = 0;
+    let currentText = "";
+    let isDeleting = false;
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const tick = () => {
+      const target = searchPlaceholders[currentIndex];
+
+      if (!isDeleting) {
+        currentText = target.substring(0, currentText.length + 1);
+      } else {
+        currentText = target.substring(0, currentText.length - 1);
+      }
+
+      if (placeholderRef.current) {
+        placeholderRef.current.textContent = currentText;
+      }
+
+      let delay = isDeleting ? 35 : 70;
+
+      if (!isDeleting && currentText === target) {
+        // Pause at full word
+        delay = 1800;
+        isDeleting = true;
+      } else if (isDeleting && currentText === "") {
+        isDeleting = false;
+        currentIndex = (currentIndex + 1) % searchPlaceholders.length;
+        delay = 300;
+      }
+
+      timeoutId = setTimeout(tick, delay);
+    };
+
+    timeoutId = setTimeout(tick, 400);
+    return () => clearTimeout(timeoutId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const {
     locationName,
     landmark,
@@ -1345,16 +1392,28 @@ export default function HomePage() {
           {/* ══ SEARCH ════════════════════════════ */}
           <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
             <div className="w-full flex items-center gap-3 pt-1 pb-1">
-              <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300">
+              <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300 relative">
                 <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
-                <input
-                  suppressHydrationWarning
-                  type="text"
-                  placeholder="Search Restaurants..."
-                  className="flex-1 min-w-0 bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none placeholder:text-gray-400 font-medium"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <div className="flex-1 min-w-0 relative">
+                  {/* Animated placeholder overlay */}
+                  {!searchQuery && (
+                    <span className="absolute inset-0 flex items-center pointer-events-none select-none">
+                      <span
+                        ref={placeholderRef}
+                        className="text-[15px] text-gray-400 font-medium"
+                      />
+                      <span className="inline-block w-[2px] h-[15px] ml-[1px] bg-orange-400 rounded-full animate-pulse" />
+                    </span>
+                  )}
+                  <input
+                    suppressHydrationWarning
+                    type="text"
+                    placeholder=""
+                    className="w-full bg-transparent text-[15px] text-gray-900 dark:text-gray-100 outline-none font-medium relative z-10"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
                 <button
                   onClick={() => setSearchQuery("")}
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 hover:bg-orange-100 dark:hover:bg-orange-500/20 transition-colors ml-2 ${searchQuery ? "opacity-100" : "opacity-0 pointer-events-none"}`}
@@ -1416,33 +1475,37 @@ export default function HomePage() {
                               ? "bg-green-600"
                               : "bg-red-600";
                         return (
-                          <button
+                          <div
                             key={p}
                             onClick={() => {
-                              setFoodPref(p);
+                              if (active && p !== "all") {
+                                setFoodPref("all");
+                              } else {
+                                setFoodPref(p);
+                              }
                               setShowFilters(false);
                             }}
-                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${active
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer ${active
                               ? `${activeBg} text-white`
                               : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#151522]"
                               }`}
                           >
                             <span>{label}</span>
-                            {/* Pill toggle */}
-                            <div
-                              className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active
-                                ? "bg-black/20 dark:bg-black/40"
-                                : "bg-gray-200"
-                                }`}
-                            >
-                              <span
-                                className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
-                                  ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                                  : "translate-x-0 bg-gray-400"
-                                  }`}
+                            <div onClick={(e) => e.stopPropagation()}>
+                              <ThemeSwitch 
+                                checked={active}
+                                onChange={(checked) => {
+                                  if (checked) {
+                                    setFoodPref(p);
+                                  } else if (p !== "all") {
+                                    setFoodPref("all");
+                                  }
+                                  setShowFilters(false);
+                                }}
+                                themeColor="orange"
                               />
                             </div>
-                          </button>
+                          </div>
                         );
                       })}
                     </div>
@@ -1564,31 +1627,37 @@ export default function HomePage() {
                     ? "bg-green-600"
                     : "bg-red-600";
               return (
-                <button
+                <div
                   key={p}
-                  onClick={() => {
-                    setFoodPref(p);
-                    setShowFilters(false);
-                  }}
-                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all ${active
+                  className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl text-sm font-bold transition-all cursor-pointer ${active
                     ? `${activeBg} text-white shadow-md`
                     : "text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-[#151522] hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
                     }`}
+                  onClick={() => {
+                    if (active && p !== "all") {
+                      setFoodPref("all");
+                    } else {
+                      setFoodPref(p);
+                    }
+                    setShowFilters(false);
+                  }}
                 >
                   <span>{label}</span>
-                  {/* Pill toggle */}
-                  <div
-                    className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${active ? "bg-black/20 dark:bg-black/40" : "bg-gray-200"
-                      }`}
-                  >
-                    <span
-                      className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${active
-                        ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                        : "translate-x-0 bg-gray-400"
-                        }`}
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <ThemeSwitch 
+                      checked={active}
+                      onChange={(checked) => {
+                        if (checked) {
+                          setFoodPref(p);
+                        } else if (p !== "all") {
+                          setFoodPref("all");
+                        }
+                        setShowFilters(false);
+                      }}
+                      themeColor="orange"
                     />
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
@@ -1923,34 +1992,24 @@ export default function HomePage() {
                 )}
               </h2>
 
-              {/* Responsive Veg pill toggle */}
-              <button
-                onClick={() =>
-                  setFoodPref((p) => (p === "veg" ? "all" : "veg"))
-                }
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl border-2 shrink-0 transition-all duration-200 ${foodPref === "veg"
+              <div
+                className={`flex items-center gap-4 px-3 py-2 rounded-xl border-2 shrink-0 transition-all duration-200 cursor-pointer ${foodPref === "veg"
                   ? "bg-green-600 border-green-600 text-white shadow-md shadow-green-200 dark:shadow-green-900/30"
                   : "bg-gray-50 dark:bg-[#151522] border-gray-200 dark:border-[#2A2A3A] text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1F1F2E]"
                   }`}
+                onClick={() => setFoodPref((p) => (p === "veg" ? "all" : "veg"))}
               >
                 <span className="text-[13px] font-black whitespace-nowrap">
                   Pure Veg
                 </span>
-                {/* Mini toggle track */}
-                <div
-                  className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${foodPref === "veg"
-                    ? "bg-black/20 dark:bg-black/40"
-                    : "bg-gray-200"
-                    }`}
-                >
-                  <span
-                    className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full shadow-sm transition-transform duration-200 ${foodPref === "veg"
-                      ? "translate-x-4 bg-white dark:bg-[#0D0D17]"
-                      : "translate-x-0 bg-gray-400"
-                      }`}
+                <div onClick={(e) => e.stopPropagation()}>
+                  <ThemeSwitch 
+                    checked={foodPref === "veg"}
+                    onChange={(checked) => setFoodPref(checked ? "veg" : "all")}
+                    themeColor="orange"
                   />
                 </div>
-              </button>
+              </div>
             </div>
 
             {isLoading ? (

@@ -12,6 +12,7 @@ import {
 import toast from "react-hot-toast";
 import dynamic from 'next/dynamic';
 import GeoapifySearch, { ResolvedGeoapifyAddress } from "@/components/GeoapifySearch";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 
 const DevMap = dynamic(() => import('@/components/DevMap'), { 
@@ -801,10 +802,11 @@ export default function DevDashboard() {
                     <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Food Module</span>
                     <span className="text-[10px] text-gray-400 font-medium">Enable Food Delivery</span>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={enableFood} onChange={(e) => setEnableFood(e.target.checked)} />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-orange-500"></div>
-                  </label>
+                  <ThemeSwitch 
+                    checked={enableFood} 
+                    onChange={setEnableFood} 
+                    themeColor="orange" 
+                  />
                 </div>
                 
                 <div className="flex items-center justify-between bg-gray-50 dark:bg-[#151522] p-4 rounded-xl border border-gray-200 dark:border-[#2A2A3A]">
@@ -812,10 +814,11 @@ export default function DevDashboard() {
                     <span className="font-bold text-gray-900 dark:text-gray-100 text-sm">Store Module</span>
                     <span className="text-[10px] text-gray-400 font-medium">Enable Essentials Store</span>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" className="sr-only peer" checked={enableStore} onChange={(e) => setEnableStore(e.target.checked)} />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500"></div>
-                  </label>
+                  <ThemeSwitch 
+                    checked={enableStore} 
+                    onChange={setEnableStore} 
+                    themeColor="blue" 
+                  />
                 </div>
 
 
