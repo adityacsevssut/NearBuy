@@ -17,30 +17,21 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     setMounted(true);
-    const storedTheme = localStorage.getItem("theme") as Theme | null;
-    if (storedTheme) {
-      setTheme(storedTheme);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      // For now, default is light as per user request, but we can respect system preference later
-      // Default to light
-      setTheme("light");
-    }
+    setTheme("light");
   }, []);
 
   useEffect(() => {
     if (!mounted) return;
     
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    
-    localStorage.setItem("theme", theme);
+    // Always force light mode
+    document.documentElement.classList.remove("dark");
+    localStorage.setItem("theme", "light");
   }, [theme, mounted]);
 
   const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+    import("react-hot-toast").then((module) => {
+      module.default("This feature will be available soon", { icon: "🚧" });
+    });
   };
 
   return (

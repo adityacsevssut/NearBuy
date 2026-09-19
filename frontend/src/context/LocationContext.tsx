@@ -297,10 +297,14 @@ export function LocationProvider({ children }: { children: React.ReactNode }) {
           await refreshSavedAddresses();
         } else {
           const errText = await res.text();
-          console.error("[LocationContext] Failed to save address to DB:", res.status, errText);
+          if (res.status === 401 || res.status === 403) {
+             console.warn("[LocationContext] Session expired or unauthorized when saving address.");
+          } else {
+             console.warn("[LocationContext] Failed to save address to DB:", res.status, errText);
+          }
         }
       } catch (err) {
-        console.error("[LocationContext] Network or fetch error in addSavedAddress:", err);
+        console.warn("[LocationContext] Network or fetch error in addSavedAddress:", err);
       }
     },
     [isLoggedIn, accessToken, apiBase, savedAddresses, refreshSavedAddresses]

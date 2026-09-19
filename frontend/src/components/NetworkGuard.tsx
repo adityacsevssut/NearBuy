@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { RefreshCcw, WifiOff } from "lucide-react";
+import { RefreshCcw, Wifi, Plane, BarChart2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -54,40 +54,73 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
     <>
       {/* Offline Overlay - always in DOM so images preload, but hidden when online */}
       <div 
-        className={`fixed inset-0 z-[9999] bg-[#f5f5f5] dark:bg-[#0D0D17] flex-col font-sans overflow-y-auto ${isOffline ? 'flex' : 'hidden'}`}
+        className={`fixed inset-0 z-[9999] bg-[#FAFAFA] dark:bg-[#0D0D17] flex-col font-sans overflow-y-auto ${isOffline ? 'flex' : 'hidden'}`}
       >
         <div className="flex-none w-full">
           <Navbar forceSolid />
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-4 text-center mt-20 mb-20 md:mb-0">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 text-center pb-24 md:pb-0 mt-8 sm:mt-12">
           {/* Error Illustration */}
-          <div className="relative w-48 h-48 sm:w-64 sm:h-64 mb-6">
-            <img src={isStore ? "/images/network_error_store.png" : "/images/network_error_food.png"} alt="Offline" className="object-contain w-full h-full dark:hidden drop-shadow-xl" />
-            <img src={isStore ? "/images/network_error_store_dark.png" : "/images/network_error_food_dark.png"} alt="Offline" className="object-contain w-full h-full hidden dark:block rounded-xl" />
+          <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-2">
+            <img src="/images/offline_boy.png" alt="Offline" className="object-contain drop-shadow-2xl w-full h-full" />
           </div>
 
           {/* Error Text Content */}
-          <h1 className="text-4xl font-black text-gray-900 dark:text-gray-100 mb-2 tracking-tight">
+          <h1 className="text-[44px] leading-[1.1] font-black text-[#1C213E] dark:text-gray-100 tracking-tight mt-4">
             Oops!
           </h1>
-          <h2 className="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4">
-            Poor Internet Connection
+          <h2 className="text-[32px] font-black text-[#FF4700] dark:text-[#FF5511] mb-6">
+            You're Offline
           </h2>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mb-8 max-w-md px-4">
-            It looks like you're offline. Please check your network connection or Wi-Fi and try again to continue using ZyphCart.
-          </p>
+
+          {/* Three small icons row */}
+          <div className="flex items-start justify-between w-full max-w-[340px] px-2 mb-8">
+            <div className="flex flex-col items-center flex-1">
+              <div className="w-[50px] h-[50px] rounded-full bg-[#FFF0E6] dark:bg-orange-500/10 text-[#FF4700] dark:text-orange-400 flex items-center justify-center mb-2.5">
+                <Wifi className="w-[22px] h-[22px] stroke-[2.5]" />
+              </div>
+              <p className="text-[11px] text-[#64748B] dark:text-gray-400 font-bold leading-[1.3] text-center">Check your<br/>network</p>
+            </div>
+
+            <div className="w-[1px] h-10 bg-gray-200 dark:bg-gray-800 mt-2 mx-2"></div>
+
+            <div className="flex flex-col items-center flex-1">
+              <div className="w-[50px] h-[50px] rounded-full bg-[#FFF0E6] dark:bg-orange-500/10 text-[#FF4700] dark:text-orange-400 flex items-center justify-center mb-2.5">
+                <Plane className="w-[22px] h-[22px] stroke-[2.5]" />
+              </div>
+              <p className="text-[11px] text-[#64748B] dark:text-gray-400 font-bold leading-[1.3] text-center">Turn off<br/>airplane mode</p>
+            </div>
+
+            <div className="w-[1px] h-10 bg-gray-200 dark:bg-gray-800 mt-2 mx-2"></div>
+
+            <div className="flex flex-col items-center flex-1">
+              <div className="w-[50px] h-[50px] rounded-full bg-[#FFF0E6] dark:bg-orange-500/10 text-[#FF4700] dark:text-orange-400 flex items-center justify-center mb-2.5">
+                <BarChart2 className="w-[22px] h-[22px] stroke-[2.5]" />
+              </div>
+              <p className="text-[11px] text-[#64748B] dark:text-gray-400 font-bold leading-[1.3] text-center">Try again<br/>in a moment</p>
+            </div>
+          </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-xs sm:max-w-sm mx-auto">
+          <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[320px] mx-auto px-1">
             <button 
               id="retry-btn"
               onClick={handleRetry}
-              className={`flex-1 flex items-center justify-center gap-2 px-6 py-4 ${isStore ? 'bg-blue-600 hover:bg-blue-700 shadow-blue-600/20' : 'bg-orange-500 hover:bg-orange-600 shadow-orange-500/20'} rounded-xl font-bold text-white transition-all active:scale-95 shadow-lg`}
+              className={`w-full flex items-center justify-center gap-2.5 px-6 py-[15px] ${isStore ? 'bg-[#0055FF] hover:bg-blue-700 shadow-[0_8px_20px_rgba(0,85,255,0.25)]' : 'bg-[#FF4700] hover:bg-[#E64000] shadow-[0_8px_20px_rgba(255,71,0,0.25)]'} rounded-full font-black text-[17px] text-white transition-all active:scale-95`}
             >
-              <RefreshCcw className="w-5 h-5" />
+              <RefreshCcw className="w-[22px] h-[22px] stroke-[2.5]" />
               Try Again
             </button>
+          </div>
+
+          {/* Divider with text */}
+          <div className="flex items-center justify-center gap-3 mt-8 w-full max-w-[320px]">
+            <div className="h-[1px] flex-1 bg-gray-200 dark:bg-gray-800"></div>
+            <div className="text-[#64748B] dark:text-gray-500 text-[11px] font-bold tracking-wide flex items-center gap-1.5 whitespace-nowrap">
+              <span className="text-[15px]">🍔</span> Your cravings aren't going anywhere.
+            </div>
+            <div className="h-[1px] flex-1 bg-gray-200 dark:bg-gray-800"></div>
           </div>
         </div>
 
