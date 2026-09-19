@@ -911,7 +911,7 @@ function AnimatedHeadline({ line1, phrases }: { line1: string, phrases: string[]
   }, [phrases.length]);
 
   return (
-    <div className="flex flex-col mb-6 -mt-8 md:-mt-10 w-max group cursor-default relative">
+    <div className="flex flex-col -mt-8 md:-mt-10 w-max group cursor-default relative">
       <div className="relative z-10 flex items-center origin-left">
         <span className={`uppercase italic font-black text-2xl sm:text-3xl md:text-4xl lg:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none ${playfair.className}`} style={{ fontWeight: 900 }}>
           {line1}
@@ -1325,13 +1325,13 @@ export default function HomePage() {
                       "SMALLER PRICES.",
                       "BETTER DEALS.",
                       "MORE SAVINGS.",
-                      "BEST LOCAL BITES."
+                      "BEST BITES."
                     ]} 
                   />
                   {/* Promo text removed */}
                   <button
                     onClick={() => document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-white dark:bg-[#151522] border-none font-extrabold text-[11px] tracking-wide px-4 py-1 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
+                    className="mt-8 block bg-white dark:bg-[#151522] border-none font-extrabold text-[11px] tracking-wide px-4 py-1 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
                   >
                     <span className="text-orange-gradient">
                       ORDER NOW

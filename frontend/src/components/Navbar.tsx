@@ -57,6 +57,12 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
         navRef.current.style.backgroundColor = `rgba(255,255,255,${whiteAlpha})`;
         navRef.current.style.backdropFilter = progress > 0.05 ? `blur(${blurPx}px)` : 'none';
         navRef.current.style.setProperty('-webkit-backdrop-filter', progress > 0.05 ? `blur(${blurPx}px)` : 'none');
+      } else if (navRef.current && pathname !== '/food/user') {
+        // Clear any leftover inline styles from the hero scroll effect
+        // so Tailwind bg-white class can take effect on other pages
+        navRef.current.style.backgroundColor = '';
+        navRef.current.style.backdropFilter = '';
+        navRef.current.style.setProperty('-webkit-backdrop-filter', '');
       }
 
       // Only update React state at the midpoint (for text color swap)
@@ -174,9 +180,17 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
       <nav
         ref={navRef}
         className={`${pathname === '/food/user' ? 'absolute' : 'fixed'} top-0 left-0 right-0 z-50 ${
-          mobileMenuOpen ? 'bg-white dark:bg-[#0D0D17]' : ''
+          mobileMenuOpen && (pathname === '/' || pathname === '/food/user') ? 'bg-white dark:bg-[#0D0D17]' : ''
         }`}
-        style={pathname === '/food/user' && !mobileMenuOpen ? {} : undefined}
+        style={
+          pathname !== '/food/user' && pathname !== '/'
+            ? { backgroundColor: '#F8F9FA' }
+            : pathname === '/food/user' && mobileMenuOpen
+            ? { backgroundColor: '#ffffff' }
+            : pathname === '/food/user' && !mobileMenuOpen
+            ? {}
+            : undefined
+        }
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2 md:gap-4 relative">
 

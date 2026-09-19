@@ -34,6 +34,12 @@ export default function RefundsPage() {
   }, [isInitializing, isLoggedIn, router]);
 
   useEffect(() => {
+    // Wait until auth is fully resolved before attempting the fetch.
+    // This prevents a race-condition where the page fires a request
+    // before the access token is hydrated after login/page-load,
+    // causing a spurious 401 "Session expired" toast.
+    if (isInitializing) return;
+
     const fetchRefunds = async () => {
       if (!isLoggedIn || !accessToken) return;
       try {
@@ -43,6 +49,12 @@ export default function RefundsPage() {
         const data = await res.json();
         if (res.ok) {
           setRefunds(data.refunds || []);
+        } else if (res.status === 401) {
+          // Token genuinely expired (not a login-timing issue).
+          // Just redirect to login — don't show a misleading toast here
+          // because the auth redirect effect below will handle it.
+          setLoadingRefunds(false);
+          return;
         } else {
           toast.error(data.error || "Failed to load refund requests");
         }
@@ -55,7 +67,7 @@ export default function RefundsPage() {
     };
 
     fetchRefunds();
-  }, [isLoggedIn, accessToken, API]);
+  }, [isInitializing, isLoggedIn, accessToken, API]);
 
   const handleUPISubmit = async (id: string) => {
     const upi_id = upiInputs[id];
@@ -127,7 +139,7 @@ export default function RefundsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-[#0D0D17] text-gray-900 dark:text-gray-100 font-sans flex flex-col">
       <Navbar />
       
       <main className="flex-1 w-full px-4 sm:px-8 pt-32 pb-10 max-w-5xl mx-auto">
