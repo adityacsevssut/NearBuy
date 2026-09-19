@@ -32,6 +32,7 @@ import Navbar from "@/components/Navbar";
 import MobileBottomNav from "@/components/MobileBottomNav";
 import Footer from "@/components/Footer";
 import BusinessRequestModal from "@/components/BusinessRequestModal";
+import HeroCarousel from "@/components/HeroCarousel";
 import { useLocationContext } from "@/context/LocationContext";
 import { useWishlist } from "@/context/WishlistContext";
 import ThemeSwitch from "@/components/ThemeSwitch";
@@ -40,7 +41,7 @@ import { useCart } from "@/context/CartContext";
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 
-import { quickBites } from "@/config/categories";
+import { quickBites, bakeryItems } from "@/config/categories";
 
 const topCuisines = [
   {
@@ -158,7 +159,7 @@ function SectionHeader({
   title: string;
   onViewAll?: () => void;
 }) {
-  const isSpecial = title.includes('Hot Deals') || title.includes('Popular');
+  const isSpecial = title.includes('Hot Deals') || title.includes('Popular') || title.includes('Fresh From Bakery');
 
   return (
     <div className="flex items-center justify-between mb-3 px-4">
@@ -899,58 +900,42 @@ function PromoImages() {
   );
 }
 
-function SequentialTypewriter({ line1, line2 }: { line1: string, line2: string }) {
-  const [text1, setText1] = useState("");
-  const [text2, setText2] = useState("");
-  const [typing1, setTyping1] = useState(true);
-  const [typing2, setTyping2] = useState(false);
-
+function AnimatedHeadline({ line1, phrases }: { line1: string, phrases: string[] }) {
+  const [index, setIndex] = useState(0);
+  
   useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setText1(line1.slice(0, i + 1));
-      i++;
-      if (i >= line1.length) {
-        clearInterval(interval);
-        setTyping1(false);
-        setTimeout(() => setTyping2(true), 400); // 400ms pause between lines
-      }
-    }, 120);
-    return () => clearInterval(interval);
-  }, [line1]);
-
-  useEffect(() => {
-    if (!typing2) return;
-    let i = 0;
-    const interval = setInterval(() => {
-      setText2(line2.slice(0, i + 1));
-      i++;
-      if (i >= line2.length) {
-        clearInterval(interval);
-        setTyping2(false);
-      }
-    }, 120);
-    return () => clearInterval(interval);
-  }, [line2, typing2]);
+    const timer = setInterval(() => {
+      setIndex((prev) => (prev + 1) % phrases.length);
+    }, 2800);
+    return () => clearInterval(timer);
+  }, [phrases.length]);
 
   return (
-    <div className="flex flex-col mb-2.5 -mt-4 float-anim w-max group cursor-default relative">
-      <div className="relative z-10 flex items-center">
-        <span className={`uppercase italic font-black text-lg sm:text-xl md:text-xl lg:text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none transition-all duration-500 ${playfair.className}`} style={{ fontWeight: 900 }}>
-          {text1}
+    <div className="flex flex-col mb-6 -mt-8 md:-mt-10 w-max group cursor-default relative">
+      <div className="relative z-10 flex items-center origin-left">
+        <span className={`uppercase italic font-black text-2xl sm:text-3xl md:text-4xl lg:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none ${playfair.className}`} style={{ fontWeight: 900 }}>
+          {line1}
         </span>
-        <span className={`uppercase italic font-light text-lg sm:text-xl md:text-xl lg:text-lg text-yellow-500 transition-opacity duration-300 leading-none ${playfair.className} ${typing1 ? 'opacity-100 animate-[pulse_1s_ease-in-out_infinite]' : 'opacity-0 hidden'}`}>|</span>
       </div>
-      <div className="relative z-20 origin-left mt-2.5 min-h-[30px] flex items-center">
-        <span className={`uppercase italic font-black text-lg sm:text-xl md:text-xl lg:text-lg text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-normal leading-tight whitespace-nowrap block ${playfair.className}`} style={{ fontWeight: 900 }}>
-          {text2}
-        </span>
-        {text2.length > 0 && <span className={`uppercase italic font-light text-lg sm:text-xl md:text-xl lg:text-lg text-yellow-500 transition-opacity duration-300 leading-tight block ${playfair.className} ${typing2 ? 'opacity-100 animate-[pulse_1s_ease-in-out_infinite]' : 'opacity-0'}`}>|</span>}
+      
+      <div className="relative z-20 origin-left mt-3 sm:mt-4 flex items-center overflow-hidden py-1 -my-1">
+        <AnimatePresence mode="popLayout">
+          <motion.span
+            key={index}
+            initial={{ y: 35, scale: 0.96, opacity: 0 }}
+            animate={{ y: 0, scale: 1, opacity: 1 }}
+            exit={{ y: -35, scale: 1.02, opacity: 0 }}
+            transition={{ duration: 0.65, ease: [0.76, 0, 0.24, 1] }}
+            className={`uppercase font-black text-xl sm:text-2xl md:text-3xl lg:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-normal leading-tight whitespace-nowrap block ${playfair.className}`}
+            style={{ fontWeight: 900 }}
+          >
+            {phrases[index]}
+          </motion.span>
+        </AnimatePresence>
       </div>
     </div>
   );
 }
-
 export default function HomePage() {
   useEffect(() => {
     document.title = "Home Food Essential";
@@ -1309,7 +1294,7 @@ export default function HomePage() {
 
 
         {/* ══ HERO SECTION (Location, Search, Promo) ════════════════════════════ */}
-        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black shadow-sm mb-[10px] pt-[68px] pb-3">
+        <div className="relative w-full rounded-b-[32px] overflow-hidden bg-gradient-to-br from-black via-gray-950 to-orange-950 shadow-sm mb-4 md:mb-5 pt-[68px] pb-10">
 
 
 
@@ -1334,13 +1319,19 @@ export default function HomePage() {
             <div className="max-w-7xl mx-auto px-6 mt-6 relative">
               <div className="flex items-center justify-between relative min-h-[160px]">
                 <div className="w-[calc(100%-170px)] md:w-[calc(100%-280px)] relative z-20">
-                  <SequentialTypewriter line1="GET FOOD AT" line2="LOWEST PRICE" />
-                  <p className="text-[15px] leading-relaxed text-gray-300 mb-4 font-medium">
-                    Get Upto <b className="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-500 dark:from-red-500 dark:to-orange-400 font-extrabold">30-40% off</b><br />on your first order
-                  </p>
+                  <AnimatedHeadline 
+                    line1="BIG CRAVINGS" 
+                    phrases={[
+                      "SMALLER PRICES.",
+                      "BETTER DEALS.",
+                      "MORE SAVINGS.",
+                      "BEST LOCAL BITES."
+                    ]} 
+                  />
+                  {/* Promo text removed */}
                   <button
                     onClick={() => document.getElementById('all-section')?.scrollIntoView({ behavior: 'smooth' })}
-                    className="bg-white dark:bg-[#151522] border-none font-extrabold text-[13px] tracking-wide px-6 py-1.5 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
+                    className="bg-white dark:bg-[#151522] border-none font-extrabold text-[11px] tracking-wide px-4 py-1 rounded-full transition-all duration-300 font-[Poppins] shadow-md hover:shadow-lg hover:shadow-orange-500/20 hover:-translate-y-1 hover:scale-105 active:scale-95"
                   >
                     <span className="text-orange-gradient">
                       ORDER NOW
@@ -1351,12 +1342,22 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+          
+          {/* ── BOTTOM PROMO STRIP ── */}
+          <div className="absolute bottom-0 left-0 w-full bg-transparent rounded-b-[32px] py-2.5 z-20 overflow-hidden isolate">
+            <div className="flex items-center justify-center gap-4 max-w-7xl mx-auto px-6">
+              <div className="h-[1px] w-12 sm:w-24 bg-orange-500/40"></div>
+              <span className="text-orange-500 font-extrabold text-[11px] sm:text-xs tracking-wider uppercase whitespace-nowrap drop-shadow-sm">
+                DISHES STARTING FROM ₹29
+              </span>
+              <div className="h-[1px] w-12 sm:w-24 bg-orange-500/40"></div>
+            </div>
+          </div>
         </div>
-
         {/* Moved Location & Search */}
-        <div className="pt-0 pb-2 z-40 relative bg-white dark:bg-[#0D0D17]">
+        <div className="pt-0 pb-1 z-40 relative bg-white dark:bg-[#0D0D17]">
           {/* ══ LOCATION ════════════════════════════ */}
-          <div className="max-w-7xl mx-auto px-4 pb-1">
+          <div className="max-w-7xl mx-auto px-4 pb-0">
             <div className="w-full">
               <button
                 suppressHydrationWarning
@@ -1388,10 +1389,10 @@ export default function HomePage() {
         </div>
 
         {/* ══ STICKY SEARCH & QUICK BITES ════════════════════════════ */}
-        <div className="sticky top-0 z-[60] bg-white dark:bg-[#0D0D17] pt-2 pb-1">
+        <div className="sticky top-0 z-[60] bg-white dark:bg-[#0D0D17] pt-1 pb-0">
           {/* ══ SEARCH ════════════════════════════ */}
           <div className="max-w-7xl mx-auto px-4 flex flex-col gap-0 z-[45]">
-            <div className="w-full flex items-center gap-3 pt-1 pb-1">
+            <div className="w-full flex items-center gap-3 pt-0 pb-1">
               <div className="flex-1 min-w-0 flex items-center bg-white dark:bg-[#151522] rounded-full px-5 py-3 border border-transparent hover:border-orange-400 focus-within:border-orange-500 dark:hover:border-orange-500/80 shadow-sm transition-all duration-300 relative">
                 <Search className="w-5 h-5 text-orange-500 dark:text-orange-400 shrink-0 mr-3" strokeWidth={2.5} />
                 <div className="flex-1 min-w-0 relative">
@@ -1517,8 +1518,8 @@ export default function HomePage() {
 
           <div className="max-w-7xl mx-auto">
             {/* ── 1. Category Quick-Bites ─────────────────────────────────────── */}
-            <section className="pt-2 pb-2 relative z-10">
-              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-2 pb-3">
+            <section className="pt-0 pb-1 relative z-10">
+              <div className="flex gap-4 overflow-x-auto scrollbar-hide px-4 pt-3 pb-4 -mt-2 -mb-2">
                 {quickBites.slice(0, 8).map(({ label, image }, index) => (
                   <motion.div
                     key={label}
@@ -1530,9 +1531,11 @@ export default function HomePage() {
                       href={`/food/user/dish/${label.toLowerCase().replace(/\s+/g, "-")}`}
                       className="flex-shrink-0 flex flex-col items-center gap-1 group outline-none"
                     >
-                      <div className="relative w-[54px] h-[54px] rounded-full overflow-hidden transition-all duration-300 group-hover:-translate-y-1 group-active:scale-90 isolate">
-                        <Image src={image} alt={label} fill sizes="54px" priority={true} className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 mix-blend-darken dark:mix-blend-normal dark:hidden" />
-                        <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="54px" priority={true} className="object-contain transition-transform duration-500 ease-out group-hover:scale-110 group-hover:rotate-3 hidden dark:block" />
+                      <div className="relative w-[60px] h-[60px] flex items-center justify-center rounded-full bg-transparent group-hover:bg-orange-50/80 dark:group-hover:bg-orange-500/10 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:-translate-y-2 group-hover:shadow-[0_12px_20px_-8px_rgba(234,88,12,0.4)] group-active:scale-90 border border-transparent group-hover:border-orange-200 dark:group-hover:border-orange-500/30 isolate">
+                        <div className="relative w-[48px] h-[48px] rounded-full overflow-hidden">
+                          <Image src={image} alt={label} fill sizes="48px" priority={true} className="object-contain transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.2] group-hover:-rotate-6 mix-blend-darken dark:mix-blend-normal dark:hidden" />
+                          <Image src={image.replace('.png', '_dark.png')} alt={label} fill sizes="48px" priority={true} className="object-contain transition-transform duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-[1.2] group-hover:-rotate-6 hidden dark:block" />
+                        </div>
                       </div>
                       <span className="text-[11px] font-bold text-gray-700 dark:text-gray-300 text-center leading-tight group-hover:text-orange-500 transition-colors max-w-[60px]">
                         {label}
@@ -1856,6 +1859,50 @@ export default function HomePage() {
             </section>
           )}
 
+          {/* ── Hot Deals Under 130 ───────────────────────────────────────── */}
+          {(filteredDeals130.length > 0 || isHotDealsLoading) && (
+            <section className="py-3">
+              <SectionHeader
+                title="Hot Deals Under ₹130"
+                onViewAll={() => setDealsDrawer({ isOpen: true, type: "under130" })}
+              />
+              <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
+                {isHotDealsLoading
+                  ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
+                  : filteredDeals130.slice(0, deals130Limit).map((deal) => (
+                    <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
+                  ))}
+
+                {!isHotDealsLoading && (isDeals130LoadingMore) && (
+                  <>
+                    <DealCardSkeleton />
+                    <DealCardSkeleton />
+                  </>
+                )}
+
+                {!isHotDealsLoading && !isDeals130LoadingMore && deals130Limit < filteredDeals130.length && (
+                  <button
+                    onClick={() => {
+                      setIsDeals130LoadingMore(true);
+                      setTimeout(() => {
+                        setDeals130Limit(prev => prev + 10);
+                        setIsDeals130LoadingMore(false);
+                      }, 800);
+                    }}
+                    className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
+                  >
+                    <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                      <ChevronRight className="w-8 h-8 text-orange-500" />
+                    </div>
+                    <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
+                      See All
+                    </span>
+                  </button>
+                )}
+              </div>
+            </section>
+          )}
+
           {/* ── 2. Promo Banner ─────────────────────────────────────────────── */}
           <section className="w-full pt-0 pb-4 relative px-[2px] md:px-0">
             {posterLoading ? (
@@ -1913,47 +1960,18 @@ export default function HomePage() {
               </div>
             )}
           </section>
-
-          {/* ── Hot Deals Under 130 ───────────────────────────────────────── */}
+          {/* ── Bakery Items ─────────────────────────────────────────── */}
           {(filteredDeals130.length > 0 || isHotDealsLoading) && (
             <section className="py-3">
               <SectionHeader
-                title="Hot Deals Under ₹130"
-                onViewAll={() => setDealsDrawer({ isOpen: true, type: "under130" })}
+                title="Fresh From Bakery"
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : filteredDeals130.slice(0, deals130Limit).map((deal) => (
-                    <DealCard key={deal.id} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
+                  : filteredDeals130.slice(0, 8).map((deal) => (
+                    <DealCard key={`bakery-${deal.id}`} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} fluid />
                   ))}
-
-                {!isHotDealsLoading && (isDeals130LoadingMore) && (
-                  <>
-                    <DealCardSkeleton />
-                    <DealCardSkeleton />
-                  </>
-                )}
-
-                {!isHotDealsLoading && !isDeals130LoadingMore && deals130Limit < filteredDeals130.length && (
-                  <button
-                    onClick={() => {
-                      setIsDeals130LoadingMore(true);
-                      setTimeout(() => {
-                        setDeals130Limit(prev => prev + 10);
-                        setIsDeals130LoadingMore(false);
-                      }, 800);
-                    }}
-                    className="flex-shrink-0 flex flex-col items-center justify-center gap-2 px-6 group outline-none min-h-[140px]"
-                  >
-                    <div className="w-[70px] h-[70px] rounded-full bg-white dark:bg-[#1A100C] flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                      <ChevronRight className="w-8 h-8 text-orange-500" />
-                    </div>
-                    <span className="text-[13px] font-bold text-gray-700 dark:text-gray-300 text-center">
-                      See All
-                    </span>
-                  </button>
-                )}
               </div>
             </section>
           )}
