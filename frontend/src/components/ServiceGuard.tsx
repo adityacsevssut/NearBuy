@@ -242,12 +242,12 @@ export default function ServiceGuard({ children }: { children: React.ReactNode }
             <img 
               src={isStore ? "/images/out_of_service_store.png" : "/images/out_of_service_hero.png"}
               alt="Out of Service Area" 
-              className="w-full h-auto mx-auto object-contain mix-blend-darken dark:hidden contrast-[1.05] brightness-[1.05]" 
+              className="w-full h-auto mx-auto object-contain dark:hidden drop-shadow-2xl" 
             />
             <img 
-              src={isStore ? "/images/out_of_service_store_dark.png" : "/images/out_of_service_hero_dark.png"}
+              src={isStore ? "/images/out_of_service_store_dark.png" : "/images/out_of_service_hero.png"}
               alt="Out of Service Area" 
-              className="w-full h-auto mx-auto object-contain hidden dark:block" 
+              className="w-full h-auto mx-auto object-contain hidden dark:block drop-shadow-2xl" 
             />
           </div>
 
