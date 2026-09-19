@@ -25,6 +25,17 @@ export const quickBites = [
   { label: "Others", image: "/others_gemini.png" },
 ];
 
+export const bakeryItems = [
+  { label: "Cakes", image: "/bakery_new.jpg" },
+  { label: "Pastries", image: "/bakery_new.jpg" },
+  { label: "Puffs", image: "/bakery_new.jpg" },
+  { label: "Donuts", image: "/bakery_new.jpg" },
+  { label: "Cookies", image: "/bakery_new.jpg" },
+  { label: "Breads", image: "/bakery_new.jpg" },
+  { label: "Muffins", image: "/bakery_new.jpg" },
+  { label: "Desserts", image: "/bakery_new.jpg" },
+];
+
 export const storeCategories = [
   { id: "all", label: "All", emoji: "🛒" },
   { id: "stationery", label: "Student Stationary", emoji: "✏️" },

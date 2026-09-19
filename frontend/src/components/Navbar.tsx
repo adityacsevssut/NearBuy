@@ -300,6 +300,13 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
               )}
             </Link>
 
+            {/* ── Download App Button ── */}
+            <button
+              className="p-2 transition-transform group shrink-0 active:scale-95 hover:scale-105"
+            >
+              <Download className="w-[20px] h-[20px] text-orange-500 shrink-0 transition-transform duration-300" strokeWidth={2.5} />
+            </button>
+
             {/* ── Notification Bell ── */}
             <div className="relative" ref={notifRef}>
               <button
