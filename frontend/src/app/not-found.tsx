@@ -59,7 +59,7 @@ export default function NotFound() {
           {/* Elegant Handwritten text */}
           <div className="relative mt-4 inline-block">
             <p 
-              className={`text-2xl md:text-3xl font-medium tracking-wide -rotate-3 drop-shadow-md text-transparent bg-clip-text ${isStore ? "bg-gradient-to-r from-blue-500 to-cyan-400" : "bg-gradient-to-r from-orange-500 to-amber-400"}`}
+              className={`text-2xl md:text-3xl font-medium tracking-wide drop-shadow-md text-transparent bg-clip-text ${isStore ? "bg-gradient-to-r from-blue-500 to-cyan-400" : "bg-gradient-to-r from-orange-500 to-amber-400"}`}
               style={{ fontFamily: "'Dancing Script', 'Pacifico', cursive" }}
             >
               Good Food Always Finds You!
