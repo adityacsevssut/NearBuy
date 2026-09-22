@@ -1970,7 +1970,7 @@ export default function HomePage() {
                 {isHotDealsLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
                   : filteredDeals130.slice(0, 8).map((deal) => (
-                    <DealCard key={`bakery-${deal.id}`} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} fluid />
+                    <DealCard key={`bakery-${deal.id}`} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
               </div>
             </section>
