@@ -241,7 +241,7 @@ export default function DishPage() {
                 <div
                   key={dish.id}
                   onClick={() => setSelectedFood(dish)}
-                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 cursor-pointer ${isUnavailable ? 'opacity-60 grayscale' : 'hover:border-orange-300 hover:shadow-md'}`}
+                  className={`bg-white dark:bg-[#0D0D17] p-4 rounded-2xl border border-gray-200 dark:border-[#2A2A3A] shadow-sm transition-all duration-300 flex gap-4 cursor-pointer ${isUnavailable ? 'hover:border-gray-300' : 'hover:border-orange-300 hover:shadow-md'}`}
                 >
                   {/* Info Section */}
                   <div className="flex-1 min-w-0 flex flex-col justify-between">
@@ -357,67 +357,73 @@ export default function DishPage() {
                         </button>
                       </div>
                       {(isOutOfRange || isClosed) && (
-                        <div className="absolute top-0 right-0 left-0 bottom-0 flex items-center justify-center bg-black/10 dark:bg-white/10 rounded-xl z-20">
-                          <span className="text-white font-black text-[10px] uppercase bg-black/60 px-2 py-0.5 rounded-full">{isClosed ? "Closed" : "Out of Range"}</span>
+                        <div className="absolute inset-0 bg-white/50 dark:bg-[#0D0D17]/50 backdrop-blur-[2px] flex items-center justify-center z-20 rounded-xl">
+                          <span className="bg-white dark:bg-[#151522] text-red-500 border border-red-100 dark:border-red-900/30 font-black text-[10px] uppercase px-3 py-1.5 rounded-full shadow-sm tracking-wider">
+                            {isClosed ? "Closed Now" : "Out of Range"}
+                          </span>
                         </div>
                       )}
                     </div>
 
                     {/* Quantity Selector and ADD Button */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-28 flex flex-col gap-1.5 items-center z-10">
-                      <div className={`flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6 ${isUnavailable ? 'opacity-50 pointer-events-none' : ''}`}>
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
-                          }}
-                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
-                        >
-                          -
-                        </button>
-                        <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">{quantities[dish.id] || 1}</span>
-                        <button 
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
-                          }}
-                          className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
-                        >
-                          +
-                        </button>
-                      </div>
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          if (isUnavailable) return;
-                          if (!isLoggedIn) return openLoginModal();
-                          const q = quantities[dish.id] || 1;
-                          addItem({
-                            id: dish.id,
-                            name: dish.name,
-                            price: dish.price,
-                            image: dish.image_url || "",
-                            type: dish.type,
-                            restaurantId: dish.vendor_id,
-                            restaurantName: dish.vendor,
-                            section: "food"
-                          }, q);
-                          setQuantities(q => ({ ...q, [dish.id]: 1 }));
-                        }}
-                        disabled={isUnavailable}
-                        className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
-                          isUnavailable 
-                            ? "bg-gray-100 dark:bg-[#1F1F2E] text-gray-400 border-gray-200 dark:border-[#2A2A3A] cursor-not-allowed"
-                            : inCartCount > 0
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
-                              : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
-                        }`}
-                      >
-                        {inCartCount > 0 ? `ADDED (${inCartCount})` : "ADD"}
-                      </button>
+                      {isUnavailable ? (
+                        <div className="w-full py-1.5 border border-gray-200 dark:border-[#2A2A3A] font-black text-[10px] rounded-lg shadow-sm bg-gray-50 dark:bg-[#1F1F2E] text-gray-400 text-center uppercase tracking-widest cursor-not-allowed">
+                          Unavailable
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex items-center justify-between w-20 bg-white dark:bg-[#0D0D17] border border-gray-200 dark:border-[#2A2A3A] rounded-full shadow-sm overflow-hidden h-6">
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setQuantities(q => ({ ...q, [dish.id]: Math.max(1, (q[dish.id] || 1) - 1) }));
+                              }}
+                              className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
+                            >
+                              -
+                            </button>
+                            <span className="font-bold text-xs text-gray-800 dark:text-gray-200 w-6 text-center">{quantities[dish.id] || 1}</span>
+                            <button 
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                setQuantities(q => ({ ...q, [dish.id]: (q[dish.id] || 1) + 1 }));
+                              }}
+                              className="flex-1 h-full flex items-center justify-center text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-[#1F1F2E] font-bold transition-colors text-xs"
+                            >
+                              +
+                            </button>
+                          </div>
+                          <button 
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              if (!isLoggedIn) return openLoginModal();
+                              const q = quantities[dish.id] || 1;
+                              addItem({
+                                id: dish.id,
+                                name: dish.name,
+                                price: dish.price,
+                                image: dish.image_url || "",
+                                type: dish.type,
+                                restaurantId: dish.vendor_id,
+                                restaurantName: dish.vendor,
+                                section: "food"
+                              }, q);
+                              setQuantities(q => ({ ...q, [dish.id]: 1 }));
+                            }}
+                            className={`w-full py-1 border font-black text-xs rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 uppercase tracking-wide ${
+                              inCartCount > 0
+                                ? "bg-emerald-50 text-emerald-600 border-emerald-200 hover:bg-emerald-100"
+                                : "bg-white dark:bg-[#0D0D17] text-orange-600 border-gray-200 dark:border-[#2A2A3A] hover:bg-orange-50"
+                            }`}
+                          >
+                            {inCartCount > 0 ? `ADDED (${inCartCount})` : "ADD"}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
