@@ -270,7 +270,7 @@ function PopCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
       {/* Dim overlay */}
       {dim && (
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 pointer-events-none">
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center pb-8 z-40 pointer-events-none">
           {manualClosed ? (
             // Vendor manually closed — red, no countdown
             <div className="flex flex-col items-center gap-1">
@@ -426,11 +426,7 @@ function DealCard({ deal, onConfirmNeeded, fluid }: any) {
 
       {/* Closed Overlay */}
       {closed && (
-        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 pointer-events-none">
-          <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
-            Closed Now
-          </span>
-        </div>
+        <div className="absolute inset-0 bg-black/40 z-30 pointer-events-none" />
       )}
 
       {/* Add Button (Top Right) */}
@@ -464,7 +460,14 @@ function DealCard({ deal, onConfirmNeeded, fluid }: any) {
       )}
 
       {/* Content Container (Bottom) */}
-      <div className="absolute bottom-0 left-0 w-full p-2 flex flex-col justify-end z-20">
+      <div className="absolute bottom-0 left-0 w-full p-2 flex flex-col justify-end z-40">
+        {closed && (
+          <div className="flex justify-center mb-1.5">
+            <span className="text-red-500 bg-white font-black text-[10px] uppercase px-2 py-0.5 rounded-full shadow-sm border border-red-100">
+              Closed Now
+            </span>
+          </div>
+        )}
         {/* Name with Veg/NonVeg icon inline */}
         <div className="mb-0.5 w-full">
           <p className="font-bold text-[12px] text-white leading-tight line-clamp-2 drop-shadow-sm">
@@ -486,7 +489,7 @@ function DealCard({ deal, onConfirmNeeded, fluid }: any) {
             <Star className="w-2.5 h-2.5 fill-current" /> {deal.rating}
           </span>
           <span className="text-gray-400">•</span>
-          <span>{20 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5}-{30 + (parseInt(deal.id.split('-')[1] || '0') % 3) * 5} mins</span>
+          <span>{deal.time ? deal.time : `${20 + ((parseInt(String(deal.id).replace(/\D/g, '')) || 0) % 3) * 5}-${30 + ((parseInt(String(deal.id).replace(/\D/g, '')) || 0) % 3) * 5} mins`}</span>
         </div>
 
         {/* Bottom Row: Price */}
@@ -644,7 +647,7 @@ function RestCard({ r, lat, lon, pin, wishlist, toggle }: any) {
 
         {/* Dim overlay for Closed/OOR */}
         {dim && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-20 pointer-events-none">
+          <div className="absolute inset-0 bg-black/40 flex items-center justify-center pb-8 z-20 pointer-events-none">
             {manualClosed ? (
               // Vendor manually closed — red, no countdown
               <div className="flex flex-col items-center gap-1.5">
@@ -840,7 +843,9 @@ let cachedState = {
   posterLoaded: false,
   hotDealsUnder60: [] as any[],
   hotDealsUnder130: [] as any[],
-  hotDealsLoaded: false
+  hotDealsLoaded: false,
+  bakeryDishes: [] as any[],
+  bakeryLoaded: false
 };
 
 function PromoImages() {
@@ -913,7 +918,7 @@ function AnimatedHeadline({ line1, phrases }: { line1: string, phrases: string[]
   return (
     <div className="flex flex-col -mt-8 md:-mt-10 w-max group cursor-default relative">
       <div className="relative z-10 flex items-center origin-left">
-        <span className={`uppercase italic font-black text-2xl sm:text-3xl md:text-4xl lg:text-3xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none ${playfair.className}`} style={{ fontWeight: 900 }}>
+        <span className={`uppercase italic font-black text-xl sm:text-2xl md:text-3xl lg:text-2xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-300 dark:to-yellow-500 tracking-wide leading-none ${playfair.className}`} style={{ fontWeight: 900 }}>
           {line1}
         </span>
       </div>
@@ -1034,6 +1039,11 @@ export default function HomePage() {
   const [hotDealsUnder60, setHotDealsUnder60] = useState<any[]>(cachedState.hotDealsUnder60);
   const [hotDealsUnder130, setHotDealsUnder130] = useState<any[]>(cachedState.hotDealsUnder130);
   const [isHotDealsLoading, setIsHotDealsLoading] = useState(!cachedState.hotDealsLoaded);
+  
+  // Bakery Deals State
+  const [bakeryDishes, setBakeryDishes] = useState<any[]>(cachedState.bakeryDishes);
+  const [isBakeryLoading, setIsBakeryLoading] = useState(!cachedState.bakeryLoaded);
+
   const [dealToConfirm, setDealToConfirm] = useState<any>(null);
   const [dealsDrawer, setDealsDrawer] = useState<{ isOpen: boolean; type: "under60" | "under130" | null }>({ isOpen: false, type: null });
   const { addItem, clearVendorCart } = useCart();
@@ -1139,10 +1149,56 @@ export default function HomePage() {
     }
   }
 
+  async function fetchBakeryDishes() {
+    try {
+      const API = (
+        process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+      ).replace(/\/+$/, "");
+
+      const query = new URLSearchParams({ limit: "10" });
+      if (latitude && longitude) {
+        query.append("lat", latitude.toString());
+        query.append("lon", longitude.toString());
+      } else if (pincode) {
+        query.append("pincode", pincode);
+      }
+
+      const res = await fetch(`${API}/api/public/dishes/bakery?${query.toString()}`);
+      if (res.ok) {
+        const data = await res.json();
+        const items = data.dishes || [];
+        const mapped = items.map((d: any) => ({
+          id: d.id,
+          name: d.name,
+          image: d.image_url,
+          restaurantId: d.vendor_id,
+          restaurantName: d.vendor,
+          rating: d.rating || "4.0",
+          originalPrice: d.actual_price || d.price,
+          discountPrice: d.price,
+          isOpen: d.vendor_is_open !== false,
+          isLive: d.isLive !== false,
+          type: d.type,
+          time: d.time || null
+        }));
+        setBakeryDishes(mapped);
+        cachedState.bakeryDishes = mapped;
+        cachedState.bakeryLoaded = true;
+      }
+    } catch (err) {
+      console.error("Failed to fetch bakery dishes", err);
+    } finally {
+      setIsBakeryLoading(false);
+    }
+  }
+
   // Fetch Hot Deals when location changes
   useEffect(() => {
     if (!cachedState.hotDealsLoaded) {
       fetchHotDeals();
+    }
+    if (!cachedState.bakeryLoaded) {
+      fetchBakeryDishes();
     }
   }, [latitude, longitude, pincode]);
 
@@ -1961,15 +2017,15 @@ export default function HomePage() {
             )}
           </section>
           {/* ── Bakery Items ─────────────────────────────────────────── */}
-          {(filteredDeals130.length > 0 || isHotDealsLoading) && (
+          {(bakeryDishes.length > 0 || isBakeryLoading) && (
             <section className="py-3">
               <SectionHeader
                 title="Fresh From Bakery"
               />
               <div className="flex gap-3 overflow-x-auto scrollbar-hide px-4 pb-2 pt-1">
-                {isHotDealsLoading
+                {isBakeryLoading
                   ? [1, 2, 3, 4].map((i) => <DealCardSkeleton key={i} />)
-                  : filteredDeals130.slice(0, 8).map((deal) => (
+                  : bakeryDishes.slice(0, 8).map((deal) => (
                     <DealCard key={`bakery-${deal.id}`} deal={deal} wishlist={restaurantWishlist} toggle={toggleRestaurant} onConfirmNeeded={setDealToConfirm} />
                   ))}
               </div>
