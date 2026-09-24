@@ -183,7 +183,9 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
           mobileMenuOpen && (pathname === '/' || pathname === '/food/user') ? 'bg-white dark:bg-[#0D0D17]' : ''
         }`}
         style={
-          pathname !== '/food/user' && pathname !== '/'
+          // Sub-routes under /food/user (cart, orders, etc.) get transparent navbar
+          // so they blend with the page's own background
+          pathname !== '/food/user' && !pathname.startsWith('/food/user/')
             ? { backgroundColor: '#F8F9FA' }
             : pathname === '/food/user' && mobileMenuOpen
             ? { backgroundColor: '#ffffff' }
