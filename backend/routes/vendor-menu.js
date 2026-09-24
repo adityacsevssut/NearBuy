@@ -7,6 +7,29 @@ const validate = require("../middleware/validate");
 const { createMenuItemSchema, updateMenuItemSchema } = require("../validators/vendorMenu.validators");
 const { createClient } = require("@supabase/supabase-js");
 const { verifyImageSignature } = require("../utils/fileUpload");
+const redis = require("../config/redis");
+
+// Helper: purge all cached data related to a specific vendor's menu
+async function invalidateVendorMenuCache(vendorId) {
+  if (!redis) return;
+  try {
+    // Delete the specific vendor menu cache and vendor profile cache
+    await redis.del(`vendor_menu_${vendorId}`);
+    await redis.del(`vendor_${vendorId}`);
+    // Also wipe vendor list caches so the home page reflects the change
+    const listKeys = await redis.keys("vendors_list:*");
+    if (listKeys && listKeys.length > 0) {
+      await redis.del(...listKeys);
+    }
+    // Wipe dish category caches that include this vendor's items
+    const dishKeys = await redis.keys("dishes_*");
+    if (dishKeys && dishKeys.length > 0) {
+      await redis.del(...dishKeys);
+    }
+  } catch (err) {
+    console.error("Redis cache invalidation error (vendor-menu):", err.message);
+  }
+}
 
 const supabase = createClient(
   process.env.SUPABASE_URL || "https://cwaiqkgimqdjsznrizgt.supabase.co",
@@ -139,6 +162,9 @@ router.post("/", authenticate, upload.single("image"), validate(createMenuItemSc
       [req.user.id, category.trim(), name.trim(), description || "", parseInt(price), actual_price ? parseInt(actual_price) : 0, type || "veg", badge || "", imageUrl, parseInt(sort_order) || 0, rating ? parseFloat(rating) : 4.5, prep_time || "15 min", reviews ? parseInt(reviews) : 0, front_page_category || ""]
     );
 
+    // Invalidate cache so frontend sees the new item immediately
+    await invalidateVendorMenuCache(req.user.id);
+
     return res.status(201).json({ item: rows[0] });
   } catch (err) {
     console.error("POST /api/vendor-menu error:", err);
@@ -216,6 +242,9 @@ router.patch("/:id", authenticate, upload.single("image"), validate(updateMenuIt
     );
 
 
+    // Invalidate cache so frontend sees the updated item immediately
+    await invalidateVendorMenuCache(req.user.id);
+
     return res.json({ item: rows[0] });
   } catch (err) {
     console.error("PATCH /api/vendor-menu/:id error:", err);
@@ -231,6 +260,10 @@ router.delete("/:id", authenticate, async (req, res) => {
       [req.params.id, req.user.id]
     );
     if (!rowCount) return res.status(404).json({ error: "Item not found." });
+
+    // Invalidate cache so the deleted item is removed from public view immediately
+    await invalidateVendorMenuCache(req.user.id);
+
     return res.json({ message: "Item deleted." });
   } catch (err) {
     console.error("DELETE /api/vendor-menu/:id error:", err);
