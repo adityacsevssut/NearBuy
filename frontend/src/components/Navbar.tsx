@@ -218,9 +218,6 @@ export default function Navbar({ forceSolid = false }: { forceSolid?: boolean } 
           {/* ── Logo ── */}
           <div className="absolute left-1/2 -translate-x-1/2 md:static md:translate-x-0 flex items-center flex-shrink-0">
             <Link href="/" className="flex items-baseline gap-1 md:gap-1.5 group">
-
-
-
               {/* Text */}
               <span className="font-black text-2xl sm:text-3xl md:text-3xl lg:text-2xl tracking-tight flex items-baseline">
                 <span className={`drop-shadow-sm ${logoGradient}`}>Zyph</span>
