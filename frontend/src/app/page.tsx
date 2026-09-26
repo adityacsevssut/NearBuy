@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import Image from "next/image";
 
 export default function RootPage() {
   const router = useRouter();
@@ -24,21 +25,30 @@ export default function RootPage() {
     }
   }, [isLoggedIn, user, isInitializing, router]);
 
-  // Classic Gradient Splash Screen
+  // Splash Screen
   return (
     <div className="min-h-[100dvh] bg-gradient-to-b from-white to-orange-200 flex flex-col items-center justify-center relative pb-safe">
       {/* Central Logo Area */}
       <div className="flex flex-col items-center">
-        <div className="flex items-center justify-center mb-2">
-
-          {/* ZyphCart Text */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black tracking-tight flex items-center">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-red-700">Zyph</span>
-            <span className="text-gray-800">Cart</span>
-          </h1>
+        <div className="flex items-center justify-center mb-1">
+          {/* ZyphCart Logo Image */}
+          <Image
+            src="/icon.png"
+            alt="ZyphCart"
+            width={220}
+            height={140}
+            className="object-contain drop-shadow-xl"
+            priority
+          />
         </div>
-        <p className="text-gray-600 text-[15px] font-semibold tracking-wide mt-1">
-          Explore Your Nearest Online Store
+
+        {/* Tagline */}
+        <p className="text-center text-[12px] sm:text-[13px] font-semibold tracking-wide leading-relaxed">
+          <span className="text-gray-700">Your </span>
+          <span className="text-orange-500 font-black">Everyday Market</span>
+          <span className="text-gray-700">, </span>
+          <span className="text-gray-500">Just a </span>
+          <span className="text-orange-600 font-black">Click Away</span>
         </p>
       </div>
 
