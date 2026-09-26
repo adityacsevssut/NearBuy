@@ -78,9 +78,6 @@ export default function Footer() {
             {/* Column 1: Brand & Address */}
             <div className="md:col-span-3 lg:col-span-3">
               <div className="flex items-center flex-shrink-0 mb-6 group cursor-pointer">
-
-
-
                 <span className="font-black text-2xl sm:text-3xl md:text-4xl tracking-tight flex items-baseline">
                   <span className={`${logoGradient} drop-shadow-sm`}>Zyph</span>
                   <span className="relative text-black dark:text-white drop-shadow-sm">
